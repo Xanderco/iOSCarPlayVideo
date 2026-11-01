@@ -22,7 +22,7 @@ public final class AppState: ObservableObject {
 
         public var iconName: String {
             switch self {
-            case .cast: return "play.tv.fill"
+            case .cast: return "tv.fill"
             case .drive: return "gauge.with.dots.needle.bottom.50percent"
             case .territory: return "hexagon.fill"
             case .widgets: return "square.grid.2x2.fill"

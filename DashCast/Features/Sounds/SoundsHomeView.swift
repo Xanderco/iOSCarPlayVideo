@@ -33,7 +33,8 @@ public struct SoundsHomeView: View {
                         // Siri Waveform & Shortcuts Guide CTA
                         waveformCTASection
                     }
-                    .padding(.vertical)
+                    .padding(.top, 10)
+                    .padding(.bottom, 120)
                 }
             }
             .navigationTitle("Car Sounds")

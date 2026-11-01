@@ -191,9 +191,9 @@ public struct DriveHomeView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.bottom, 12)
+            .padding(.bottom, 36)
         }
-        .padding(.top, 14)
+        .padding(.top, 10)
         .background(Color.dashBackground)
     }
 

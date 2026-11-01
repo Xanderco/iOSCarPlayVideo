@@ -1,9 +1,18 @@
 import SwiftUI
+import UIKit
 
 public struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
 
-    public init() {}
+    public init() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(red: 0.06, green: 0.07, blue: 0.09, alpha: 1.0)
+        appearance.shadowColor = UIColor(red: 0.15, green: 0.18, blue: 0.22, alpha: 1.0)
+
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
 
     public var body: some View {
         TabView(selection: $appState.selectedTab) {

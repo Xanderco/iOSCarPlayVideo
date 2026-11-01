@@ -12,6 +12,7 @@ public struct CastHomeView: View {
     @State private var showingAddM3UDialog: Bool = false
     @State private var m3uURLInput: String = ""
     @State private var showingWebBrowser: Bool = false
+    @State private var showingCastGuide: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
 
@@ -60,7 +61,8 @@ public struct CastHomeView: View {
                         // Channels Grid
                         channelsSection
                     }
-                    .padding(.bottom, 24)
+                    .padding(.top, 4)
+                    .padding(.bottom, 120) // Clean clearance so content never collides with tab bar
                 }
             }
             .navigationTitle("Cast")
@@ -98,6 +100,9 @@ public struct CastHomeView: View {
             .sheet(isPresented: $showingWebBrowser) {
                 WebVideoBrowserView()
             }
+            .sheet(isPresented: $showingCastGuide) {
+                CarCastGuideModalView()
+            }
             .fullScreenCover(isPresented: $isFullscreenPlayer) {
                 AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
                     .ignoresSafeArea()
@@ -107,6 +112,11 @@ public struct CastHomeView: View {
                     Task {
                         await localVideoManager.importVideo(from: newItem)
                     }
+                }
+            }
+            .onAppear {
+                if playerService.currentChannel == nil, let first = channels.first {
+                    playerService.load(channel: first)
                 }
             }
         }
@@ -168,18 +178,10 @@ public struct CastHomeView: View {
                 showingWebBrowser = true
             }
 
-            // Screen Broadcast
-            VStack(spacing: 4) {
-                ScreenBroadcastPickerView()
-                    .frame(width: 24, height: 24)
-                Text("Mirror")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color.dashTextPrimary)
+            // Cast to Car Button
+            actionButton(icon: "airplayvideo", label: "Cast to Car") {
+                showingCastGuide = true
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background(Color.dashSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .padding(.horizontal)
     }
