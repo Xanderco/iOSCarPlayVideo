@@ -21,6 +21,8 @@
 		59D7DC31996F93EC73E44C2C /* TripSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5135CBF68C8B6C3C6B1FD85E /* TripSummaryView.swift */; };
 		5A5E52DE474BF30B52C8E106 /* SpeedGradientRouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33D46134290FCE84E6581FDD /* SpeedGradientRouteView.swift */; };
 		5D7F75BCBE6ADE3531D6C4C2 /* ScreenBroadcastPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023D3E03ED4C0A490E7F195D /* ScreenBroadcastPickerView.swift */; };
+		63C3521A7F47DBF8695C72DD /* SoundEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7CA14354290DB78FBB940F /* SoundEngineTests.swift */; };
+		645CC7BA3C0744232BBF6CA7 /* SoundCatalogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3F9CAAD71CDEDC5FBFD9FC /* SoundCatalogService.swift */; };
 		65985557C48AFF579D8171C1 /* NeonGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E972DD5D46ED34A7B258CA8A /* NeonGaugeView.swift */; };
 		68C6EC109C7FAE4660269C96 /* DrivingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE586E24B44E73A2EB78BED /* DrivingScorer.swift */; };
 		6CB8B51B7A458EC1873B07F2 /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28AC6E5199CABB6177670CD9 /* UserPreferences.swift */; };
@@ -34,6 +36,7 @@
 		9607EF0B03440C14A27FB5E8 /* GlowButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4B9840CBEB80D851527AF2 /* GlowButton.swift */; };
 		965B92D8EBC564D0251467EE /* DriveHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DD4FC96EC2B1A6528C12205 /* DriveHomeView.swift */; };
 		A89B00106AEBC76B81F30C7D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7988572BEF647D90AE4FCD9C /* ModelTests.swift */; };
+		ABF50187BF045E4E8E1D6D16 /* SoundPlayerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6C7D5CBE16D15758462AA7B /* SoundPlayerEngine.swift */; };
 		AD7E9B3ED3B4D187ACCC7C8C /* DashCastStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 0E1F58247BEF3CD5F1D1A669 /* DashCastStore.storekit */; };
 		AD81AD92DF5C022264F96C32 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F43C3213B1E785A8A29E8E0 /* PersistenceController.swift */; };
 		AECB53F470FC5E1CC2C2C827 /* TerritoryMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97AAF72C00CB2B7C651646C2 /* TerritoryMapView.swift */; };
@@ -54,6 +57,7 @@
 		EFFD332DB93C3599253728E6 /* WebVideoBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E7419D4ADA2FE49451906E /* WebVideoBrowserView.swift */; };
 		F008F5D1BA3B7F8626A8D0E7 /* LocalVideoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFFC0D14BAD800CDE9EF620 /* LocalVideoManager.swift */; };
 		F10EFC48F0C6599343713CEC /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E5DCF30D2CC8EBC1B8C4FE6 /* AppStateTests.swift */; };
+		FEE8305FA57ACDEC93A08A5A /* ShortcutsGuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EEE9241ACC482DE52971F8F /* ShortcutsGuideView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +79,7 @@
 		148D82D35C87701CBD61C5FF /* VideoPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerService.swift; sourceTree = "<group>"; };
 		28AC6E5199CABB6177670CD9 /* UserPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserPreferences.swift; sourceTree = "<group>"; };
 		2DD4FC96EC2B1A6528C12205 /* DriveHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveHomeView.swift; sourceTree = "<group>"; };
+		2EEE9241ACC482DE52971F8F /* ShortcutsGuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsGuideView.swift; sourceTree = "<group>"; };
 		31882871FC3F01666AC3BFDF /* CastEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CastEngineTests.swift; sourceTree = "<group>"; };
 		33D46134290FCE84E6581FDD /* SpeedGradientRouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedGradientRouteView.swift; sourceTree = "<group>"; };
 		349967648683051138B732C0 /* DriveTelemetryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveTelemetryTests.swift; sourceTree = "<group>"; };
@@ -86,9 +91,11 @@
 		4776EC35F3860648E6F1BC8F /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
 		48494D97CD4CC93A7C22C83A /* TerritoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryManager.swift; sourceTree = "<group>"; };
 		4B9503F70894CF151D337477 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		4F7CA14354290DB78FBB940F /* SoundEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEngineTests.swift; sourceTree = "<group>"; };
 		502BBD10136E5D9217A0A80C /* VideoTrimmerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoTrimmerView.swift; sourceTree = "<group>"; };
 		5135CBF68C8B6C3C6B1FD85E /* TripSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripSummaryView.swift; sourceTree = "<group>"; };
 		55F5C7B20864EE654010949D /* TerritoryEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryEngineTests.swift; sourceTree = "<group>"; };
+		5A3F9CAAD71CDEDC5FBFD9FC /* SoundCatalogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundCatalogService.swift; sourceTree = "<group>"; };
 		5C9C65E7FBF3CAA9E623D8E8 /* DashCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastApp.swift; sourceTree = "<group>"; };
 		6D4AD0382E27B879B7BA7B5D /* WidgetConfigModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetConfigModel.swift; sourceTree = "<group>"; };
 		6E5DCF30D2CC8EBC1B8C4FE6 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
@@ -108,6 +115,7 @@
 		BF49F308FB5171FABDD5CF18 /* CarPlayDashboardMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayDashboardMockupView.swift; sourceTree = "<group>"; };
 		C79E156505347D94E89D8125 /* TerritoryHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryHomeView.swift; sourceTree = "<group>"; };
 		E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexGridEngine.swift; sourceTree = "<group>"; };
+		E6C7D5CBE16D15758462AA7B /* SoundPlayerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPlayerEngine.swift; sourceTree = "<group>"; };
 		E83E69023AB260F1992E661D /* AutomotiveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomotiveCard.swift; sourceTree = "<group>"; };
 		E972DD5D46ED34A7B258CA8A /* NeonGaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeonGaugeView.swift; sourceTree = "<group>"; };
 		E98D6F452D087DEB51729D01 /* ExternalDisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDisplayManager.swift; sourceTree = "<group>"; };
@@ -169,6 +177,7 @@
 				349967648683051138B732C0 /* DriveTelemetryTests.swift */,
 				7988572BEF647D90AE4FCD9C /* ModelTests.swift */,
 				4776EC35F3860648E6F1BC8F /* PersistenceTests.swift */,
+				4F7CA14354290DB78FBB940F /* SoundEngineTests.swift */,
 				97AF87774832E5428D12AAAD /* StoreKitTests.swift */,
 				55F5C7B20864EE654010949D /* TerritoryEngineTests.swift */,
 				F07EA8D19080BEA1BB5B7198 /* WidgetCatalogTests.swift */,
@@ -179,6 +188,9 @@
 		392DA1F841E87F1253AA843F /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
+				2EEE9241ACC482DE52971F8F /* ShortcutsGuideView.swift */,
+				5A3F9CAAD71CDEDC5FBFD9FC /* SoundCatalogService.swift */,
+				E6C7D5CBE16D15758462AA7B /* SoundPlayerEngine.swift */,
 				A9505FA65A032C6EB96004F9 /* SoundsHomeView.swift */,
 			);
 			path = Sounds;
@@ -423,6 +435,7 @@
 				EBB50A478259AD81DBE37624 /* DriveTelemetryTests.swift in Sources */,
 				A89B00106AEBC76B81F30C7D /* ModelTests.swift in Sources */,
 				8C513917273D8AD4D80064F1 /* PersistenceTests.swift in Sources */,
+				63C3521A7F47DBF8695C72DD /* SoundEngineTests.swift in Sources */,
 				3A5B816225491A9B8D9C29A9 /* StoreKitTests.swift in Sources */,
 				87122846EAA284DC86EE6A83 /* TerritoryEngineTests.swift in Sources */,
 				1DB310F6719B3F0E1A895D03 /* WidgetCatalogTests.swift in Sources */,
@@ -453,6 +466,9 @@
 				65985557C48AFF579D8171C1 /* NeonGaugeView.swift in Sources */,
 				AD81AD92DF5C022264F96C32 /* PersistenceController.swift in Sources */,
 				5D7F75BCBE6ADE3531D6C4C2 /* ScreenBroadcastPickerView.swift in Sources */,
+				FEE8305FA57ACDEC93A08A5A /* ShortcutsGuideView.swift in Sources */,
+				645CC7BA3C0744232BBF6CA7 /* SoundCatalogService.swift in Sources */,
+				ABF50187BF045E4E8E1D6D16 /* SoundPlayerEngine.swift in Sources */,
 				8F3111A25FC084CB77F981B6 /* SoundsHomeView.swift in Sources */,
 				5A5E52DE474BF30B52C8E106 /* SpeedGradientRouteView.swift in Sources */,
 				5936F10444640090CF8FBB5E /* StoreKitManager.swift in Sources */,
