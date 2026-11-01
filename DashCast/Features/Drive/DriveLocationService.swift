@@ -114,9 +114,20 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         timer = nil
     }
 
-    // MARK: - CLLocationManagerDelegate
-    public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last, isTracking, !isPaused else { return }
+    // MARK: - Swift 6 CLLocationManagerDelegate Conformance
+    nonisolated public func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let location = locations.last else { return }
+        Task { @MainActor [weak self] in
+            self?.handleLocationUpdate(location)
+        }
+    }
+
+    nonisolated public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location manager error: \(error.localizedDescription)")
+    }
+
+    private func handleLocationUpdate(_ location: CLLocation) {
+        guard isTracking, !isPaused else { return }
 
         self.currentLocation = location
 

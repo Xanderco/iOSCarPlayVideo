@@ -12,43 +12,64 @@ public final class ExternalDisplayManager: ObservableObject {
     private var externalWindow: UIWindow?
 
     public init() {
-        setupScreenNotifications()
-        checkForExistingExternalScreen()
+        setupSceneNotifications()
+        checkForExistingExternalScene()
     }
 
-    private func setupScreenNotifications() {
+    private func setupSceneNotifications() {
         NotificationCenter.default.addObserver(
-            forName: UIScreen.didConnectNotification,
+            forName: UIScene.didActivateNotification,
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self = self, let newScreen = notification.object as? UIScreen else { return }
-            self.connectExternalScreen(newScreen)
+            guard let self = self, let scene = notification.object as? UIWindowScene else { return }
+            Task { @MainActor [weak self] in
+                self?.handleSceneActivation(scene)
+            }
         }
 
         NotificationCenter.default.addObserver(
-            forName: UIScreen.didDisconnectNotification,
+            forName: UIScene.didDisconnectNotification,
             object: nil,
             queue: .main
-        ) { [weak self] _ in
-            self?.disconnectExternalScreen()
+        ) { [weak self] notification in
+            guard let self = self, let scene = notification.object as? UIWindowScene else { return }
+            Task { @MainActor [weak self] in
+                self?.handleSceneDisconnect(scene)
+            }
         }
     }
 
-    private func checkForExistingExternalScreen() {
-        if UIScreen.screens.count > 1 {
-            let externalScreen = UIScreen.screens[1]
-            connectExternalScreen(externalScreen)
+    private func checkForExistingExternalScene() {
+        for scene in UIApplication.shared.connectedScenes {
+            if let windowScene = scene as? UIWindowScene, isExternalRole(windowScene.session.role) {
+                connectExternalScene(windowScene)
+                break
+            }
         }
     }
 
-    private func connectExternalScreen(_ screen: UIScreen) {
+    private func handleSceneActivation(_ scene: UIWindowScene) {
+        if isExternalRole(scene.session.role) {
+            connectExternalScene(scene)
+        }
+    }
+
+    private func handleSceneDisconnect(_ scene: UIWindowScene) {
+        if isExternalRole(scene.session.role) {
+            disconnectExternalScreen()
+        }
+    }
+
+    private func isExternalRole(_ role: UISceneSession.Role) -> Bool {
+        return role == .windowExternalDisplayNonInteractive
+    }
+
+    private func connectExternalScene(_ windowScene: UIWindowScene) {
         self.isExternalDisplayConnected = true
-        self.externalDisplayResolution = screen.bounds.size
+        self.externalDisplayResolution = windowScene.coordinateSpace.bounds.size
 
-        let window = UIWindow(frame: screen.bounds)
-        window.screen = screen
-
+        let window = UIWindow(windowScene: windowScene)
         let playerVC = AVPlayerViewController()
         playerVC.player = VideoPlayerService.shared.player
         playerVC.showsPlaybackControls = false

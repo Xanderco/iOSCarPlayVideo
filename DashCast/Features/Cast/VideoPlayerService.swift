@@ -31,12 +31,15 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func configureAudioSession() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .moviePlayback, options: [.allowBluetooth, .allowBluetoothA2DP, .allowAirPlay])
-            try session.setActive(true)
-        } catch {
-            print("Failed to configure audio session: \(error)")
+        // Offload audio session configuration to prevent UI hang risk on main thread
+        Task.detached(priority: .userInitiated) {
+            do {
+                let session = AVAudioSession.sharedInstance()
+                try session.setCategory(.playback, mode: .moviePlayback, options: [.allowBluetoothHFP, .allowBluetoothA2DP, .allowAirPlay])
+                try session.setActive(true)
+            } catch {
+                print("Failed to configure audio session: \(error)")
+            }
         }
     }
 
@@ -94,10 +97,12 @@ public final class VideoPlayerService: ObservableObject {
     private func setupTimeObserver() {
         let interval = CMTime(seconds: 0.5, preferredTimescale: 600)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            guard let self = self else { return }
-            self.currentTime = time.seconds
-            if let item = self.player.currentItem, item.duration.seconds.isFinite {
-                self.duration = item.duration.seconds
+            Task { @MainActor [weak self] in
+                guard let self = self else { return }
+                self.currentTime = time.seconds
+                if let item = self.player.currentItem, item.duration.seconds.isFinite {
+                    self.duration = item.duration.seconds
+                }
             }
         }
     }

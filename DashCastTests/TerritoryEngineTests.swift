@@ -29,8 +29,6 @@ final class TerritoryEngineTests: XCTestCase {
 
     @MainActor
     func testDriverRankProgression() {
-        let manager = TerritoryManager.shared
-
         // Verify ranks thresholds
         XCTAssertEqual(DriverRank.rookie.threshold, 0)
         XCTAssertEqual(DriverRank.cruiser.threshold, 50)
