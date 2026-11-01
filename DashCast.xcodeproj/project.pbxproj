@@ -23,6 +23,8 @@
 		65985557C48AFF579D8171C1 /* NeonGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E972DD5D46ED34A7B258CA8A /* NeonGaugeView.swift */; };
 		68C6EC109C7FAE4660269C96 /* DrivingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE586E24B44E73A2EB78BED /* DrivingScorer.swift */; };
 		6CB8B51B7A458EC1873B07F2 /* UserPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28AC6E5199CABB6177670CD9 /* UserPreferences.swift */; };
+		765E4680E9A672D897AB74E0 /* TerritoryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48494D97CD4CC93A7C22C83A /* TerritoryManager.swift */; };
+		87122846EAA284DC86EE6A83 /* TerritoryEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F5C7B20864EE654010949D /* TerritoryEngineTests.swift */; };
 		8941B296D22CF0493F91A8DF /* DashCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9C65E7FBF3CAA9E623D8E8 /* DashCastApp.swift */; };
 		8BB0FE36446746192F2FA4C7 /* WidgetConfigModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4AD0382E27B879B7BA7B5D /* WidgetConfigModel.swift */; };
 		8C513917273D8AD4D80064F1 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4776EC35F3860648E6F1BC8F /* PersistenceTests.swift */; };
@@ -32,11 +34,13 @@
 		A89B00106AEBC76B81F30C7D /* ModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7988572BEF647D90AE4FCD9C /* ModelTests.swift */; };
 		AD7E9B3ED3B4D187ACCC7C8C /* DashCastStore.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 0E1F58247BEF3CD5F1D1A669 /* DashCastStore.storekit */; };
 		AD81AD92DF5C022264F96C32 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F43C3213B1E785A8A29E8E0 /* PersistenceController.swift */; };
+		AECB53F470FC5E1CC2C2C827 /* TerritoryMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97AAF72C00CB2B7C651646C2 /* TerritoryMapView.swift */; };
 		B9DEFEBDE481DD01A74DC6C9 /* DriveLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4438C109BD09F6271214B045 /* DriveLocationService.swift */; };
 		BB45176C10DE112B867B41AD /* ThemeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8965DA7A87549D83EC5720F2 /* ThemeColors.swift */; };
 		C95E3833B1959D611A164C2D /* TerritoryHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C79E156505347D94E89D8125 /* TerritoryHomeView.swift */; };
 		CEED4B26193F145A32A7A205 /* CastEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31882871FC3F01666AC3BFDF /* CastEngineTests.swift */; };
 		D64F0E2CF37B0C21B475E64E /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EA567C3C2BFBB27C457B94 /* MainTabView.swift */; };
+		D83B3E4B8001BA93CD3F601B /* HexGridEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */; };
 		DBCCEE89E764C34AA6A4D467 /* VideoPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148D82D35C87701CBD61C5FF /* VideoPlayerService.swift */; };
 		DDB90FB5A7ACDAF3B56D01A0 /* AutomotiveCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83E69023AB260F1992E661D /* AutomotiveCard.swift */; };
 		E162566470FE426E6EBB7881 /* ChannelModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DC9C713A2E7B11FAFB29DB /* ChannelModel.swift */; };
@@ -74,8 +78,10 @@
 		3DF09473DF9B2E15B6E6ABD3 /* WidgetsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetsHomeView.swift; sourceTree = "<group>"; };
 		4438C109BD09F6271214B045 /* DriveLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveLocationService.swift; sourceTree = "<group>"; };
 		4776EC35F3860648E6F1BC8F /* PersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceTests.swift; sourceTree = "<group>"; };
+		48494D97CD4CC93A7C22C83A /* TerritoryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryManager.swift; sourceTree = "<group>"; };
 		4B9503F70894CF151D337477 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		5135CBF68C8B6C3C6B1FD85E /* TripSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripSummaryView.swift; sourceTree = "<group>"; };
+		55F5C7B20864EE654010949D /* TerritoryEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryEngineTests.swift; sourceTree = "<group>"; };
 		5C9C65E7FBF3CAA9E623D8E8 /* DashCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastApp.swift; sourceTree = "<group>"; };
 		6D4AD0382E27B879B7BA7B5D /* WidgetConfigModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetConfigModel.swift; sourceTree = "<group>"; };
 		6E5DCF30D2CC8EBC1B8C4FE6 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
@@ -84,6 +90,7 @@
 		8965DA7A87549D83EC5720F2 /* ThemeColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeColors.swift; sourceTree = "<group>"; };
 		8F43C3213B1E785A8A29E8E0 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		91EA567C3C2BFBB27C457B94 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		97AAF72C00CB2B7C651646C2 /* TerritoryMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryMapView.swift; sourceTree = "<group>"; };
 		97AF87774832E5428D12AAAD /* StoreKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitTests.swift; sourceTree = "<group>"; };
 		9BA68CC8667E0C508FA6DCC8 /* DashCastTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DashCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2DC9C713A2E7B11FAFB29DB /* ChannelModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelModel.swift; sourceTree = "<group>"; };
@@ -92,6 +99,7 @@
 		B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomotiveVideoPlayerView.swift; sourceTree = "<group>"; };
 		B88D44D627DAD31196345969 /* IPTVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPTVParser.swift; sourceTree = "<group>"; };
 		C79E156505347D94E89D8125 /* TerritoryHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryHomeView.swift; sourceTree = "<group>"; };
+		E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexGridEngine.swift; sourceTree = "<group>"; };
 		E83E69023AB260F1992E661D /* AutomotiveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomotiveCard.swift; sourceTree = "<group>"; };
 		E972DD5D46ED34A7B258CA8A /* NeonGaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeonGaugeView.swift; sourceTree = "<group>"; };
 		E98D6F452D087DEB51729D01 /* ExternalDisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDisplayManager.swift; sourceTree = "<group>"; };
@@ -122,7 +130,10 @@
 		1E023C30730F6B9E6CF67183 /* Territory */ = {
 			isa = PBXGroup;
 			children = (
+				E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */,
 				C79E156505347D94E89D8125 /* TerritoryHomeView.swift */,
+				48494D97CD4CC93A7C22C83A /* TerritoryManager.swift */,
+				97AAF72C00CB2B7C651646C2 /* TerritoryMapView.swift */,
 			);
 			path = Territory;
 			sourceTree = "<group>";
@@ -149,6 +160,7 @@
 				7988572BEF647D90AE4FCD9C /* ModelTests.swift */,
 				4776EC35F3860648E6F1BC8F /* PersistenceTests.swift */,
 				97AF87774832E5428D12AAAD /* StoreKitTests.swift */,
+				55F5C7B20864EE654010949D /* TerritoryEngineTests.swift */,
 			);
 			path = DashCastTests;
 			sourceTree = "<group>";
@@ -397,6 +409,7 @@
 				A89B00106AEBC76B81F30C7D /* ModelTests.swift in Sources */,
 				8C513917273D8AD4D80064F1 /* PersistenceTests.swift in Sources */,
 				3A5B816225491A9B8D9C29A9 /* StoreKitTests.swift in Sources */,
+				87122846EAA284DC86EE6A83 /* TerritoryEngineTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -415,6 +428,7 @@
 				68C6EC109C7FAE4660269C96 /* DrivingScorer.swift in Sources */,
 				1A3263DFAC93985C2F1774EF /* ExternalDisplayManager.swift in Sources */,
 				9607EF0B03440C14A27FB5E8 /* GlowButton.swift in Sources */,
+				D83B3E4B8001BA93CD3F601B /* HexGridEngine.swift in Sources */,
 				1627D9EBF17E8A798C354764 /* IPTVParser.swift in Sources */,
 				1BE96904CEF08DADDBECDA20 /* LifetimePaywallView.swift in Sources */,
 				F008F5D1BA3B7F8626A8D0E7 /* LocalVideoManager.swift in Sources */,
@@ -426,6 +440,8 @@
 				5A5E52DE474BF30B52C8E106 /* SpeedGradientRouteView.swift in Sources */,
 				5936F10444640090CF8FBB5E /* StoreKitManager.swift in Sources */,
 				C95E3833B1959D611A164C2D /* TerritoryHomeView.swift in Sources */,
+				765E4680E9A672D897AB74E0 /* TerritoryManager.swift in Sources */,
+				AECB53F470FC5E1CC2C2C827 /* TerritoryMapView.swift in Sources */,
 				BB45176C10DE112B867B41AD /* ThemeColors.swift in Sources */,
 				3D2EEC43E78D8FFF0F69DD2D /* ThemeFonts.swift in Sources */,
 				1993945C43A1E99D1FD8E607 /* TripModel.swift in Sources */,
