@@ -77,9 +77,9 @@ public struct WidgetsHomeView: View {
                 let loaded = PersistenceController.shared.loadWidgets()
                 if loaded.isEmpty {
                     savedWidgets = [
-                        WidgetConfigModel(carBrand: "Toyota", carModelName: "RAV4 Prime", driverGreeting: "Welcome, Driver", showWatermark: true, stickerId: "paw"),
-                        WidgetConfigModel(carBrand: "Chevrolet", carModelName: "Corvette Z06", driverGreeting: "Hello, Michael", showWatermark: true, stickerId: "turbo"),
-                        WidgetConfigModel(carBrand: "Ford", carModelName: "Mustang Dark Horse", driverGreeting: "Track Ready", showWatermark: true, stickerId: "route66")
+                        WidgetConfigModel(carBrand: "Porsche", carModelName: "911 GT3 RS", carImageName: "car_porsche_911", driverGreeting: "Welcome, Driver", showWatermark: true, stickerId: "turbo"),
+                        WidgetConfigModel(carBrand: "Toyota", carModelName: "RAV4 GR Sport", carImageName: "car_toyota_rav4", driverGreeting: "Hello, Michael", showWatermark: true, stickerId: "paw"),
+                        WidgetConfigModel(carBrand: "Chevrolet", carModelName: "Corvette Stingray", carImageName: "car_chevrolet_corvette", driverGreeting: "Track Ready", showWatermark: true, stickerId: "route66")
                     ]
                     PersistenceController.shared.saveWidgets(savedWidgets)
                 } else {
@@ -90,7 +90,7 @@ public struct WidgetsHomeView: View {
     }
 
     private var defaultWidget: WidgetConfigModel {
-        WidgetConfigModel(carBrand: "Toyota", carModelName: "GR Supra", driverGreeting: "Welcome, Driver")
+        WidgetConfigModel(carBrand: "Porsche", carModelName: "911 GT3 RS", carImageName: "car_porsche_911", driverGreeting: "Welcome, Driver")
     }
 
     private var myWidgetsSection: some View {
@@ -130,9 +130,17 @@ public struct WidgetsHomeView: View {
                                             .font(.system(size: 11, weight: .black))
                                             .foregroundStyle(Color.dashTextMuted)
 
-                                        Image(systemName: "car.side.fill")
-                                            .font(.system(size: 32))
-                                            .foregroundStyle(Color.dashCyan)
+                                        if let uiImage = UIImage(named: widget.carImageName) ?? UIImage(contentsOfFile: Bundle.main.path(forResource: widget.carImageName, ofType: "png") ?? "") {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(height: 48)
+                                                .padding(.horizontal, 6)
+                                        } else {
+                                            Image(systemName: "car.side.fill")
+                                                .font(.system(size: 32))
+                                                .foregroundStyle(Color.dashCyan)
+                                        }
 
                                         Text(widget.driverGreeting)
                                             .font(.system(size: 10, weight: .medium))

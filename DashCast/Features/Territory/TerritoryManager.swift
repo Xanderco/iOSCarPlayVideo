@@ -81,6 +81,7 @@ public final class TerritoryManager: ObservableObject {
             claimedHexIDs.insert(cell.id)
             weeklyHexCount += 1
             PersistenceController.shared.saveClaimedHexes(claimedHexIDs)
+            UsageMetricsManager.shared.recordHexClaimed()
             return true
         }
         return false

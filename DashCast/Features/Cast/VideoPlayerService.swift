@@ -62,6 +62,7 @@ public final class VideoPlayerService: ObservableObject {
         }
 
         player.replaceCurrentItem(with: playerItem)
+        UsageMetricsManager.shared.recordVideoPlayed()
         play()
     }
 

@@ -28,6 +28,7 @@ public final class SoundPlayerEngine: ObservableObject {
         stop()
 
         currentlyPlayingId = sound.id
+        UsageMetricsManager.shared.recordSoundPlayed()
 
         // Synthesize acoustic automotive tone
         playTone(frequency: sound.frequencyHz, durationSeconds: 0.8)

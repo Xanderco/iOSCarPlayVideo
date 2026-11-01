@@ -22,14 +22,24 @@ public struct VehicleModel: Identifiable, Hashable {
     public let year: String
     public let colorName: String
     public let carAccentColor: Color
+    public let imageName: String
 
-    public init(id: String, brandId: String, name: String, year: String = "2024", colorName: String = "Racing Red", carAccentColor: Color = .dashRed) {
+    public init(
+        id: String,
+        brandId: String,
+        name: String,
+        year: String = "2024",
+        colorName: String = "Racing Red",
+        carAccentColor: Color = .dashRed,
+        imageName: String? = nil
+    ) {
         self.id = id
         self.brandId = brandId
         self.name = name
         self.year = year
         self.colorName = colorName
         self.carAccentColor = carAccentColor
+        self.imageName = imageName ?? "car_\(id)"
     }
 }
 
@@ -67,18 +77,14 @@ public final class VehicleCatalogService {
     ]
 
     public let vehicles: [VehicleModel] = [
-        VehicleModel(id: "toyota_supra", brandId: "toyota", name: "GR Supra", year: "2024", colorName: "Velocity Orange", carAccentColor: .dashOrange),
-        VehicleModel(id: "toyota_rav4", brandId: "toyota", name: "RAV4 Prime", year: "2024", colorName: "Blueprint Blue", carAccentColor: .dashCyan),
-        VehicleModel(id: "toyota_camry", brandId: "toyota", name: "Camry TRD", year: "2024", colorName: "Supersonic Red", carAccentColor: .dashRed),
-        VehicleModel(id: "chevrolet_corvette", brandId: "chevrolet", name: "Corvette Z06", year: "2024", colorName: "Torch Red", carAccentColor: .dashRed),
-        VehicleModel(id: "chevrolet_equinox", brandId: "chevrolet", name: "Equinox RS", year: "2024", colorName: "Sunlit Gold", carAccentColor: .dashGold),
-        VehicleModel(id: "ford_mustang", brandId: "ford", name: "Mustang Dark Horse", year: "2024", colorName: "Grabber Blue", carAccentColor: .dashBlue),
-        VehicleModel(id: "ford_gt", brandId: "ford", name: "Ford GT", year: "2023", colorName: "Liquid Carbon", carAccentColor: .dashCyan),
-        VehicleModel(id: "porsche_911", brandId: "porsche", name: "911 GT3 RS", year: "2024", colorName: "Lizard Green", carAccentColor: .dashGreen),
-        VehicleModel(id: "porsche_taycan", brandId: "porsche", name: "Taycan Turbo S", year: "2024", colorName: "Frozen Blue", carAccentColor: .dashCyan),
-        VehicleModel(id: "jeep_wrangler", brandId: "jeep", name: "Wrangler Rubicon 392", year: "2024", colorName: "Firecracker Red", carAccentColor: .dashRed),
-        VehicleModel(id: "bmw_m4", brandId: "bmw", name: "M4 Competition", year: "2024", colorName: "Isle of Man Green", carAccentColor: .dashGreen),
-        VehicleModel(id: "mercedes_amg_gt", brandId: "mercedes", name: "AMG GT 63", year: "2024", colorName: "Magno Grey", carAccentColor: .dashGold)
+        VehicleModel(id: "porsche_911", brandId: "porsche", name: "911 GT3 RS", year: "2024", colorName: "Agate Grey", carAccentColor: .dashGreen, imageName: "car_porsche_911"),
+        VehicleModel(id: "toyota_rav4", brandId: "toyota", name: "RAV4 GR Sport", year: "2024", colorName: "Pearl White", carAccentColor: .dashCyan, imageName: "car_toyota_rav4"),
+        VehicleModel(id: "chevrolet_corvette", brandId: "chevrolet", name: "Corvette Stingray", year: "2024", colorName: "Satin Black", carAccentColor: .dashRed, imageName: "car_chevrolet_corvette"),
+        VehicleModel(id: "toyota_supra", brandId: "toyota", name: "GR Supra", year: "2024", colorName: "Velocity Orange", carAccentColor: .dashOrange, imageName: "car_toyota_supra"),
+        VehicleModel(id: "ford_mustang", brandId: "ford", name: "Mustang Dark Horse", year: "2024", colorName: "Midnight Shadow", carAccentColor: .dashBlue, imageName: "car_ford_mustang"),
+        VehicleModel(id: "jeep_wrangler", brandId: "jeep", name: "Wrangler Rubicon", year: "2024", colorName: "Granite Crystal", carAccentColor: .dashRed, imageName: "car_jeep_wrangler"),
+        VehicleModel(id: "bmw_m4", brandId: "bmw", name: "M4 Competition", year: "2024", colorName: "Isle of Man Green", carAccentColor: .dashGreen, imageName: "car_bmw_m4"),
+        VehicleModel(id: "mercedes_amg_gt", brandId: "mercedes", name: "AMG GT 63", year: "2024", colorName: "Magno Stealth", carAccentColor: .dashGold, imageName: "car_mercedes_amg")
     ]
 
     public let stickers: [VehicleSticker] = [

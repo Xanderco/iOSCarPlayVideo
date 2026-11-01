@@ -9,6 +9,9 @@ struct DashCastApp: App {
             MainTabView()
                 .environmentObject(appState)
                 .preferredColorScheme(.dark)
+                .onAppear {
+                    ExternalDisplayManager.shared.checkForExistingExternalDisplay()
+                }
         }
     }
 }

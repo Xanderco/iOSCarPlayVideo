@@ -39,8 +39,8 @@ final class ModelTests: XCTestCase {
 
     func testWidgetConfigModelDefaults() {
         let config = WidgetConfigModel()
-        XCTAssertEqual(config.carBrand, "Toyota")
-        XCTAssertEqual(config.carModelName, "Supra")
+        XCTAssertEqual(config.carBrand, "Porsche")
+        XCTAssertEqual(config.carModelName, "911 GT3 RS")
         XCTAssertTrue(config.showWatermark)
     }
 }
