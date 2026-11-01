@@ -30,6 +30,7 @@
 		813FEB0358796AABB24E4ABF /* WidgetEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F97B93303B133EFAB0AF241A /* WidgetEditorView.swift */; };
 		87122846EAA284DC86EE6A83 /* TerritoryEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F5C7B20864EE654010949D /* TerritoryEngineTests.swift */; };
 		8941B296D22CF0493F91A8DF /* DashCastApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9C65E7FBF3CAA9E623D8E8 /* DashCastApp.swift */; };
+		89B231625985445135293E40 /* EndToEndFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC56F59AB4EB1823B29E3731 /* EndToEndFlowTests.swift */; };
 		8BB0FE36446746192F2FA4C7 /* WidgetConfigModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D4AD0382E27B879B7BA7B5D /* WidgetConfigModel.swift */; };
 		8C513917273D8AD4D80064F1 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4776EC35F3860648E6F1BC8F /* PersistenceTests.swift */; };
 		8F3111A25FC084CB77F981B6 /* SoundsHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9505FA65A032C6EB96004F9 /* SoundsHomeView.swift */; };
@@ -112,6 +113,7 @@
 		A9505FA65A032C6EB96004F9 /* SoundsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundsHomeView.swift; sourceTree = "<group>"; };
 		B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomotiveVideoPlayerView.swift; sourceTree = "<group>"; };
 		B88D44D627DAD31196345969 /* IPTVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPTVParser.swift; sourceTree = "<group>"; };
+		BC56F59AB4EB1823B29E3731 /* EndToEndFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndToEndFlowTests.swift; sourceTree = "<group>"; };
 		BF49F308FB5171FABDD5CF18 /* CarPlayDashboardMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayDashboardMockupView.swift; sourceTree = "<group>"; };
 		C79E156505347D94E89D8125 /* TerritoryHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryHomeView.swift; sourceTree = "<group>"; };
 		E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexGridEngine.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				6E5DCF30D2CC8EBC1B8C4FE6 /* AppStateTests.swift */,
 				31882871FC3F01666AC3BFDF /* CastEngineTests.swift */,
 				349967648683051138B732C0 /* DriveTelemetryTests.swift */,
+				BC56F59AB4EB1823B29E3731 /* EndToEndFlowTests.swift */,
 				7988572BEF647D90AE4FCD9C /* ModelTests.swift */,
 				4776EC35F3860648E6F1BC8F /* PersistenceTests.swift */,
 				4F7CA14354290DB78FBB940F /* SoundEngineTests.swift */,
@@ -433,6 +436,7 @@
 				F10EFC48F0C6599343713CEC /* AppStateTests.swift in Sources */,
 				CEED4B26193F145A32A7A205 /* CastEngineTests.swift in Sources */,
 				EBB50A478259AD81DBE37624 /* DriveTelemetryTests.swift in Sources */,
+				89B231625985445135293E40 /* EndToEndFlowTests.swift in Sources */,
 				A89B00106AEBC76B81F30C7D /* ModelTests.swift in Sources */,
 				8C513917273D8AD4D80064F1 /* PersistenceTests.swift in Sources */,
 				63C3521A7F47DBF8695C72DD /* SoundEngineTests.swift in Sources */,
