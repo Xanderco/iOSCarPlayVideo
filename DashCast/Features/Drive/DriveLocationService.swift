@@ -29,6 +29,10 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.distanceFilter = 2 // 2 meters
         locationManager.allowsBackgroundLocationUpdates = false
+
+        // Start location updates immediately so maps and coordinates locate the user at launch
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
     }
 
     public func requestPermissions() {
@@ -53,18 +57,15 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
 
     public func pauseTrip() {
         isPaused = true
-        locationManager.stopUpdatingLocation()
     }
 
     public func resumeTrip() {
         isPaused = false
-        locationManager.startUpdatingLocation()
     }
 
     public func endTrip() -> TripModel {
         isTracking = false
         isPaused = false
-        locationManager.stopUpdatingLocation()
         stopTimer()
 
         let score = DrivingScorer.shared.calculateScore()
@@ -127,19 +128,22 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
     }
 
     private func handleLocationUpdate(_ location: CLLocation) {
-        guard isTracking, !isPaused else { return }
-
+        // ALWAYS update current location & altitude regardless of whether trip is active
         self.currentLocation = location
+        self.currentAltitudeMeters = max(location.altitude, 0)
 
-        // Calculate speed (CLLocation.speed is in m/s)
         let rawSpeed = location.speed
         let speedKmh = max(rawSpeed >= 0 ? rawSpeed * 3.6 : 0, 0)
         self.currentSpeedKmh = speedKmh
+
+        // Check if user is also conquering territory hexes
+        TerritoryManager.shared.claimCoordinate(location.coordinate)
+
+        guard isTracking, !isPaused else { return }
+
         if speedKmh > topSpeedKmh {
             topSpeedKmh = speedKmh
         }
-
-        self.currentAltitudeMeters = max(location.altitude, 0)
 
         // Accumulate distance
         if let previous = lastLocation {

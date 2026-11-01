@@ -32,7 +32,7 @@ public struct NeonGaugeView: View {
                 .trim(from: 0.15, to: 0.85)
                 .stroke(
                     Color.dashSurfaceHighlight,
-                    style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                    style: StrokeStyle(lineWidth: 10, lineCap: .round)
                 )
                 .rotationEffect(.degrees(90))
 
@@ -41,7 +41,7 @@ public struct NeonGaugeView: View {
                 .trim(from: 0.15, to: 0.15 + (progress * 0.70))
                 .stroke(
                     accentColor,
-                    style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                    style: StrokeStyle(lineWidth: 10, lineCap: .round)
                 )
                 .rotationEffect(.degrees(90))
                 .shadow(color: accentColor.opacity(0.8), radius: 8, x: 0, y: 0)
@@ -50,20 +50,20 @@ public struct NeonGaugeView: View {
             // Digital readout
             VStack(spacing: 2) {
                 Text(title)
-                    .font(ThemeFonts.hudCaption(size: 11))
+                    .font(ThemeFonts.hudCaption(size: 10))
                     .foregroundStyle(Color.dashTextMuted)
-                    .tracking(1.5)
+                    .tracking(1.2)
 
                 Text(String(format: "%.0f", value))
-                    .font(ThemeFonts.speedDisplay(size: 56))
+                    .font(ThemeFonts.speedDisplay(size: 44))
                     .foregroundStyle(Color.dashTextPrimary)
 
                 Text(unit)
-                    .font(ThemeFonts.hudCaption(size: 12))
+                    .font(ThemeFonts.hudCaption(size: 11))
                     .foregroundStyle(accentColor)
                     .fontWeight(.bold)
             }
         }
-        .frame(width: 170, height: 170)
+        .frame(width: 140, height: 140)
     }
 }

@@ -45,7 +45,8 @@ public struct WidgetsHomeView: View {
                         // Live Wallpaper Video Loops Showcase
                         liveWallpapersSection
                     }
-                    .padding(.vertical)
+                    .padding(.top, 10)
+                    .padding(.bottom, 120)
                 }
             }
             .navigationTitle("CarDash Widgets")

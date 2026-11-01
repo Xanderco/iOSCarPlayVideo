@@ -4,7 +4,7 @@ import MapKit
 public struct SpeedGradientRouteView: View {
     public let points: [TripPoint]
 
-    @State private var position: MapCameraPosition = .automatic
+    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
 
     public init(points: [TripPoint]) {
         self.points = points
@@ -12,6 +12,9 @@ public struct SpeedGradientRouteView: View {
 
     public var body: some View {
         Map(position: $position) {
+            // Real-time Current User Location Pin
+            UserAnnotation()
+
             if points.count >= 2 {
                 // Render segments colored by speed
                 ForEach(0..<(points.count - 1), id: \.self) { i in
@@ -34,19 +37,13 @@ public struct SpeedGradientRouteView: View {
                             .overlay(Circle().stroke(Color.white, lineWidth: 2))
                     }
                 }
-
-                // Current/End Marker
-                if let last = points.last {
-                    Annotation("End", coordinate: CLLocationCoordinate2D(latitude: last.latitude, longitude: last.longitude)) {
-                        Image(systemName: "location.north.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundStyle(Color.dashCyan)
-                            .background(Circle().fill(Color.white))
-                    }
-                }
             }
         }
         .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
+        .mapControls {
+            MapUserLocationButton()
+            MapCompass()
+        }
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
