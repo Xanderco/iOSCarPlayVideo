@@ -13,6 +13,7 @@ public struct CastHomeView: View {
     @State private var m3uURLInput: String = ""
     @State private var showingWebBrowser: Bool = false
     @State private var showingCastGuide: Bool = false
+    @State private var showingMetrics: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
 
@@ -61,12 +62,21 @@ public struct CastHomeView: View {
                         // Channels Grid
                         channelsSection
                     }
-                    .padding(.top, 4)
-                    .padding(.bottom, 120) // Clean clearance so content never collides with tab bar
+                    .padding(.bottom, 24)
                 }
             }
             .navigationTitle("Cast")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showingMetrics = true
+                    } label: {
+                        Image(systemName: "chart.bar.xaxis")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.dashCyan)
+                    }
+                }
+
                 ToolbarItem(placement: .topBarTrailing) {
                     if !appState.isProLifetimeUnlocked {
                         Button {
@@ -103,6 +113,9 @@ public struct CastHomeView: View {
             .sheet(isPresented: $showingCastGuide) {
                 CarCastGuideModalView()
             }
+            .sheet(isPresented: $showingMetrics) {
+                UsageMetricsView()
+            }
             .fullScreenCover(isPresented: $isFullscreenPlayer) {
                 AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
                     .ignoresSafeArea()
@@ -112,11 +125,6 @@ public struct CastHomeView: View {
                     Task {
                         await localVideoManager.importVideo(from: newItem)
                     }
-                }
-            }
-            .onAppear {
-                if playerService.currentChannel == nil, let first = channels.first {
-                    playerService.load(channel: first)
                 }
             }
         }

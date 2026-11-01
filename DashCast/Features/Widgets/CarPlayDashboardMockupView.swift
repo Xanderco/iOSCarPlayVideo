@@ -102,14 +102,14 @@ public struct CarPlayDashboardMockupView: View {
                     .offset(y: -24)
             }
 
-            VStack(spacing: 6) {
+            VStack(spacing: 4) {
                 HStack {
                     VStack(alignment: .leading, spacing: 1) {
                         Text("August")
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(Color.dashTextSecondary)
                         Text("03")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.dashTextPrimary)
                     }
 
@@ -124,15 +124,23 @@ public struct CarPlayDashboardMockupView: View {
                     }
                 }
                 .padding(.horizontal, 10)
-                .padding(.top, 8)
+                .padding(.top, 6)
 
-                // Car illustration
+                // Real Car illustration
                 ZStack {
-                    Image(systemName: "car.side.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 48)
-                        .foregroundStyle(Color.dashCyan)
+                    if let uiImage = loadCarUIImage(name: config.carImageName) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 60)
+                            .shadow(color: Color.black.opacity(0.6), radius: 6, y: 3)
+                    } else {
+                        Image(systemName: "car.side.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 48)
+                            .foregroundStyle(Color.dashCyan)
+                    }
 
                     if let stickerId = config.stickerId {
                         Image(systemName: stickerIcon(for: stickerId))
@@ -154,7 +162,7 @@ public struct CarPlayDashboardMockupView: View {
                         .foregroundStyle(Color.dashCyan)
                 }
                 .padding(.horizontal, 10)
-                .padding(.bottom, 8)
+                .padding(.bottom, 6)
             }
         }
     }
@@ -164,7 +172,7 @@ public struct CarPlayDashboardMockupView: View {
             RoundedRectangle(cornerRadius: 14)
                 .fill(
                     LinearGradient(
-                        colors: [Color.dashRed.opacity(0.8), Color.dashBlue.opacity(0.8)],
+                        colors: [Color.dashRed.opacity(0.85), Color.dashBlue.opacity(0.85)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -172,7 +180,7 @@ public struct CarPlayDashboardMockupView: View {
 
             VStack(spacing: 2) {
                 Text(config.countdownTitle ?? "10")
-                    .font(.system(size: 48, weight: .black, design: .rounded))
+                    .font(.system(size: 44, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
 
                 Text("DAYS LEFT")
@@ -185,5 +193,13 @@ public struct CarPlayDashboardMockupView: View {
 
     private func stickerIcon(for id: String) -> String {
         VehicleCatalogService.shared.stickers.first(where: { $0.id == id })?.icon ?? "sparkle"
+    }
+
+    private func loadCarUIImage(name: String) -> UIImage? {
+        if let img = UIImage(named: name) { return img }
+        if let path = Bundle.main.path(forResource: name, ofType: "png") {
+            return UIImage(contentsOfFile: path)
+        }
+        return nil
     }
 }

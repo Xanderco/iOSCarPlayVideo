@@ -4,7 +4,14 @@ import MapKit
 public struct TerritoryMapView: View {
     public let claimedHexIDs: Set<String>
 
-    @State private var position: MapCameraPosition = .userLocation(fallback: .automatic)
+    @State private var position: MapCameraPosition = .camera(
+        MapCamera(
+            centerCoordinate: CLLocationCoordinate2D(latitude: 40.7580, longitude: -73.9855), // NYC Midtown Manhattan
+            distance: 14000,
+            heading: 25,
+            pitch: 30
+        )
+    )
 
     public init(claimedHexIDs: Set<String>) {
         self.claimedHexIDs = claimedHexIDs
@@ -22,9 +29,6 @@ public struct TerritoryMapView: View {
 
     public var body: some View {
         Map(position: $position) {
-            // Live User GPS Location
-            UserAnnotation()
-
             ForEach(hexCells) { cell in
                 let vertices = HexGridEngine.polygonVertices(for: cell)
                 MapPolygon(coordinates: vertices)
@@ -33,10 +37,6 @@ public struct TerritoryMapView: View {
             }
         }
         .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
-        .mapControls {
-            MapUserLocationButton()
-            MapCompass()
-        }
         .ignoresSafeArea()
     }
 }

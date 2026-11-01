@@ -139,7 +139,7 @@ public struct TerritoryHomeView: View {
             .padding(.vertical, 4)
         }
         .padding(.horizontal)
-        .padding(.bottom, 36)
+        .padding(.bottom, 16)
     }
 
     private func metricItem(value: String, label: String) -> some View {

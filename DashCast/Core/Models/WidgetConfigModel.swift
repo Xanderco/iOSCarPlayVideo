@@ -15,9 +15,9 @@ public struct WidgetConfigModel: Codable, Identifiable {
 
     public init(
         id: UUID = UUID(),
-        carBrand: String = "Toyota",
-        carModelName: String = "Supra",
-        carImageName: String = "car_toyota_supra",
+        carBrand: String = "Porsche",
+        carModelName: String = "911 GT3 RS",
+        carImageName: String = "car_porsche_911",
         driverGreeting: String = "Welcome, Driver",
         showWatermark: Bool = true,
         stickerId: String? = nil,

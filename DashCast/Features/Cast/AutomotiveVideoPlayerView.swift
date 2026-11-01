@@ -75,22 +75,17 @@ public struct AutomotiveVideoPlayerView: View {
 
                     Spacer()
 
-                    HStack(spacing: 12) {
-                        AirPlayRoutePickerRepresentable()
-                            .frame(width: 32, height: 32)
-
-                        Button {
-                            withAnimation {
-                                isFullscreen.toggle()
-                            }
-                        } label: {
-                            Image(systemName: isFullscreen ? "arrow.down.right.and.arrow.up.left" : "viewfinder")
-                                .font(.system(size: 18, weight: .bold))
-                                .foregroundStyle(.white)
-                                .padding(8)
-                                .background(Color.white.opacity(0.2))
-                                .clipShape(Circle())
+                    Button {
+                        withAnimation {
+                            isFullscreen.toggle()
                         }
+                    } label: {
+                        Image(systemName: isFullscreen ? "arrow.down.right.and.arrow.up.left" : "viewfinder")
+                            .font(.system(size: 18, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(8)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
                     }
                 }
                 .padding()

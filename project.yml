@@ -10,7 +10,6 @@ settings:
   base:
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     SWIFT_VERSION: "5.9"
-    DEVELOPMENT_TEAM: "96YG38576A"
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_EXTENSIONS: YES
@@ -27,8 +26,11 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast
         PRODUCT_NAME: DashCast
+        DEVELOPMENT_TEAM: "96YG38576A"
+        CODE_SIGN_STYLE: Automatic
         INFOPLIST_KEY_CFBundleDisplayName: "DashCast"
         INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+        INFOPLIST_KEY_UIApplicationSupportsMultipleScenes: "YES"
         INFOPLIST_KEY_UIBackgroundModes: "audio,location"
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: "DashCast uses your location to track driving speed, trip stats, and street territory exploration."
         INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription: "DashCast tracks your route and speed while driving to score your trips."

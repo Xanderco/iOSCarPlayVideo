@@ -62,6 +62,7 @@ public struct WidgetEditorView: View {
                                         let isSelected = config.carModelName == vehicle.name
                                         Button {
                                             config.carModelName = vehicle.name
+                                            config.carImageName = vehicle.imageName
                                             if let brand = catalog.brands.first(where: { $0.id == vehicle.brandId }) {
                                                 config.carBrand = brand.name
                                             }
@@ -70,15 +71,23 @@ public struct WidgetEditorView: View {
                                                 ZStack {
                                                     RoundedRectangle(cornerRadius: 14)
                                                         .fill(Color.dashSurface)
-                                                        .frame(width: 110, height: 80)
+                                                        .frame(width: 120, height: 80)
                                                         .overlay(
                                                             RoundedRectangle(cornerRadius: 14)
                                                                 .stroke(isSelected ? Color.dashCyan : Color.dashBorder, lineWidth: isSelected ? 3 : 1)
                                                         )
 
-                                                    Image(systemName: "car.side.fill")
-                                                        .font(.system(size: 32))
-                                                        .foregroundStyle(vehicle.carAccentColor)
+                                                    if let uiImage = UIImage(named: vehicle.imageName) ?? UIImage(contentsOfFile: Bundle.main.path(forResource: vehicle.imageName, ofType: "png") ?? "") {
+                                                        Image(uiImage: uiImage)
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                            .frame(height: 52)
+                                                            .padding(4)
+                                                    } else {
+                                                        Image(systemName: "car.side.fill")
+                                                            .font(.system(size: 32))
+                                                            .foregroundStyle(vehicle.carAccentColor)
+                                                    }
                                                 }
 
                                                 Text(vehicle.name)
@@ -86,7 +95,7 @@ public struct WidgetEditorView: View {
                                                     .foregroundStyle(isSelected ? Color.dashCyan : Color.dashTextPrimary)
                                                     .lineLimit(1)
                                             }
-                                            .frame(width: 110)
+                                            .frame(width: 120)
                                         }
                                     }
                                 }
