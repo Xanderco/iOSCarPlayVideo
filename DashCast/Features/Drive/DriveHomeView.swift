@@ -9,6 +9,7 @@ public struct DriveHomeView: View {
     @State private var showingTripSummary: Bool = false
     @State private var completedTrip: TripModel?
     @State private var showingHistory: Bool = false
+    @State private var showingPermissions: Bool = false
     @State private var pastTrips: [TripModel] = []
 
     public init() {}
@@ -35,6 +36,28 @@ public struct DriveHomeView: View {
                     ZStack(alignment: .topTrailing) {
                         SpeedGradientRouteView(points: locationService.tripPoints)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                        // Top Left Permissions / Tracking Status Toggle
+                        VStack {
+                            Button {
+                                showingPermissions = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "location.fill")
+                                        .font(.system(size: 11))
+                                    Text("Tracking")
+                                        .font(.system(size: 11, weight: .bold))
+                                }
+                                .foregroundStyle(Color.dashGreen)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.dashSurface.opacity(0.85))
+                                .clipShape(Capsule())
+                            }
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                        .padding()
 
                         // Top right quick toggles
                         VStack(spacing: 8) {
@@ -78,6 +101,9 @@ public struct DriveHomeView: View {
             }
             .sheet(isPresented: $showingHistory) {
                 pastTripsListView
+            }
+            .sheet(isPresented: $showingPermissions) {
+                DriveTrackingPermissionsSheet()
             }
         }
     }

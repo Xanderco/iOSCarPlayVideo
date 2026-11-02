@@ -35,6 +35,10 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         locationManager.requestWhenInUseAuthorization()
     }
 
+    public func requestAlwaysAuthorization() {
+        locationManager.requestAlwaysAuthorization()
+    }
+
     public func startTrip() {
         requestPermissions()
         distanceMeters = 0
