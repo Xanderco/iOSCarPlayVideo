@@ -13,6 +13,7 @@ public struct CastHomeView: View {
     @State private var showingCastGuide: Bool = false
     @State private var showingFavorites: Bool = false
     @State private var showingBroadcastPicker: Bool = false
+    @State private var showingCarPlaySimulator: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
     @State private var m3uURLInput: String = ""
@@ -107,6 +108,15 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingAddM3UDialog) {
                 addM3UDialogSheet
+            }
+            .sheet(isPresented: Binding(
+                get: { showingCarPlaySimulator || appState.showCarPlaySimulator },
+                set: {
+                    showingCarPlaySimulator = $0
+                    appState.showCarPlaySimulator = $0
+                }
+            )) {
+                CarPlaySimulatorView()
             }
             .sheet(isPresented: $showingBroadcastPicker) {
                 NavigationStack {
@@ -349,18 +359,34 @@ public struct CastHomeView: View {
                     .padding(.horizontal, 32)
             }
 
-            // AirPlay & Guide buttons
-            HStack(spacing: 12) {
+            // AirPlay, Guide & CarPlay Mode Simulator buttons
+            HStack(spacing: 10) {
+                Button {
+                    showingCarPlaySimulator = true
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "car.side.fill")
+                        Text("CarPlay Mode")
+                    }
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color.black)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(LinearGradient.dashAccentGradient)
+                    .clipShape(Capsule())
+                    .shadow(color: Color.dashYellow.opacity(0.35), radius: 6, y: 3)
+                }
+
                 Button {
                     showingCastGuide = true
                 } label: {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 5) {
                         Image(systemName: "info.circle")
-                        Text("Connection Help")
+                        Text("Help")
                     }
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Color.dashYellow)
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(Color.dashYellow.opacity(0.12))
                     .clipShape(Capsule())

@@ -115,7 +115,7 @@ public struct CarPlayExternalDisplayView: View {
                                 Spacer()
                                 Text(activeWidget.carModelName)
                                     .font(.system(size: 12))
-                                    .foregroundStyle(Color.dashCyan)
+                                    .foregroundStyle(Color.dashYellow)
                             }
                             .padding(.horizontal, 16)
                             .padding(.bottom, 12)
@@ -125,18 +125,12 @@ public struct CarPlayExternalDisplayView: View {
                     // Right Widget: Countdown & Ready Status
                     ZStack {
                         RoundedRectangle(cornerRadius: 18)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.dashRed.opacity(0.85), Color.dashBlue.opacity(0.85)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
+                            .fill(LinearGradient.dashAccentGradient)
 
                         VStack(spacing: 8) {
                             Text("DashCast")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.9))
+                                .foregroundStyle(Color.black.opacity(0.9))
                                 .tracking(1)
 
                             Text("READY")
@@ -166,7 +160,7 @@ public struct CarPlayExternalDisplayView: View {
             Image(systemName: "car.side.fill")
                 .resizable()
                 .scaledToFit()
-                .foregroundStyle(Color.dashCyan)
+                .foregroundStyle(Color.dashYellow)
         }
     }
 

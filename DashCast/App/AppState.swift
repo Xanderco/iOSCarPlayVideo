@@ -9,6 +9,8 @@ public final class AppState: ObservableObject {
     @Published public var isProLifetimeUnlocked: Bool = false
     @Published public var showPaywall: Bool = false
     @Published public var showWidgetEditor: Bool = false
+    @Published public var showCarPlaySimulator: Bool = false
+    @Published public var initialCarPlayMode: String = "App in CarPlay"
     @Published public var isDriveActive: Bool = false
     @Published public var useMilesPerHour: Bool = false
 
@@ -52,6 +54,23 @@ public final class AppState: ObservableObject {
         if ProcessInfo.processInfo.arguments.contains("-showWidgetEditor") {
             self.showWidgetEditor = true
             self.selectedTab = .widgets
+        }
+
+        if ProcessInfo.processInfo.arguments.contains("-carplaySimulator") {
+            self.showCarPlaySimulator = true
+            self.selectedTab = .cast
+        }
+
+        if ProcessInfo.processInfo.arguments.contains("-carplayDashboard") {
+            self.showCarPlaySimulator = true
+            self.initialCarPlayMode = "CarPlay Dashboard"
+            self.selectedTab = .cast
+        }
+
+        if ProcessInfo.processInfo.arguments.contains("-carplayHomeMenu") {
+            self.showCarPlaySimulator = true
+            self.initialCarPlayMode = "CarPlay Home Menu"
+            self.selectedTab = .cast
         }
     }
 

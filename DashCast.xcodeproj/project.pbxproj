@@ -70,6 +70,7 @@
 		D64F0E2CF37B0C21B475E64E /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91EA567C3C2BFBB27C457B94 /* MainTabView.swift */; };
 		D83B3E4B8001BA93CD3F601B /* HexGridEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */; };
 		DBCCEE89E764C34AA6A4D467 /* VideoPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148D82D35C87701CBD61C5FF /* VideoPlayerService.swift */; };
+		DD4F3BD817A7E006687ABEB6 /* CarPlaySimulatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC0ED3CEC3007C5205B9B30 /* CarPlaySimulatorView.swift */; };
 		DDB90FB5A7ACDAF3B56D01A0 /* AutomotiveCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E83E69023AB260F1992E661D /* AutomotiveCard.swift */; };
 		E162566470FE426E6EBB7881 /* ChannelModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DC9C713A2E7B11FAFB29DB /* ChannelModel.swift */; };
 		E1D321C82BF66E6D5E278814 /* car_jeep_wrangler.png in Resources */ = {isa = PBXBuildFile; fileRef = 48C4369C5C12826BC474FF5D /* car_jeep_wrangler.png */; };
@@ -134,6 +135,7 @@
 		6E5DCF30D2CC8EBC1B8C4FE6 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		6FF441DC34D145A9368F39E6 /* UsageMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMetricsTests.swift; sourceTree = "<group>"; };
 		7988572BEF647D90AE4FCD9C /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
+		7AC0ED3CEC3007C5205B9B30 /* CarPlaySimulatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlaySimulatorView.swift; sourceTree = "<group>"; };
 		835BD058FC420EF574D41652 /* car_toyota_rav4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = car_toyota_rav4.png; sourceTree = "<group>"; };
 		8527E74AADE9925916DDFCB0 /* TripModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripModel.swift; sourceTree = "<group>"; };
 		8965DA7A87549D83EC5720F2 /* ThemeColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeColors.swift; sourceTree = "<group>"; };
@@ -373,6 +375,7 @@
 				B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */,
 				EC284E325ADDDC3EDEBFAE64 /* CarCastGuideModalView.swift */,
 				67CBE26791A6FD1D17A3C43D /* CarPlayExternalDisplayView.swift */,
+				7AC0ED3CEC3007C5205B9B30 /* CarPlaySimulatorView.swift */,
 				03E031563F679E8435586232 /* CastHomeView.swift */,
 				E98D6F452D087DEB51729D01 /* ExternalDisplayManager.swift */,
 				B88D44D627DAD31196345969 /* IPTVParser.swift */,
@@ -569,6 +572,7 @@
 				9ACF713C48C4E66AB02FCBA1 /* CarCastGuideModalView.swift in Sources */,
 				E3091E65529E9B6C4FB53BD0 /* CarPlayDashboardMockupView.swift in Sources */,
 				5F1CC8A54F527BFE6D85EBD0 /* CarPlayExternalDisplayView.swift in Sources */,
+				DD4F3BD817A7E006687ABEB6 /* CarPlaySimulatorView.swift in Sources */,
 				3808B801ACC0099B6F315CED /* CastHomeView.swift in Sources */,
 				E162566470FE426E6EBB7881 /* ChannelModel.swift in Sources */,
 				8941B296D22CF0493F91A8DF /* DashCastApp.swift in Sources */,
