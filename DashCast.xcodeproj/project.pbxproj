@@ -17,7 +17,9 @@
 		1DBCE1BA3B898F70B7884082 /* night_drive.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 922FB42B96258606219A9447 /* night_drive.mp4 */; };
 		2363E6E55F52A10F09A3C97D /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9503F70894CF151D337477 /* AppState.swift */; };
 		266C8A3EA2FFF3BCFD6C75B6 /* DriveTrackingPermissionsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5844FA7D455E2F2BF7AEC267 /* DriveTrackingPermissionsSheet.swift */; };
+		2B534481FA57F1A9969A7429 /* CarPlayDashboardSceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C62F6D7FB6B7CF23F630A503 /* CarPlayDashboardSceneDelegate.swift */; };
 		310C322FB69A7371D1528D26 /* car_mercedes_amg.png in Resources */ = {isa = PBXBuildFile; fileRef = 2071F51CEF4D05F395E4A507 /* car_mercedes_amg.png */; };
+		324D5F8B85E84E295D451E51 /* CarPlaySceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66794BA5890CAC5090DD6D63 /* CarPlaySceneDelegate.swift */; };
 		3808B801ACC0099B6F315CED /* CastHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03E031563F679E8435586232 /* CastHomeView.swift */; };
 		3A5B816225491A9B8D9C29A9 /* StoreKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97AF87774832E5428D12AAAD /* StoreKitTests.swift */; };
 		3D2EEC43E78D8FFF0F69DD2D /* ThemeFonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8502A880BB765100D8703F6 /* ThemeFonts.swift */; };
@@ -129,6 +131,7 @@
 		5A3F9CAAD71CDEDC5FBFD9FC /* SoundCatalogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundCatalogService.swift; sourceTree = "<group>"; };
 		5C9C65E7FBF3CAA9E623D8E8 /* DashCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastApp.swift; sourceTree = "<group>"; };
 		5E3D07286BD20FE82FF1C20F /* car_ford_mustang.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = car_ford_mustang.png; sourceTree = "<group>"; };
+		66794BA5890CAC5090DD6D63 /* CarPlaySceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlaySceneDelegate.swift; sourceTree = "<group>"; };
 		67CBE26791A6FD1D17A3C43D /* CarPlayExternalDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayExternalDisplayView.swift; sourceTree = "<group>"; };
 		6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeHomeView.swift; sourceTree = "<group>"; };
 		6D4AD0382E27B879B7BA7B5D /* WidgetConfigModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetConfigModel.swift; sourceTree = "<group>"; };
@@ -158,6 +161,7 @@
 		BC56F59AB4EB1823B29E3731 /* EndToEndFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndToEndFlowTests.swift; sourceTree = "<group>"; };
 		BF49F308FB5171FABDD5CF18 /* CarPlayDashboardMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayDashboardMockupView.swift; sourceTree = "<group>"; };
 		C32F40D0385588C72CEA88D1 /* CarPlayDiagnosticTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayDiagnosticTests.swift; sourceTree = "<group>"; };
+		C62F6D7FB6B7CF23F630A503 /* CarPlayDashboardSceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayDashboardSceneDelegate.swift; sourceTree = "<group>"; };
 		C79E156505347D94E89D8125 /* TerritoryHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryHomeView.swift; sourceTree = "<group>"; };
 		E1AA7351C013766BE53CB5B9 /* LiquidCapsuleTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidCapsuleTabBar.swift; sourceTree = "<group>"; };
 		E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexGridEngine.swift; sourceTree = "<group>"; };
@@ -165,6 +169,7 @@
 		E83E69023AB260F1992E661D /* AutomotiveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomotiveCard.swift; sourceTree = "<group>"; };
 		E972DD5D46ED34A7B258CA8A /* NeonGaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeonGaugeView.swift; sourceTree = "<group>"; };
 		E98D6F452D087DEB51729D01 /* ExternalDisplayManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDisplayManager.swift; sourceTree = "<group>"; };
+		EB172A31F0CF9B5B24ABB019 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		EBAA6EE74B7D3ED822D05E21 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EC284E325ADDDC3EDEBFAE64 /* CarCastGuideModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarCastGuideModalView.swift; sourceTree = "<group>"; };
 		F07EA8D19080BEA1BB5B7198 /* WidgetCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetCatalogTests.swift; sourceTree = "<group>"; };
@@ -316,7 +321,9 @@
 		816D6B692E38A29CD4618336 /* DashCast */ = {
 			isa = PBXGroup;
 			children = (
+				EB172A31F0CF9B5B24ABB019 /* Info.plist */,
 				DA33F5B6016175A6E8F532EF /* App */,
+				B0F1BE7F5D42E66AD9358DF1 /* CarPlay */,
 				9EAFD66A5D9F7B0350180865 /* Core */,
 				2359268705C1F1442E7D20BF /* Features */,
 				CB2DEFD16482AEBC0B0D9070 /* Resources */,
@@ -358,6 +365,15 @@
 				1D473CCE5C26F9534D1405BD /* StoreKit */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		B0F1BE7F5D42E66AD9358DF1 /* CarPlay */ = {
+			isa = PBXGroup;
+			children = (
+				C62F6D7FB6B7CF23F630A503 /* CarPlayDashboardSceneDelegate.swift */,
+				66794BA5890CAC5090DD6D63 /* CarPlaySceneDelegate.swift */,
+			);
+			path = CarPlay;
 			sourceTree = "<group>";
 		};
 		B7FC53EE66C4908CE2622B7C /* Persistence */ = {
@@ -571,7 +587,9 @@
 				0A10D3C06073B0758530F093 /* AutomotiveVideoPlayerView.swift in Sources */,
 				9ACF713C48C4E66AB02FCBA1 /* CarCastGuideModalView.swift in Sources */,
 				E3091E65529E9B6C4FB53BD0 /* CarPlayDashboardMockupView.swift in Sources */,
+				2B534481FA57F1A9969A7429 /* CarPlayDashboardSceneDelegate.swift in Sources */,
 				5F1CC8A54F527BFE6D85EBD0 /* CarPlayExternalDisplayView.swift in Sources */,
+				324D5F8B85E84E295D451E51 /* CarPlaySceneDelegate.swift in Sources */,
 				DD4F3BD817A7E006687ABEB6 /* CarPlaySimulatorView.swift in Sources */,
 				3808B801ACC0099B6F315CED /* CastHomeView.swift in Sources */,
 				E162566470FE426E6EBB7881 /* ChannelModel.swift in Sources */,
@@ -782,15 +800,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 96YG38576A;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = DashCast;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "DashCast tracks your route and speed while driving to score your trips.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "DashCast uses your location to track driving speed, trip stats, and street territory exploration.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "DashCast analyzes motion sensor data to detect smooth acceleration, braking, and cornering.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "DashCast accesses your photos so you can import personal videos and widget backgrounds.";
-				INFOPLIST_KEY_UIApplicationSupportsMultipleScenes = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "audio,location";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_FILE = DashCast/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -810,15 +820,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 96YG38576A;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = DashCast;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "DashCast tracks your route and speed while driving to score your trips.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "DashCast uses your location to track driving speed, trip stats, and street territory exploration.";
-				INFOPLIST_KEY_NSMotionUsageDescription = "DashCast analyzes motion sensor data to detect smooth acceleration, braking, and cornering.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "DashCast accesses your photos so you can import personal videos and widget backgrounds.";
-				INFOPLIST_KEY_UIApplicationSupportsMultipleScenes = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "audio,location";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_FILE = DashCast/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
