@@ -62,6 +62,9 @@ public struct MeHomeView: View {
             .sheet(isPresented: $showingAbout) {
                 aboutSheet
             }
+            .sheet(isPresented: $showingFeedback) {
+                FeedbackView()
+            }
             .sheet(isPresented: $showingDriveDetails) {
                 NavigationStack {
                     TerritoryHomeView()

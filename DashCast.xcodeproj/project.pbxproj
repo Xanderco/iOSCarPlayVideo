@@ -28,6 +28,7 @@
 		5B67374D25F58077C345F276 /* car_bmw_m4.png in Resources */ = {isa = PBXBuildFile; fileRef = 89978D43068AA1F5279E2476 /* car_bmw_m4.png */; };
 		5D7F75BCBE6ADE3531D6C4C2 /* ScreenBroadcastPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023D3E03ED4C0A490E7F195D /* ScreenBroadcastPickerView.swift */; };
 		5F1CC8A54F527BFE6D85EBD0 /* CarPlayExternalDisplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67CBE26791A6FD1D17A3C43D /* CarPlayExternalDisplayView.swift */; };
+		610E3EB3A0FDCB1CBA4DB30A /* FeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09433C03227FB54C7094611 /* FeedbackView.swift */; };
 		63C3521A7F47DBF8695C72DD /* SoundEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7CA14354290DB78FBB940F /* SoundEngineTests.swift */; };
 		645CC7BA3C0744232BBF6CA7 /* SoundCatalogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A3F9CAAD71CDEDC5FBFD9FC /* SoundCatalogService.swift */; };
 		65985557C48AFF579D8171C1 /* NeonGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E972DD5D46ED34A7B258CA8A /* NeonGaugeView.swift */; };
@@ -145,6 +146,7 @@
 		9B58D273249287AB6AB54DC8 /* track_lap.mp4 */ = {isa = PBXFileReference; path = track_lap.mp4; sourceTree = "<group>"; };
 		9BA68CC8667E0C508FA6DCC8 /* DashCastTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DashCastTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9C358CB33002A78017E56A06 /* UsageMetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMetricsView.swift; sourceTree = "<group>"; };
+		A09433C03227FB54C7094611 /* FeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackView.swift; sourceTree = "<group>"; };
 		A2DC9C713A2E7B11FAFB29DB /* ChannelModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelModel.swift; sourceTree = "<group>"; };
 		A895883D2E1C02218562C54B /* AirPlayRoutePickerRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirPlayRoutePickerRepresentable.swift; sourceTree = "<group>"; };
 		A8A88F9DFAD40AE1E0C0C5CB /* StoreKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitManager.swift; sourceTree = "<group>"; };
@@ -396,6 +398,7 @@
 		CECAD913F9CBBE85F47857EB /* Me */ = {
 			isa = PBXGroup;
 			children = (
+				A09433C03227FB54C7094611 /* FeedbackView.swift */,
 				6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */,
 			);
 			path = Me;
@@ -574,6 +577,7 @@
 				266C8A3EA2FFF3BCFD6C75B6 /* DriveTrackingPermissionsSheet.swift in Sources */,
 				68C6EC109C7FAE4660269C96 /* DrivingScorer.swift in Sources */,
 				1A3263DFAC93985C2F1774EF /* ExternalDisplayManager.swift in Sources */,
+				610E3EB3A0FDCB1CBA4DB30A /* FeedbackView.swift in Sources */,
 				9607EF0B03440C14A27FB5E8 /* GlowButton.swift in Sources */,
 				D83B3E4B8001BA93CD3F601B /* HexGridEngine.swift in Sources */,
 				1627D9EBF17E8A798C354764 /* IPTVParser.swift in Sources */,
