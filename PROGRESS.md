@@ -14,7 +14,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **App State (5 Tabs)** | ✅ Completed | Yes | Replaced `.territory` tab with `.me`, updated tests |
 | **Liquid Capsule Tab Bar** | ✅ Completed | Yes | Solved simulator tap bug; frosted glass capsule with yellow active states |
 | **Me / Profile Screen** | ✅ Completed | Yes | Created `MeHomeView` (Garage, Stats, Territory shortcut, Unit switches, PRO pass) |
-| **Cast Screen** | ⏳ In Progress | Next | Update player accents, channel cards, category chips to yellow theme |
+| **Cast Screen** | ✅ Completed | Yes | 1:1 match to CarDash reference: 4-row menu card, hardware mockup, 20 streaming sources, yellow accents |
 | **Drive Screen** | ⏳ Pending | No | Redesign neon speedometer HUD, HUD buttons, route map buttons with yellow glow |
 | **Widgets Screen** | ⏳ Pending | No | Yellow accents on CarPlay mockup, widget cards, brand picker, trimmer |
 | **Sounds Screen** | ⏳ Pending | No | Yellow soundboard triggers, category filters, waveforms, Shortcuts guide |
