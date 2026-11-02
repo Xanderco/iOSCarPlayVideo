@@ -139,7 +139,7 @@ public struct CarPlayDashboardMockupView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(height: 48)
-                            .foregroundStyle(Color.dashCyan)
+                            .foregroundStyle(Color.dashYellow)
                     }
 
                     if let stickerId = config.stickerId {
@@ -159,7 +159,7 @@ public struct CarPlayDashboardMockupView: View {
                     Spacer()
                     Text(config.carModelName)
                         .font(.system(size: 9))
-                        .foregroundStyle(Color.dashCyan)
+                        .foregroundStyle(Color.dashYellow)
                 }
                 .padding(.horizontal, 10)
                 .padding(.bottom, 6)

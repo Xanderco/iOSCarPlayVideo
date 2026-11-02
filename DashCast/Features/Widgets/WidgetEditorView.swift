@@ -74,7 +74,7 @@ public struct WidgetEditorView: View {
                                                         .frame(width: 120, height: 80)
                                                         .overlay(
                                                             RoundedRectangle(cornerRadius: 14)
-                                                                .stroke(isSelected ? Color.dashCyan : Color.dashBorder, lineWidth: isSelected ? 3 : 1)
+                                                                .stroke(isSelected ? Color.dashYellow : Color.dashBorder, lineWidth: isSelected ? 3 : 1)
                                                         )
 
                                                     if let uiImage = UIImage(named: vehicle.imageName) ?? UIImage(contentsOfFile: Bundle.main.path(forResource: vehicle.imageName, ofType: "png") ?? "") {
@@ -92,7 +92,7 @@ public struct WidgetEditorView: View {
 
                                                 Text(vehicle.name)
                                                     .font(.system(size: 12, weight: .semibold))
-                                                    .foregroundStyle(isSelected ? Color.dashCyan : Color.dashTextPrimary)
+                                                    .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextPrimary)
                                                     .lineLimit(1)
                                             }
                                             .frame(width: 120)
@@ -115,7 +115,7 @@ public struct WidgetEditorView: View {
                                         .foregroundStyle(Color.dashTextSecondary)
                                 }
                             }
-                            .tint(.dashCyan)
+                            .tint(.dashYellow)
                         }
                         .padding(.horizontal)
 
@@ -140,16 +140,16 @@ public struct WidgetEditorView: View {
                                             VStack(spacing: 6) {
                                                 ZStack {
                                                     Circle()
-                                                        .fill(isSelected ? Color.dashCyan.opacity(0.2) : Color.dashSurface)
+                                                        .fill(isSelected ? Color.dashYellow.opacity(0.2) : Color.dashSurface)
                                                         .frame(width: 50, height: 50)
                                                         .overlay(
                                                             Circle()
-                                                                .stroke(isSelected ? Color.dashCyan : Color.dashBorder, lineWidth: 2)
+                                                                .stroke(isSelected ? Color.dashYellow : Color.dashBorder, lineWidth: 2)
                                                         )
 
                                                     Image(systemName: sticker.icon)
                                                         .font(.system(size: 20))
-                                                        .foregroundStyle(isSelected ? Color.dashCyan : Color.dashGold)
+                                                        .foregroundStyle(isSelected ? Color.dashYellow : Color.dashGold)
                                                 }
 
                                                 Text(sticker.title)

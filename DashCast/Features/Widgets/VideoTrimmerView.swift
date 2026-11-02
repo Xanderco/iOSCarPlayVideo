@@ -22,10 +22,10 @@ public struct VideoTrimmerView: View {
 
                 Text("3.0s")
                     .font(ThemeFonts.monospaceDigits(size: 12))
-                    .foregroundStyle(Color.dashCyan)
+                    .foregroundStyle(Color.dashYellow)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 2)
-                    .background(Color.dashCyan.opacity(0.15))
+                    .background(Color.dashYellow.opacity(0.15))
                     .clipShape(Capsule())
             }
 
@@ -55,8 +55,8 @@ public struct VideoTrimmerView: View {
                     let currentX = normalizedOffset * maxOffset
 
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.dashCyan, lineWidth: 3)
-                        .background(Color.dashCyan.opacity(0.2))
+                        .stroke(Color.dashYellow, lineWidth: 3)
+                        .background(Color.dashYellow.opacity(0.2))
                         .frame(width: windowWidth, height: 54)
                         .offset(x: currentX)
                         .gesture(
