@@ -16,7 +16,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **Theme & Color System** | ✅ Completed | Yes | `ThemeColors.swift` with Racing Yellow `#FFE600`, Gold `#FFBF00`, Amber `#FF9900`, OLED Black |
 | **App State (5 Tabs)** | ✅ Completed | Yes | Replaced `.territory` tab with `.me`, updated tests |
 | **Liquid Capsule Tab Bar** | ✅ Completed | Yes | Solved simulator tap bug; frosted glass capsule with yellow active states |
-| **Me / Profile Screen** | ✅ Completed | Yes | 1:1 CarDash match: vehicle card, ROAD ROOKIE badge, 3-col stats, PRO gold card, Settings & About sheets |
+| **DI-11** (Activity 6) | **Me Profile, Settings, About & Feedback** | ✅ Completed | 1:1 Me profile with car card, ROAD ROOKIE badge, PRO gold banner, Settings, About, and `FeedbackView` matching `Feedback.jpeg` [DI-11] |
 | **DI-7** (Activity 2) | **Cast Module 1:1 Redesign** | ✅ Completed | 4-row source menu card, CarPlay hardware mockup, 20 streaming source browser with "Send to car", M3U drawer [DI-7] |
 | **DI-8** (Activity 3) | **Drive HUD & Permissions** | ✅ Completed | Drive HUD with yellow speedometer, live telemetry console, top status banner, and `DriveTrackingPermissionsSheet` matching `Enable the tracking always.jpeg` [DI-8] |
 | **DI-9** (Activity 4) | **Widgets Ecosystem & Live Editor** | ✅ Completed | 1:1 Widgets Home with Plate, Countdowns, Clocks, Vinyl, Quotes, and interactive Live Editor with Size, Vertical, Horizontal sliders [DI-9] |
