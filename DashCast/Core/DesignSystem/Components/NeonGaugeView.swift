@@ -12,7 +12,7 @@ public struct NeonGaugeView: View {
         maxValue: Double = 220,
         title: String = "SPEED",
         unit: String = "KM/H",
-        accentColor: Color = .dashCyan
+        accentColor: Color = .dashYellow
     ) {
         self.value = value
         self.maxValue = maxValue
@@ -40,11 +40,15 @@ public struct NeonGaugeView: View {
             Circle()
                 .trim(from: 0.15, to: 0.15 + (progress * 0.70))
                 .stroke(
-                    accentColor,
+                    LinearGradient(
+                        colors: [.dashYellow, .dashGold, .dashAmber],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
                     style: StrokeStyle(lineWidth: 12, lineCap: .round)
                 )
                 .rotationEffect(.degrees(90))
-                .shadow(color: accentColor.opacity(0.8), radius: 8, x: 0, y: 0)
+                .shadow(color: Color.dashYellow.opacity(0.85), radius: 10, x: 0, y: 0)
                 .animation(.easeOut(duration: 0.2), value: value)
 
             // Digital readout

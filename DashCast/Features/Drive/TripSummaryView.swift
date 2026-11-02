@@ -67,7 +67,7 @@ public struct TripSummaryView: View {
                                 HStack {
                                     telemetryPill(label: "Hard Brakes", count: trip.harshBrakingCount, color: .dashOrange)
                                     Spacer()
-                                    telemetryPill(label: "Rapid Accel", count: trip.harshAccelerationCount, color: .dashCyan)
+                                    telemetryPill(label: "Rapid Accel", count: trip.harshAccelerationCount, color: .dashYellow)
                                     Spacer()
                                     telemetryPill(label: "Sharp Turns", count: trip.harshCorneringCount, color: .dashGold)
                                 }
@@ -107,7 +107,7 @@ public struct TripSummaryView: View {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Image(systemName: icon)
-                        .foregroundStyle(Color.dashCyan)
+                        .foregroundStyle(Color.dashYellow)
                     Spacer()
                 }
                 Text(title)

@@ -43,7 +43,7 @@ public struct DriveHomeView: View {
                             } label: {
                                 Text(speedUnit)
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundStyle(Color.dashCyan)
+                                    .foregroundStyle(Color.dashYellow)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 6)
                                     .background(Color.dashSurface.opacity(0.85))
@@ -91,7 +91,7 @@ public struct DriveHomeView: View {
                     maxValue: appState.useMilesPerHour ? 140 : 220,
                     title: "SPEED",
                     unit: speedUnit,
-                    accentColor: .dashCyan
+                    accentColor: .dashYellow
                 )
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -191,7 +191,7 @@ public struct DriveHomeView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.bottom, 12)
+            .padding(.bottom, 80)
         }
         .padding(.top, 14)
         .background(Color.dashBackground)

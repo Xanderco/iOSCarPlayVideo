@@ -12,7 +12,7 @@ public struct GlowButton: View {
         title: String,
         iconName: String? = nil,
         gradient: LinearGradient = .dashAccentGradient,
-        textColor: Color = .white,
+        textColor: Color = .black,
         height: CGFloat = 52,
         action: @escaping () -> Void
     ) {
@@ -39,7 +39,7 @@ public struct GlowButton: View {
             .frame(height: height)
             .background(gradient)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .shadow(color: Color.dashCyan.opacity(0.35), radius: 10, x: 0, y: 5)
+            .shadow(color: Color.dashYellow.opacity(0.4), radius: 10, x: 0, y: 5)
         }
         .buttonStyle(.plain)
     }
