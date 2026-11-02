@@ -20,7 +20,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **DI-7** (Activity 2) | **Cast Module 1:1 Redesign** | ✅ Completed | 4-row source menu card, CarPlay hardware mockup, 20 streaming source browser with "Send to car", M3U drawer [DI-7] |
 | **DI-8** (Activity 3) | **Drive HUD & Permissions** | ✅ Completed | Drive HUD with yellow speedometer, live telemetry console, top status banner, and `DriveTrackingPermissionsSheet` matching `Enable the tracking always.jpeg` [DI-8] |
 | **DI-9** (Activity 4) | **Widgets Ecosystem & Live Editor** | ✅ Completed | 1:1 Widgets Home with Plate, Countdowns, Clocks, Vinyl, Quotes, and interactive Live Editor with Size, Vertical, Horizontal sliders [DI-9] |
-| **Sounds Screen** | ✅ Completed | Yes | 1:1 CarDash match: Disconnection & Arrival triggers, trending cards with watermarks, yellow How to Activate CTA |
+| **DI-10** (Activity 5) | **Sounds Soundboard & Selector** | ✅ Completed | 1:1 Soundboard with Disconnection & Arrival triggers, trending cards with watermarks, How to Activate CTA, and Sound Selection sheet matching reference [DI-10] |
 | **PRO Lifetime Paywall** | ✅ Completed | Yes | Electric Gold gradient CTA buttons, yellow luxury border styling, feature checklist |
 
 ---
