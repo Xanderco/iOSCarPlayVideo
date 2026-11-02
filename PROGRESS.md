@@ -18,7 +18,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **Liquid Capsule Tab Bar** | ✅ Completed | Yes | Solved simulator tap bug; frosted glass capsule with yellow active states |
 | **Me / Profile Screen** | ✅ Completed | Yes | 1:1 CarDash match: vehicle card, ROAD ROOKIE badge, 3-col stats, PRO gold card, Settings & About sheets |
 | **DI-7** (Activity 2) | **Cast Module 1:1 Redesign** | ✅ Completed | 4-row source menu card, CarPlay hardware mockup, 20 streaming source browser with "Send to car", M3U drawer [DI-7] |
-| **Drive Screen** | ✅ Completed | Yes | Yellow neon gauge gradient, high-contrast gold Start Drive button, perfect tab bar clearance |
+| **DI-8** (Activity 3) | **Drive HUD & Permissions** | ✅ Completed | Drive HUD with yellow speedometer, live telemetry console, top status banner, and `DriveTrackingPermissionsSheet` matching `Enable the tracking always.jpeg` [DI-8] |
 | **Widgets Screen** | ✅ Completed | Yes | 1:1 CarDash match: Plate, Couple Days, Clocks, Vinyl, Quotes, CarPlay live mockup, yellow accents |
 | **Sounds Screen** | ✅ Completed | Yes | 1:1 CarDash match: Disconnection & Arrival triggers, trending cards with watermarks, yellow How to Activate CTA |
 | **PRO Lifetime Paywall** | ✅ Completed | Yes | Electric Gold gradient CTA buttons, yellow luxury border styling, feature checklist |
