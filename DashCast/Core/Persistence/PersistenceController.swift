@@ -69,4 +69,21 @@ public final class PersistenceController {
         let array = userDefaults.stringArray(forKey: claimedHexesKey) ?? []
         return Set(array)
     }
+
+    private let userPreferencesKey = "dashcast_user_preferences"
+
+    // User Preferences Persistence
+    public func saveUserPreferences(_ preferences: UserPreferences) {
+        if let data = try? JSONEncoder().encode(preferences) {
+            userDefaults.set(data, forKey: userPreferencesKey)
+        }
+    }
+
+    public func loadUserPreferences() -> UserPreferences {
+        guard let data = userDefaults.data(forKey: userPreferencesKey),
+              let decoded = try? JSONDecoder().decode(UserPreferences.self, from: data) else {
+            return UserPreferences()
+        }
+        return decoded
+    }
 }

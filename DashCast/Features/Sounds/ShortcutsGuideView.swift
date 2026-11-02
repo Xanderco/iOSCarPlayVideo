@@ -72,12 +72,12 @@ public struct ShortcutsGuideView: View {
             HStack(alignment: .top, spacing: 14) {
                 ZStack {
                     Circle()
-                        .fill(Color.dashCyan.opacity(0.15))
+                        .fill(Color.dashYellow.opacity(0.15))
                         .frame(width: 36, height: 36)
 
                     Text(stepNumber)
                         .font(.system(size: 16, weight: .black, design: .rounded))
-                        .foregroundStyle(Color.dashCyan)
+                        .foregroundStyle(Color.dashYellow)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {

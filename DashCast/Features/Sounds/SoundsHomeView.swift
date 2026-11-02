@@ -4,11 +4,11 @@ public struct SoundsHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var soundPlayer = SoundPlayerEngine.shared
 
-    @State private var selectedCategory: SoundCategory = .all
-    @State private var connectionSoundId: String = "jet_startup"
+    @State private var connectionSoundId: String = "sport_startup"
     @State private var disconnectionSoundId: String = "airline_dingy"
-    @State private var homeArrivalSoundId: String = "welcome_sir"
+    @State private var homeArrivalSoundId: String = "welcome_traveler"
     @State private var showingShortcutsGuide: Bool = false
+    @State private var showingSoundPickerForSlot: String? = nil
 
     private let catalog = SoundCatalogService.shared
 
@@ -16,280 +16,397 @@ public struct SoundsHomeView: View {
 
     public var body: some View {
         NavigationStack {
-            ZStack {
+            ZStack(alignment: .bottom) {
                 Color.dashBackground.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 22) {
-                        // Top Active Trigger Slots (Connection, Disconnection, Arrival)
-                        activeTriggerSlots
+                    VStack(spacing: 20) {
+                        // Top Sound Triggers (Disconnection, Home Arrival)
+                        topTriggerCards
 
-                        // Category Pills
-                        categoryPills
+                        // Section: Top trending
+                        topTrendingSection
 
-                        // Soundboard Grid
-                        soundboardGrid
-
-                        // Siri Waveform & Shortcuts Guide CTA
-                        waveformCTASection
+                        // Spacer for bottom sticky button and capsule bar
+                        Color.clear.frame(height: 120)
                     }
-                    .padding(.vertical)
+                    .padding(.top, 10)
                 }
+
+                // Sticky "How to Activate? 🪄" Button above the tab bar
+                howToActivateStickyButton
             }
-            .navigationTitle("Car Sounds")
+            .navigationTitle("Sounds")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingShortcutsGuide = true
-                    } label: {
-                        Image(systemName: "questionmark.circle")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(Color.dashCyan)
+                    HStack(spacing: 8) {
+                        if !appState.isProLifetimeUnlocked {
+                            Button {
+                                appState.showPaywall = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "crown.fill")
+                                        .font(.system(size: 11))
+                                    Text("PRO")
+                                        .font(.system(size: 12, weight: .heavy))
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(LinearGradient.dashProGoldGradient)
+                                .foregroundStyle(Color.black)
+                                .clipShape(Capsule())
+                            }
+                        }
+
+                        Button {
+                            showingShortcutsGuide = true
+                        } label: {
+                            Image(systemName: "questionmark")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(Color.dashTextPrimary)
+                                .frame(width: 32, height: 32)
+                                .background(Color.dashSurface)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
+                        }
                     }
                 }
             }
             .sheet(isPresented: $showingShortcutsGuide) {
                 ShortcutsGuideView()
             }
+            .sheet(item: Binding(
+                get: { showingSoundPickerForSlot.map { SoundSlotIdentifiable(id: $0) } },
+                set: { showingSoundPickerForSlot = $0?.id }
+            )) { slot in
+                soundPickerSheet(for: slot.id)
+            }
             .onAppear {
-                let prefs = loadPreferences()
-                if let conn = prefs.connectionSoundId { connectionSoundId = conn }
-                if let disc = prefs.disconnectionSoundId { disconnectionSoundId = disc }
-                if let home = prefs.homeArrivalSoundId { homeArrivalSoundId = home }
+                loadPreferences()
             }
         }
     }
 
-    private var activeTriggerSlots: some View {
+    // MARK: - Top Trigger Cards
+
+    private var topTriggerCards: some View {
         VStack(spacing: 12) {
-            triggerSlotCard(
-                slotTitle: "Connection Sound",
-                soundId: connectionSoundId,
-                icon: "bolt.fill",
-                accentColor: .dashGreen
-            ) {
-                assignSound(type: .connection, id: $0)
-            }
+            // Disconnection Sound Card
+            triggerCard(
+                icon: "stop.circle.fill",
+                iconColor: Color(red: 0.85, green: 0.25, blue: 0.25),
+                title: "Disconnection Sound",
+                subtitle: "Plays when CarPlay disconnects",
+                currentSoundId: disconnectionSoundId,
+                slotKey: "disconnection"
+            )
 
-            triggerSlotCard(
-                slotTitle: "Disconnection Sound",
-                soundId: disconnectionSoundId,
-                icon: "power",
-                accentColor: .dashRed
-            ) {
-                assignSound(type: .disconnection, id: $0)
-            }
-
-            triggerSlotCard(
-                slotTitle: "Home Arrival Sound",
-                soundId: homeArrivalSoundId,
+            // Home Arrival Sound Card
+            triggerCard(
                 icon: "house.fill",
-                accentColor: .dashGold
-            ) {
-                assignSound(type: .arrival, id: $0)
-            }
+                iconColor: Color.dashAmber,
+                title: "Home Arrival Sound",
+                subtitle: "Plays when you arrive home",
+                currentSoundId: homeArrivalSoundId,
+                slotKey: "arrival"
+            )
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 16)
     }
 
-    private func triggerSlotCard(
-        slotTitle: String,
-        soundId: String,
+    private func triggerCard(
         icon: String,
-        accentColor: Color,
-        onAssign: @escaping (String) -> Void
+        iconColor: Color,
+        title: String,
+        subtitle: String,
+        currentSoundId: String,
+        slotKey: String
     ) -> some View {
-        let sound = catalog.sounds.first(where: { $0.id == soundId })
-        let isPlaying = soundPlayer.currentlyPlayingId == soundId
+        let sound = catalog.sounds.first(where: { $0.id == currentSoundId })
+        let isPlaying = soundPlayer.currentlyPlayingId == currentSoundId
 
-        return AutomotiveCard(cornerRadius: 16) {
-            HStack(spacing: 14) {
-                Button {
-                    if let sound {
-                        soundPlayer.play(sound: sound)
-                    }
-                } label: {
-                    ZStack {
-                        Circle()
-                            .fill(accentColor.opacity(0.2))
-                            .frame(width: 44, height: 44)
-
-                        Image(systemName: isPlaying ? "stop.fill" : "play.fill")
-                            .font(.system(size: 18))
-                            .foregroundStyle(accentColor)
-                    }
+        return HStack(spacing: 14) {
+            Button {
+                if let sound {
+                    soundPlayer.play(sound: sound)
                 }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(iconColor.opacity(0.25))
+                        .frame(width: 46, height: 46)
 
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(slotTitle)
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(Color.dashTextPrimary)
+                    Image(systemName: isPlaying ? "stop.fill" : (slotKey == "arrival" ? "house.fill" : "play.fill"))
+                        .font(.system(size: 20))
+                        .foregroundStyle(iconColor)
+                }
+            }
 
-                    HStack(spacing: 6) {
-                        Image(systemName: "waveform")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.dashCyan)
-                        Text(sound?.title ?? "None Selected")
-                            .font(.system(size: 12))
-                            .foregroundStyle(Color.dashCyan)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundStyle(Color.dashTextPrimary)
+
+                Text(subtitle)
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.dashTextSecondary)
+
+                if let sound {
+                    Text("Selected: \(sound.title)")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Color.dashYellow)
+                }
+            }
+
+            Spacer()
+
+            Button {
+                showingSoundPickerForSlot = slotKey
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Color.dashYellow)
+                    .frame(width: 32, height: 32)
+                    .background(Color.dashSurfaceHighlight)
+                    .clipShape(Circle())
+            }
+        }
+        .padding(14)
+        .background(Color.dashSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.dashBorder, lineWidth: 1)
+        )
+    }
+
+    // MARK: - Top Trending Section
+
+    private var topTrendingSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Top trending")
+                .font(ThemeFonts.hudTitle(size: 18))
+                .foregroundStyle(Color.dashTextPrimary)
+                .padding(.horizontal, 16)
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                ForEach(catalog.sounds) { sound in
+                    trendingSoundTile(sound: sound)
+                }
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+
+    private func trendingSoundTile(sound: SoundEffectItem) -> some View {
+        let isPlaying = soundPlayer.currentlyPlayingId == sound.id
+
+        return ZStack(alignment: .topTrailing) {
+            // Background gradient card
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(tileGradient(for: sound))
+                .frame(height: 125)
+
+            // Watermark icon
+            Image(systemName: watermarkIcon(for: sound))
+                .font(.system(size: 48))
+                .foregroundStyle(Color.white.opacity(0.12))
+                .offset(x: -8, y: 12)
+
+            // Content
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Button {
+                        soundPlayer.play(sound: sound)
+                    } label: {
+                        Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                            .font(.system(size: 26))
+                            .foregroundStyle(Color.white)
+                    }
+
+                    Spacer()
+
+                    Menu {
+                        Button("Set as Connection Sound") {
+                            connectionSoundId = sound.id
+                            savePreferences()
+                        }
+                        Button("Set as Disconnection Sound") {
+                            disconnectionSoundId = sound.id
+                            savePreferences()
+                        }
+                        Button("Set as Arrival Sound") {
+                            homeArrivalSoundId = sound.id
+                            savePreferences()
+                        }
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 22))
+                            .foregroundStyle(Color.white.opacity(0.85))
                     }
                 }
 
                 Spacer()
 
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 20))
-                    .foregroundStyle(Color.dashBlue)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(sound.title)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(Color.white)
+                        .lineLimit(1)
+
+                    Text("\(sound.category.rawValue) · \(sound.durationString)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(Color.white.opacity(0.75))
+                }
             }
+            .padding(12)
         }
     }
 
-    private var categoryPills: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(SoundCategory.allCases) { cat in
-                    Button {
-                        selectedCategory = cat
-                    } label: {
-                        Text(cat.rawValue)
-                            .font(.system(size: 14, weight: selectedCategory == cat ? .bold : .medium))
-                            .foregroundStyle(selectedCategory == cat ? Color.black : Color.dashTextSecondary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                selectedCategory == cat
-                                ? AnyView(LinearGradient.dashAccentGradient)
-                                : AnyView(Color.dashSurface)
-                            )
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
+    // MARK: - Sticky "How to Activate? 🪄" Button
 
-    private var soundboardGrid: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            ForEach(catalog.sounds(for: selectedCategory)) { sound in
-                let isPlaying = soundPlayer.currentlyPlayingId == sound.id
-                AutomotiveCard(cornerRadius: 14) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Button {
-                                soundPlayer.play(sound: sound)
-                            } label: {
-                                Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
-                                    .font(.system(size: 32))
-                                    .foregroundStyle(sound.color)
-                            }
-
-                            Spacer()
-
-                            Menu {
-                                Button("Set as Connection Sound") {
-                                    connectionSoundId = sound.id
-                                    savePreferences()
-                                }
-                                Button("Set as Disconnection Sound") {
-                                    disconnectionSoundId = sound.id
-                                    savePreferences()
-                                }
-                                Button("Set as Arrival Sound") {
-                                    homeArrivalSoundId = sound.id
-                                    savePreferences()
-                                }
-                            } label: {
-                                Image(systemName: "plus.circle")
-                                    .font(.system(size: 20))
-                                    .foregroundStyle(Color.dashTextMuted)
-                            }
-                        }
-
-                        Text(sound.title)
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(Color.dashTextPrimary)
-                            .lineLimit(1)
-
-                        HStack {
-                            Text(sound.category.rawValue)
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.dashTextMuted)
-                            Spacer()
-                            Text(sound.durationString)
-                                .font(ThemeFonts.monospaceDigits(size: 11))
-                                .foregroundStyle(Color.dashTextMuted)
-                        }
-                    }
-                }
-            }
-        }
-        .padding(.horizontal)
-    }
-
-    private var waveformCTASection: some View {
-        VStack(spacing: 12) {
-            // Siri Waveform visualization
-            HStack(spacing: 4) {
-                ForEach(0..<18, id: \.self) { i in
-                    let height: CGFloat = CGFloat(12 + (sin(Double(i) * 0.6) * 14))
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [.dashCyan, .dashGreen],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-                        .frame(width: 4, height: max(6, height))
-                }
-            }
-            .frame(height: 36)
-
+    private var howToActivateStickyButton: some View {
+        VStack(spacing: 0) {
             Button {
                 showingShortcutsGuide = true
             } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "sparkles")
-                        .foregroundStyle(Color.dashCyan)
-                    Text("Follow in-app setup guide to configure automations")
-                        .font(ThemeFonts.hudCaption(size: 13))
-                        .foregroundStyle(Color.dashCyan)
-                        .underline()
+                HStack(spacing: 8) {
+                    Text("How to Activate?")
+                        .font(.system(size: 16, weight: .bold))
+                    Text("🪄")
+                        .font(.system(size: 16))
+                }
+                .foregroundStyle(Color.black)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(LinearGradient.dashAccentGradient)
+                .clipShape(Capsule())
+                .shadow(color: Color.dashYellow.opacity(0.35), radius: 10, y: 4)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 75) // sits above the liquid tab bar
+        }
+    }
+
+    // MARK: - Sound Picker Sheet
+
+    private func soundPickerSheet(for slot: String) -> some View {
+        NavigationStack {
+            ZStack {
+                Color.dashBackground.ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(catalog.sounds) { sound in
+                            Button {
+                                if slot == "disconnection" {
+                                    disconnectionSoundId = sound.id
+                                } else {
+                                    homeArrivalSoundId = sound.id
+                                }
+                                savePreferences()
+                                showingSoundPickerForSlot = nil
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Button {
+                                        soundPlayer.play(sound: sound)
+                                    } label: {
+                                        Image(systemName: soundPlayer.currentlyPlayingId == sound.id ? "stop.fill" : "play.fill")
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(Color.dashYellow)
+                                            .frame(width: 32, height: 32)
+                                            .background(Color.dashYellow.opacity(0.15))
+                                            .clipShape(Circle())
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(sound.title)
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundStyle(Color.dashTextPrimary)
+
+                                        Text("\(sound.category.rawValue) · \(sound.durationString)")
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(Color.dashTextSecondary)
+                                    }
+
+                                    Spacer()
+
+                                    let isSelected = (slot == "disconnection" ? disconnectionSoundId : homeArrivalSoundId) == sound.id
+                                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextMuted)
+                                }
+                                .padding(12)
+                                .background(Color.dashSurface)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                .padding(.horizontal)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.top, 14)
+                    .padding(.bottom, 30)
+                }
+            }
+            .navigationTitle("Select Sound")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        showingSoundPickerForSlot = nil
+                    }
+                    .foregroundStyle(Color.dashYellow)
                 }
             }
         }
-        .padding(.top, 8)
     }
 
-    private enum SlotType {
-        case connection, disconnection, arrival
-    }
+    // MARK: - Helpers
 
-    private func assignSound(type: SlotType, id: String) {
-        switch type {
-        case .connection: connectionSoundId = id
-        case .disconnection: disconnectionSoundId = id
-        case .arrival: homeArrivalSoundId = id
+    private func tileGradient(for sound: SoundEffectItem) -> LinearGradient {
+        switch sound.category {
+        case .engine:
+            return LinearGradient(colors: [Color(red: 0.6, green: 0.15, blue: 0.15), Color(red: 0.2, green: 0.05, blue: 0.05)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .voices:
+            return LinearGradient(colors: [Color(red: 0.2, green: 0.45, blue: 0.25), Color(red: 0.05, green: 0.15, blue: 0.08)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .futuristic:
+            return LinearGradient(colors: [Color(red: 0.6, green: 0.45, blue: 0.1), Color(red: 0.18, green: 0.12, blue: 0.02)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .chimes:
+            return LinearGradient(colors: [Color(red: 0.15, green: 0.35, blue: 0.6), Color(red: 0.04, green: 0.1, blue: 0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .cinematic:
+            return LinearGradient(colors: [Color(red: 0.35, green: 0.15, blue: 0.5), Color(red: 0.1, green: 0.04, blue: 0.15)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        default:
+            return LinearGradient(colors: [Color.dashSurfaceHighlight, Color.dashSurface], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
-        savePreferences()
+    }
+
+    private func watermarkIcon(for sound: SoundEffectItem) -> String {
+        switch sound.category {
+        case .engine: return "key.fill"
+        case .voices: return "person.wave.2.fill"
+        case .futuristic: return "airplane"
+        case .chimes: return "bell.fill"
+        case .cinematic: return "film.fill"
+        default: return "speaker.wave.3.fill"
+        }
+    }
+
+    private func loadPreferences() {
+        let prefs = PersistenceController.shared.loadUserPreferences()
+        if let conn = prefs.connectionSoundId { self.connectionSoundId = conn }
+        if let disc = prefs.disconnectionSoundId { self.disconnectionSoundId = disc }
+        if let arriv = prefs.homeArrivalSoundId { self.homeArrivalSoundId = arriv }
     }
 
     private func savePreferences() {
-        var prefs = loadPreferences()
+        var prefs = PersistenceController.shared.loadUserPreferences()
         prefs.connectionSoundId = connectionSoundId
         prefs.disconnectionSoundId = disconnectionSoundId
         prefs.homeArrivalSoundId = homeArrivalSoundId
-        if let data = try? JSONEncoder().encode(prefs) {
-            UserDefaults.standard.set(data, forKey: "dashcast_user_prefs")
-        }
+        PersistenceController.shared.saveUserPreferences(prefs)
     }
+}
 
-    private func loadPreferences() -> UserPreferences {
-        if let data = UserDefaults.standard.data(forKey: "dashcast_user_prefs"),
-           let prefs = try? JSONDecoder().decode(UserPreferences.self, from: data) {
-            return prefs
-        }
-        return UserPreferences()
-    }
+private struct SoundSlotIdentifiable: Identifiable {
+    let id: String
 }
