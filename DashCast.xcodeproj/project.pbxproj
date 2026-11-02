@@ -57,6 +57,7 @@
 		B9DEFEBDE481DD01A74DC6C9 /* DriveLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4438C109BD09F6271214B045 /* DriveLocationService.swift */; };
 		BB45176C10DE112B867B41AD /* ThemeColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8965DA7A87549D83EC5720F2 /* ThemeColors.swift */; };
 		C4D6A5710A299135FD6EB486 /* track_lap.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 9B58D273249287AB6AB54DC8 /* track_lap.mp4 */; };
+		C6FBC82AEC8542C64BBD7B23 /* LiquidCapsuleTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1AA7351C013766BE53CB5B9 /* LiquidCapsuleTabBar.swift */; };
 		C82CE628FD41E8812BD7C1BD /* car_chevrolet_corvette.png in Resources */ = {isa = PBXBuildFile; fileRef = 252F72F6B0C74B67B23975D0 /* car_chevrolet_corvette.png */; };
 		C8F4DB5615DCB393739587B7 /* car_ford_mustang.png in Resources */ = {isa = PBXBuildFile; fileRef = 5E3D07286BD20FE82FF1C20F /* car_ford_mustang.png */; };
 		C95E3833B1959D611A164C2D /* TerritoryHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C79E156505347D94E89D8125 /* TerritoryHomeView.swift */; };
@@ -150,6 +151,7 @@
 		BF49F308FB5171FABDD5CF18 /* CarPlayDashboardMockupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayDashboardMockupView.swift; sourceTree = "<group>"; };
 		C32F40D0385588C72CEA88D1 /* CarPlayDiagnosticTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayDiagnosticTests.swift; sourceTree = "<group>"; };
 		C79E156505347D94E89D8125 /* TerritoryHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerritoryHomeView.swift; sourceTree = "<group>"; };
+		E1AA7351C013766BE53CB5B9 /* LiquidCapsuleTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidCapsuleTabBar.swift; sourceTree = "<group>"; };
 		E3CAD0F7D2276EE30F53FBBF /* HexGridEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HexGridEngine.swift; sourceTree = "<group>"; };
 		E6C7D5CBE16D15758462AA7B /* SoundPlayerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundPlayerEngine.swift; sourceTree = "<group>"; };
 		E83E69023AB260F1992E661D /* AutomotiveCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutomotiveCard.swift; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 			children = (
 				E83E69023AB260F1992E661D /* AutomotiveCard.swift */,
 				FE4B9840CBEB80D851527AF2 /* GlowButton.swift */,
+				E1AA7351C013766BE53CB5B9 /* LiquidCapsuleTabBar.swift */,
 				E972DD5D46ED34A7B258CA8A /* NeonGaugeView.swift */,
 			);
 			path = Components;
@@ -560,6 +563,7 @@
 				D83B3E4B8001BA93CD3F601B /* HexGridEngine.swift in Sources */,
 				1627D9EBF17E8A798C354764 /* IPTVParser.swift in Sources */,
 				1BE96904CEF08DADDBECDA20 /* LifetimePaywallView.swift in Sources */,
+				C6FBC82AEC8542C64BBD7B23 /* LiquidCapsuleTabBar.swift in Sources */,
 				F008F5D1BA3B7F8626A8D0E7 /* LocalVideoManager.swift in Sources */,
 				D64F0E2CF37B0C21B475E64E /* MainTabView.swift in Sources */,
 				65985557C48AFF579D8171C1 /* NeonGaugeView.swift in Sources */,

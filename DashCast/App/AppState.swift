@@ -11,22 +11,23 @@ public final class AppState: ObservableObject {
     @Published public var isDriveActive: Bool = false
     @Published public var useMilesPerHour: Bool = false
 
+    // Matches CarDash exact 5 native tabs
     public enum TabItem: String, CaseIterable, Identifiable {
         case cast = "Cast"
         case drive = "Drive"
-        case territory = "Territory"
         case widgets = "Widgets"
         case sounds = "Sounds"
+        case me = "Me"
 
         public var id: String { rawValue }
 
         public var iconName: String {
             switch self {
-            case .cast: return "tv.fill"
-            case .drive: return "gauge.with.dots.needle.bottom.50percent"
-            case .territory: return "hexagon.fill"
+            case .cast: return "tv"
+            case .drive: return "car.fill"
             case .widgets: return "square.grid.2x2.fill"
             case .sounds: return "speaker.wave.3.fill"
+            case .me: return "person.crop.circle.fill"
             }
         }
     }
