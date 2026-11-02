@@ -1,52 +1,40 @@
 import SwiftUI
-import UIKit
 
 public struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
 
-    public init() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(red: 0.08, green: 0.09, blue: 0.12, alpha: 1.0)
-        appearance.shadowColor = UIColor(red: 0.20, green: 0.23, blue: 0.29, alpha: 0.8)
-
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
-    }
+    public init() {}
 
     public var body: some View {
-        TabView(selection: $appState.selectedTab) {
-            CastHomeView()
-                .tabItem {
-                    Label(AppState.TabItem.cast.rawValue, systemImage: AppState.TabItem.cast.iconName)
-                }
-                .tag(AppState.TabItem.cast)
+        ZStack(alignment: .bottom) {
+            Color.dashBackground.ignoresSafeArea()
 
-            DriveHomeView()
-                .tabItem {
-                    Label(AppState.TabItem.drive.rawValue, systemImage: AppState.TabItem.drive.iconName)
-                }
-                .tag(AppState.TabItem.drive)
+            ZStack {
+                CastHomeView()
+                    .opacity(appState.selectedTab == .cast ? 1 : 0)
+                    .allowsHitTesting(appState.selectedTab == .cast)
 
-            TerritoryHomeView()
-                .tabItem {
-                    Label(AppState.TabItem.territory.rawValue, systemImage: AppState.TabItem.territory.iconName)
-                }
-                .tag(AppState.TabItem.territory)
+                DriveHomeView()
+                    .opacity(appState.selectedTab == .drive ? 1 : 0)
+                    .allowsHitTesting(appState.selectedTab == .drive)
 
-            WidgetsHomeView()
-                .tabItem {
-                    Label(AppState.TabItem.widgets.rawValue, systemImage: AppState.TabItem.widgets.iconName)
-                }
-                .tag(AppState.TabItem.widgets)
+                WidgetsHomeView()
+                    .opacity(appState.selectedTab == .widgets ? 1 : 0)
+                    .allowsHitTesting(appState.selectedTab == .widgets)
 
-            SoundsHomeView()
-                .tabItem {
-                    Label(AppState.TabItem.sounds.rawValue, systemImage: AppState.TabItem.sounds.iconName)
-                }
-                .tag(AppState.TabItem.sounds)
+                SoundsHomeView()
+                    .opacity(appState.selectedTab == .sounds ? 1 : 0)
+                    .allowsHitTesting(appState.selectedTab == .sounds)
+
+                MeHomeView()
+                    .opacity(appState.selectedTab == .me ? 1 : 0)
+                    .allowsHitTesting(appState.selectedTab == .me)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            LiquidCapsuleTabBar(selectedTab: $appState.selectedTab)
         }
-        .tint(.dashCyan)
+        .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $appState.showPaywall) {
             LifetimePaywallView()
         }

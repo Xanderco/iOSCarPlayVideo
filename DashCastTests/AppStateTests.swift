@@ -33,9 +33,9 @@ final class AppStateTests: XCTestCase {
     func testTabItemProperties() {
         XCTAssertEqual(AppState.TabItem.cast.rawValue, "Cast")
         XCTAssertEqual(AppState.TabItem.drive.rawValue, "Drive")
-        XCTAssertEqual(AppState.TabItem.territory.rawValue, "Territory")
         XCTAssertEqual(AppState.TabItem.widgets.rawValue, "Widgets")
         XCTAssertEqual(AppState.TabItem.sounds.rawValue, "Sounds")
+        XCTAssertEqual(AppState.TabItem.me.rawValue, "Me")
 
         for item in AppState.TabItem.allCases {
             XCTAssertFalse(item.iconName.isEmpty)

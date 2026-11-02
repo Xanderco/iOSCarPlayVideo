@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0A10D3C06073B0758530F093 /* AutomotiveVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */; };
 		1627D9EBF17E8A798C354764 /* IPTVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88D44D627DAD31196345969 /* IPTVParser.swift */; };
+		17879C0D0F61BB9D2E290658 /* MeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */; };
 		1993945C43A1E99D1FD8E607 /* TripModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8527E74AADE9925916DDFCB0 /* TripModel.swift */; };
 		1A3263DFAC93985C2F1774EF /* ExternalDisplayManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E98D6F452D087DEB51729D01 /* ExternalDisplayManager.swift */; };
 		1BE96904CEF08DADDBECDA20 /* LifetimePaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38CC940669629CEF43CC4459 /* LifetimePaywallView.swift */; };
@@ -125,6 +126,7 @@
 		5C9C65E7FBF3CAA9E623D8E8 /* DashCastApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastApp.swift; sourceTree = "<group>"; };
 		5E3D07286BD20FE82FF1C20F /* car_ford_mustang.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = car_ford_mustang.png; sourceTree = "<group>"; };
 		67CBE26791A6FD1D17A3C43D /* CarPlayExternalDisplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarPlayExternalDisplayView.swift; sourceTree = "<group>"; };
+		6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeHomeView.swift; sourceTree = "<group>"; };
 		6D4AD0382E27B879B7BA7B5D /* WidgetConfigModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetConfigModel.swift; sourceTree = "<group>"; };
 		6E5DCF30D2CC8EBC1B8C4FE6 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		6FF441DC34D145A9368F39E6 /* UsageMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMetricsTests.swift; sourceTree = "<group>"; };
@@ -210,6 +212,7 @@
 			children = (
 				C095EF3E38FD6163DF994949 /* Cast */,
 				3F5B93D3124A86041F9883F4 /* Drive */,
+				CECAD913F9CBBE85F47857EB /* Me */,
 				D7FFAE0393948DE01366FCD1 /* Pro */,
 				392DA1F841E87F1253AA843F /* Sounds */,
 				1E023C30730F6B9E6CF67183 /* Territory */,
@@ -385,6 +388,14 @@
 				3357A7D750B98384B5B14C1E /* Videos */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		CECAD913F9CBBE85F47857EB /* Me */ = {
+			isa = PBXGroup;
+			children = (
+				6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */,
+			);
+			path = Me;
 			sourceTree = "<group>";
 		};
 		D200E9E895616B8A93187EAC = {
@@ -566,6 +577,7 @@
 				C6FBC82AEC8542C64BBD7B23 /* LiquidCapsuleTabBar.swift in Sources */,
 				F008F5D1BA3B7F8626A8D0E7 /* LocalVideoManager.swift in Sources */,
 				D64F0E2CF37B0C21B475E64E /* MainTabView.swift in Sources */,
+				17879C0D0F61BB9D2E290658 /* MeHomeView.swift in Sources */,
 				65985557C48AFF579D8171C1 /* NeonGaugeView.swift in Sources */,
 				AD81AD92DF5C022264F96C32 /* PersistenceController.swift in Sources */,
 				5D7F75BCBE6ADE3531D6C4C2 /* ScreenBroadcastPickerView.swift in Sources */,
