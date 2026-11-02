@@ -17,7 +17,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **Cast Screen** | ✅ Completed | Yes | 1:1 match to CarDash reference: 4-row menu card, hardware mockup, 20 streaming sources, yellow accents |
 | **Drive Screen** | ✅ Completed | Yes | Yellow neon gauge gradient, high-contrast gold Start Drive button, perfect tab bar clearance |
 | **Widgets Screen** | ✅ Completed | Yes | 1:1 CarDash match: Plate, Couple Days, Clocks, Vinyl, Quotes, CarPlay live mockup, yellow accents |
-| **Sounds Screen** | ⏳ Pending | No | Yellow soundboard triggers, category filters, waveforms, Shortcuts guide |
+| **Sounds Screen** | ✅ Completed | Yes | 1:1 CarDash match: Disconnection & Arrival triggers, trending cards with watermarks, yellow How to Activate CTA |
 | **PRO Lifetime Paywall** | ⏳ Pending | No | Electric Gold gradient CTA buttons, yellow luxury border styling |
 
 ---
