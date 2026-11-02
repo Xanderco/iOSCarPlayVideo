@@ -109,7 +109,13 @@ public struct WidgetsHomeView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingEditor) {
+            .sheet(isPresented: Binding(
+                get: { showingEditor || appState.showWidgetEditor },
+                set: {
+                    showingEditor = $0
+                    appState.showWidgetEditor = $0
+                }
+            )) {
                 WidgetEditorView(config: editingWidget ?? WidgetConfigModel()) { saved in
                     savedWidgets.insert(saved, at: 0)
                     PersistenceController.shared.saveWidgets(savedWidgets)

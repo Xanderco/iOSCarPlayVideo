@@ -8,6 +8,7 @@ public final class AppState: ObservableObject {
     @Published public var selectedTab: TabItem = .cast
     @Published public var isProLifetimeUnlocked: Bool = false
     @Published public var showPaywall: Bool = false
+    @Published public var showWidgetEditor: Bool = false
     @Published public var isDriveActive: Bool = false
     @Published public var useMilesPerHour: Bool = false
 
@@ -46,6 +47,11 @@ public final class AppState: ObservableObject {
 
         if ProcessInfo.processInfo.arguments.contains("-showPaywall") {
             self.showPaywall = true
+        }
+
+        if ProcessInfo.processInfo.arguments.contains("-showWidgetEditor") {
+            self.showWidgetEditor = true
+            self.selectedTab = .widgets
         }
     }
 
