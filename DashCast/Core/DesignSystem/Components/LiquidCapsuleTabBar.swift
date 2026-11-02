@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 public struct LiquidCapsuleTabBar: View {
     @Binding var selectedTab: AppState.TabItem
@@ -12,8 +13,11 @@ public struct LiquidCapsuleTabBar: View {
             ForEach(AppState.TabItem.allCases) { item in
                 let isSelected = selectedTab == item
                 Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        selectedTab = item
+                    if selectedTab != item {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.75)) {
+                            selectedTab = item
+                        }
                     }
                 } label: {
                     VStack(spacing: 4) {
@@ -42,11 +46,12 @@ public struct LiquidCapsuleTabBar: View {
         .padding(.vertical, 6)
         .background(
             ZStack {
-                Color(red: 0.10, green: 0.11, blue: 0.14).opacity(0.92)
+                Color.dashSurface.opacity(0.85)
                 Capsule()
                     .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
             }
         )
+        .background(.ultraThinMaterial)
         .clipShape(Capsule())
         .shadow(color: Color.black.opacity(0.65), radius: 16, x: 0, y: 6)
         .padding(.horizontal, 16)

@@ -1,47 +1,72 @@
 import SwiftUI
 
 public extension Color {
-    // OLED True Black Automotive Theme
-    static let dashBackground = Color(red: 0.04, green: 0.05, blue: 0.06)
-    static let dashSurface = Color(red: 0.10, green: 0.11, blue: 0.13)
-    static let dashSurfaceHighlight = Color(red: 0.15, green: 0.16, blue: 0.20)
-    static let dashBorder = Color(red: 0.22, green: 0.24, blue: 0.28)
+    // Hex Initializer
+    init(hex: String) {
+        let cleanHex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: cleanHex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch cleanHex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue: Double(b) / 255,
+            opacity: Double(a) / 255
+        )
+    }
 
-    // Signature Electric Yellow Brand Accents
-    static let dashYellow = Color(red: 1.00, green: 0.90, blue: 0.00) // #FFE600
-    static let dashGold = Color(red: 1.00, green: 0.75, blue: 0.00)   // #FFBF00
-    static let dashAmber = Color(red: 1.00, green: 0.60, blue: 0.00)  // #FF9900
+    // OLED True Deep Black Automotive Surfaces
+    static let dashBackground = Color(hex: "#0C0D10")
+    static let dashSurface = Color(hex: "#171920")
+    static let dashSurfaceHighlight = Color(hex: "#222530")
+    static let dashBorder = Color(hex: "#2D3240")
 
-    // Legacy aliases mapped to Electric Yellow
-    static let dashCyan = Color(red: 1.00, green: 0.88, blue: 0.10)
-    static let dashBlue = Color(red: 1.00, green: 0.72, blue: 0.00)
+    // Signature Electric Racing Yellow & Gold Accents
+    static let dashYellow = Color(hex: "#FFE600") // Electric Yellow
+    static let dashGold = Color(hex: "#FFB800")   // Racing Gold
+    static let dashAmber = Color(hex: "#FF9900")  // Deep Amber
+
+    // Compatibility aliases mapped to Yellow Theme
+    static let dashCyan = Color(hex: "#FFE600")
+    static let dashBlue = Color(hex: "#FFB800")
 
     // Functional Status Colors
-    static let dashGreen = Color(red: 0.20, green: 0.85, blue: 0.45)
-    static let dashRed = Color(red: 1.00, green: 0.25, blue: 0.25)
-    static let dashOrange = Color(red: 1.00, green: 0.55, blue: 0.00)
+    static let dashGreen = Color(hex: "#34C759")
+    static let dashRed = Color(hex: "#FF3B30")
+    static let dashOrange = Color(hex: "#FF9500")
 
     // Typography hierarchy
     static let dashTextPrimary = Color.white
-    static let dashTextSecondary = Color(red: 0.68, green: 0.71, blue: 0.76)
-    static let dashTextMuted = Color(red: 0.44, green: 0.47, blue: 0.53)
+    static let dashTextSecondary = Color(hex: "#A0A5B2")
+    static let dashTextMuted = Color(hex: "#636876")
 }
 
 public extension LinearGradient {
     static let dashAccentGradient = LinearGradient(
-        colors: [.dashYellow, .dashGold],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
+        colors: [Color(hex: "#FFDE00"), Color(hex: "#FF9900")],
+        startPoint: .top,
+        endPoint: .bottom
     )
 
     static let dashProGoldGradient = LinearGradient(
-        colors: [.dashYellow, .dashAmber],
+        colors: [Color(hex: "#FFE600"), Color(hex: "#FFB800")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
 
     static let dashSpeedGradient = LinearGradient(
-        colors: [.dashGreen, .dashYellow, .dashRed],
+        colors: [.dashGreen, .dashYellow, .dashOrange, .dashRed],
         startPoint: .leading,
         endPoint: .trailing
     )
