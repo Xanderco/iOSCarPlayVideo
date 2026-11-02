@@ -12,15 +12,11 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | :--- | :--- | :--- | :--- |
 | **DI-13** (Activity 0) | **MediaToAnalyze Ingestion & Promo Deconstruction** | ✅ Completed | Cataloged all 32 assets into `MediaToAnalyze-Mapping.md`; deconstructed competitor video; authored 60s viral production script in `Promotional-Video-Storyboard.md` [DI-13] |
 | **DI-6** (Activity 1) | **Yellow Theme & Floating Liquid Capsule Tab Bar** | ✅ Completed | Electric Yellow (`#FFE600`), OLED Black (`#0C0D10`), translucent frosted glass dock with haptic feedback for 5 tabs `[Cast, Drive, Widgets, Sounds, Me]` [DI-6] |
-| :--- | :--- | :--- | :--- |
-| **Theme & Color System** | ✅ Completed | Yes | `ThemeColors.swift` with Racing Yellow `#FFE600`, Gold `#FFBF00`, Amber `#FF9900`, OLED Black |
-| **App State (5 Tabs)** | ✅ Completed | Yes | Replaced `.territory` tab with `.me`, updated tests |
-| **Liquid Capsule Tab Bar** | ✅ Completed | Yes | Solved simulator tap bug; frosted glass capsule with yellow active states |
-| **DI-11** (Activity 6) | **Me Profile, Settings, About & Feedback** | ✅ Completed | 1:1 Me profile with car card, ROAD ROOKIE badge, PRO gold banner, Settings, About, and `FeedbackView` matching `Feedback.jpeg` [DI-11] |
 | **DI-7** (Activity 2) | **Cast Module 1:1 Redesign** | ✅ Completed | 4-row source menu card, CarPlay hardware mockup, 20 streaming source browser with "Send to car", M3U drawer [DI-7] |
 | **DI-8** (Activity 3) | **Drive HUD & Permissions** | ✅ Completed | Drive HUD with yellow speedometer, live telemetry console, top status banner, and `DriveTrackingPermissionsSheet` matching `Enable the tracking always.jpeg` [DI-8] |
 | **DI-9** (Activity 4) | **Widgets Ecosystem & Live Editor** | ✅ Completed | 1:1 Widgets Home with Plate, Countdowns, Clocks, Vinyl, Quotes, and interactive Live Editor with Size, Vertical, Horizontal sliders [DI-9] |
 | **DI-10** (Activity 5) | **Sounds Soundboard & Selector** | ✅ Completed | 1:1 Soundboard with Disconnection & Arrival triggers, trending cards with watermarks, How to Activate CTA, and Sound Selection sheet matching reference [DI-10] |
+| **DI-11** (Activity 6) | **Me Profile, Settings, About & Feedback** | ✅ Completed | 1:1 Me profile with car card, ROAD ROOKIE badge, PRO gold banner, Settings, About, and `FeedbackView` matching `Feedback.jpeg` [DI-11] |
 | **DI-12** (Activity 7) | **Automated Testing & Device Deployment** | ✅ Completed | 100% test pass rate across 12 test suites, clean build for iPhone Simulator (`iPhone 17`) & Physical iOS Device (`generic/platform=iOS`), automatic code signing configured with Team `96YG38576A` [DI-12] |
 
 ---
