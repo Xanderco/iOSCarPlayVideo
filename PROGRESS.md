@@ -13,7 +13,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **Theme & Color System** | ✅ Completed | Yes | `ThemeColors.swift` with Racing Yellow `#FFE600`, Gold `#FFBF00`, Amber `#FF9900`, OLED Black |
 | **App State (5 Tabs)** | ✅ Completed | Yes | Replaced `.territory` tab with `.me`, updated tests |
 | **Liquid Capsule Tab Bar** | ✅ Completed | Yes | Solved simulator tap bug; frosted glass capsule with yellow active states |
-| **Me / Profile Screen** | ✅ Completed | Yes | Created `MeHomeView` (Garage, Stats, Territory shortcut, Unit switches, PRO pass) |
+| **Me / Profile Screen** | ✅ Completed | Yes | 1:1 CarDash match: vehicle card, ROAD ROOKIE badge, 3-col stats, PRO gold card, Settings & About sheets |
 | **Cast Screen** | ✅ Completed | Yes | 1:1 match to CarDash reference: 4-row menu card, hardware mockup, 20 streaming sources, yellow accents |
 | **Drive Screen** | ✅ Completed | Yes | Yellow neon gauge gradient, high-contrast gold Start Drive button, perfect tab bar clearance |
 | **Widgets Screen** | ✅ Completed | Yes | 1:1 CarDash match: Plate, Couple Days, Clocks, Vinyl, Quotes, CarPlay live mockup, yellow accents |
