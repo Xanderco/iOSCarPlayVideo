@@ -43,6 +43,10 @@ public final class AppState: ObservableObject {
                 self.selectedTab = matched
             }
         }
+
+        if ProcessInfo.processInfo.arguments.contains("-showPaywall") {
+            self.showPaywall = true
+        }
     }
 
     public func unlockProLifetime() {

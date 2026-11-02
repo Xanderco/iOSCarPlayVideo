@@ -157,7 +157,7 @@ public struct LifetimePaywallView: View {
         HStack(alignment: .top, spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 18, weight: .bold))
-                .foregroundStyle(Color.dashCyan)
+                .foregroundStyle(Color.dashYellow)
                 .frame(width: 24)
 
             VStack(alignment: .leading, spacing: 2) {
