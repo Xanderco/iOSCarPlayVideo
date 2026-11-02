@@ -16,7 +16,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **Me / Profile Screen** | ✅ Completed | Yes | Created `MeHomeView` (Garage, Stats, Territory shortcut, Unit switches, PRO pass) |
 | **Cast Screen** | ✅ Completed | Yes | 1:1 match to CarDash reference: 4-row menu card, hardware mockup, 20 streaming sources, yellow accents |
 | **Drive Screen** | ✅ Completed | Yes | Yellow neon gauge gradient, high-contrast gold Start Drive button, perfect tab bar clearance |
-| **Widgets Screen** | ⏳ Pending | No | Yellow accents on CarPlay mockup, widget cards, brand picker, trimmer |
+| **Widgets Screen** | ✅ Completed | Yes | 1:1 CarDash match: Plate, Couple Days, Clocks, Vinyl, Quotes, CarPlay live mockup, yellow accents |
 | **Sounds Screen** | ⏳ Pending | No | Yellow soundboard triggers, category filters, waveforms, Shortcuts guide |
 | **PRO Lifetime Paywall** | ⏳ Pending | No | Electric Gold gradient CTA buttons, yellow luxury border styling |
 
