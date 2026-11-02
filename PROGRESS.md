@@ -11,7 +11,7 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | Task / Activity | Scope | Status | Notes |
 | :--- | :--- | :--- | :--- |
 | **DI-13** (Activity 0) | **MediaToAnalyze Ingestion & Promo Deconstruction** | ✅ Completed | Cataloged all 32 assets into `MediaToAnalyze-Mapping.md`; deconstructed competitor video; authored 60s viral production script in `Promotional-Video-Storyboard.md` [DI-13] |
-| **DI-6** (Activity 1) | **Yellow Theme & Floating Liquid Capsule Tab Bar** | ⏳ In Progress | Electric Yellow (`#FFE600`), OLED Black (`#0C0D10`), floating 5-tab capsule `[Cast, Drive, Widgets, Sounds, Me]` |
+| **DI-6** (Activity 1) | **Yellow Theme & Floating Liquid Capsule Tab Bar** | ✅ Completed | Electric Yellow (`#FFE600`), OLED Black (`#0C0D10`), translucent frosted glass dock with haptic feedback for 5 tabs `[Cast, Drive, Widgets, Sounds, Me]` [DI-6] |
 | :--- | :--- | :--- | :--- |
 | **Theme & Color System** | ✅ Completed | Yes | `ThemeColors.swift` with Racing Yellow `#FFE600`, Gold `#FFBF00`, Amber `#FF9900`, OLED Black |
 | **App State (5 Tabs)** | ✅ Completed | Yes | Replaced `.territory` tab with `.me`, updated tests |
