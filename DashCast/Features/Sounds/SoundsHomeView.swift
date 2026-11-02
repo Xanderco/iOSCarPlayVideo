@@ -9,6 +9,8 @@ public struct SoundsHomeView: View {
     @State private var homeArrivalSoundId: String = "welcome_traveler"
     @State private var showingShortcutsGuide: Bool = false
     @State private var showingSoundPickerForSlot: String? = nil
+    @State private var soundSearchText: String = ""
+    @State private var pickerCategory: String = "Recommend"
 
     private let catalog = SoundCatalogService.shared
 
@@ -289,73 +291,153 @@ public struct SoundsHomeView: View {
         }
     }
 
-    // MARK: - Sound Picker Sheet
+    // MARK: - Sound Picker Sheet (Matching Select CarPlay Connection Sound.jpeg)
 
     private func soundPickerSheet(for slot: String) -> some View {
-        NavigationStack {
-            ZStack {
+        let title = slot == "disconnection" ? "Select Disconnection Sound" : "Select Connection Sound"
+        let categories = ["Recommend", "All", "Brands", "Voices", "Engine", "Futuristic"]
+
+        return NavigationStack {
+            ZStack(alignment: .bottom) {
                 Color.dashBackground.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(catalog.sounds) { sound in
-                            Button {
-                                if slot == "disconnection" {
-                                    disconnectionSoundId = sound.id
-                                } else {
-                                    homeArrivalSoundId = sound.id
-                                }
-                                savePreferences()
-                                showingSoundPickerForSlot = nil
-                            } label: {
-                                HStack(spacing: 12) {
-                                    Button {
-                                        soundPlayer.play(sound: sound)
-                                    } label: {
-                                        Image(systemName: soundPlayer.currentlyPlayingId == sound.id ? "stop.fill" : "play.fill")
-                                            .font(.system(size: 14))
-                                            .foregroundStyle(Color.dashYellow)
-                                            .frame(width: 32, height: 32)
-                                            .background(Color.dashYellow.opacity(0.15))
-                                            .clipShape(Circle())
-                                    }
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(sound.title)
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundStyle(Color.dashTextPrimary)
-
-                                        Text("\(sound.category.rawValue) · \(sound.durationString)")
-                                            .font(.system(size: 11))
-                                            .foregroundStyle(Color.dashTextSecondary)
-                                    }
-
-                                    Spacer()
-
-                                    let isSelected = (slot == "disconnection" ? disconnectionSoundId : homeArrivalSoundId) == sound.id
-                                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextMuted)
-                                }
-                                .padding(12)
-                                .background(Color.dashSurface)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .padding(.horizontal)
-                            }
-                            .buttonStyle(.plain)
-                        }
+                VStack(spacing: 12) {
+                    // Search Bar
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 14))
+                            .foregroundStyle(Color.dashTextMuted)
+                        TextField("Search a sound", text: $soundSearchText)
+                            .font(.system(size: 14))
+                            .foregroundStyle(Color.dashTextPrimary)
                     }
-                    .padding(.top, 14)
-                    .padding(.bottom, 30)
+                    .padding(12)
+                    .background(Color.dashSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .padding(.horizontal, 16)
+                    .padding(.top, 10)
+
+                    // Category Filter Pills
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(categories, id: \.self) { cat in
+                                Button {
+                                    pickerCategory = cat
+                                } label: {
+                                    Text(cat)
+                                        .font(.system(size: 13, weight: pickerCategory == cat ? .bold : .medium))
+                                        .foregroundStyle(pickerCategory == cat ? Color.black : Color.dashTextSecondary)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            pickerCategory == cat
+                                            ? AnyView(LinearGradient.dashAccentGradient)
+                                            : AnyView(Color.dashSurface)
+                                        )
+                                        .clipShape(Capsule())
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 16)
+                    }
+
+                    // Guidance caption
+                    Text("Tap ▶ to preview, tap the card to select")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(Color.dashTextMuted)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 18)
+
+                    // Sound List
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            let list = catalog.sounds.filter { sound in
+                                let matchesCategory = (pickerCategory == "All" || pickerCategory == "Recommend") || sound.category.rawValue.lowercased().contains(pickerCategory.lowercased())
+                                let matchesSearch = soundSearchText.isEmpty || sound.title.localizedCaseInsensitiveContains(soundSearchText)
+                                return matchesCategory && matchesSearch
+                            }
+
+                            ForEach(list) { sound in
+                                Button {
+                                    if slot == "disconnection" {
+                                        disconnectionSoundId = sound.id
+                                    } else {
+                                        homeArrivalSoundId = sound.id
+                                    }
+                                    savePreferences()
+                                    showingSoundPickerForSlot = nil
+                                } label: {
+                                    HStack(spacing: 14) {
+                                        Button {
+                                            soundPlayer.play(sound: sound)
+                                        } label: {
+                                            Image(systemName: soundPlayer.currentlyPlayingId == sound.id ? "stop.circle.fill" : "play.circle.fill")
+                                                .font(.system(size: 28))
+                                                .foregroundStyle(Color.dashYellow)
+                                        }
+
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text(sound.title)
+                                                .font(.system(size: 15, weight: .semibold))
+                                                .foregroundStyle(Color.dashTextPrimary)
+
+                                            Text("\(sound.category.rawValue) · \(sound.durationString)")
+                                                .font(.system(size: 11))
+                                                .foregroundStyle(Color.dashTextSecondary)
+                                        }
+
+                                        Spacer()
+
+                                        let isSelected = (slot == "disconnection" ? disconnectionSoundId : homeArrivalSoundId) == sound.id
+                                        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                            .font(.system(size: 18))
+                                            .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextMuted)
+                                    }
+                                    .padding(14)
+                                    .background(Color.dashSurface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 16)
+                                            .stroke(Color.dashBorder, lineWidth: 1)
+                                    )
+                                    .padding(.horizontal, 16)
+                                }
+                                .buttonStyle(.plain)
+                            }
+
+                            Color.clear.frame(height: 90)
+                        }
+                        .padding(.top, 4)
+                    }
                 }
+
+                // Sticky Bottom Select Button
+                Button {
+                    showingSoundPickerForSlot = nil
+                } label: {
+                    Text("Select a sound")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Color.black)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .background(LinearGradient.dashAccentGradient)
+                        .clipShape(Capsule())
+                        .shadow(color: Color.dashYellow.opacity(0.35), radius: 10, y: 4)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 16)
             }
-            .navigationTitle("Select Sound")
+            .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") {
+                    Button {
                         showingSoundPickerForSlot = nil
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.dashYellow)
                     }
-                    .foregroundStyle(Color.dashYellow)
                 }
             }
         }
