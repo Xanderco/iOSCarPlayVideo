@@ -107,8 +107,8 @@ public struct AutomotiveVideoPlayerView: View {
                     } label: {
                         Image(systemName: playerService.isPlaying ? "pause.circle.fill" : "play.circle.fill")
                             .font(.system(size: 54))
-                            .foregroundStyle(Color.dashCyan)
-                            .shadow(color: Color.dashCyan.opacity(0.5), radius: 10)
+                            .foregroundStyle(Color.dashYellow)
+                            .shadow(color: Color.dashYellow.opacity(0.5), radius: 10)
                     }
 
                     Button {
@@ -140,7 +140,7 @@ public struct AutomotiveVideoPlayerView: View {
                             }
                         }
                     )
-                    .tint(.dashCyan)
+                    .tint(.dashYellow)
 
                     HStack {
                         Text(formatTime(playerService.currentTime))

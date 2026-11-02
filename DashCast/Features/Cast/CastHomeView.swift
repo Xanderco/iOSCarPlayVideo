@@ -7,29 +7,18 @@ public struct CastHomeView: View {
     @StateObject private var localVideoManager = LocalVideoManager.shared
     @StateObject private var externalDisplay = ExternalDisplayManager.shared
 
-    @State private var selectedCategory: String = "All"
-    @State private var channels: [ChannelModel] = IPTVParser.samplePlaylist
     @State private var showingAddM3UDialog: Bool = false
-    @State private var m3uURLInput: String = ""
+    @State private var showingPlaylistsSheet: Bool = false
     @State private var showingWebBrowser: Bool = false
     @State private var showingCastGuide: Bool = false
-    @State private var showingMetrics: Bool = false
+    @State private var showingFavorites: Bool = false
+    @State private var showingBroadcastPicker: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
-
-    private let categories = ["All", "Movies", "Live", "Sports", "Local"]
+    @State private var m3uURLInput: String = ""
+    @State private var channels: [ChannelModel] = IPTVParser.samplePlaylist
 
     public init() {}
-
-    public var filteredChannels: [ChannelModel] {
-        if selectedCategory == "All" {
-            return channels + localVideoManager.localVideos
-        } else if selectedCategory == "Local" {
-            return localVideoManager.localVideos
-        } else {
-            return channels.filter { $0.groupTitle.lowercased() == selectedCategory.lowercased() }
-        }
-    }
 
     public var body: some View {
         NavigationStack {
@@ -38,303 +27,505 @@ public struct CastHomeView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Top Video Player Section
-                        AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
-                            .frame(height: 220)
-                            .padding(.horizontal)
-
-                        // Connected display banner if car screen is detected
-                        if externalDisplay.isExternalDisplayConnected {
-                            carConnectedBanner
+                        // If video is currently playing, render the video player
+                        if playerService.currentChannel != nil {
+                            AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
+                                .frame(height: 220)
+                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                                .padding(.horizontal, 16)
                         }
 
-                        // Quick Actions Bar
-                        quickActionsBar
+                        // Main 4-Row Source Menu Card (Exact 1:1 CarDash layout)
+                        mainSourceMenuCard
 
-                        // Category Filter Pills
-                        categoryFilterBar
-
-                        // Keep Watching Carousel
-                        if !channels.isEmpty {
-                            keepWatchingSection
-                        }
-
-                        // Channels Grid
-                        channelsSection
+                        // CarPlay Connection Illustration & Status Section
+                        carPlayStatusSection
                     }
-                    .padding(.bottom, 24)
+                    .padding(.top, 10)
+                    .padding(.bottom, 110) // clearance for LiquidCapsuleTabBar
                 }
             }
             .navigationTitle("Cast")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showingMetrics = true
-                    } label: {
-                        Image(systemName: "chart.bar.xaxis")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(Color.dashCyan)
-                    }
-                }
-
                 ToolbarItem(placement: .topBarTrailing) {
-                    if !appState.isProLifetimeUnlocked {
-                        Button {
-                            appState.showPaywall = true
-                        } label: {
-                            HStack(spacing: 4) {
-                                Image(systemName: "crown.fill")
-                                    .foregroundStyle(Color.dashGold)
-                                Text("LIFETIME")
-                                    .font(.system(size: 12, weight: .bold))
-                                    .foregroundStyle(Color.dashGold)
+                    HStack(spacing: 8) {
+                        if !appState.isProLifetimeUnlocked {
+                            Button {
+                                appState.showPaywall = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "crown.fill")
+                                        .font(.system(size: 11))
+                                    Text("PRO")
+                                        .font(.system(size: 12, weight: .heavy))
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(LinearGradient.dashProGoldGradient)
+                                .foregroundStyle(Color.black)
+                                .clipShape(Capsule())
                             }
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 4)
-                            .background(Color.dashGold.opacity(0.15))
-                            .clipShape(Capsule())
+                        }
+
+                        Button {
+                            showingCastGuide = true
+                        } label: {
+                            Image(systemName: "questionmark")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(Color.dashTextPrimary)
+                                .frame(width: 34, height: 34)
+                                .background(Color.dashSurface)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
+                        }
+
+                        Button {
+                            showingFavorites = true
+                        } label: {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(Color.dashTextPrimary)
+                                .frame(width: 34, height: 34)
+                                .background(Color.dashSurface)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
                         }
                     }
                 }
             }
-            .alert("Add M3U Playlist", isPresented: $showingAddM3UDialog) {
-                TextField("https://example.com/playlist.m3u", text: $m3uURLInput)
-                    .textInputAutocapitalization(.never)
-                Button("Add") {
-                    loadM3UFromURL()
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Enter a public or personal M3U / M3U8 streaming playlist URL.")
+            .sheet(isPresented: $showingCastGuide) {
+                CarCastGuideModalView()
             }
             .sheet(isPresented: $showingWebBrowser) {
                 WebVideoBrowserView()
             }
-            .sheet(isPresented: $showingCastGuide) {
-                CarCastGuideModalView()
+            .sheet(isPresented: $showingPlaylistsSheet) {
+                mediaSourcePlaylistsSheet
             }
-            .sheet(isPresented: $showingMetrics) {
-                UsageMetricsView()
+            .sheet(isPresented: $showingFavorites) {
+                favoritesSheet
             }
-            .fullScreenCover(isPresented: $isFullscreenPlayer) {
-                AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
-                    .ignoresSafeArea()
+            .sheet(isPresented: $showingAddM3UDialog) {
+                addM3UDialogSheet
             }
-            .onChange(of: selectedPhotoItem) { _, newItem in
-                if let newItem {
-                    Task {
-                        await localVideoManager.importVideo(from: newItem)
+            .sheet(isPresented: $showingBroadcastPicker) {
+                NavigationStack {
+                    ZStack {
+                        Color.dashBackground.ignoresSafeArea()
+                        VStack(spacing: 24) {
+                            Text("Mirror iPhone Screen")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundStyle(Color.dashTextPrimary)
+
+                            Text("Broadcast your entire iOS screen live to your car's CarPlay display via AirPlay.")
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.dashTextSecondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
+
+                            ScreenBroadcastPickerView()
+                                .frame(width: 80, height: 80)
+                                .padding()
+                                .background(Color.dashSurface)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.dashYellow.opacity(0.4), lineWidth: 2))
+
+                            AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
+                                .frame(width: 50, height: 50)
+
+                            Spacer()
+                        }
+                        .padding(.top, 40)
                     }
+                    .navigationTitle("Screen Mirroring")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarLeading) {
+                            Button("Close") { showingBroadcastPicker = false }
+                                .foregroundStyle(Color.dashYellow)
+                        }
+                    }
+                }
+            }
+            .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
+                guard let newItem = newItem else { return }
+                Task {
+                    await localVideoManager.importVideo(from: newItem)
                 }
             }
         }
     }
 
-    private var carConnectedBanner: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "car.side.fill")
-                .foregroundStyle(Color.dashGreen)
-                .font(.system(size: 20))
+    // MARK: - 4-Row Source Menu Card
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Connected to Car Display")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white)
-                Text("Playing video on external screen while parked")
-                    .font(.system(size: 11))
+    private var mainSourceMenuCard: some View {
+        VStack(spacing: 1) {
+            // Row 1: Media Source
+            Button {
+                showingPlaylistsSheet = true
+            } label: {
+                menuRow(
+                    icon: "play.tv.fill",
+                    title: "Media Source",
+                    subtitle: "Your M3U / M3U8 playlists"
+                )
+            }
+            .buttonStyle(.plain)
+
+            Divider().background(Color.dashBorder.opacity(0.6))
+
+            // Row 2: Local Videos
+            PhotosPicker(selection: $selectedPhotoItem, matching: .videos) {
+                menuRow(
+                    icon: "folder.fill",
+                    title: "Local Videos",
+                    subtitle: "From Photos & Files"
+                )
+            }
+            .buttonStyle(.plain)
+
+            Divider().background(Color.dashBorder.opacity(0.6))
+
+            // Row 3: Mirror iPhone
+            Button {
+                showingBroadcastPicker = true
+            } label: {
+                menuRow(
+                    icon: "rectangle.on.rectangle.fill",
+                    title: "Mirror iPhone",
+                    subtitle: "Share your screen live"
+                )
+            }
+            .buttonStyle(.plain)
+
+            Divider().background(Color.dashBorder.opacity(0.6))
+
+            // Row 4: Browser
+            Button {
+                showingWebBrowser = true
+            } label: {
+                menuRow(
+                    icon: "globe",
+                    title: "Browser",
+                    subtitle: "Explore websites"
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .background(Color.dashSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color.dashBorder, lineWidth: 1)
+        )
+        .padding(.horizontal, 16)
+    }
+
+    private func menuRow(icon: String, title: String, subtitle: String) -> some View {
+        HStack(spacing: 16) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(red: 0.12, green: 0.15, blue: 0.22))
+                    .frame(width: 46, height: 46)
+
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                    .foregroundStyle(Color.dashYellow)
+            }
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.dashTextPrimary)
+
+                Text(subtitle)
+                    .font(.system(size: 12))
                     .foregroundStyle(Color.dashTextSecondary)
             }
 
             Spacer()
 
-            Circle()
-                .fill(Color.dashGreen)
-                .frame(width: 8, height: 8)
+            Image(systemName: "arrow.up.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.dashTextMuted)
         }
-        .padding()
-        .background(Color.dashGreen.opacity(0.15))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-        .padding(.horizontal)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 
-    private var quickActionsBar: some View {
-        HStack(spacing: 12) {
-            actionButton(icon: "plus.circle.fill", label: "Add M3U") {
-                if !appState.isProLifetimeUnlocked && channels.count > 10 {
-                    appState.showPaywall = true
-                } else {
-                    showingAddM3UDialog = true
+    // MARK: - CarPlay Connection Visual Section
+
+    private var carPlayStatusSection: some View {
+        VStack(spacing: 16) {
+            // Visual hardware mockup: iPhone and Car Head Unit screen
+            HStack(spacing: 20) {
+                // iPhone silhouette
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(Color(red: 0.28, green: 0.32, blue: 0.40), lineWidth: 3)
+                        .frame(width: 70, height: 125)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color(red: 0.08, green: 0.09, blue: 0.12))
+                        )
+
+                    VStack(spacing: 6) {
+                        Capsule()
+                            .fill(Color.white.opacity(0.3))
+                            .frame(width: 20, height: 3)
+
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundStyle(Color.dashYellow)
+
+                        Text("DashCast")
+                            .font(.system(size: 8, weight: .bold))
+                            .foregroundStyle(Color.dashTextSecondary)
+                    }
                 }
-            }
 
-            PhotosPicker(selection: $selectedPhotoItem, matching: .videos) {
-                VStack(spacing: 6) {
-                    Image(systemName: "photo.badge.plus.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(Color.dashCyan)
-                    Text("Import")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Color.dashTextPrimary)
+                // Wireless connection link symbol with waves
+                VStack(spacing: 4) {
+                    Image(systemName: "wave.3.right")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(externalDisplay.isExternalDisplayConnected ? Color.dashGreen : Color.dashYellow)
+
+                    Image(systemName: externalDisplay.isExternalDisplayConnected ? "link.circle.fill" : "link")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundStyle(externalDisplay.isExternalDisplayConnected ? Color.dashGreen : Color.dashYellow)
+
+                    Image(systemName: "wave.3.left")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(externalDisplay.isExternalDisplayConnected ? Color.dashGreen : Color.dashYellow)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
-                .background(Color.dashSurface)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
 
-            actionButton(icon: "safari.fill", label: "Browser") {
-                showingWebBrowser = true
-            }
+                // Car Head Unit Dashboard Screen
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color(red: 0.28, green: 0.32, blue: 0.40), lineWidth: 3.5)
+                        .frame(width: 170, height: 110)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color(red: 0.07, green: 0.08, blue: 0.11))
+                        )
 
-            // Cast to Car Button
-            actionButton(icon: "airplayvideo", label: "Cast to Car") {
-                showingCastGuide = true
-            }
-        }
-        .padding(.horizontal)
-    }
-
-    private func actionButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundStyle(Color.dashCyan)
-                Text(label)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color.dashTextPrimary)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(Color.dashSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-    }
-
-    private var categoryFilterBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(categories, id: \.self) { cat in
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            selectedCategory = cat
+                    if externalDisplay.isExternalDisplayConnected {
+                        VStack(spacing: 6) {
+                            Image(systemName: "car.fill")
+                                .font(.system(size: 26))
+                                .foregroundStyle(Color.dashGreen)
+                            Text("CarPlay Connected")
+                                .font(.system(size: 10, weight: .bold))
+                                .foregroundStyle(Color.dashGreen)
                         }
-                    } label: {
-                        Text(cat)
-                            .font(.system(size: 14, weight: selectedCategory == cat ? .bold : .medium))
-                            .foregroundStyle(selectedCategory == cat ? Color.black : Color.dashTextSecondary)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(
-                                selectedCategory == cat
-                                ? AnyView(LinearGradient.dashAccentGradient)
-                                : AnyView(Color.dashSurface)
-                            )
-                            .clipShape(Capsule())
+                    } else {
+                        VStack(spacing: 6) {
+                            Image(systemName: "car.side.fill")
+                                .font(.system(size: 26))
+                                .foregroundStyle(Color.dashYellow.opacity(0.8))
+                            Text("CarPlay Screen")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(Color.dashTextMuted)
+                        }
                     }
                 }
             }
-            .padding(.horizontal)
+            .frame(height: 135)
+            .padding(.top, 4)
+
+            // Status Text
+            VStack(spacing: 6) {
+                Text(externalDisplay.isExternalDisplayConnected ? "CarPlay Connected" : "CarPlay not connected")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(Color.dashTextPrimary)
+
+                Text(externalDisplay.isExternalDisplayConnected
+                     ? "Playing video & audio on car display while parked."
+                     : "Connect to watch in your car. You can still explore on iPhone.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Color.dashTextSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+            }
+
+            // AirPlay & Guide buttons
+            HStack(spacing: 12) {
+                Button {
+                    showingCastGuide = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "info.circle")
+                        Text("Connection Help")
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.dashYellow)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.dashYellow.opacity(0.12))
+                    .clipShape(Capsule())
+                }
+
+                AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
+                    .frame(width: 36, height: 36)
+                    .background(Color.dashSurface)
+                    .clipShape(Circle())
+                    .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
+            }
+            .padding(.bottom, 10)
         }
+        .padding(.horizontal, 16)
     }
 
-    private var keepWatchingSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Keep Watching")
-                .font(ThemeFonts.hudTitle(size: 18))
-                .foregroundStyle(Color.dashTextPrimary)
-                .padding(.horizontal)
+    // MARK: - Playlists Sheet
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 14) {
-                    ForEach(channels.prefix(4)) { channel in
-                        Button {
-                            playerService.load(channel: channel)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 8) {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.dashSurfaceHighlight)
-                                        .frame(width: 170, height: 100)
+    private var mediaSourcePlaylistsSheet: some View {
+        NavigationStack {
+            ZStack {
+                Color.dashBackground.ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 14) {
+                        HStack {
+                            Text("Sample Automotive Streams")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(Color.dashYellow)
+                            Spacer()
+                            Button("+ Add M3U URL") {
+                                showingAddM3UDialog = true
+                            }
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.dashYellow)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 12)
+
+                        ForEach(channels) { channel in
+                            Button {
+                                playerService.load(channel: channel)
+                                showingPlaylistsSheet = false
+                            } label: {
+                                HStack(spacing: 14) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.dashSurfaceHighlight)
+                                            .frame(width: 44, height: 44)
+
+                                        Image(systemName: "tv.fill")
+                                            .foregroundStyle(Color.dashYellow)
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(channel.name)
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundStyle(Color.dashTextPrimary)
+
+                                        Text(channel.groupTitle)
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(Color.dashTextSecondary)
+                                    }
+
+                                    Spacer()
 
                                     Image(systemName: "play.circle.fill")
-                                        .font(.system(size: 34))
-                                        .foregroundStyle(Color.dashCyan)
+                                        .font(.system(size: 22))
+                                        .foregroundStyle(Color.dashYellow)
                                 }
-
-                                Text(channel.name)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(Color.dashTextPrimary)
-                                    .lineLimit(1)
-
-                                Text(channel.groupTitle)
-                                    .font(.system(size: 11))
-                                    .foregroundStyle(Color.dashTextSecondary)
+                                .padding()
+                                .background(Color.dashSurface)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                .padding(.horizontal)
                             }
-                            .frame(width: 170)
+                            .buttonStyle(.plain)
                         }
                     }
+                    .padding(.bottom, 30)
                 }
-                .padding(.horizontal)
+            }
+            .navigationTitle("Media Sources")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Done") { showingPlaylistsSheet = false }
+                        .foregroundStyle(Color.dashYellow)
+                }
             }
         }
     }
 
-    private var channelsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(selectedCategory == "All" ? "All Channels & Videos" : "\(selectedCategory) Channels")
-                    .font(ThemeFonts.hudTitle(size: 18))
-                    .foregroundStyle(Color.dashTextPrimary)
-
-                Spacer()
-
-                Text("\(filteredChannels.count) items")
-                    .font(ThemeFonts.hudCaption(size: 13))
-                    .foregroundStyle(Color.dashTextMuted)
-            }
-            .padding(.horizontal)
-
-            LazyVStack(spacing: 10) {
-                ForEach(filteredChannels) { channel in
-                    Button {
-                        playerService.load(channel: channel)
-                    } label: {
-                        HStack(spacing: 14) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.dashSurfaceHighlight)
-                                    .frame(width: 46, height: 46)
-
-                                Image(systemName: "tv.fill")
-                                    .font(.system(size: 20))
-                                    .foregroundStyle(Color.dashCyan)
-                            }
-
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(channel.name)
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundStyle(Color.dashTextPrimary)
-                                    .lineLimit(1)
-
-                                Text(channel.groupTitle)
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(Color.dashTextSecondary)
-                            }
-
-                            Spacer()
-
-                            Image(systemName: "play.fill")
-                                .font(.system(size: 14))
-                                .foregroundStyle(Color.dashCyan)
-                        }
-                        .padding()
-                        .background(Color.dashSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                    }
+    private var favoritesSheet: some View {
+        NavigationStack {
+            ZStack {
+                Color.dashBackground.ignoresSafeArea()
+                VStack(spacing: 16) {
+                    Image(systemName: "heart.slash")
+                        .font(.system(size: 40))
+                        .foregroundStyle(Color.dashTextMuted)
+                    Text("No Favorites Yet")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Color.dashTextPrimary)
+                    Text("Save videos and web bookmarks to quickly access them in your car.")
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.dashTextSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
                 }
             }
-            .padding(.horizontal)
+            .navigationTitle("Favorites")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Close") { showingFavorites = false }
+                        .foregroundStyle(Color.dashYellow)
+                }
+            }
+        }
+    }
+
+    private var addM3UDialogSheet: some View {
+        NavigationStack {
+            ZStack {
+                Color.dashBackground.ignoresSafeArea()
+                VStack(spacing: 20) {
+                    Text("Add Custom M3U / M3U8 Stream")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundStyle(Color.dashTextPrimary)
+
+                    TextField("https://example.com/playlist.m3u", text: $m3uURLInput)
+                        .padding()
+                        .background(Color.dashSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.dashBorder, lineWidth: 1))
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(.horizontal)
+
+                    Button {
+                        loadM3UFromURL()
+                        showingAddM3UDialog = false
+                    } label: {
+                        Text("Import Stream")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(Color.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(LinearGradient.dashAccentGradient)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .padding(.horizontal)
+                    }
+
+                    Spacer()
+                }
+                .padding(.top, 30)
+            }
+            .navigationTitle("Add Stream")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { showingAddM3UDialog = false }
+                        .foregroundStyle(Color.dashYellow)
+                }
+            }
         }
     }
 

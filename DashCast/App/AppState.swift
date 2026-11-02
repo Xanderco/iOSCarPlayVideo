@@ -35,6 +35,14 @@ public final class AppState: ObservableObject {
     public init(isProLifetimeUnlocked: Bool = false) {
         self.isProLifetimeUnlocked = isProLifetimeUnlocked
         self.useMilesPerHour = UserDefaults.standard.bool(forKey: "useMilesPerHour")
+
+        if let tabIndex = ProcessInfo.processInfo.arguments.firstIndex(of: "-initialTab"),
+           ProcessInfo.processInfo.arguments.indices.contains(tabIndex + 1) {
+            let tabArg = ProcessInfo.processInfo.arguments[tabIndex + 1].lowercased()
+            if let matched = TabItem.allCases.first(where: { $0.rawValue.lowercased() == tabArg }) {
+                self.selectedTab = matched
+            }
+        }
     }
 
     public func unlockProLifetime() {

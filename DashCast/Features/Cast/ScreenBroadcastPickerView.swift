@@ -8,7 +8,7 @@ public struct ScreenBroadcastPickerView: UIViewRepresentable {
         let picker = RPSystemBroadcastPickerView(frame: CGRect(x: 0, y: 0, width: 44, height: 44))
         picker.showsMicrophoneButton = false
         if let button = picker.subviews.first(where: { $0 is UIButton }) as? UIButton {
-            button.tintColor = UIColor(Color.dashCyan)
+            button.tintColor = UIColor(Color.dashYellow)
         }
         return picker
     }

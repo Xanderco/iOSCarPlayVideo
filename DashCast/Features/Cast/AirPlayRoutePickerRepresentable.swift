@@ -4,7 +4,7 @@ import AVKit
 public struct AirPlayRoutePickerRepresentable: UIViewRepresentable {
     public var tintColor: Color
 
-    public init(tintColor: Color = .dashCyan) {
+    public init(tintColor: Color = .dashYellow) {
         self.tintColor = tintColor
     }
 

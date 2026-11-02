@@ -30,11 +30,11 @@ public struct CarCastGuideModalView: View {
                                 HStack(spacing: 12) {
                                     ZStack {
                                         Circle()
-                                            .fill(Color.dashCyan.opacity(0.15))
+                                            .fill(Color.dashYellow.opacity(0.15))
                                             .frame(width: 44, height: 44)
                                         Image(systemName: "airplayvideo")
                                             .font(.system(size: 22))
-                                            .foregroundStyle(Color.dashCyan)
+                                            .foregroundStyle(Color.dashYellow)
                                     }
 
                                     VStack(alignment: .leading, spacing: 2) {
@@ -169,7 +169,7 @@ public struct CarCastGuideModalView: View {
                         dismiss()
                     }
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(Color.dashCyan)
+                    .foregroundStyle(Color.dashYellow)
                 }
             }
         }
