@@ -66,27 +66,13 @@ public struct MeHomeView: View {
                 FeedbackView()
             }
             .sheet(isPresented: $showingDriveDetails) {
-                NavigationStack {
-                    TerritoryHomeView()
-                        .toolbar {
-                            ToolbarItem(placement: .topBarLeading) {
-                                Button("Close") { showingDriveDetails = false }
-                                    .foregroundStyle(Color.dashYellow)
-                            }
-                        }
-                }
+                DriveSettingsView()
             }
             .alert("Rate DashCast", isPresented: $showingRateAlert) {
                 Button("5 Stars ⭐⭐⭐⭐⭐") {}
                 Button("Remind Me Later", role: .cancel) {}
             } message: {
                 Text("Enjoying DashCast? Your positive review helps us keep the app 100% subscription-free.")
-            }
-            .alert("Driver Feedback", isPresented: $showingFeedback) {
-                Button("Send Email") {}
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("Have a suggestion, bug report, or new car brand request? We read every message.")
             }
         }
     }

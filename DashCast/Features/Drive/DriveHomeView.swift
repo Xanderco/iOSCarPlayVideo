@@ -10,6 +10,8 @@ public struct DriveHomeView: View {
     @State private var completedTrip: TripModel?
     @State private var showingHistory: Bool = false
     @State private var showingPermissions: Bool = false
+    @State private var showingDriveSettings: Bool = false
+    @State private var showingLiveActivityPreview: Bool = false
     @State private var pastTrips: [TripModel] = []
 
     public init() {}
@@ -84,6 +86,17 @@ public struct DriveHomeView: View {
                                     .background(Color.dashSurface.opacity(0.85))
                                     .clipShape(Circle())
                             }
+
+                            Button {
+                                showingDriveSettings = true
+                            } label: {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(Color.dashYellow)
+                                    .padding(8)
+                                    .background(Color.dashSurface.opacity(0.85))
+                                    .clipShape(Circle())
+                            }
                         }
                         .padding()
                     }
@@ -104,6 +117,9 @@ public struct DriveHomeView: View {
             }
             .sheet(isPresented: $showingPermissions) {
                 DriveTrackingPermissionsSheet()
+            }
+            .sheet(isPresented: $showingDriveSettings) {
+                DriveSettingsView()
             }
         }
     }
@@ -177,6 +193,7 @@ public struct DriveHomeView: View {
                 if !locationService.isTracking {
                     GlowButton(title: "Start Drive", iconName: "play.fill", gradient: .dashAccentGradient) {
                         locationService.startTrip()
+                        DriveNotificationService.shared.sendDriveRecordingNotification(distanceKm: 0.1)
                     }
                 } else {
                     Button {
@@ -201,6 +218,7 @@ public struct DriveHomeView: View {
                     Button {
                         let trip = locationService.endTrip()
                         self.completedTrip = trip
+                        DriveNotificationService.shared.sendTripSavedNotification(trip: trip)
                         self.showingTripSummary = true
                     } label: {
                         HStack {

@@ -15,6 +15,9 @@ public struct WidgetConfigModel: Codable, Identifiable {
     public var carScale: Double
     public var carVerticalOffset: Double
     public var carHorizontalOffset: Double
+    public var plateText: String?
+    public var textColorHex: String?
+    public var fontName: String?
 
     public init(
         id: UUID = UUID(),
@@ -30,7 +33,10 @@ public struct WidgetConfigModel: Codable, Identifiable {
         countdownTitle: String? = nil,
         carScale: Double = 1.0,
         carVerticalOffset: Double = 0.0,
-        carHorizontalOffset: Double = 0.0
+        carHorizontalOffset: Double = 0.0,
+        plateText: String? = "ABC-1234",
+        textColorHex: String? = "#FFFFFF",
+        fontName: String? = "Default"
     ) {
         self.id = id
         self.carBrand = carBrand
@@ -46,6 +52,29 @@ public struct WidgetConfigModel: Codable, Identifiable {
         self.carScale = carScale
         self.carVerticalOffset = carVerticalOffset
         self.carHorizontalOffset = carHorizontalOffset
+        self.plateText = plateText
+        self.textColorHex = textColorHex
+        self.fontName = fontName
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case carBrand
+        case carModelName
+        case carImageName
+        case driverGreeting
+        case showWatermark
+        case stickerId
+        case customPhotoData
+        case trimmedVideoURL
+        case countdownTargetDate
+        case countdownTitle
+        case carScale
+        case carVerticalOffset
+        case carHorizontalOffset
+        case plateText
+        case textColorHex
+        case fontName
     }
 
     public init(from decoder: Decoder) throws {
@@ -64,5 +93,8 @@ public struct WidgetConfigModel: Codable, Identifiable {
         self.carScale = try container.decodeIfPresent(Double.self, forKey: .carScale) ?? 1.0
         self.carVerticalOffset = try container.decodeIfPresent(Double.self, forKey: .carVerticalOffset) ?? 0.0
         self.carHorizontalOffset = try container.decodeIfPresent(Double.self, forKey: .carHorizontalOffset) ?? 0.0
+        self.plateText = try container.decodeIfPresent(String.self, forKey: .plateText) ?? "ABC-1234"
+        self.textColorHex = try container.decodeIfPresent(String.self, forKey: .textColorHex) ?? "#FFFFFF"
+        self.fontName = try container.decodeIfPresent(String.self, forKey: .fontName) ?? "Default"
     }
 }
