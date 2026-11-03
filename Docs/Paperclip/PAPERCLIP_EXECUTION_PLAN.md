@@ -1,7 +1,7 @@
-# DashCast 🚗💨 — Paperclip Autonomous Team Architecture & Execution Plan
+# DashCast 🚗💨 — Paperclip Autonomous Company Architecture & Industry Best Practices
 
 **Project:** CarDash / DashCast Autonomous Operating Plan  
-**Target Harness:** Paperclip (http://127.0.0.1:3100) & PACA (http://100.66.253.3:8080)  
+**Target Harness:** Paperclip (`http://100.66.253.3:3100`), PACA (`http://100.66.253.3:8080`), and 1MCP Hub (`http://100.66.253.3:3050/mcp`)  
 **Repository:** `Xanderco/iOSCarPlayVideo`  
 **Active Branch:** `feat/cardash-yellow-redesign`  
 **Human Owner & Final Gatekeeper:** Alexander Benitez  
@@ -9,33 +9,59 @@
 
 ---
 
-## 1. Executive Mandate & Company Vision
+## 1. Executive Summary & Product Thesis
 
-DashCast is built to become the **#1 aftermarket automotive companion app** for Apple CarPlay users worldwide.
+DashCast is designed to become the **#1 aftermarket automotive companion app** for Apple CarPlay users worldwide.
 
-Competitors like *CarDash*, *CarTV (@cartv_cast2car)*, and *PlayCar* have proven massive market demand: drivers crave personalized dashboard widgets, custom startup engine audio, and parked video casting on their vehicle displays. However, competitor apps are plagued by **predatory recurring subscriptions ($9.99/mo or $4.99/mo)**, brittle connection instructions, and poor automotive ergonomics.
+Competitors like *CarDash*, *CarTV (@cartv_cast2car)*, and *PlayCar* have demonstrated immense organic demand across TikTok and the iOS App Store: car enthusiasts and daily commuters want personalized in-dash widgets, custom ignition sound effects, and parked video streaming on their vehicle screens. However, competitor apps suffer from:
+1. **Predatory Subscription Pricing ($9.99/mo or $4.99/mo):** Users complain heavily about recurring fees for what is fundamentally a utility.
+2. **Aggressive Paywalls:** Competitors lock the entire interface upon first launch before users even see the app work.
+3. **Fragile Connection Instructions:** Users struggle with generic screen mirroring that lags or disconnects.
 
-### The DashCast Advantage
-1. **Disruptive Pricing:** Pay Once ($19.99 Lifetime). Own Forever. Zero Subscriptions.
-2. **Native CarPlay Integration:** Direct `CPTemplateApplicationSceneDelegate` inclusion on vehicle head-units, not just screen mirroring.
-3. **Obsessive 1:1 Automotive UI:** High-contrast OLED True Black (`#0C0D10`), Electric Racing Yellow (`#FFE600`), and a floating tactile `LiquidCapsuleTabBar`.
-4. **Autonomous Paperclip Execution:** Continuous competitor monitoring, automated test suites, and structured PACA governance.
+### The DashCast Disruption
+- **Pay Once ($19.99 Lifetime). Own Forever.** Zero subscriptions.
+- **Native CarPlay Scene Integration:** Direct `CPTemplateApplicationSceneDelegate` presence on the car's head-unit menu grid, not just passive screen casting.
+- **Obsessive Automotive Ergonomics:** High-contrast OLED True Black (`#0C0D10`), Electric Racing Yellow (`#FFE600`), and a floating tactile frosted glass dock (`LiquidCapsuleTabBar`).
+- **Autonomous Operating Structure:** Continuous competitor surveillance, automated test suites, and strict PACA/Paperclip governance.
 
 ---
 
-## 2. Autonomous Agent Team Architecture ("The Hires")
+## 2. Industry Best Practices for Autonomous AI Companies (Paperclip Governance)
 
-In the Paperclip organizational model, autonomous execution is partitioned across specialized agent personas with clear ownership boundaries.
+Based on industry research on multi-agent software organizations (Anthropic Model Context Protocol standards, OpenAI Autonomous Agent Systems, and enterprise AI engineering guidelines), autonomous AI teams must be structured with strict separation of concerns, circuit breakers, and human-in-the-loop gates.
+
+### Core Governance Principles
+1. **Delegation Over Monolithic Execution:**
+   The Executive/CEO agent never touches code or writes PRs directly. Work is triaged, decomposed into atomic subtasks, and routed to departmental specialists.
+2. **Strict Pre-Flight & Checkout Gate:**
+   - No code is touched without an existing task registered in PACA (`http://100.66.253.3:8080`) and checked out in Paperclip (`http://100.66.253.3:3100/api`).
+   - Every task transitions to `in_progress` before work starts.
+   - Work happens exclusively in isolated git worktrees (`feature/<TASK_ID>-<slug>`). Never commit to `main`.
+3. **Deterministic Quality Gates (The Finish Protocol):**
+   - No task is completed without passing 100% of automated test suites.
+   - Every task update in PACA and Paperclip must contain a **Deliverable Report**:
+     - Repository & Path
+     - Branch (`feature/<TASK_ID>-<slug>`)
+     - Commit SHA
+     - Verification Proof (test pass logs, simulator verification)
+4. **Human Finality (The Alexander Gate):**
+   Agents only have authority to move tasks to **In Review** or create approval requests via `paperclipCreateApproval`. Only Alexander Benitez has the authority to transition work to **Done**.
+5. **Heartbeat & Token Circuit Breakers:**
+   Heartbeat worker runs are bounded by execution timeouts and token limits to prevent runaway loops. If a blocking dependency is encountered, the agent logs an escalation issue in Paperclip and yields.
+
+---
+
+## 3. Autonomous Team Roles ("The Hires")
 
 ```
                      ┌───────────────────────────┐
-                     │   Alexander Benitez       │
-                     │  (Human Gatekeeper & VP)  │
+                     │     Alexander Benitez     │
+                     │  (Human Owner & Approver) │
                      └─────────────┬─────────────┘
                                    │ Approves "In Review" -> "Done"
                      ┌─────────────▼─────────────┐
                      │  Agent 1: Executive Lead  │
-                     │  (Paperclip Orchestrator) │
+                     │  (@dashcast-orchestrator) │
                      └─────────────┬─────────────┘
                                    │
          ┌─────────────────────────┼─────────────────────────┐
@@ -53,188 +79,143 @@ In the Paperclip organizational model, autonomous execution is partitioned acros
 └─────────────────┘
 ```
 
-### Agent 1: Executive Operator (`@dashcast-orchestrator`)
-- **Mission:** Project management, task dispatch, backlog health, and PACA synchronization.
+### 1. Executive Lead (`@dashcast-orchestrator`)
+- **Role:** Chief of Staff / Product Director.
 - **Responsibilities:**
-  - Evaluates incoming media assets (`MediaToAnalyze`) and translates them into actionable engineering epics.
-  - Enforces the **PACA Pre-Flight** and **Finish Gate** rules.
-  - Coordinates cross-functional agent handoffs and maintains `PROGRESS.md` and `PAPERCLIP.md`.
+  - Triages incoming feature requests, competitor shifts, and customer feedback.
+  - Deconstructs epics into actionable child tasks in PACA and Paperclip.
+  - Maintains `PROGRESS.md`, `PAPERCLIP.md`, and roadmap milestone timelines.
+  - Ensures compliance with the Omni Memory Protocol.
 
-### Agent 2: Principal iOS & CarPlay Systems Engineer (`@dashcast-ios-lead`)
-- **Mission:** High-performance Swift/SwiftUI engineering, AVFoundation pipelines, and CarPlay framework integration.
+### 2. Principal iOS & CarPlay Systems Engineer (`@dashcast-ios-lead`)
+- **Role:** Technical Architect.
 - **Responsibilities:**
-  - Owns `CPTemplateApplicationSceneDelegate`, `CPDashboardController`, and external screen scene lifecycle.
-  - Implements video casting engines (IPTV M3U8, WebKit inline video extractors, PiP, local file streamers).
+  - Implements Swift 5.9+ / SwiftUI architecture, AVFoundation pipelines, and CarPlay framework delegates.
+  - Owns `CarPlaySceneDelegate.swift`, `CarPlayDashboardSceneDelegate.swift`, and secondary display window management.
   - Optimizes CoreLocation / CoreMotion telemetry calculation with low battery overhead.
-  - Manages StoreKit 2 Lifetime IAP transactions and restore flows.
+  - Implements StoreKit 2 Lifetime In-App Purchases and receipt validation.
 
-### Agent 3: Competitor Intelligence & Growth Scout (`@dashcast-growth-scout`)
-- **Mission:** Reverse-engineer top competitor features, track TikTok/Reels automotive trends, and optimize App Store conversion.
+### 3. Competitor Intelligence & Growth Scout (`@dashcast-scout`)
+- **Role:** Growth & Market Intelligence.
 - **Responsibilities:**
-  - Deconstructs rival releases (CarDash, CarTV, CarTube, DriveCast) on iOS App Store and TestFlight.
-  - Maintains `MediaToAnalyze-Mapping.md` with every UI change, pricing shift, and user complaint.
-  - Authors viral promo video scripts (TikTok/Reels/Shorts) highlighting our "No Subscription" lifetime model.
-  - Audits App Store metadata, keywords, and screenshots for high ASO conversion.
+  - Continuously monitors rival apps on the App Store (CarDash, CarTV, PlayCar, CarTube).
+  - Deconstructs rival releases, viral TikTok creative formats, and user dissatisfaction signals.
+  - Authors high-converting 60-second video storyboards (TikTok/Instagram Reels/YouTube Shorts).
+  - Drives App Store Optimization (ASO) keywords, subtitle copy, and screenshot sequencing.
 
-### Agent 4: Automotive UX & Ergonomics Architect (`@dashcast-auto-designer`)
-- **Mission:** Pixel-perfect 1:1 visual fidelity, automotive contrast compliance, and touch ergonomics.
+### 4. Automotive UX & Ergonomics Architect (`@dashcast-designer`)
+- **Role:** Design System & Ergonomics Lead.
 - **Responsibilities:**
-  - Enforces the Electric Racing Yellow (`#FFE600`) and OLED Deep Black (`#0C0D10`) design language.
-  - Designs in-car widget templates (metal stamped plates, tachometer clocks, vinyl animations, vehicle garage renders).
-  - Ensures minimum 48pt tap targets and glare-safe typography for vehicle lighting environments.
-  - Maintains the in-app CarPlay Emulator (`CarPlaySimulatorView.swift`) reflecting exact 800×480 in-dash bezels.
+  - Maintains the signature Electric Racing Yellow (`#FFE600`) and OLED True Black (`#0C0D10`) design system.
+  - Enforces strict automotive safety standards: minimum 48×48pt touch targets, high contrast for glare environments.
+  - Creates custom widget assets (metal stamped license plates, tachometer clocks, retro vinyl animations).
+  - Maintains the in-app CarPlay Emulator (`CarPlaySimulatorView.swift`) reflecting exact 800×480 vehicle bezels.
 
-### Agent 5: QA Automation & Release Engineer (`@dashcast-qa-deploy`)
-- **Mission:** Bulletproof automated testing, simulator regression checks, and device deployment pipelines.
+### 5. QA Automation & Release Engineer (`@dashcast-qa-deploy`)
+- **Role:** Build & Release Engineer.
 - **Responsibilities:**
-  - Maintains `project.yml` (XcodeGen) and ensures clean reproducible builds.
-  - Expands unit and integration test coverage across all core engines (Target: >85% coverage, 0 failures).
-  - Executes automated UI test runs across target simulator configurations (`iPhone 17`, `iPhone SE 3rd gen`).
-  - Manages code signing (`Team 96YG38576A`) and coordinates TestFlight builds for real-car field testing.
+  - Maintains `project.yml` (XcodeGen) to guarantee zero `.pbxproj` git merge conflicts.
+  - Enforces 100% test pass rate across all 14+ unit and integration test suites.
+  - Configures automatic code signing (`Team 96YG38576A`) and builds TestFlight release archives.
+  - Coordinates physical hardware testing across wired and wireless CarPlay head-units.
 
 ---
 
-## 3. End-to-End Workflow for Features & Fixes
+## 4. Modern iOS & CarPlay Development Best Practices
 
-Every feature or bug fix processed by Paperclip follows an immutable 5-phase SOP:
+Based on Apple Developer Documentation, WWDC sessions (WWDC22 *“Design high-quality CarPlay apps”*, WWDC23 *“Create modern CarPlay apps with SwiftUI”*, WWDC24 *“Explore CarPlay advancements”*), and top iOS engineering standards:
 
-```
-[Phase 1: Intake & Competitor Diff]
-        ↓
-[Phase 2: PACA Pre-Flight & Branching]
-        ↓
-[Phase 3: Clean Architecture Implementation]
-        ↓
-[Phase 4: Automated Testing & Simulator Verification]
-        ↓
-[Phase 5: PACA Deliverable Report & Alexander Review Gate]
-```
+### 1. Declarative Project Specification (XcodeGen / Tuist)
+- **Problem:** Teams of developers or AI agents modifying Xcode projects inevitably encounter massive merge conflicts inside `project.pbxproj`.
+- **Best Practice:** The entire project structure is declared in `project.yml`. Any file addition or build setting change is committed as clean YAML, followed by `xcodegen generate`.
 
-### Phase 1: Intake & Competitor Diff
-1. Scout inspects new reference media or competitor App Store update.
-2. Identifies:
-   - What UI component is new?
-   - What user problem does it solve?
-   - Does it improve engagement without degrading safety?
-3. Files a task draft with before/after screenshots.
+### 2. Native CarPlay Scene Manifest & Secondary Display Architecture
+- **CarPlay Scenes:** CarPlay apps must declare a `UIApplicationSceneManifest` with `CPTemplateApplicationSceneSessionRoleApplication` (`CarPlaySceneDelegate.swift`) and `CPTemplateApplicationDashboardSceneSessionRoleApplication` (`CarPlayDashboardSceneDelegate.swift`).
+- **Head-Unit Visibility:** Declaring these delegates ensures DashCast appears directly as an installed app on the vehicle's in-dash home grid.
+- **Parked Video Playback:** For video casting, DashCast establishes a secondary UIWindow on the external display screen (`UIScreen.screens` or `UIWindowScene`), rendering high-bitrate video via `AVPlayerLayer` while the vehicle is stationary.
 
-### Phase 2: PACA Pre-Flight & Branching
-1. Query PACA (`http://100.66.253.3:8080`) for the project `DashCast (iOSCarPlayVideo)` (`250c3694-30fa-414d-a9ec-aa541d659ad9`).
-2. Move target task to **In Progress** (`b6f96a62-b54d-4596-b194-f7180cc271c3`).
-3. Create feature branch off `main` or the active sprint branch following the format:
-   `feature/<TASK_ID>-<slug>` (e.g., `feature/DI-8-drive-settings-notifications`).
+### 3. CoreLocation & CoreMotion Battery Optimization
+- Use `CLLocationManager.deferredLocationUpdates` and `CLActivityType.automotiveNavigation` to ensure the GPS hardware uses automotive Kalman filtering.
+- Monitor speed thresholds (`> 5 km/h`) with minimal CPU overhead, waking the telemetry engine only when motion is confirmed via `CMMotionActivityManager`.
 
-### Phase 3: Clean Architecture Implementation
-1. Follow existing codebase patterns:
-   - Modern Swift 5.9+ / SwiftUI.
-   - Observable patterns (`@MainActor`, `@StateObject`, `ObservableObject`).
-   - Pure SwiftUI floating navigation (`LiquidCapsuleTabBar`) avoiding UIKit gesture conflicts.
-   - Decoupled services (`VehicleCatalogService`, `SoundCatalogService`, `DriveLocationService`).
-2. Run `xcodegen generate` if project structure or files are added.
-
-### Phase 4: Automated Testing & Simulator Verification
-1. Every new feature must be accompanied by dedicated unit tests in `DashCastTests/`.
-2. Run test execution:
-   ```bash
-   xcodebuild test -project DashCast.xcodeproj -scheme DashCast -destination 'platform=iOS Simulator,name=iPhone 17'
-   ```
-3. Zero failures accepted before proceeding.
-4. If visual verification is needed, launch simulator and capture artifact screenshots.
-
-### Phase 5: PACA Deliverable Report & Human Gate
-1. Commit changes with clear Conventional Commits format (`feat(...)`, `fix(...)`, `docs(...)`).
-2. Push branch to `origin`.
-3. Update PACA task description with standard Deliverable Report:
-   - **Repository**
-   - **Branch & Commit SHA**
-   - **Key Deliverables**
-   - **Verification Proof (Test logs & screenshot references)**
-4. Move task in PACA to **In Review** (`25c2971e-6b10-4fbd-9fda-ae6f825a5eba`).
-5. **Human Gate:** Only Alexander Benitez has authority to approve to **Done** (`cb550e71-512b-4b9e-b8c5-23ce3465cafc`).
+### 4. Pure SwiftUI Floating Navigation (`LiquidCapsuleTabBar`)
+- Replaces UIKit's `UITabBarController` to eliminate dropped touch events and tab state desynchronization in iOS 17/18.
+- Utilizes `.safeAreaInset(edge: .bottom)` and haptic feedback (`UIImpactFeedbackGenerator(style: .medium)`) for an ultra-responsive native feel.
 
 ---
 
-## 4. Competitor Reverse-Engineering Engine ("Keep, Kill, Disrupt")
+## 5. Connectors, MCPs & Skills Ecosystem
 
-To win the category, DashCast systematically dissects competitors:
+To empower the autonomous Paperclip team with complete capabilities, the following connectors and MCPs are integrated via **1MCP Hub** (`http://100.66.253.3:3050/mcp`):
 
-| Competitor Feature | Decision | Strategic Execution in DashCast |
+| Category | Tool / Connector | Protocol / Endpoint | Purpose & Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Governance** | **PACA MCP** | `http://100.66.253.3:8080` | Issue tracking, task status (`Todo`, `In Progress`, `In Review`, `Done`), sprint management, team assignments. |
+| **Governance** | **Paperclip MCP** | `http://100.66.253.3:3100/api` | Agent company operations, issue checkout (`paperclipCheckoutIssue`), approval requests (`paperclipCreateApproval`), document storage. |
+| **Central Hub** | **1MCP Hub** | `http://100.66.253.3:3050/mcp` | Central gateway aggregating all specialized development MCPs into a single authenticated connection. |
+| **Source Code** | **GitHub MCP** | `tools.github.*` | Automated Pull Request creation, commit tagging, issue linking, and code review comments. |
+| **Documentation** | **Context7 MCP** | `https://mcp.context7.com/mcp` | Real-time Apple Developer Documentation, iOS 17/18 SDK APIs, WWDC session code samples. |
+| **App Store CI** | **App Store Connect MCP** | Fastlane / ASC API | Automated TestFlight builds upload, tester group invitations, App Store metadata publishing. |
+| **Local Harness** | **Xcodebuild & Simctl MCP** | Local macOS CLI | Running test suites, compiler diagnostics, capturing simulator screenshots for PR verification. |
+
+### Specialized Agent Skills to Employ
+1. **`orchestration`**: Coordinates worker agents in parallel, handles heartbeats, task DAGs, and decision gates.
+2. **`fastlane-skill`**: Automates `match` certificates, `gym` compilation, and `pilot` TestFlight distribution.
+3. **`competitor-scraper`**: Regularly extracts App Store reviews, ratings, and feature updates of rival apps.
+4. **`docs` / `docx`**: Generates formatted executive reports, release notes, and marketing one-pagers for stakeholders.
+
+---
+
+## 6. Continuous Competitor Reverse-Engineering ("Keep, Kill, Disrupt")
+
+To establish market dominance, DashCast follows a systematic product strategy against competitors:
+
+| Competitor Feature | Strategy | DashCast Implementation |
 | :--- | :---: | :--- |
-| **Recurring Subscriptions ($9.99/mo)** | ❌ **KILL** | **Core Disruption:** Single $19.99 Lifetime Pass. Users pay once and own all present and future features forever. |
-| **Aggressive First-Launch Paywall** | ❌ **KILL** | Allow users to freely explore all 5 tabs, configure widgets, and test sounds before gently presenting PRO. |
-| **4-Row Cast Menu & Source Browser** | ✅ **KEEP** | 1:1 match with Media Source, Local Videos, Mirroring, and 20 preloaded online video links. |
-| **CarPlay Startup & Shutdown Audio** | ✅ **KEEP** | Automotive soundboard with engine revs, turbo spools, sci-fi chimes, and 1-tap iOS Shortcuts setup. |
-| **License Plate & Car Customization** | ⚡ **DISRUPT** | Enhanced live editor with stamped metal texture, customizable typography, color swatches, and live in-dash simulator. |
-| **Screen Mirroring Lag** | ⚡ **DISRUPT** | Direct AVPlayer secondary window rendering on CarPlay display instead of heavy lossy screen re-encoding. |
-| **CarPlay Home Grid Visibility** | ⚡ **DISRUPT** | Implement native `UIApplicationSceneManifest` CarPlay scenes so DashCast is an actual installed app on the car's head-unit. |
+| **Recurring Subscriptions ($9.99/mo)** | ❌ **KILL** | **Disruption:** Single $19.99 Lifetime Pass. Pay once, own forever. Eliminates subscription fatigue. |
+| **Intrusive First-Launch Paywall** | ❌ **KILL** | Full exploratory access to all 5 tabs (`Cast`, `Drive`, `Widgets`, `Sounds`, `Me`). Paywall is presented as an upgrade, never a hostage gate. |
+| **4-Row Cast Menu & Source Browser** | ✅ **KEEP** | 1:1 match with Media Source, Local Videos, Mirroring, and 20 streaming source links. |
+| **CarPlay Startup & Shutdown Audio** | ✅ **KEEP** | Comprehensive soundboard with engine revs, turbo spools, sci-fi chimes, and 1-tap iOS Shortcuts setup. |
+| **License Plate & Car Customization** | ⚡ **DISRUPT** | High-definition stamped metal plate text, 6 curated color swatches, 5 typography options, and real-time in-dash simulator preview. |
+| **Low-Framerate Screen Mirroring** | ⚡ **DISRUPT** | Direct `AVPlayerLayer` rendering to secondary CarPlay display, eliminating compression artifacts and touch latency. |
+| **CarPlay Head-Unit App Grid** | ⚡ **DISRUPT** | Native `CPTemplateApplicationSceneDelegate` inclusion so DashCast appears directly on the vehicle's native display menu! |
 
 ---
 
-## 5. Continuous Testing & Vehicle Validation Protocol
-
-### Tier 1: Automated Unit & Logic Testing (Local CI)
-- **Frameworks:** XCTest, Swift Testing.
-- **Coverage Areas:**
-  - `AppStateTests`: Tab switching, launch arguments (`-initialTab`, `-carplaySimulator`), pro status.
-  - `CastEngineTests`: IPTV M3U parser robustness, stream URL sanitization, playlist persistence.
-  - `DriveTelemetryTests`: Speed calculations, distance aggregation, harsh braking/acceleration penalties, trip persistence.
-  - `DriveSettingsAndNotificationTests`: Notification formatting, user preference encoding/decoding, threshold persistence.
-  - `WidgetCatalogTests` & `WidgetCustomizationTests`: Vehicle catalog filtering, plate text, typography, color swatches, offset bounds.
-  - `SoundEngineTests`: Sound catalog frequency validation, audio asset lookup, shortcut URL generation.
-  - `StoreKitTests`: Lifetime product identifiers, purchase validation, restore state.
-
-### Tier 2: In-App CarPlay Display Emulation
-- Since developers cannot sit inside a car while writing code, `CarPlaySimulatorView.swift` replicates 3 distinct hardware modes:
-  1. **App in CarPlay:** In-dash video player with aspect-fit video, progress bar, playback controls, and car dock.
-  2. **CarPlay Dashboard:** Multi-window split view showing custom live widget, map, and now-playing media tile.
-  3. **CarPlay Home Menu:** In-dash 4x2 app grid showing DashCast sitting proudly alongside native automotive apps.
-
-### Tier 3: Physical Vehicle Road Testing Matrix
-Before public App Store updates, execute testing on physical test vehicles:
-1. **Connection Types:**
-   - Wired Apple CarPlay (USB-A / USB-C direct).
-   - Wireless Factory CarPlay (e.g., BMW iDrive, Ford SYNC 4).
-   - Aftermarket Wireless Adapters (Carlinkit 5.0, Ottocast U2-Air).
-2. **Safety & Distraction Lockout:**
-   - Verify audio plays while driving.
-   - Verify video pauses or displays safe audio visualizer when vehicle speed > 5 km/h if strict safety lockout is active.
-
----
-
-## 6. Detailed Roadmap & Sprint Milestones
+## 7. Sprint Backlog & Release Roadmap
 
 ```
-Sprint 1 (Done/In Review) ──► Sprint 2 (Active Next) ──► Sprint 3 (Scaling) ──► Sprint 4 (Launch)
-Yellow Redesign               Dynamic Island &           Local RTSP/HTTP         Viral Marketing &
-CarPlay Native Scene          Background Drive           Streaming Engine        Global App Store
+Sprint 1 (Done/In Review) ──► Sprint 2 (Active Next) ──► Sprint 3 (Streaming) ──► Sprint 4 (Launch)
+Yellow Theme Parity           Dynamic Island &           Embedded Local           Viral Marketing &
+CarPlay Native Scene          Background Drive           HTTP Server              Global App Store
 ```
 
-### Sprint 1: Yellow Theme & Native CarPlay Parity (Status: In Review)
-- [x] DI-13: Catalog 32 assets and author viral promotional script.
-- [x] DI-6: Electric Yellow & Gold palette, floating Liquid Capsule dock.
-- [x] DI-7: 1:1 Cast module, 20 streaming sources, native CarPlay scene delegates.
-- [x] DI-8: Drive HUD, permissions sheet, `DriveSettingsView`, and `DriveNotificationService`.
-- [x] DI-9: Widgets ecosystem, license plate customization, typography, and live sliders.
-- [x] DI-10: 1:1 Soundboard, categories, and Shortcuts setup guide.
-- [x] DI-11: Me profile, settings, about modal, and 1:1 feedback form.
-- [x] DI-12: 14 test suites (40 tests passing), automated signing configured.
+### Sprint 1: Yellow Parity & Native CarPlay (Status: In Review)
+- [x] **DI-13**: MediaToAnalyze Ingestion (32 assets mapped) & 60s viral storyboard script.
+- [x] **DI-6**: Electric Yellow (`#FFE600`) theme and floating `LiquidCapsuleTabBar`.
+- [x] **DI-7**: 1:1 Cast module, 20 streaming sources, native `CarPlaySceneDelegate.swift`, and in-app emulator.
+- [x] **DI-8**: Drive HUD, `DriveTrackingPermissionsSheet.swift`, `DriveSettingsView.swift`, and `DriveNotificationService.swift`.
+- [x] **DI-9**: Widgets ecosystem, metal stamped plate text, color swatches, typography, and live sliders.
+- [x] **DI-10**: Sounds soundboard, categories, and Shortcuts setup guide.
+- [x] **DI-11**: "Me" driver profile, settings, about modal, and 1:1 `FeedbackView.swift`.
+- [x] **DI-12**: 14 test suites (40 tests passing), automated signing configured.
 
-### Sprint 2: Dynamic Island & Background Drive Intelligence (Next Milestone)
+### Sprint 2: Dynamic Island & Background Intelligence (Next Milestone)
 - [ ] **ActivityKit Live Activity Extension (`DashCastLiveActivity`)**:
-  - Live drive stats (speed, peak G, trip distance) on iPhone Lock Screen and Dynamic Island.
-  - "Your CarPlay Your Style" widget teaser banner matching `Live Activity when Open and in Carplay.jpeg`.
-- [ ] **CoreMotion Activity Classification**:
+  - Live driving stats (speed, peak G, trip distance) on iPhone Lock Screen and Dynamic Island.
+  - "Your CarPlay Your Style" teaser banner matching `Live Activity when Open and in Carplay.jpeg`.
+- [ ] **CoreMotion Auto-Detect Drives**:
   - Automatic drive detection (`CMMotionActivityManager.isAutomotive`) to automatically trigger trip recording without tapping Start.
-- [ ] **Trip Export & Social Share Cards**:
+- [ ] **Social Trip Share Cards**:
   - Render high-resolution Instagram Story image cards showing drive route, top speed, and vehicle avatar.
 
 ### Sprint 3: Low-Latency In-Car Streaming Server
 - [ ] **Local Embedded HTTP/HLS Server (`GCDWebServer` / SwiftNIO)**:
-  - Host local camera roll videos and transcoded streams on `http://127.0.0.1:8080` for instant CarPlay buffer-free playback.
+  - Stream local camera roll videos and transcoded streams to the car screen at 1080p 60fps with zero buffering.
 - [ ] **Picture-in-Picture (PiP) Video Bridge**:
   - Enable background playback so navigation apps (Google Maps, Waze) can display while DashCast audio continues playing.
 
-### Sprint 4: Viral Marketing, App Store Submission & Monetization
+### Sprint 4: Viral Marketing, App Store Submission & Launch
 - [ ] **Production Video Shoot**:
   - Execute `Promotional-Video-Storyboard.md` inside a modern vehicle cockpit at night.
   - Publish across TikTok, Instagram Reels, and YouTube Shorts.
@@ -243,12 +224,3 @@ CarPlay Native Scene          Background Drive           Streaming Engine       
   - Request CarPlay entitlements from Apple.
 - [ ] **Post-Launch A/B Testing**:
   - Test paywall price points ($14.99 vs $19.99 vs $24.99 Lifetime).
-
----
-
-## 7. Operational Governance Rules for Paperclip Agents
-
-1. **Strict Branching:** Never commit directly to `main`. Every unit of work must originate from a dedicated feature branch.
-2. **No Regression:** All existing 14 test suites must pass before any branch is considered ready.
-3. **PACA Synchronization:** Every pull request and release must have a corresponding task update in PACA with commit SHA and deliverable proof.
-4. **Human Finality:** The agent may only move tasks to **In Review**. Alexander Benitez is the sole authority to mark tasks **Done**.
