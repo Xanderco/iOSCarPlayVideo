@@ -60,4 +60,17 @@ All Sprint 1 deliverables (Tasks DI-5 through DI-13 / CARAA-2 through CARAA-9) w
 | **DI-19 Auto-Drive Detection** | `CARAA-11` | `@dashcast-ios-lead` | ✅ Done | `feature/DI-19-auto-drive-detection` (commit `87b8396`). `CMMotionActivityManager` auto trip start, 3-min stationary cooldown, dynamic badge, 11 unit tests in `AutoDriveDetectionTests` (100% pass). Approved to Done by Alexander Benitez. |
 | **60s Viral TikTok Campaign** | `CARAA-12` | `@dashcast-scout` | 🔵 In Progress / Briefed | Strategic brief dispatched. Script staged in `Promotional-Video-Storyboard.md`. Targeting @cartv_cast2car $9.99/mo paywall vs $19.99 Lifetime ownership. |
 
+---
+
+## 🔮 Sprint 3 Status & Feature Decomposition (From Competitor Intelligence)
+Derived from `@dashcast-scout` competitor analysis (`Docs/Marketing/Competitor-Analysis.md`) and evaluated under the CEO **'Keep, Kill, Disrupt'** thesis:
+
+| Task / Activity | Issue ID | Assignee | Priority | Scope Summary | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **DI-21 Offline Deadzone Cache Engine** | `CARAA-14` | `@dashcast-ios-lead` | High | Background video preloading and local storage cache manager for cellular deadzones (tunnels, mountains). Up to 50GB local cache. | ⚪ Todo |
+| **DI-22 Offline Media Library UX** | `CARAA-15` | `@dashcast-designer` | High | 1:1 Electric Racing Yellow UI for managing offline cached streams, storage gauge, download progress indicators, and offline mode toggle. | ⚪ Todo |
+| **DI-23 Social Score Card Image Renderer** | `CARAA-16` | `@dashcast-ios-lead` | Medium | Off-screen 1080x1920 Instagram Story / TikTok card bitmap generator from `SmoothnessScorer` telemetry + native iOS ShareSheet. | ⚪ Todo |
+| **DI-24 Social Share Card Templates** | `CARAA-17` | `@dashcast-designer` | Medium | High-impact Electric Racing Yellow and OLED black social share story card templates (driver grade S/A/B, peak G-force, route polyline). | ⚪ Todo |
+
+
 
