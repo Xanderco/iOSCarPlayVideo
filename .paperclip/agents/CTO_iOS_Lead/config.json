@@ -1,0 +1,16 @@
+{
+  "adapterType": "opencode_local",
+  "adapterConfig": {
+    "command": "C:\\Program Files\\nodejs\\node_modules\\@opencode\\cli\\bin\\opencode.exe",
+    "model": "omniroute/Xander-agents",
+    "cwd": "C:\\Users\\benit\\Repos\\iOSCarPlayVideo",
+    "timeoutSec": 2400,
+    "graceSec": 15,
+    "dangerouslySkipPermissions": true,
+    "env": {
+      "PACA_API_URL": "http://100.66.253.3:8080",
+      "PACA_API_KEY": "paca_2803e45267d5391beed96c25a1df7cc415fa7a5609bc7456204710cdedfbf504",
+      "PAPERCLIP_API_URL": "http://100.66.253.3:3100"
+    }
+  }
+}
