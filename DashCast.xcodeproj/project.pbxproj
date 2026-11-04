@@ -756,6 +756,7 @@
 				DEVELOPMENT_TEAM = 96YG38576A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = DashCast;
+				INFOPLIST_KEY_CFBundleURLTypes = "[[\"CFBundleURLSchemes\": [\"dashcast\"], \"CFBundleURLName\": \"com.xanderco.dashcast\"]]";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "DashCast tracks your route and speed while driving to score your trips.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "DashCast uses your location to track driving speed, trip stats, and street territory exploration.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "DashCast analyzes motion sensor data to detect smooth acceleration, braking, and cornering.";
@@ -784,6 +785,7 @@
 				DEVELOPMENT_TEAM = 96YG38576A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = DashCast;
+				INFOPLIST_KEY_CFBundleURLTypes = "[[\"CFBundleURLSchemes\": [\"dashcast\"], \"CFBundleURLName\": \"com.xanderco.dashcast\"]]";
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "DashCast tracks your route and speed while driving to score your trips.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "DashCast uses your location to track driving speed, trip stats, and street territory exploration.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "DashCast analyzes motion sensor data to detect smooth acceleration, braking, and cornering.";

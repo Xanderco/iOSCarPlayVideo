@@ -37,6 +37,10 @@ targets:
         INFOPLIST_KEY_NSMotionUsageDescription: "DashCast analyzes motion sensor data to detect smooth acceleration, braking, and cornering."
         INFOPLIST_KEY_NSPhotoLibraryUsageDescription: "DashCast accesses your photos so you can import personal videos and widget backgrounds."
         GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleURLTypes:
+          - CFBundleURLName: "com.xanderco.dashcast"
+            CFBundleURLSchemes:
+              - "dashcast"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 
   DashCastTests:

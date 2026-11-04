@@ -12,6 +12,15 @@ struct DashCastApp: App {
                 .onAppear {
                     ExternalDisplayManager.shared.checkForExistingExternalDisplay()
                 }
+                .onOpenURL { url in
+                    guard url.scheme == "dashcast" else { return }
+                    if url.host == "tab" {
+                        let tabName = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                        appState.selectTabByName(tabName)
+                    } else if url.host == "unlock-pro" {
+                        appState.unlockProLifetime()
+                    }
+                }
         }
     }
 }

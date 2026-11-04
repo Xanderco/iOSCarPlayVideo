@@ -34,6 +34,34 @@ public final class AppState: ObservableObject {
     public init(isProLifetimeUnlocked: Bool = false) {
         self.isProLifetimeUnlocked = isProLifetimeUnlocked
         self.useMilesPerHour = UserDefaults.standard.bool(forKey: "useMilesPerHour")
+        applyCommandLineArguments()
+    }
+
+    private func applyCommandLineArguments() {
+        let args = ProcessInfo.processInfo.arguments
+        let env = ProcessInfo.processInfo.environment
+
+        if args.contains("-unlockPro") || env["SIMCTL_CHILD_UNLOCK_PRO"] == "1" {
+            self.isProLifetimeUnlocked = true
+        }
+
+        if let tabIdx = args.firstIndex(of: "-selectedTab"), tabIdx + 1 < args.count {
+            selectTabByName(args[tabIdx + 1])
+        } else if let envTab = env["SIMCTL_CHILD_SELECTED_TAB"] {
+            selectTabByName(envTab)
+        }
+    }
+
+    public func selectTabByName(_ name: String) {
+        let normalized = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        switch normalized {
+        case "cast": self.selectedTab = .cast
+        case "drive": self.selectedTab = .drive
+        case "territory": self.selectedTab = .territory
+        case "widgets": self.selectedTab = .widgets
+        case "sounds": self.selectedTab = .sounds
+        default: break
+        }
     }
 
     public func unlockProLifetime() {
