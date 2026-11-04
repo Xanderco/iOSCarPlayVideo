@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B10300010000000000000001 /* DeadzoneCacheModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10300010000000000000001 /* DeadzoneCacheModel.swift */; };
+		B10300010000000000000002 /* DeadzoneCacheStorageEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10300010000000000000002 /* DeadzoneCacheStorageEngine.swift */; };
+		B10300010000000000000003 /* DeadzoneCacheService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10300010000000000000003 /* DeadzoneCacheService.swift */; };
+		B10300010000000000000004 /* MediaPreloaderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10300010000000000000004 /* MediaPreloaderService.swift */; };
+		B10300010000000000000005 /* OfflineDeadzoneCacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10300010000000000000005 /* OfflineDeadzoneCacheTests.swift */; };
 		0A10D3C06073B0758530F093 /* AutomotiveVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */; };
 		1627D9EBF17E8A798C354764 /* IPTVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88D44D627DAD31196345969 /* IPTVParser.swift */; };
 		17879C0D0F61BB9D2E290658 /* MeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */; };
@@ -101,6 +106,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A10300010000000000000001 /* DeadzoneCacheModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadzoneCacheModel.swift; sourceTree = "<group>"; };
+		A10300010000000000000002 /* DeadzoneCacheStorageEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadzoneCacheStorageEngine.swift; sourceTree = "<group>"; };
+		A10300010000000000000003 /* DeadzoneCacheService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeadzoneCacheService.swift; sourceTree = "<group>"; };
+		A10300010000000000000004 /* MediaPreloaderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreloaderService.swift; sourceTree = "<group>"; };
+		A10300010000000000000005 /* OfflineDeadzoneCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineDeadzoneCacheTests.swift; sourceTree = "<group>"; };
 		00402A9DBF128AB5CC2E9A52 /* UsageMetricsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMetricsManager.swift; sourceTree = "<group>"; };
 		00F8229DAD5E36941BA5E63D /* DashCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DashCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		023D3E03ED4C0A490E7F195D /* ScreenBroadcastPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenBroadcastPickerView.swift; sourceTree = "<group>"; };
@@ -255,6 +265,7 @@
 				6E5DCF30D2CC8EBC1B8C4FE6 /* AppStateTests.swift */,
 				C32F40D0385588C72CEA88D1 /* CarPlayDiagnosticTests.swift */,
 				31882871FC3F01666AC3BFDF /* CastEngineTests.swift */,
+				A10300010000000000000005 /* OfflineDeadzoneCacheTests.swift */,
 				D7F32483F986606169E211AB /* DriveSettingsAndNotificationTests.swift */,
 				349967648683051138B732C0 /* DriveTelemetryTests.swift */,
 				BC56F59AB4EB1823B29E3731 /* EndToEndFlowTests.swift */,
@@ -396,9 +407,21 @@
 			path = Persistence;
 			sourceTree = "<group>";
 		};
+		G10300010000000000000001 /* OfflineDeadzone */ = {
+			isa = PBXGroup;
+			children = (
+				A10300010000000000000001 /* DeadzoneCacheModel.swift */,
+				A10300010000000000000002 /* DeadzoneCacheStorageEngine.swift */,
+				A10300010000000000000003 /* DeadzoneCacheService.swift */,
+				A10300010000000000000004 /* MediaPreloaderService.swift */,
+			);
+			path = OfflineDeadzone;
+			sourceTree = "<group>";
+		};
 		C095EF3E38FD6163DF994949 /* Cast */ = {
 			isa = PBXGroup;
 			children = (
+				G10300010000000000000001 /* OfflineDeadzone */,
 				A895883D2E1C02218562C54B /* AirPlayRoutePickerRepresentable.swift */,
 				B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */,
 				EC284E325ADDDC3EDEBFAE64 /* CarCastGuideModalView.swift */,
@@ -577,6 +600,7 @@
 				F10EFC48F0C6599343713CEC /* AppStateTests.swift in Sources */,
 				D562D9A81C3D205531CA0C1D /* CarPlayDiagnosticTests.swift in Sources */,
 				CEED4B26193F145A32A7A205 /* CastEngineTests.swift in Sources */,
+				B10300010000000000000005 /* OfflineDeadzoneCacheTests.swift in Sources */,
 				78FD907E8EF3E5A779D23726 /* DriveSettingsAndNotificationTests.swift in Sources */,
 				EBB50A478259AD81DBE37624 /* DriveTelemetryTests.swift in Sources */,
 				89B231625985445135293E40 /* EndToEndFlowTests.swift in Sources */,
@@ -606,6 +630,10 @@
 				324D5F8B85E84E295D451E51 /* CarPlaySceneDelegate.swift in Sources */,
 				DD4F3BD817A7E006687ABEB6 /* CarPlaySimulatorView.swift in Sources */,
 				3808B801ACC0099B6F315CED /* CastHomeView.swift in Sources */,
+				B10300010000000000000001 /* DeadzoneCacheModel.swift in Sources */,
+				B10300010000000000000002 /* DeadzoneCacheStorageEngine.swift in Sources */,
+				B10300010000000000000003 /* DeadzoneCacheService.swift in Sources */,
+				B10300010000000000000004 /* MediaPreloaderService.swift in Sources */,
 				E162566470FE426E6EBB7881 /* ChannelModel.swift in Sources */,
 				8941B296D22CF0493F91A8DF /* DashCastApp.swift in Sources */,
 				965B92D8EBC564D0251467EE /* DriveHomeView.swift in Sources */,

@@ -12,6 +12,9 @@ public final class VideoPlayerService: ObservableObject {
     @Published public private(set) var duration: Double = 0
     @Published public private(set) var isBuffering: Bool = false
     @Published public var isMuted: Bool = false
+    @Published public private(set) var isOfflinePlayback: Bool = false
+    @Published public private(set) var isDeadzoneFallbackActive: Bool = false
+    @Published public private(set) var activeCacheItem: DeadzoneCacheItem? = nil
 
     public let player: AVPlayer = AVPlayer()
     private var timeObserverToken: Any?
@@ -45,8 +48,21 @@ public final class VideoPlayerService: ObservableObject {
 
     public func load(channel: ChannelModel) {
         self.currentChannel = channel
-        let asset = AVURLAsset(url: channel.streamURL)
-        let playerItem = AVPlayerItem(asset: asset)
+
+        let playerItem: AVPlayerItem
+        if let localURL = DeadzoneCacheService.shared.localURL(for: channel.streamURL) {
+            self.isOfflinePlayback = true
+            self.activeCacheItem = DeadzoneCacheService.shared.item(for: channel.streamURL)
+            if let cacheId = self.activeCacheItem?.id {
+                DeadzoneCacheService.shared.touchItem(id: cacheId)
+            }
+            playerItem = AVPlayerItem(url: localURL)
+        } else {
+            self.isOfflinePlayback = false
+            self.activeCacheItem = nil
+            let asset = AVURLAsset(url: channel.streamURL)
+            playerItem = AVPlayerItem(asset: asset)
+        }
 
         statusObserver?.invalidate()
         statusObserver = playerItem.observe(\.status, options: [.new]) { [weak self] item, _ in
@@ -57,6 +73,9 @@ public final class VideoPlayerService: ObservableObject {
                     self.isBuffering = false
                 } else if item.status == .failed {
                     self.isBuffering = false
+                    if !self.isOfflinePlayback {
+                        self.triggerDeadzoneFallback()
+                    }
                 }
             }
         }
@@ -64,6 +83,15 @@ public final class VideoPlayerService: ObservableObject {
         player.replaceCurrentItem(with: playerItem)
         UsageMetricsManager.shared.recordVideoPlayed()
         play()
+    }
+
+    /// Automatically triggers seamless switchover to preloaded offline deadzone cache when cellular drops
+    public func triggerDeadzoneFallback() {
+        guard !isDeadzoneFallbackActive else { return }
+        if let fallbackChannel = DeadzoneCacheService.shared.firstAvailableOfflineChannel() {
+            self.isDeadzoneFallbackActive = true
+            self.load(channel: fallbackChannel)
+        }
     }
 
     public func play() {

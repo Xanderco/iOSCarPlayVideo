@@ -20,10 +20,29 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
     }
 
     private func setupCarPlayRootTemplate(interfaceController: CPInterfaceController) {
-        // Tab 1: Library (Channels & Videos)
-        let libraryItems: [CPListItem] = IPTVParser.samplePlaylist.map { channel in
-            let item = CPListItem(text: channel.name, detailText: channel.groupTitle)
-            item.handler = { [weak self] _, completion in
+        // Tab 1: Library (Channels & Videos with Offline Deadzone Cache Support)
+        var librarySections: [CPListSection] = []
+
+        let offlineChannels = DeadzoneCacheService.shared.allOfflineChannels()
+        if !offlineChannels.isEmpty {
+            let offlineItems: [CPListItem] = offlineChannels.map { channel in
+                let item = CPListItem(text: channel.name, detailText: "Cached for Deadzones • 1080p")
+                item.handler = { _, completion in
+                    Task { @MainActor in
+                        VideoPlayerService.shared.load(channel: channel)
+                        completion()
+                    }
+                }
+                return item
+            }
+            librarySections.append(CPListSection(items: offlineItems, header: "Offline Deadzone Cache"))
+        }
+
+        let standardItems: [CPListItem] = IPTVParser.samplePlaylist.map { channel in
+            let isCached = DeadzoneCacheService.shared.isCached(sourceURL: channel.streamURL)
+            let detail = isCached ? "Cached Offline • Ready for Deadzones" : channel.groupTitle
+            let item = CPListItem(text: channel.name, detailText: detail)
+            item.handler = { _, completion in
                 Task { @MainActor in
                     VideoPlayerService.shared.load(channel: channel)
                     completion()
@@ -31,7 +50,9 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
             }
             return item
         }
-        let libraryList = CPListTemplate(title: "Library", sections: [CPListSection(items: libraryItems)])
+        librarySections.append(CPListSection(items: standardItems, header: "Channels & Media"))
+
+        let libraryList = CPListTemplate(title: "Library", sections: librarySections)
         libraryList.tabTitle = "Library"
         libraryList.tabImage = UIImage(systemName: "tv.fill")
 
