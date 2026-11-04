@@ -3,6 +3,7 @@ import SwiftUI
 public struct TripSummaryView: View {
     @Environment(\.dismiss) private var dismiss
     public let trip: TripModel
+    @State private var showingShareSheet: Bool = false
 
     public init(trip: TripModel) {
         self.trip = trip
@@ -75,17 +76,51 @@ public struct TripSummaryView: View {
                         }
                         .padding(.horizontal)
 
+                        // Share Story Button (DI-24)
+                        Button {
+                            showingShareSheet = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "square.and.arrow.up.fill")
+                                    .font(.system(size: 16, weight: .bold))
+                                Text("Share Post-Drive Story")
+                                    .font(.system(size: 15, weight: .bold))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(LinearGradient.dashAccentGradient)
+                            .foregroundStyle(Color.dashBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .shadow(color: Color.dashYellow.opacity(0.35), radius: 8, y: 3)
+                        }
+                        .padding(.horizontal)
+
                         GlowButton(title: "Done", iconName: "checkmark") {
                             dismiss()
                         }
                         .padding(.horizontal)
-                        .padding(.top, 10)
+                        .padding(.top, 4)
                     }
                     .padding(.vertical)
                 }
             }
             .navigationTitle("Trip Summary")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingShareSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.dashYellow)
+                            .frame(width: 48, height: 48)
+                    }
+                }
+            }
+            .sheet(isPresented: $showingShareSheet) {
+                SocialShareSheetView(trip: trip)
+            }
         }
     }
 
