@@ -56,7 +56,8 @@ All Sprint 1 deliverables (Tasks DI-5 through DI-13 / CARAA-2 through CARAA-9) w
 
 | Task / Activity | Issue ID | Assignee | Status | Deliverables & Verification |
 | :--- | :--- | :--- | :--- | :--- |
-| **DI-18 Dynamic Island & Live Activities** | `CARAA-10` | `@dashcast-ios-lead` | 🟡 In Review | `feature/DI-18-live-activities` (commit `225c341`). Real-time speed, dynamic/peak G-force, Lock Screen 1:1 teaser card, 8 unit tests in `DashCastLiveActivityTests` (100% pass). |
-| **DI-19 Auto-Drive Detection** | `CARAA-11` | `@dashcast-ios-lead` | 🟡 In Review (PACA Done) | `feature/DI-19-auto-drive-detection` (commit `87b8396`). `CMMotionActivityManager` auto trip start, 3-min stationary cooldown, dynamic badge, 11 unit tests in `AutoDriveDetectionTests` (100% pass). |
+| **DI-18 Dynamic Island & Live Activities** | `CARAA-10` | `@dashcast-ios-lead` | ✅ Done | `feature/DI-18-live-activities` (commit `225c341`). Real-time speed, dynamic/peak G-force, Lock Screen 1:1 teaser card, 8 unit tests in `DashCastLiveActivityTests` (100% pass). Approved to Done by Alexander Benitez. |
+| **DI-19 Auto-Drive Detection** | `CARAA-11` | `@dashcast-ios-lead` | ✅ Done | `feature/DI-19-auto-drive-detection` (commit `87b8396`). `CMMotionActivityManager` auto trip start, 3-min stationary cooldown, dynamic badge, 11 unit tests in `AutoDriveDetectionTests` (100% pass). Approved to Done by Alexander Benitez. |
 | **60s Viral TikTok Campaign** | `CARAA-12` | `@dashcast-scout` | 🔵 In Progress / Briefed | Strategic brief dispatched. Script staged in `Promotional-Video-Storyboard.md`. Targeting @cartv_cast2car $9.99/mo paywall vs $19.99 Lifetime ownership. |
+
 
