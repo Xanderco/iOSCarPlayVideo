@@ -12,6 +12,7 @@ public struct MeHomeView: View {
     @State private var showingRateAlert: Bool = false
     @State private var showingShareSheet: Bool = false
     @State private var showingDriveDetails: Bool = false
+    @State private var showingCacheSettings: Bool = false
     @State private var selectedVehicleIndex: Int = 0
 
     private let vehicles = VehicleCatalogService.shared.vehicles
@@ -67,6 +68,9 @@ public struct MeHomeView: View {
             }
             .sheet(isPresented: $showingDriveDetails) {
                 DriveSettingsView()
+            }
+            .sheet(isPresented: $showingCacheSettings) {
+                OfflineCacheSettingsView()
             }
             .alert("Rate DashCast", isPresented: $showingRateAlert) {
                 Button("5 Stars ⭐⭐⭐⭐⭐") {}
@@ -227,6 +231,12 @@ public struct MeHomeView: View {
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
+            menuItemRow(icon: "internaldrive.fill", title: "Offline Storage & Cache") {
+                showingCacheSettings = true
+            }
+
+            Divider().background(Color.dashBorder.opacity(0.5))
+
             menuItemRow(icon: "gearshape.fill", title: "Settings") {
                 showingSettings = true
             }
@@ -362,6 +372,31 @@ public struct MeHomeView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 14)
+
+                            Divider().background(Color.dashBorder.opacity(0.5))
+
+                            // Offline Storage Quota
+                            Button {
+                                showingSettings = false
+                                showingCacheSettings = true
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "internaldrive.fill")
+                                        .foregroundStyle(Color.dashYellow)
+                                    Text("Offline Storage Quota")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundStyle(Color.dashTextPrimary)
+                                    Spacer()
+                                    Text("\(PersistenceController.shared.loadUserPreferences().offlineCacheMaxGigabytes) GB")
+                                        .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                                        .foregroundStyle(Color.dashYellow)
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Color.dashTextMuted)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                            }
 
                             Divider().background(Color.dashBorder.opacity(0.5))
 

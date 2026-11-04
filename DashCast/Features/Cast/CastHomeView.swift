@@ -14,10 +14,12 @@ public struct CastHomeView: View {
     @State private var showingFavorites: Bool = false
     @State private var showingBroadcastPicker: Bool = false
     @State private var showingCarPlaySimulator: Bool = false
+    @State private var showingOfflineMedia: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
     @State private var m3uURLInput: String = ""
     @State private var channels: [ChannelModel] = IPTVParser.samplePlaylist
+    @StateObject private var cacheService = DeadzoneCacheService.shared
 
     public init() {}
 
@@ -36,7 +38,12 @@ public struct CastHomeView: View {
                                 .padding(.horizontal, 16)
                         }
 
-                        // Main 4-Row Source Menu Card (Exact 1:1 CarDash layout)
+                        // Deadzone Mode Indicator Banner
+                        if cacheService.isDeadzoneActive {
+                            deadzoneBanner
+                        }
+
+                        // Main 5-Row Source Menu Card (Exact 1:1 CarDash layout)
                         mainSourceMenuCard
 
                         // CarPlay Connection Illustration & Status Section
@@ -91,8 +98,23 @@ public struct CastHomeView: View {
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
                         }
+
+                        Button {
+                            showingOfflineMedia = true
+                        } label: {
+                            Image(systemName: cacheService.isDeadzoneActive ? "antenna.radiowaves.left.and.right.slash" : "internaldrive.fill")
+                                .font(.system(size: 13, weight: .bold))
+                                .foregroundStyle(cacheService.isDeadzoneActive ? Color.dashBackground : Color.dashYellow)
+                                .frame(width: 34, height: 34)
+                                .background(cacheService.isDeadzoneActive ? Color.dashYellow : Color.dashSurface)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.dashYellow.opacity(0.4), lineWidth: 1))
+                        }
                     }
                 }
+            }
+            .sheet(isPresented: $showingOfflineMedia) {
+                OfflineMediaLibraryView()
             }
             .sheet(isPresented: $showingCastGuide) {
                 CarCastGuideModalView()
@@ -218,6 +240,22 @@ public struct CastHomeView: View {
                     icon: "globe",
                     title: "Browser",
                     subtitle: "Explore websites"
+                )
+            }
+            .buttonStyle(.plain)
+
+            Divider().background(Color.dashBorder.opacity(0.6))
+
+            // Row 5: Offline Media & Cache (DI-22)
+            Button {
+                showingOfflineMedia = true
+            } label: {
+                menuRow(
+                    icon: "internaldrive.fill",
+                    title: "Offline Media & Cache",
+                    subtitle: cacheService.isDeadzoneActive
+                        ? "Deadzone playback active • \(cacheService.metrics.itemCount) clips"
+                        : "\(cacheService.metrics.itemCount) clips cached • \(cacheService.metrics.formattedUsage)"
                 )
             }
             .buttonStyle(.plain)
@@ -553,6 +591,43 @@ public struct CastHomeView: View {
                 }
             }
         }
+    }
+
+    private var deadzoneBanner: some View {
+        Button {
+            showingOfflineMedia = true
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "antenna.radiowaves.left.and.right.slash")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Color.dashBackground)
+
+                Text("DEADZONE PLAYBACK ACTIVE")
+                    .font(.system(size: 12, weight: .heavy))
+                    .foregroundStyle(Color.dashBackground)
+
+                Spacer()
+
+                Text("LOCAL CACHE")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.dashBackground.opacity(0.2))
+                    .foregroundStyle(Color.dashBackground)
+                    .clipShape(Capsule())
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(Color.dashBackground)
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 44)
+            .background(Color.dashYellow)
+            .clipShape(Capsule())
+            .shadow(color: Color.dashYellow.opacity(0.4), radius: 6, x: 0, y: 2)
+            .padding(.horizontal, 16)
+        }
+        .buttonStyle(.plain)
     }
 
     private func loadM3UFromURL() {

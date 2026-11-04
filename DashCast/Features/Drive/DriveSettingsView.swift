@@ -8,6 +8,7 @@ public struct DriveSettingsView: View {
     @State private var preferences: UserPreferences = PersistenceController.shared.loadUserPreferences()
     @State private var showingPermissionsSheet: Bool = false
     @State private var showingVehiclePicker: Bool = false
+    @State private var showingCacheSettings: Bool = false
 
     private let minimumDriveOptions: [Double] = [50, 100, 250, 500, 1000]
 
@@ -31,6 +32,9 @@ public struct DriveSettingsView: View {
 
                         // NOTIFICATIONS Section
                         notificationsSection
+
+                        // STORAGE & CACHE Section
+                        storageCacheSection
 
                         // PERMISSIONS Section
                         permissionsSection
@@ -61,6 +65,9 @@ public struct DriveSettingsView: View {
             }
             .sheet(isPresented: $showingVehiclePicker) {
                 vehiclePickerSheet
+            }
+            .sheet(isPresented: $showingCacheSettings) {
+                OfflineCacheSettingsView()
             }
         }
     }
@@ -274,6 +281,51 @@ public struct DriveSettingsView: View {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Storage & Cache Section
+
+    private var storageCacheSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("OFFLINE STORAGE CACHE")
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(Color.dashTextMuted)
+                .padding(.horizontal, 4)
+
+            Button {
+                showingCacheSettings = true
+            } label: {
+                HStack(spacing: 12) {
+                    ZStack {
+                        Circle()
+                            .fill(Color.dashSurfaceHighlight)
+                            .frame(width: 36, height: 36)
+                        Image(systemName: "internaldrive.fill")
+                            .font(.system(size: 15))
+                            .foregroundStyle(Color.dashYellow)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Deadzone Cache & Quota")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.dashTextPrimary)
+                        Text("\(preferences.offlineCacheMaxGigabytes) GB quota • \(DeadzoneCacheService.shared.metrics.itemCount) clips cached")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dashTextSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.dashTextMuted)
+                }
+                .padding(14)
+                .background(Color.dashSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+            .buttonStyle(.plain)
         }
     }
 
