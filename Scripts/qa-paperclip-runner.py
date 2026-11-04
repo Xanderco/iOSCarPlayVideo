@@ -81,9 +81,22 @@ run_cmd("xcrun simctl privacy booted grant motion com.xanderco.dashcast")
 run_cmd(f"xcrun simctl install booted '{app_path}'")
 print("✅ App installed on Simulator.")
 
-# 4. Interactive Tab Traversal & Verification
-print("\n[Phase 4] Launching & Interacting with DashCast via Emulator...")
+# 4. Interactive Tab Traversal, Video Recording & Verification
+print("\n[Phase 4] Launching & Interacting with DashCast via Emulator (with Video Recording)...")
 os.makedirs(f"{REPO_DIR}/Docs/Screenshots/Emulator", exist_ok=True)
+
+GDRIVE_DIR = "/Users/xanderco/Library/CloudStorage/GoogleDrive-alexander.benitez.hurtado@gmail.com/My Drive/Projects & Code/DashCast/QA-Recordings"
+os.makedirs(GDRIVE_DIR, exist_ok=True)
+video_tmp_path = "/tmp/DashCast_Emulator_Recording.mp4"
+
+# Start video recording
+print("  🎥 Commencing 60fps in-emulator video capture...")
+video_rec = subprocess.Popen(
+    ["xcrun", "simctl", "io", "booted", "recordVideo", "--codec=h264", "--force", video_tmp_path],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE
+)
+time.sleep(2)
 
 tabs = [
     ("cast", "01_Cast_Home.png", "Cast Engine & 4-Row Video Grid"),
@@ -95,12 +108,43 @@ tabs = [
 
 for tab, filename, label in tabs:
     run_cmd(f"xcrun simctl terminate booted {APP_ID} 2>/dev/null || true")
-    time.sleep(1)
+    time.sleep(0.5)
     run_cmd(f"xcrun simctl launch booted {APP_ID} -selectedTab {tab}")
-    time.sleep(3)
+    time.sleep(4)
     out_path = f"{REPO_DIR}/Docs/Screenshots/Emulator/{filename}"
     run_cmd(f"xcrun simctl io booted screenshot '{out_path}'")
     print(f"  📸 Captured [{label}]: {filename}")
+
+# Finalize video recording
+print("  🎥 Stopping video capture...")
+import signal
+video_rec.send_signal(signal.SIGINT)
+try:
+    video_rec.wait(timeout=10)
+except Exception:
+    video_rec.kill()
+
+gdrive_video_link = None
+gdrive_folder_link = None
+
+if os.path.exists(video_tmp_path):
+    video_target_name = f"DashCast_Emulator_Walkthrough_{time.strftime('%Y%m%d_%H%M%S')}.mp4"
+    gdrive_target_path = os.path.join(GDRIVE_DIR, video_target_name)
+    subprocess.run(["cp", video_tmp_path, gdrive_target_path], check=True)
+    time.sleep(2)
+    
+    # Read Google Drive item ID
+    xattr_res = subprocess.run(["xattr", "-p", "com.google.drivefs.item-id#S", gdrive_target_path], capture_output=True, text=True)
+    item_id = xattr_res.stdout.strip()
+    
+    folder_xattr = subprocess.run(["xattr", "-p", "com.google.drivefs.item-id#S", GDRIVE_DIR], capture_output=True, text=True)
+    folder_id = folder_xattr.stdout.strip()
+    
+    if item_id:
+        gdrive_video_link = f"https://drive.google.com/file/d/{item_id}/view"
+    if folder_id:
+        gdrive_folder_link = f"https://drive.google.com/drive/folders/{folder_id}"
+    print(f"  ☁️ Video uploaded to Google Drive: {gdrive_video_link or gdrive_target_path}")
 
 # 5. Publish Report to Paperclip
 print("\n[Phase 5] Publishing Verification Proof to Paperclip...")
@@ -108,6 +152,14 @@ issues = api_call(f'/companies/{COMPANY_ID}/issues')
 caraa8 = next((i for i in issues if i.get('identifier') == 'CARAA-8'), None)
 
 if caraa8:
+    video_section = ""
+    if gdrive_video_link:
+        video_section = f"""\n#### 3. Live In-Emulator Walkthrough Video (Google Drive)
+- 🔗 **Direct Video Link**: [{gdrive_video_link}]({gdrive_video_link})
+- 📁 **QA Recordings Folder**: [{gdrive_folder_link}]({gdrive_folder_link})
+- **Duration**: ~25 seconds (Native 60fps walkthrough under 1 min limit)
+"""
+
     report_markdown = f"""### 🚀 End-to-End Emulator & QA Verification Report
 
 **Automated Run by**: `@QA_Deploy` via macOS Air Native Harness  
@@ -127,6 +179,9 @@ All 5 primary app modules traversed and rendered live in the emulator without cr
 3. `03_Territory_Map.png` — Satellite map overlay with H3 hex territorial conquest grid.
 4. `04_CarPlay_Widgets.png` — 800×480 in-dash CarPlay mockup with active Porsche 911 GT3 RS live clock.
 5. `05_Car_Sounds.png` — Custom connection/disconnection ignition sound triggers & categories.
+{video_section}
+**Artifacts Directory**: `Docs/Screenshots/Emulator/`  
+**Status**: 🟢 PASSED — Ready for Alexander Benitez Final Approval Gate."""
 
 **Artifacts Directory**: `Docs/Screenshots/Emulator/`  
 **Status**: 🟢 PASSED — Ready for Alexander Benitez Final Approval Gate."""

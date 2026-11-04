@@ -21,7 +21,9 @@ This script automatically:
 3. Provisions simulator privacy permissions (Location, Motion, Photos).
 4. Boots and traverses each module in the simulator (`Cast`, `Drive`, `Territory`, `Widgets`, `Sounds`).
 5. Captures visual screenshots to `Docs/Screenshots/Emulator/`.
-6. Publishes the verification report and visual evidence directly to Paperclip.
+6. Films a 60fps walkthrough video (< 1 min) of the interactive test run.
+7. Uploads the video to Google Drive (`Projects & Code/DashCast/QA-Recordings`).
+8. Publishes the verification report, screenshots, and direct Google Drive video link to Paperclip.
 
 ## Responsibilities:
 - Maintain `project.yml` (XcodeGen) to guarantee zero `.pbxproj` git merge conflicts.
