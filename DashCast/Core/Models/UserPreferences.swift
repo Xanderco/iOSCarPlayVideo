@@ -13,6 +13,7 @@ public struct UserPreferences: Codable {
     public var driveVehicleName: String
     public var driveVehicleImage: String
     public var liveActivitiesEnabled: Bool
+    public var autoDriveCooldownSeconds: Double
 
     public init(
         useMilesPerHour: Bool = false,
@@ -26,7 +27,8 @@ public struct UserPreferences: Codable {
         driveCountry: String = "Colombia",
         driveVehicleName: String = "Chevrolet Trax",
         driveVehicleImage: String = "car_chevrolet_corvette",
-        liveActivitiesEnabled: Bool = true
+        liveActivitiesEnabled: Bool = true,
+        autoDriveCooldownSeconds: Double = 180.0
     ) {
         self.useMilesPerHour = useMilesPerHour
         self.isProLifetimeUnlocked = isProLifetimeUnlocked
@@ -40,6 +42,7 @@ public struct UserPreferences: Codable {
         self.driveVehicleName = driveVehicleName
         self.driveVehicleImage = driveVehicleImage
         self.liveActivitiesEnabled = liveActivitiesEnabled
+        self.autoDriveCooldownSeconds = autoDriveCooldownSeconds
     }
 
     enum CodingKeys: String, CodingKey {
@@ -55,6 +58,7 @@ public struct UserPreferences: Codable {
         case driveVehicleName
         case driveVehicleImage
         case liveActivitiesEnabled
+        case autoDriveCooldownSeconds
     }
 
     public init(from decoder: Decoder) throws {
@@ -71,5 +75,6 @@ public struct UserPreferences: Codable {
         driveVehicleName = try container.decodeIfPresent(String.self, forKey: .driveVehicleName) ?? "Chevrolet Trax"
         driveVehicleImage = try container.decodeIfPresent(String.self, forKey: .driveVehicleImage) ?? "car_chevrolet_corvette"
         liveActivitiesEnabled = try container.decodeIfPresent(Bool.self, forKey: .liveActivitiesEnabled) ?? true
+        autoDriveCooldownSeconds = try container.decodeIfPresent(Double.self, forKey: .autoDriveCooldownSeconds) ?? 180.0
     }
 }

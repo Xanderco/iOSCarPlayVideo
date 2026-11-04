@@ -6,6 +6,7 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         let prefs = UserPreferences()
         XCTAssertTrue(prefs.autoDetectDrives)
         XCTAssertEqual(prefs.minimumDriveMeters, 50.0)
+        XCTAssertEqual(prefs.autoDriveCooldownSeconds, 180.0)
         XCTAssertTrue(prefs.driveNotificationsEnabled)
         XCTAssertEqual(prefs.driveCountry, "Colombia")
         XCTAssertEqual(prefs.driveVehicleName, "Chevrolet Trax")
@@ -19,6 +20,7 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         prefs.driveVehicleName = "Porsche 911 GT3 RS"
         prefs.driveVehicleImage = "car_porsche_911"
         prefs.useMilesPerHour = true
+        prefs.autoDriveCooldownSeconds = 120.0
 
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(prefs) else {
@@ -38,6 +40,7 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         XCTAssertEqual(decoded.driveVehicleName, "Porsche 911 GT3 RS")
         XCTAssertEqual(decoded.driveVehicleImage, "car_porsche_911")
         XCTAssertTrue(decoded.useMilesPerHour)
+        XCTAssertEqual(decoded.autoDriveCooldownSeconds, 120.0)
     }
 
     func testTripSavedNotificationGeneration() {

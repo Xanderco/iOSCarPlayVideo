@@ -10,6 +10,7 @@ public struct DriveSettingsView: View {
     @State private var showingVehiclePicker: Bool = false
 
     private let minimumDriveOptions: [Double] = [50, 100, 250, 500, 1000]
+    private let stopTimeoutOptions: [Double] = [60, 120, 180, 300]
 
     public init() {}
 
@@ -121,14 +122,57 @@ public struct DriveSettingsView: View {
                         Text("Auto-detect drives")
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(Color.dashTextPrimary)
-                        Text("Starts and stops on its own")
+                        Text("Starts and stops on its own via CoreMotion")
                             .font(.system(size: 12))
                             .foregroundStyle(Color.dashTextMuted)
                     }
                 }
                 .tint(Color.dashYellow)
                 .padding(14)
-                .onChange(of: preferences.autoDetectDrives) { _ in savePreferences() }
+                .onChange(of: preferences.autoDetectDrives) { newValue in
+                    savePreferences()
+                    if newValue {
+                        AutoDriveDetectionService.shared.startMonitoring()
+                    } else {
+                        AutoDriveDetectionService.shared.stopMonitoring()
+                    }
+                }
+
+                Divider().background(Color.dashBorder)
+
+                // Stop timeout cooldown
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Stop Cooldown")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.dashTextPrimary)
+                        Text("Finalizes trip after vehicle stops")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dashTextMuted)
+                    }
+
+                    Spacer()
+
+                    Menu {
+                        ForEach(stopTimeoutOptions, id: \.self) { seconds in
+                            Button("\(Int(seconds / 60)) min") {
+                                preferences.autoDriveCooldownSeconds = seconds
+                                AutoDriveDetectionService.shared.cooldownThresholdSeconds = seconds
+                                savePreferences()
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Text("\(Int(preferences.autoDriveCooldownSeconds / 60)) min")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(Color.dashTextMuted)
+                            Image(systemName: "chevron.up.chevron.down")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.dashTextMuted)
+                        }
+                    }
+                }
+                .padding(14)
 
                 Divider().background(Color.dashBorder)
 

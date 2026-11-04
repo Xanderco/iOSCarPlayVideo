@@ -5,6 +5,7 @@ public struct DriveHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var locationService = DriveLocationService.shared
     @StateObject private var drivingScorer = DrivingScorer.shared
+    @StateObject private var autoDriveDetection = AutoDriveDetectionService.shared
 
     @State private var showingTripSummary: Bool = false
     @State private var completedTrip: TripModel?
@@ -26,6 +27,33 @@ public struct DriveHomeView: View {
 
     private var speedUnit: String {
         appState.useMilesPerHour ? "MPH" : "KM/H"
+    }
+
+    private var autoDriveIcon: String {
+        switch autoDriveDetection.autoDriveState {
+        case .driving: return "car.fill"
+        case .stationaryCooldown: return "pause.circle.fill"
+        case .finalized: return "checkmark.circle.fill"
+        case .idle: return autoDriveDetection.isMonitoring ? "bolt.car.fill" : "car"
+        }
+    }
+
+    private var autoDriveText: String {
+        switch autoDriveDetection.autoDriveState {
+        case .driving: return "Auto: Active"
+        case .stationaryCooldown(let remaining): return "Cooldown (\(Int(remaining))s)"
+        case .finalized: return "Auto: Saved"
+        case .idle: return autoDriveDetection.isMonitoring ? "Auto: Standby" : "Auto: Off"
+        }
+    }
+
+    private var autoDriveColor: Color {
+        switch autoDriveDetection.autoDriveState {
+        case .driving: return Color.dashYellow
+        case .stationaryCooldown: return Color.dashOrange
+        case .finalized: return Color.dashGreen
+        case .idle: return autoDriveDetection.isMonitoring ? Color.dashGreen : Color.dashTextMuted
+        }
     }
 
     public var body: some View {
@@ -67,6 +95,22 @@ public struct DriveHomeView: View {
                                         .font(.system(size: 11, weight: .bold))
                                 }
                                 .foregroundStyle(DriveLiveActivityManager.shared.isLiveActivityActive ? Color.dashYellow : Color.dashTextPrimary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.dashSurface.opacity(0.85))
+                                .clipShape(Capsule())
+                            }
+
+                            Button {
+                                showingDriveSettings = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: autoDriveIcon)
+                                        .font(.system(size: 11))
+                                    Text(autoDriveText)
+                                        .font(.system(size: 11, weight: .bold))
+                                }
+                                .foregroundStyle(autoDriveColor)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
                                 .background(Color.dashSurface.opacity(0.85))
@@ -213,6 +257,7 @@ public struct DriveHomeView: View {
                 if !locationService.isTracking {
                     GlowButton(title: "Start Drive", iconName: "play.fill", gradient: .dashAccentGradient) {
                         locationService.startTrip()
+                        autoDriveDetection.handleManualTripStarted()
                         DriveNotificationService.shared.sendDriveRecordingNotification(distanceKm: 0.1)
                     }
                 } else {
@@ -237,6 +282,7 @@ public struct DriveHomeView: View {
 
                     Button {
                         let trip = locationService.endTrip()
+                        autoDriveDetection.handleManualTripEnded()
                         self.completedTrip = trip
                         DriveNotificationService.shared.sendTripSavedNotification(trip: trip)
                         self.showingTripSummary = true

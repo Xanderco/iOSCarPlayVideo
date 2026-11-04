@@ -11,6 +11,7 @@ struct DashCastApp: App {
                 .preferredColorScheme(.dark)
                 .onAppear {
                     ExternalDisplayManager.shared.checkForExistingExternalDisplay()
+                    AutoDriveDetectionService.shared.startMonitoringIfEnabled()
                 }
         }
     }

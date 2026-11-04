@@ -205,8 +205,13 @@ CarPlay Native Scene          Background Drive           HTTP Server            
   - Live driving stats (speed, dynamic G-force, trip distance, smoothness score) on iPhone Lock Screen and Dynamic Island.
   - "Your CarPlay Your Style" teaser banner matching `Live Activity when Open and in Carplay.jpeg`.
   - Comprehensive 15th test suite `DashCastLiveActivityTests.swift`.
-- [ ] **CoreMotion Auto-Detect Drives**:
-  - Automatic drive detection (`CMMotionActivityManager.isAutomotive`) to automatically trigger trip recording without tapping Start.
+- [x] **CoreMotion Auto-Detect Drives (`AutoDriveDetectionService` / DI-19 / CARAA-11)**:
+  - Automatic drive detection via `CMMotionActivityManager` with `MotionActivityManagerProtocol` abstraction.
+  - Automatically triggers `DriveLocationService.shared.startTrip()` when automotive motion is recognized.
+  - Gracefully pauses active trip when vehicle stops, initiating a 180s (3-minute) stationary exit cooldown before finalization.
+  - Resumes active trip seamlessly if automotive motion resumes before the 3-minute cooldown expires.
+  - Background activity querying, `DriveNotificationService` integration, and live status badges in `DriveHomeView`.
+  - Comprehensive 16th test suite `AutoDriveDetectionTests.swift` with 11 unit tests passing 100%.
 - [ ] **Social Trip Share Cards**:
   - Render high-resolution Instagram Story image cards showing drive route, top speed, and vehicle avatar.
 
