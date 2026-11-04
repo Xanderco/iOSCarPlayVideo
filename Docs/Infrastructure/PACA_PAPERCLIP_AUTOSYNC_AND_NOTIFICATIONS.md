@@ -1,0 +1,131 @@
+# PACA ⇄ Paperclip Universal Synchronization & Pushover Architecture
+
+**Service Name**: `paca-ha-bridge` (PM2 Process #35 on SVR)  
+**Host Machine**: SVR (`100.66.253.3` on Tailscale)  
+**Script Path**: `C:\Users\benit\scripts\paca_ha_bridge\bridge.js`  
+**Execution Cycle**: Continuous 60-second polling daemon  
+**Author**: Alexander Benitez / Omni Protocol Governance
+
+---
+
+## 1. Executive Summary & Architectural Rationale
+
+### The Problem: Dual-Board Redundancy
+Operating both **PACA** (Agile/Sprint project management) and **Paperclip** (Autonomous AI Agent orchestrator) without automation creates dual-board overhead:
+- When Alexander approves a task to `Done` in PACA, agents in Paperclip remain unaware unless manually updated.
+- When an AI agent in Paperclip finishes coding and marks a ticket `in_review`, PACA does not reflect the deliverable.
+- Previous review notifications sent local LAN URLs (`http://192.168.2.3:8080` or `localhost`), failing to open on mobile devices outside the local Wi-Fi.
+
+### The Solution: Universal Synchronization Daemon
+The upgraded `paca-ha-bridge` daemon on SVR bridges PACA, Paperclip, and Home Assistant automatically for **all projects (current and future)**:
+1. **Zero Double-Work**: Approving a task in PACA automatically closes the issue in Paperclip.
+2. **Pushover High-Priority Alerts**: Delivers review notifications with sound, priority 1, and verified Tailscale URLs (`http://100.66.253.3:8080` and `http://100.66.253.3:3100`).
+3. **Generic & Extensible**: Works by project prefix and company metadata without hardcoding single repositories.
+
+---
+
+## 2. Infrastructure & Data Flow Diagram
+
+```
+      ┌─────────────────────────────────────────────────────────────┐
+      │                      SVR (100.66.253.3)                     │
+      │                                                             │
+      │  ┌─────────────────┐                 ┌───────────────────┐  │
+      │  │   PACA (8080)   │                 │  Paperclip (3100) │  │
+      │  │  - Human Views  │                 │  - AI Agents Live │  │
+      │  │  - Sprints/EPICs│                 │  - Code Checkouts │  │
+      │  └────────┬────────┘                 └─────────▲─────────┘  │
+      │           │                                    │            │
+      │           │         ┌────────────────┐         │            │
+      │           └────────►│ paca-ha-bridge ├─────────┘            │
+      │                     │  (PM2 Proc 35) │                      │
+      │                     └───────┬────────┘                      │
+      └─────────────────────────────┼───────────────────────────────┘
+                                    │
+                                    │ (Tailscale / LAN)
+                                    ▼
+                     ┌───────────────────────────────┐
+                     │ Home Assistant (100.76.94.99) │
+                     │   Service: notify.pushover    │
+                     └──────────────┬────────────────┘
+                                    │
+                                    ▼ (APNs / Pushover Cloud)
+                     ┌───────────────────────────────┐
+                     │   Alexander's iPhone 16 Pro   │
+                     │  - High Priority Alert        │
+                     │  - Tailscale Direct URL       │
+                     └───────────────────────────────┘
+```
+
+---
+
+## 3. Generic Mapping Rules for ALL Projects
+
+The synchronization engine uses dynamic pattern matching to connect any PACA project with its corresponding Paperclip company:
+
+| PACA Task Prefix | Project Domain | Paperclip Issue Prefix | Target Company |
+| :---: | :--- | :---: | :--- |
+| **`DI`** | DashCast (CarPlay Video / Telemetry) | **`CARAA`** | CarDash / DashCast Inc. |
+| **`LAG`** | LaGuaca.online (Affiliate Deals Platform) | **`LAG`** | LaGuaca.online |
+| **`PER`** | Personal Life Management & 3D Printing | **`PER`** | Personal Workspace |
+| **`*` (Any new prefix)** | Any newly registered project | **Dynamic Match** | Matches by company `issuePrefix` or fuzzy project name |
+
+### Status State Machine:
+
+1. **Direction A: PACA ➔ Paperclip (Human Gate Approvals)**
+   - When Alexander moves a task to `Done` in PACA:
+   - The daemon finds the matching Paperclip issue (via `[TASK-ID]` tag or description metadata).
+   - If the Paperclip issue is not `done`, calls `PATCH /api/issues/:id` to mark it `done`.
+   - Result: Agents detect the task completion, release checkouts, and proceed to subsequent backlog tickets.
+
+2. **Direction B: Paperclip ➔ PACA (AI Deliverable Submissions)**
+   - When an autonomous agent moves a Paperclip issue to `in_review`:
+   - The daemon identifies the corresponding task in PACA.
+   - Moves the PACA task status to `In Review`.
+   - Dispatches a Pushover alert to Alexander's iPhone.
+
+---
+
+## 4. Notification Egress: Pushover Integration
+
+### URL Standardization:
+Every notification generated by the daemon uses the fixed Tailscale IP address:
+- **PACA Task Link**: `http://100.66.253.3:8080/projects/{projectId}`
+- **Paperclip Issue Link**: `http://100.66.253.3:3100/{issuePrefix}/issues/{issueId}`
+
+### Pushover Payload Structure:
+```javascript
+const payload = {
+  title: "PACA / Paperclip Review: [DI-18]",
+  message: "Live Activities Dynamic Island Telemetry\nBranch: feature/DI-18-dynamic-island. Tap to review.",
+  data: {
+    url: "http://100.66.253.3:3100/CARAA/issues/CARAA-10",
+    url_title: "Abrir en Paperclip",
+    priority: 1,      // Bypasses iOS Do Not Disturb
+    sound: "magic"     // Distinctive Pushover chime
+  }
+};
+```
+
+---
+
+## 5. Operations & Daemon Maintenance
+
+The daemon runs continuously under **PM2** on Windows (SVR) and auto-restarts on server reboot.
+
+### Useful Management Commands (Run on SVR via Orca Terminal):
+```powershell
+# View live logs
+pm2 logs paca-ha-bridge --lines 50
+
+# Restart the daemon
+pm2 restart paca-ha-bridge
+
+# Check process status
+pm2 status paca-ha-bridge
+```
+
+### File Hierarchy on SVR:
+- **Active Daemon**: `C:\Users\benit\scripts\paca_ha_bridge\bridge.js`
+- **Safe Backup**: `C:\Users\benit\scripts\paca_ha_bridge\bridge.js.bak`
+- **State & ID Cache**: `C:\Users\benit\scripts\paca_ha_bridge\.bridge_cache.json`
