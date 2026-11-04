@@ -18,7 +18,8 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 | **DI-9** (Activity 4) | **Widgets Ecosystem & Live Editor** | ✅ Completed | 1:1 Widgets Home with Plate, Countdowns, Clocks, Vinyl, Quotes, and interactive Live Editor with Size, Vertical, Horizontal sliders, License Plate stamped text overlay, Text Color palette swatches, Font selector, and Brand Watermark toggle [DI-9] |
 | **DI-10** (Activity 5) | **Sounds Soundboard & Selector** | ✅ Completed | 1:1 Soundboard with Disconnection & Arrival triggers, trending cards with watermarks, How to Activate CTA, and Sound Selection sheet matching reference [DI-10] |
 | **DI-11** (Activity 6) | **Me Profile, Settings, About & Feedback** | ✅ Completed | 1:1 Me profile with car card, ROAD ROOKIE badge, PRO gold banner, Settings, About, and `FeedbackView` matching `Feedback.jpeg` [DI-11] |
-| **DI-12** (Activity 7) | **Automated Testing & Device Deployment** | ✅ Completed | 100% test pass rate across 14 test suites (40 tests), clean build for iPhone Simulator (`iPhone 17`) & Physical iOS Device (`generic/platform=iOS`), automatic code signing configured with Team `96YG38576A` [DI-12] |
+| **DI-18 / CARAA-10** | **ActivityKit Live Activities & Dynamic Island** | ✅ Completed | Built native ActivityKit Live Activity & Dynamic Island telemetry suite: `DashCastTelemetryAttributes`, `DashCastLockScreenLiveActivityView`, `DashCastDynamicIslandViews` (Compact, Minimal, Expanded), `DashCastLiveActivityWidget`, `DriveLiveActivityManager`, and `LiveActivityPreviewSheet` matching `Live Activity when Open and in Carplay.jpeg`. Integrated real-time speed, dynamic G-force, and smoothness scoring from `DriveLocationService` and `DrivingScorer`. Added 15th test suite `DashCastLiveActivityTests` with 8 comprehensive unit tests. [DI-18, CARAA-10] |
+| **DI-12** (Activity 7) | **Automated Testing & Device Deployment** | ✅ Completed | 100% test pass rate across 15 test suites (48 tests), clean build for iPhone Simulator (`iPhone 17`) & Physical iOS Device (`generic/platform=iOS`), automatic code signing configured with Team `96YG38576A` [DI-12] |
 
 ---
 
@@ -42,5 +43,6 @@ The redesign transitions DashCast from the initial cyan/blue palette to the sign
 5. ✅ **DI-9 Widgets Ecosystem & Live Editor**: Plates, clocks, vinyl, countdowns, car brand catalog, and interactive size/position slider editor.
 6. ✅ **DI-10 Sounds Soundboard & Selector**: Connection, disconnection, and arrival triggers, viral automotive sound effects, and Shortcuts automation guide.
 7. ✅ **DI-11 Me Profile, Settings & Feedback**: 1:1 driver profile, garage car selector, settings, about, and user feedback sheet.
-8. ✅ **DI-12 Automated Testing & Signing**: 35 automated tests passing 100%, automated test runner script, code signing configured with Development Team `96YG38576A`.
+8. ✅ **DI-12 Automated Testing & Signing**: 48 automated tests passing 100%, automated test runner script, code signing configured with Development Team `96YG38576A`.
 9. ✅ **Lifetime Monetization**: StoreKit 2 paywall offering one-time lifetime purchase ($19.99) vs competitor's recurring subscription ($4.99/mo).
+10. ✅ **DI-18 / CARAA-10 ActivityKit Live Activities & Dynamic Island**: Real-time Lock Screen Live Activity & Dynamic Island telemetry (speed, dynamic G-force, smoothness score, distance, duration) plus 1:1 'Your CarPlay Your Style' widget teaser banner matching `Live Activity when Open and in Carplay.jpeg`.

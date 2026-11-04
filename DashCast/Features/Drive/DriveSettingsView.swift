@@ -204,6 +204,24 @@ public struct DriveSettingsView: View {
                     .clipShape(Capsule())
                 }
                 .padding(14)
+
+                Divider().background(Color.dashBorder)
+
+                // Live Activities & Dynamic Island
+                Toggle(isOn: $preferences.liveActivitiesEnabled) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Live Activities & Dynamic Island")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.dashTextPrimary)
+
+                        Text("Stream speed, G-force, and smoothness score to Lock Screen")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dashTextMuted)
+                    }
+                }
+                .tint(Color.dashYellow)
+                .padding(14)
+                .onChange(of: preferences.liveActivitiesEnabled) { _ in savePreferences() }
             }
             .background(Color.dashSurface)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))

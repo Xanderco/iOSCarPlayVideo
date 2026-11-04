@@ -9,6 +9,8 @@ public final class DrivingScorer: ObservableObject {
     @Published public private(set) var harshBrakingCount: Int = 0
     @Published public private(set) var harshAccelerationCount: Int = 0
     @Published public private(set) var harshCorneringCount: Int = 0
+    @Published public private(set) var currentGForce: Double = 0.0
+    @Published public private(set) var peakGForce: Double = 0.0
 
     private let motionManager = CMMotionManager()
     private var lastSpeedKmh: Double?
@@ -23,6 +25,8 @@ public final class DrivingScorer: ObservableObject {
         harshBrakingCount = 0
         harshAccelerationCount = 0
         harshCorneringCount = 0
+        currentGForce = 0.0
+        peakGForce = 0.0
         lastSpeedKmh = nil
         lastSpeedTime = nil
     }
@@ -37,9 +41,24 @@ public final class DrivingScorer: ObservableObject {
     }
 
     public func analyzeGForce(x: Double, y: Double, z: Double) {
+        let lateralG = abs(x)
+        self.currentGForce = lateralG
+        if lateralG > peakGForce {
+            peakGForce = lateralG
+        }
+
         // Lateral G-Force (cornering)
-        if abs(x) > 0.45 {
+        if lateralG > 0.45 {
             recordHarshEvent(.cornering)
+        }
+    }
+
+    public func simulateGForce(current: Double, peak: Double? = nil) {
+        self.currentGForce = current
+        if let peak = peak {
+            self.peakGForce = peak
+        } else if current > self.peakGForce {
+            self.peakGForce = current
         }
     }
 
@@ -50,6 +69,12 @@ public final class DrivingScorer: ObservableObject {
             if dt > 0.3 && dt < 3.0 {
                 let deltaKmh = speedKmh - previousSpeed
                 let accelerationMs2 = (deltaKmh / 3.6) / dt
+                let longitudinalG = abs(accelerationMs2 / 9.80665)
+                let combinedG = max(self.currentGForce, longitudinalG)
+                self.currentGForce = combinedG
+                if combinedG > self.peakGForce {
+                    self.peakGForce = combinedG
+                }
 
                 // Harsh Braking: deceleration > 3.5 m/s^2 (~0.36g)
                 if accelerationMs2 < -3.5 {

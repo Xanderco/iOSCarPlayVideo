@@ -40,7 +40,7 @@ public struct DriveHomeView: View {
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                         // Top Left Permissions / Tracking Status Toggle
-                        VStack {
+                        VStack(alignment: .leading, spacing: 8) {
                             Button {
                                 showingPermissions = true
                             } label: {
@@ -56,6 +56,23 @@ public struct DriveHomeView: View {
                                 .background(Color.dashSurface.opacity(0.85))
                                 .clipShape(Capsule())
                             }
+
+                            Button {
+                                showingLiveActivityPreview = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "dot.radiowaves.up.forward")
+                                        .font(.system(size: 11))
+                                    Text("Dynamic Island")
+                                        .font(.system(size: 11, weight: .bold))
+                                }
+                                .foregroundStyle(DriveLiveActivityManager.shared.isLiveActivityActive ? Color.dashYellow : Color.dashTextPrimary)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.dashSurface.opacity(0.85))
+                                .clipShape(Capsule())
+                            }
+
                             Spacer()
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -120,6 +137,9 @@ public struct DriveHomeView: View {
             }
             .sheet(isPresented: $showingDriveSettings) {
                 DriveSettingsView()
+            }
+            .sheet(isPresented: $showingLiveActivityPreview) {
+                LiveActivityPreviewSheet()
             }
         }
     }

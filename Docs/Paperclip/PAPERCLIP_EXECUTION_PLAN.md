@@ -200,10 +200,11 @@ CarPlay Native Scene          Background Drive           HTTP Server            
 - [x] **DI-11**: "Me" driver profile, settings, about modal, and 1:1 `FeedbackView.swift`.
 - [x] **DI-12**: 14 test suites (40 tests passing), automated signing configured.
 
-### Sprint 2: Dynamic Island & Background Intelligence (Next Milestone)
-- [ ] **ActivityKit Live Activity Extension (`DashCastLiveActivity`)**:
-  - Live driving stats (speed, peak G, trip distance) on iPhone Lock Screen and Dynamic Island.
+### Sprint 2: Dynamic Island & Background Intelligence (Active Milestone)
+- [x] **ActivityKit Live Activity Extension (`DashCastLiveActivity` / DI-18 / CARAA-10)**:
+  - Live driving stats (speed, dynamic G-force, trip distance, smoothness score) on iPhone Lock Screen and Dynamic Island.
   - "Your CarPlay Your Style" teaser banner matching `Live Activity when Open and in Carplay.jpeg`.
+  - Comprehensive 15th test suite `DashCastLiveActivityTests.swift`.
 - [ ] **CoreMotion Auto-Detect Drives**:
   - Automatic drive detection (`CMMotionActivityManager.isAutomotive`) to automatically trigger trip recording without tapping Start.
 - [ ] **Social Trip Share Cards**:

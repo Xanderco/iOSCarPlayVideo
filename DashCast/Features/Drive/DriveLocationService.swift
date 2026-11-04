@@ -1,6 +1,7 @@
 import Foundation
 import CoreLocation
 import Combine
+import UIKit
 
 @MainActor
 public final class DriveLocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -29,6 +30,30 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.distanceFilter = 2 // 2 meters
         locationManager.allowsBackgroundLocationUpdates = false
+
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.handleAppDidEnterBackground()
+            }
+        }
+    }
+
+    private func handleAppDidEnterBackground() {
+        guard isTracking else { return }
+        let prefs = PersistenceController.shared.loadUserPreferences()
+        if prefs.liveActivitiesEnabled && !DriveLiveActivityManager.shared.isLiveActivityActive {
+            DriveLiveActivityManager.shared.startLiveActivity(
+                vehicleName: prefs.driveVehicleName,
+                vehicleImageName: prefs.driveVehicleImage,
+                speedUnit: prefs.useMilesPerHour ? "MPH" : "KM/H",
+                useMilesPerHour: prefs.useMilesPerHour,
+                initialSpeed: prefs.useMilesPerHour ? currentSpeedKmh * 0.621371 : currentSpeedKmh
+            )
+        }
     }
 
     public func requestPermissions() {
@@ -51,6 +76,17 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         isPaused = false
         tripStartTime = Date()
 
+        let prefs = PersistenceController.shared.loadUserPreferences()
+        if prefs.liveActivitiesEnabled {
+            DriveLiveActivityManager.shared.startLiveActivity(
+                vehicleName: prefs.driveVehicleName,
+                vehicleImageName: prefs.driveVehicleImage,
+                speedUnit: prefs.useMilesPerHour ? "MPH" : "KM/H",
+                useMilesPerHour: prefs.useMilesPerHour,
+                initialSpeed: 0.0
+            )
+        }
+
         locationManager.startUpdatingLocation()
         startTimer()
     }
@@ -58,11 +94,37 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
     public func pauseTrip() {
         isPaused = true
         locationManager.stopUpdatingLocation()
+
+        let prefs = PersistenceController.shared.loadUserPreferences()
+        DriveLiveActivityManager.shared.updateLiveActivity(
+            speedKmh: currentSpeedKmh,
+            distanceMeters: distanceMeters,
+            elapsedTime: elapsedTime,
+            currentGForce: DrivingScorer.shared.currentGForce,
+            peakGForce: DrivingScorer.shared.peakGForce,
+            smoothnessScore: DrivingScorer.shared.currentScore,
+            isPaused: true,
+            useMilesPerHour: prefs.useMilesPerHour,
+            forceUpdate: true
+        )
     }
 
     public func resumeTrip() {
         isPaused = false
         locationManager.startUpdatingLocation()
+
+        let prefs = PersistenceController.shared.loadUserPreferences()
+        DriveLiveActivityManager.shared.updateLiveActivity(
+            speedKmh: currentSpeedKmh,
+            distanceMeters: distanceMeters,
+            elapsedTime: elapsedTime,
+            currentGForce: DrivingScorer.shared.currentGForce,
+            peakGForce: DrivingScorer.shared.peakGForce,
+            smoothnessScore: DrivingScorer.shared.currentScore,
+            isPaused: false,
+            useMilesPerHour: prefs.useMilesPerHour,
+            forceUpdate: true
+        )
     }
 
     public func endTrip() -> TripModel {
@@ -70,6 +132,8 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         isPaused = false
         locationManager.stopUpdatingLocation()
         stopTimer()
+
+        DriveLiveActivityManager.shared.endLiveActivity(dismissImmediately: false)
 
         let score = DrivingScorer.shared.calculateScore()
         let trip = TripModel(
@@ -169,6 +233,19 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
 
         // Pass motion acceleration to scorer
         DrivingScorer.shared.recordPoint(speedKmh: speedKmh)
+
+        // Stream telemetry to ActivityKit Live Activity & Dynamic Island
+        let prefs = PersistenceController.shared.loadUserPreferences()
+        DriveLiveActivityManager.shared.updateLiveActivity(
+            speedKmh: speedKmh,
+            distanceMeters: distanceMeters,
+            elapsedTime: elapsedTime,
+            currentGForce: DrivingScorer.shared.currentGForce,
+            peakGForce: DrivingScorer.shared.peakGForce,
+            smoothnessScore: DrivingScorer.shared.currentScore,
+            isPaused: isPaused,
+            useMilesPerHour: prefs.useMilesPerHour
+        )
     }
 
     // Manual simulation injection for tests & preview
@@ -183,5 +260,17 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         currentSpeedKmh = speedKmh
         if speedKmh > topSpeedKmh { topSpeedKmh = speedKmh }
         DrivingScorer.shared.recordPoint(speedKmh: speedKmh)
+
+        let prefs = PersistenceController.shared.loadUserPreferences()
+        DriveLiveActivityManager.shared.updateLiveActivity(
+            speedKmh: speedKmh,
+            distanceMeters: distanceMeters,
+            elapsedTime: elapsedTime,
+            currentGForce: DrivingScorer.shared.currentGForce,
+            peakGForce: DrivingScorer.shared.peakGForce,
+            smoothnessScore: DrivingScorer.shared.currentScore,
+            isPaused: isPaused,
+            useMilesPerHour: prefs.useMilesPerHour
+        )
     }
 }

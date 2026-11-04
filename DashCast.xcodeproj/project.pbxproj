@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B10100010000000000000001 /* DashCastTelemetryAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10100010000000000000001 /* DashCastTelemetryAttributes.swift */; };
+		B10100010000000000000002 /* DashCastLockScreenLiveActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10100010000000000000002 /* DashCastLockScreenLiveActivityView.swift */; };
+		B10100010000000000000003 /* DashCastDynamicIslandViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10100010000000000000003 /* DashCastDynamicIslandViews.swift */; };
+		B10100010000000000000004 /* DashCastLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10100010000000000000004 /* DashCastLiveActivityWidget.swift */; };
+		B10100010000000000000005 /* DriveLiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10100010000000000000005 /* DriveLiveActivityManager.swift */; };
+		B10100010000000000000006 /* LiveActivityPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10100010000000000000006 /* LiveActivityPreviewSheet.swift */; };
+		B10100010000000000000007 /* DashCastLiveActivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10100010000000000000007 /* DashCastLiveActivityTests.swift */; };
 		0A10D3C06073B0758530F093 /* AutomotiveVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */; };
 		1627D9EBF17E8A798C354764 /* IPTVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88D44D627DAD31196345969 /* IPTVParser.swift */; };
 		17879C0D0F61BB9D2E290658 /* MeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */; };
@@ -101,6 +108,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A10100010000000000000001 /* DashCastTelemetryAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastTelemetryAttributes.swift; sourceTree = "<group>"; };
+		A10100010000000000000002 /* DashCastLockScreenLiveActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastLockScreenLiveActivityView.swift; sourceTree = "<group>"; };
+		A10100010000000000000003 /* DashCastDynamicIslandViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastDynamicIslandViews.swift; sourceTree = "<group>"; };
+		A10100010000000000000004 /* DashCastLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastLiveActivityWidget.swift; sourceTree = "<group>"; };
+		A10100010000000000000005 /* DriveLiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveLiveActivityManager.swift; sourceTree = "<group>"; };
+		A10100010000000000000006 /* LiveActivityPreviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityPreviewSheet.swift; sourceTree = "<group>"; };
+		A10100010000000000000007 /* DashCastLiveActivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashCastLiveActivityTests.swift; sourceTree = "<group>"; };
 		00402A9DBF128AB5CC2E9A52 /* UsageMetricsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMetricsManager.swift; sourceTree = "<group>"; };
 		00F8229DAD5E36941BA5E63D /* DashCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DashCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		023D3E03ED4C0A490E7F195D /* ScreenBroadcastPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenBroadcastPickerView.swift; sourceTree = "<group>"; };
@@ -266,6 +280,7 @@
 				6FF441DC34D145A9368F39E6 /* UsageMetricsTests.swift */,
 				F07EA8D19080BEA1BB5B7198 /* WidgetCatalogTests.swift */,
 				BA0B597AA347AF9A805820C2 /* WidgetCustomizationTests.swift */,
+				A10100010000000000000007 /* DashCastLiveActivityTests.swift */,
 			);
 			path = DashCastTests;
 			sourceTree = "<group>";
@@ -281,6 +296,19 @@
 			path = Sounds;
 			sourceTree = "<group>";
 		};
+				C10100010000000000000001 /* LiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				A10100010000000000000003 /* DashCastDynamicIslandViews.swift */,
+				A10100010000000000000004 /* DashCastLiveActivityWidget.swift */,
+				A10100010000000000000002 /* DashCastLockScreenLiveActivityView.swift */,
+				A10100010000000000000001 /* DashCastTelemetryAttributes.swift */,
+				A10100010000000000000005 /* DriveLiveActivityManager.swift */,
+				A10100010000000000000006 /* LiveActivityPreviewSheet.swift */,
+			);
+			path = LiveActivity;
+			sourceTree = "<group>";
+		};
 		3F5B93D3124A86041F9883F4 /* Drive */ = {
 			isa = PBXGroup;
 			children = (
@@ -290,6 +318,7 @@
 				549DB5A4A3DD184039FF65D6 /* DriveSettingsView.swift */,
 				5844FA7D455E2F2BF7AEC267 /* DriveTrackingPermissionsSheet.swift */,
 				3CE586E24B44E73A2EB78BED /* DrivingScorer.swift */,
+				C10100010000000000000001 /* LiveActivity */,
 				33D46134290FCE84E6581FDD /* SpeedGradientRouteView.swift */,
 				5135CBF68C8B6C3C6B1FD85E /* TripSummaryView.swift */,
 			);
@@ -588,6 +617,7 @@
 				6DD8FBE8011D7651C787D8A1 /* UsageMetricsTests.swift in Sources */,
 				1DB310F6719B3F0E1A895D03 /* WidgetCatalogTests.swift in Sources */,
 				6EA6B3D5585BC3658129F717 /* WidgetCustomizationTests.swift in Sources */,
+				B10100010000000000000007 /* DashCastLiveActivityTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -614,6 +644,12 @@
 				5296CFE58D18329659A33DE4 /* DriveSettingsView.swift in Sources */,
 				266C8A3EA2FFF3BCFD6C75B6 /* DriveTrackingPermissionsSheet.swift in Sources */,
 				68C6EC109C7FAE4660269C96 /* DrivingScorer.swift in Sources */,
+				B10100010000000000000003 /* DashCastDynamicIslandViews.swift in Sources */,
+				B10100010000000000000004 /* DashCastLiveActivityWidget.swift in Sources */,
+				B10100010000000000000002 /* DashCastLockScreenLiveActivityView.swift in Sources */,
+				B10100010000000000000001 /* DashCastTelemetryAttributes.swift in Sources */,
+				B10100010000000000000005 /* DriveLiveActivityManager.swift in Sources */,
+				B10100010000000000000006 /* LiveActivityPreviewSheet.swift in Sources */,
 				1A3263DFAC93985C2F1774EF /* ExternalDisplayManager.swift in Sources */,
 				610E3EB3A0FDCB1CBA4DB30A /* FeedbackView.swift in Sources */,
 				9607EF0B03440C14A27FB5E8 /* GlowButton.swift in Sources */,
