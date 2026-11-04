@@ -4,6 +4,8 @@ public struct TripSummaryView: View {
     @Environment(\.dismiss) private var dismiss
     public let trip: TripModel
 
+    @State private var showShareModal: Bool = false
+
     public init(trip: TripModel) {
         self.trip = trip
     }
@@ -75,17 +77,50 @@ public struct TripSummaryView: View {
                         }
                         .padding(.horizontal)
 
+                        // Social Story Share Card CTA
+                        Button(action: { showShareModal = true }) {
+                            HStack(spacing: 10) {
+                                Image(systemName: "sparkles")
+                                    .font(.system(size: 18, weight: .bold))
+                                Text("Share Story Card (1080x1920)")
+                                    .font(ThemeFonts.hudStat(size: 16))
+                            }
+                            .foregroundStyle(Color.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 15)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color.dashYellow, Color.dashGold],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .shadow(color: Color.dashYellow.opacity(0.35), radius: 6, y: 2)
+                        }
+                        .padding(.horizontal)
+
                         GlowButton(title: "Done", iconName: "checkmark") {
                             dismiss()
                         }
                         .padding(.horizontal)
-                        .padding(.top, 10)
                     }
                     .padding(.vertical)
                 }
             }
             .navigationTitle("Trip Summary")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { showShareModal = true }) {
+                        Image(systemName: "square.and.arrow.up")
+                            .foregroundStyle(Color.dashYellow)
+                    }
+                }
+            }
+            .sheet(isPresented: $showShareModal) {
+                DriveStoryShareModalView(trip: trip)
+            }
         }
     }
 

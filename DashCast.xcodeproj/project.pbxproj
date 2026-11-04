@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B12300010000000000000001 /* SmoothnessScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12300010000000000000001 /* SmoothnessScorer.swift */; };
+		B12300010000000000000002 /* DriveSummaryCardData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12300010000000000000002 /* DriveSummaryCardData.swift */; };
+		B12300010000000000000003 /* DriveSummaryStoryCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12300010000000000000003 /* DriveSummaryStoryCardView.swift */; };
+		B12300010000000000000004 /* DriveSummaryCardRendererService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12300010000000000000004 /* DriveSummaryCardRendererService.swift */; };
+		B12300010000000000000005 /* ShareSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12300010000000000000005 /* ShareSheetView.swift */; };
+		B12300010000000000000006 /* DriveStoryShareModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12300010000000000000006 /* DriveStoryShareModalView.swift */; };
+		B12300010000000000000007 /* DriveSummaryCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A12300010000000000000007 /* DriveSummaryCardTests.swift */; };
 		0A10D3C06073B0758530F093 /* AutomotiveVideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7E60E1CA13465E7211C9089 /* AutomotiveVideoPlayerView.swift */; };
 		1627D9EBF17E8A798C354764 /* IPTVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = B88D44D627DAD31196345969 /* IPTVParser.swift */; };
 		17879C0D0F61BB9D2E290658 /* MeHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A9CE56E95CCB914B3D6CCD0 /* MeHomeView.swift */; };
@@ -101,6 +108,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A12300010000000000000001 /* SmoothnessScorer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmoothnessScorer.swift; sourceTree = "<group>"; };
+		A12300010000000000000002 /* DriveSummaryCardData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveSummaryCardData.swift; sourceTree = "<group>"; };
+		A12300010000000000000003 /* DriveSummaryStoryCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveSummaryStoryCardView.swift; sourceTree = "<group>"; };
+		A12300010000000000000004 /* DriveSummaryCardRendererService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveSummaryCardRendererService.swift; sourceTree = "<group>"; };
+		A12300010000000000000005 /* ShareSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheetView.swift; sourceTree = "<group>"; };
+		A12300010000000000000006 /* DriveStoryShareModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveStoryShareModalView.swift; sourceTree = "<group>"; };
+		A12300010000000000000007 /* DriveSummaryCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveSummaryCardTests.swift; sourceTree = "<group>"; };
 		00402A9DBF128AB5CC2E9A52 /* UsageMetricsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMetricsManager.swift; sourceTree = "<group>"; };
 		00F8229DAD5E36941BA5E63D /* DashCast.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DashCast.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		023D3E03ED4C0A490E7F195D /* ScreenBroadcastPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenBroadcastPickerView.swift; sourceTree = "<group>"; };
@@ -266,6 +280,7 @@
 				6FF441DC34D145A9368F39E6 /* UsageMetricsTests.swift */,
 				F07EA8D19080BEA1BB5B7198 /* WidgetCatalogTests.swift */,
 				BA0B597AA347AF9A805820C2 /* WidgetCustomizationTests.swift */,
+				A12300010000000000000007 /* DriveSummaryCardTests.swift */,
 			);
 			path = DashCastTests;
 			sourceTree = "<group>";
@@ -292,6 +307,12 @@
 				3CE586E24B44E73A2EB78BED /* DrivingScorer.swift */,
 				33D46134290FCE84E6581FDD /* SpeedGradientRouteView.swift */,
 				5135CBF68C8B6C3C6B1FD85E /* TripSummaryView.swift */,
+				A12300010000000000000001 /* SmoothnessScorer.swift */,
+				A12300010000000000000002 /* DriveSummaryCardData.swift */,
+				A12300010000000000000003 /* DriveSummaryStoryCardView.swift */,
+				A12300010000000000000004 /* DriveSummaryCardRendererService.swift */,
+				A12300010000000000000005 /* ShareSheetView.swift */,
+				A12300010000000000000006 /* DriveStoryShareModalView.swift */,
 			);
 			path = Drive;
 			sourceTree = "<group>";
@@ -588,6 +609,7 @@
 				6DD8FBE8011D7651C787D8A1 /* UsageMetricsTests.swift in Sources */,
 				1DB310F6719B3F0E1A895D03 /* WidgetCatalogTests.swift in Sources */,
 				6EA6B3D5585BC3658129F717 /* WidgetCustomizationTests.swift in Sources */,
+				B12300010000000000000007 /* DriveSummaryCardTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -640,6 +662,12 @@
 				3D2EEC43E78D8FFF0F69DD2D /* ThemeFonts.swift in Sources */,
 				1993945C43A1E99D1FD8E607 /* TripModel.swift in Sources */,
 				59D7DC31996F93EC73E44C2C /* TripSummaryView.swift in Sources */,
+				B12300010000000000000001 /* SmoothnessScorer.swift in Sources */,
+				B12300010000000000000002 /* DriveSummaryCardData.swift in Sources */,
+				B12300010000000000000003 /* DriveSummaryStoryCardView.swift in Sources */,
+				B12300010000000000000004 /* DriveSummaryCardRendererService.swift in Sources */,
+				B12300010000000000000005 /* ShareSheetView.swift in Sources */,
+				B12300010000000000000006 /* DriveStoryShareModalView.swift in Sources */,
 				ECEFD76BB45819D4273CB6F3 /* UsageMetricsManager.swift in Sources */,
 				880507C3374C6306D3BDAE46 /* UsageMetricsView.swift in Sources */,
 				6CB8B51B7A458EC1873B07F2 /* UserPreferences.swift in Sources */,
