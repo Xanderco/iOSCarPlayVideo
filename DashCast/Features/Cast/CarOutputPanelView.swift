@@ -6,6 +6,7 @@ struct CarOutputPanelView: View {
     @ObservedObject private var output = CarVideoOutputController.shared
     @ObservedObject private var parkedGuard = CarVideoOutputController.shared.parkedGuard
     @State private var copiedURL = false
+    @State private var mirrorToCarPlay = CarMirrorFeature.isEnabled()
 
     var body: some View {
         ScrollView {
@@ -131,6 +132,21 @@ struct CarOutputPanelView: View {
             Text("For cars and adapters with a web browser: connect the car to your iPhone's Personal Hotspot (or the same Wi-Fi), start mirroring, then open the address below in the car's browser.")
                 .font(.system(size: 13))
                 .foregroundStyle(Color.dashTextSecondary)
+
+            Toggle(isOn: $mirrorToCarPlay) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Mirror to CarPlay screen (beta)")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.dashTextPrimary)
+                    Text("Shows the broadcast on the CarPlay display while parked, where supported.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.dashTextMuted)
+                }
+            }
+            .tint(Color.dashYellow)
+            .onChange(of: mirrorToCarPlay) { enabled in
+                CarMirrorFeature.setEnabled(enabled)
+            }
 
             HStack(spacing: 12) {
                 ScreenBroadcastPickerView()

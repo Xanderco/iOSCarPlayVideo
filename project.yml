@@ -43,6 +43,7 @@ targets:
     sources:
       - path: DashCastBroadcast
       - path: DashCast/Features/Cast/Shared/CarCastShared.swift
+      - path: DashCast/Features/Cast/Shared/MirrorFrameTransport.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast.broadcast
