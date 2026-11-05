@@ -1,4 +1,5 @@
 import CarPlay
+import Combine
 import MediaPlayer
 import UIKit
 
@@ -19,6 +20,11 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
     private var favoritesTemplate: CPListTemplate?
     private var playlistObserver: NSObjectProtocol?
     private var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
+    private var playerCancellable: AnyCancellable?
+
+    /// CarPlay audio apps may stack at most five templates (root included); pushing more
+    /// raises an exception in CarPlay. Now Playing counts towards the depth.
+    private static let maximumTemplateDepth = 5
 
     // MARK: - Scene lifecycle
 
@@ -38,9 +44,12 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         let favorites = CPListTemplate(title: "Favorites", sections: [])
         favorites.tabTitle = "Favorites"
         favorites.tabImage = UIImage(systemName: "heart.fill")
+        favorites.emptyViewTitleVariants = ["No Favorites Yet"]
+        favorites.emptyViewSubtitleVariants = ["Tap the heart on a channel on your iPhone"]
         favoritesTemplate = favorites
 
-        let tabBar = CPTabBarTemplate(templates: [library, favorites, makeInfoTemplate()])
+        let tabs: [CPTemplate] = [library, favorites, makeInfoTemplate()]
+        let tabBar = CPTabBarTemplate(templates: Array(tabs.prefix(Int(CPTabBarTemplate.maximumTabCount))))
 
         rebuildTemplates()
         interfaceController.setRootTemplate(tabBar, animated: false, completion: nil)
@@ -56,6 +65,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         }
 
         configureRemoteCommands()
+        observePlayer()
     }
 
     public func templateApplicationScene(
@@ -67,6 +77,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         }
         playlistObserver = nil
         removeRemoteCommands()
+        playerCancellable = nil
         libraryTemplate = nil
         favoritesTemplate = nil
         self.interfaceController = nil
@@ -79,6 +90,31 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         let store = PlaylistStore.shared
         libraryTemplate?.updateSections(makeLibrarySections(store: store))
         favoritesTemplate?.updateSections(makeFavoritesSections(store: store))
+
+        // Group lists pushed from Library carry their group name in `userInfo`;
+        // refresh them so they never show channels that were removed.
+        guard let interfaceController else { return }
+        let groups = store.groupedChannels(store.allChannels)
+        for case let template as CPListTemplate in interfaceController.templates {
+            guard let group = template.userInfo as? String else { continue }
+            let channels = groups.first(where: { $0.group == group })?.channels ?? []
+            template.updateSections(channelSections(channels, showGroup: false))
+        }
+    }
+
+    /// Updates the playing indicator on every visible channel row without rebuilding lists.
+    private func refreshPlayingIndicators() {
+        let playingURL = VideoPlayerService.shared.currentChannel?.streamURL
+        var templates: [CPListTemplate] = [libraryTemplate, favoritesTemplate].compactMap { $0 }
+        templates += interfaceController?.templates.compactMap { $0 as? CPListTemplate } ?? []
+        for template in templates {
+            for section in template.sections {
+                for case let item as CPListItem in section.items {
+                    guard let url = item.userInfo as? URL else { continue }
+                    item.isPlaying = url == playingURL
+                }
+            }
+        }
     }
 
     /// Library root: one row per group. Tapping a group pushes its channel list.
@@ -97,7 +133,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
             )
             item.accessoryType = .disclosureIndicator
             item.handler = { [weak self] _, completion in
-                self?.pushGroup(title: group.isEmpty ? "Other" : group, channels: channels)
+                self?.pushGroup(group, title: group.isEmpty ? "Other" : group, channels: channels)
                 completion()
             }
             return item
@@ -107,15 +143,8 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
 
     private func makeFavoritesSections(store: PlaylistStore) -> [CPListSection] {
         let favorites = store.favoriteChannels
-        guard !favorites.isEmpty else {
-            let empty = CPListItem(
-                text: "No Favorites Yet",
-                detailText: "Tap the heart on a channel on your iPhone",
-                image: UIImage(systemName: "heart")
-            )
-            empty.handler = { _, completion in completion() }
-            return [CPListSection(items: [empty])]
-        }
+        // An empty template shows `emptyViewTitleVariants` / `emptyViewSubtitleVariants`.
+        guard !favorites.isEmpty else { return [] }
         // Favorites are sectioned by group, within CarPlay's section and item limits.
         let maxSections = Int(CPListTemplate.maximumSectionCount)
         var remaining = Int(CPListTemplate.maximumItemCount)
@@ -132,6 +161,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
 
     /// One section of channels, capped at CarPlay's item limit.
     private func channelSections(_ channels: [ChannelModel], showGroup: Bool) -> [CPListSection] {
+        guard !channels.isEmpty else { return [] }
         let maxItems = Int(CPListTemplate.maximumItemCount)
         let items = channels.prefix(maxItems).map { makeChannelItem($0, showGroup: showGroup) }
         return [CPListSection(items: Array(items))]
@@ -143,6 +173,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
             detailText: showGroup ? channel.groupTitle : nil,
             image: UIImage(systemName: "play.tv.fill")
         )
+        item.userInfo = channel.streamURL
         item.isPlaying = VideoPlayerService.shared.currentChannel?.streamURL == channel.streamURL
         item.handler = { [weak self] _, completion in
             self?.play(channel)
@@ -151,10 +182,16 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         return item
     }
 
-    private func pushGroup(title: String, channels: [ChannelModel]) {
-        guard let interfaceController else { return }
+    private func pushGroup(_ group: String, title: String, channels: [ChannelModel]) {
+        guard let interfaceController, canPush(onto: interfaceController) else { return }
         let template = CPListTemplate(title: title, sections: channelSections(channels, showGroup: false))
+        template.userInfo = group
+        template.emptyViewTitleVariants = ["No channels"]
         interfaceController.pushTemplate(template, animated: true, completion: nil)
+    }
+
+    private func canPush(onto interfaceController: CPInterfaceController) -> Bool {
+        interfaceController.templates.count < Self.maximumTemplateDepth
     }
 
     private func makeInfoTemplate() -> CPListTemplate {
@@ -177,8 +214,8 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
 
     private func play(_ channel: ChannelModel) {
         VideoPlayerService.shared.load(channel: channel)
-        updateNowPlayingInfo(for: channel, isPlaying: true)
-        rebuildTemplates()
+        updateNowPlayingInfo(for: channel, isPlaying: VideoPlayerService.shared.isPlaying)
+        refreshPlayingIndicators()
         showNowPlaying()
     }
 
@@ -188,9 +225,30 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         if interfaceController.topTemplate === nowPlaying { return }
         if interfaceController.templates.contains(where: { $0 === nowPlaying }) {
             interfaceController.pop(to: nowPlaying, animated: true, completion: nil)
-        } else {
+        } else if canPush(onto: interfaceController) {
             interfaceController.pushTemplate(nowPlaying, animated: true, completion: nil)
+        } else {
+            // Stack is full: go back to the root and show Now Playing from there.
+            interfaceController.popToRootTemplate(animated: false) { _, _ in
+                interfaceController.pushTemplate(nowPlaying, animated: true, completion: nil)
+            }
         }
+    }
+
+    /// Keeps Now Playing info and row indicators in sync when playback is changed
+    /// from the iPhone UI (or anywhere else), not just from CarPlay.
+    private func observePlayer() {
+        let service = VideoPlayerService.shared
+        playerCancellable = service.$currentChannel
+            .combineLatest(service.$isPlaying)
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] channel, isPlaying in
+                MainActor.assumeIsolated {
+                    self?.updateNowPlayingInfo(for: channel, isPlaying: isPlaying)
+                    self?.refreshPlayingIndicators()
+                }
+            }
     }
 
     private func updateNowPlayingInfo(for channel: ChannelModel?, isPlaying: Bool) {
@@ -221,23 +279,10 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
             remoteCommandTargets.append((command, token))
         }
 
-        register(center.playCommand) { [weak self] in
-            VideoPlayerService.shared.play()
-            self?.syncNowPlayingRate()
-        }
-        register(center.pauseCommand) { [weak self] in
-            VideoPlayerService.shared.pause()
-            self?.syncNowPlayingRate()
-        }
-        register(center.togglePlayPauseCommand) { [weak self] in
-            VideoPlayerService.shared.togglePlayPause()
-            self?.syncNowPlayingRate()
-        }
-    }
-
-    private func syncNowPlayingRate() {
-        let service = VideoPlayerService.shared
-        updateNowPlayingInfo(for: service.currentChannel, isPlaying: service.isPlaying)
+        // Now Playing info follows `VideoPlayerService` via `observePlayer()`.
+        register(center.playCommand) { VideoPlayerService.shared.play() }
+        register(center.pauseCommand) { VideoPlayerService.shared.pause() }
+        register(center.togglePlayPauseCommand) { VideoPlayerService.shared.togglePlayPause() }
     }
 
     private func removeRemoteCommands() {

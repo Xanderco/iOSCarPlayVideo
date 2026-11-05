@@ -55,13 +55,21 @@ There is no "video" category: CarPlay templates cannot play video while driving.
 
 - **Library:** groups (`group-title`) from `PlaylistStore.shared.allChannels`; tapping a group pushes
   its channels.
-- **Favorites:** `PlaylistStore.shared.favoriteChannels`, sectioned by group, with an empty state.
+- **Favorites:** `PlaylistStore.shared.favoriteChannels`, sectioned by group; when empty the
+  template's empty view ("No Favorites Yet") is shown.
 - **Info:** short explanation.
-- Lists respect `CPListTemplate.maximumSectionCount` / `maximumItemCount` and rebuild on
+- Lists respect `CPListTemplate.maximumSectionCount` / `maximumItemCount` (read at connect time,
+  they depend on the car), tabs respect `CPTabBarTemplate.maximumTabCount`, and pushes respect the
+  5-template depth limit for audio apps (Now Playing counts; if the stack is full it pops to root
+  first). Library, Favorites and any pushed group list rebuild on
   `PlaylistStore.didChangeNotification`.
-- Selecting a channel calls `VideoPlayerService.shared.load(channel:)`, shows
-  `CPNowPlayingTemplate.shared`, fills `MPNowPlayingInfoCenter` (title, group) and wires
-  `MPRemoteCommandCenter` play / pause / toggle.
+- Selecting a channel calls `VideoPlayerService.shared.load(channel:)` and shows
+  `CPNowPlayingTemplate.shared`. `MPNowPlayingInfoCenter` (title, group, live, rate) and the
+  rows' playing indicator follow `VideoPlayerService`'s `currentChannel` / `isPlaying`, so they stay
+  right when playback is changed from the iPhone. `MPRemoteCommandCenter` play / pause / toggle are
+  wired while CarPlay is connected and removed on disconnect.
+- All CarPlay code is `@MainActor` (the scene delegates, template handlers, notification and
+  Combine callbacks via `MainActor.assumeIsolated` on the main queue).
 
 ## Video in the car (iOS 26)
 
