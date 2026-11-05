@@ -62,22 +62,25 @@
 ## 6. Open decisions (owner)
 
 - **O1** In-app web browser: keep (honest 18+ rating) or remove (lower rating)?
-- **O2** Drive / Widgets / Sounds: keep as secondary "Extras", or drop to sharpen the video focus?
+- ~~**O2** Drive / Widgets / Sounds: keep as secondary "Extras", or drop to sharpen the video focus?~~ **Resolved 2026-11-05 (owner): Drive stays a real feature** (live location + automatic trip detection, `claude/drive-auto`, which owns `Features/Drive`). Widgets and Sounds may move under Extras. *(Context: #31 had moved all three under Settings › Car Extras as Trip Log / Car Screen / Chime — see `Docs/Originality-audit.md` §3.)*
 - **O3** Which car-video path to promise (see ADR-002): AirPlay-when-parked on supported head units, screen mirroring, DLNA receive.
-- **O4** CarPlay entitlement category to request from Apple (likely Audio/Video-adjacent per ADR).
+- **O4** CarPlay entitlement category to request from Apple (likely Audio/Video-adjacent per ADR). *(2026-11-05: #28 recommends the **CarPlay Video App** entitlement, not Navigation; justification text in ADR-002 §7.3 — owner to submit.)*
 
 ## 7. Human to-dos
 
-- [ ] Request CarPlay entitlement — developer.apple.com/contact/carplay.
-- [ ] App Store Connect: create non-consumable `pro.lifetime`, USD 19.99, Family Sharing.
+- [ ] Request CarPlay entitlement — developer.apple.com/contact/carplay. Category: **CarPlay Video App** (ADR-002 §7.3). Until granted, CarPlay shows nothing on a real head unit and the mirror flag stays off.
+- [ ] App Store Connect: create **one** non-consumable `pro.lifetime`, USD 19.99, Family Sharing on. No subscriptions (D1).
+- [ ] Apple Developer portal: register app group `group.com.xanderco.dashcast` and bundle IDs `com.xanderco.dashcast.broadcast`, `.castwidget`, `.widgets` (each with the app group). Needed before any device/TestFlight signing.
 - [ ] Privacy policy, terms (EULA) and support URLs (placeholders in metadata).
-- [ ] Check GitHub Actions minutes / billing (private repo).
+- [ ] Check GitHub Actions minutes / billing (private repo). The repo was made public for the sprint — set it back to **private** afterwards.
 - [ ] Close superseded PRs #11, #12, #13; review and merge #14.
-- [ ] On the Mac: hand `Docs/MAC_AGENT_HANDOFF.md` to an agent; run `Scripts/verify-all.sh` until green; do the manual checklist (real device, CarPlay Simulator, AirPlay, TestFlight).
+- [ ] On the Mac: hand `Docs/MAC_AGENT_HANDOFF.md` to an agent; run `Scripts/verify-all.sh` until green; do the manual checklist (real device, CarPlay Simulator, AirPlay, TestFlight). **Note:** both files are only on PR #26's branch (`claude/loving-archimedes-bxc7wp`) until it is ported (handoff issue T1).
+- [ ] Paperclip: hand `Docs/Paperclip/HANDOFF_2026-11-05.md` to the CEO agent (issue C0) when Paperclip resumes.
 
 ## 8. Next steps (beyond current tasks)
 
-1. Finish phase-2 integration (paywall, car video, redesign A/B, test automation) with CI green on `verify-all.sh`.
+1. ~~Finish phase-2 integration (paywall, car video, redesign A/B, test automation) with CI green on `verify-all.sh`.~~ Paywall, car video, CarPlay mirror, widgets, redesign 2A/2B and review fixes are merged (phases 2–3). **Remaining: port PR #26 (test automation / `verify-all.sh`) onto the redesigned app — handoff T1.**
+1b. Library tab → `LibraryView` (handoff U1); owner decisions O1, O2, O4.
 2. Mac run: full test pass + manual checklist; fix what simulators can't catch.
 3. TestFlight build → owner tests in a real car.
 4. App Store submission with `AppStoreMedia/` + review notes (demo playlist, passenger-only statement).
@@ -86,6 +89,20 @@
 ---
 
 ## Log
+
+### 2026-11-05 01:13 (Bogotá) — Integrator: fix EntitlementGate test after #18 × #24
+- **CI on `cecc1e6`:** the build succeeded and 190 of 192 unit tests passed (1 skipped, pre-existing). **2 failures, both in `EntitlementGateTests.testPlayerRefusesToCastWhenFreeAllowanceIsUsedUp`.** This is a semantic clash between #18 and #24. #24's test assumed `play()` sets `isPlaying` synchronously. Since #18, `isPlaying` mirrors AVPlayer's asynchronous `timeControlStatus`, which never reaches `.playing` for the test's fake URL.
+- Fix: added a read-only `VideoPlayerService.isPlaybackRequested` (whether playback was requested *and allowed* by the gate and the parked guard). The test asserts on it. Same three checks, same strictness: no skip, no weakening (D9).
+
+### 2026-11-05 01:13 (Bogotá) — Owner: Mac test results + decision O2
+- **Owner's Mac test run** (real Xcode, before phases 2–3 landed): build OK, **118 unit + 4 UI tests pass**, no runtime issues. Bugs found, with owners:
+  1. http streams blocked by ATS → fixed by #30 (review-fixes, merged): `NSAllowsArbitraryLoadsForMedia` + `NSAllowsLocalNetworking`.
+  2. In-app "CarPlay Emulator" should be removed → redesign 2A (#32). **Still present** (`CarPlaySimulatorView`, the Home "Preview car screen" entry) → follow-up for 2A / handoff U1.
+  3. Third-party sample streams still listed → 2A. #32's welcome state has "Browse sample streams"; verify the list against D5 → U1.
+  4. Jellyfin/QR hidden in the Me tab → fixed by #31/#32: Library tab = Media Servers, Add Source sheet = Link/File/QR/Server.
+  5. Drive map not centred on the user, no automatic trips → `claude/drive-auto` (pending, see below).
+  6. App not visible in the CarPlay Simulator → carplay-mirror adds a simulator-only entitlement. Note: #28 as merged has no such entitlement in `DashCast.entitlements` (only the app group); if a later carplay-mirror commit adds it, it still needs integrating.
+- **Owner decision O2:** Drive stays a real feature; Widgets/Sounds may move under Extras (§6 updated). `claude/drive-auto` is next in the merge queue.
 
 ### 2026-11-05 01:01 (Bogotá) — Integrator: merged #32 follow-up a39798d
 - The #32 session pushed `a39798d` after my merge: the same `canStep` return fix, plus explicit initializers for `ResumeCard` and the internal `LibraryView` subviews (memberwise inits were inaccessible). Merged it. The only conflict was `MirrorScreenSheet`, which stays removed (superseded by #25's `CarOutputPanelView`, see the #32 entry).

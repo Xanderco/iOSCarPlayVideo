@@ -41,6 +41,10 @@ public final class VideoPlayerService: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var wantsToPlay = false
 
+    /// True while playback has been requested and allowed (entitlement gate, parked-only guard).
+    /// `isPlaying` instead mirrors AVPlayer's asynchronous `timeControlStatus`.
+    public var isPlaybackRequested: Bool { wantsToPlay }
+
     private var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
     /// Number of MPRemoteCommandCenter targets this instance registered. Exposed for tests.
     var remoteCommandTargetCount: Int { remoteCommandTargets.count }

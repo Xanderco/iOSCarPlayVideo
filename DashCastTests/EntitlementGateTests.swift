@@ -140,20 +140,22 @@ final class EntitlementGateTests: XCTestCase {
         player.entitlementGate = gate
         let channel = ChannelModel(name: "One", streamURL: URL(string: "https://stream.example.com/one.m3u8")!, groupTitle: "News")
 
+        // `isPlaying` follows AVPlayer's async timeControlStatus since #18 (and never reaches .playing
+        // for this fake URL), so assert what the gate controls: whether playback was requested.
         player.load(channel: channel)
-        XCTAssertTrue(player.isPlaying, "Free users can cast while allowance remains")
+        XCTAssertTrue(player.isPlaybackRequested, "Free users can cast while allowance remains")
         player.pause()
 
         gate.recordCasting(seconds: 15 * 60)
         blocked = []
         player.load(channel: channel)
-        XCTAssertFalse(player.isPlaying)
+        XCTAssertFalse(player.isPlaybackRequested)
         XCTAssertEqual(blocked, [.dailyCastingLimitReached(minutes: 15)])
 
         // Buying Pro unlocks unlimited casting.
         pro.send(true)
         player.play()
-        XCTAssertTrue(player.isPlaying)
+        XCTAssertTrue(player.isPlaybackRequested)
         player.pause()
     }
 }
