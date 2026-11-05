@@ -48,7 +48,10 @@ public struct MainTabView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            LiquidCapsuleTabBar(selectedTab: $appState.selectedTab)
+            VStack(spacing: 0) {
+                MiniPlayerHost()
+                LiquidCapsuleTabBar(selectedTab: $appState.selectedTab)
+            }
         }
         .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $appState.showPaywall) {

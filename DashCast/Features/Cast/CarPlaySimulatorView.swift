@@ -102,7 +102,7 @@ public struct CarPlaySimulatorView: View {
         }
     }
 
-    // MARK: - Left CarPlay Sidebar / Dock (Matching Real CarPlay 1:1)
+    // MARK: - Left CarPlay Sidebar / Dock (approximation of the system CarPlay dock)
 
     private var carPlayLeftDock: some View {
         VStack(spacing: 10) {

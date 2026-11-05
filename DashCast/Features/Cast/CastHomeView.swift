@@ -1,758 +1,501 @@
 import SwiftUI
 import PhotosUI
-import UniformTypeIdentifiers
 
+/// Home: search, quick ways to watch, Continue Watching, Favorites, Recently Watched,
+/// your sources and the car-display status. Playback continues in the mini player.
 public struct CastHomeView: View {
-    @EnvironmentObject private var appState: AppState
-    @StateObject private var playerService = VideoPlayerService.shared
-    @StateObject private var localVideoManager = LocalVideoManager.shared
-    @StateObject private var externalDisplay = ExternalDisplayManager.shared
+    /// Identifiable wrapper so the Library sheet can open at a specific place.
+    private struct LibraryLaunch: Identifiable {
+        let id = UUID()
+        let route: LibraryRoute?
+    }
 
-    @State private var showingAddM3UDialog: Bool = false
-    @State private var showingPlaylistsSheet: Bool = false
-    @State private var showingWebBrowser: Bool = false
-    @State private var showingCastGuide: Bool = false
-    @State private var showingFavorites: Bool = false
-    @State private var showingBroadcastPicker: Bool = false
-    @State private var showingCarPlaySimulator: Bool = false
-    @State private var selectedPhotoItem: PhotosPickerItem?
-    @State private var isFullscreenPlayer: Bool = false
-    @State private var m3uURLInput: String = ""
-    @StateObject private var playlistStore = PlaylistStore.shared
-    @State private var isImportingPlaylist: Bool = false
-    @State private var showingPlaylistFileImporter: Bool = false
-    @State private var importErrorMessage: String?
-    @State private var importSuccessMessage: String?
+    @EnvironmentObject private var appState: AppState
+    @ObservedObject private var player = VideoPlayerService.shared
+    @ObservedObject private var presentation = PlayerPresentation.shared
+    @ObservedObject private var playlistStore = PlaylistStore.shared
+    @ObservedObject private var localVideos = LocalVideoManager.shared
+    @ObservedObject private var history = WatchHistoryStore.shared
+    @ObservedObject private var externalDisplay = ExternalDisplayManager.shared
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    @State private var query = ""
+    @State private var library: LibraryLaunch?
+    @State private var showingAddSource = false
+    @State private var showingWebBrowser = false
+    @State private var showingGuide = false
+    @State private var showingMirror = false
+    @State private var showingCarPlaySimulator = false
+    @State private var showingPhotoPicker = false
+    @State private var pickedPhotoItem: PhotosPickerItem?
     @State private var localImportError: String?
 
     public init() {}
 
+    private var gridColumns: [GridItem] {
+        let count = dynamicTypeSize.isAccessibilitySize ? 1 : 2
+        return Array(repeating: GridItem(.flexible(), spacing: DSSpacing.gridGap), count: count)
+    }
+
+    private var bottomInset: CGFloat {
+        // Tab bar clearance, plus room for the mini player when it is showing.
+        110 + (player.currentChannel != nil ? DSLayout.miniPlayerHeight + DSSpacing.sm : 0)
+    }
+
     public var body: some View {
         NavigationStack {
-            ZStack {
-                Color.dashBackground.ignoresSafeArea()
+            ScrollView {
+                VStack(alignment: .leading, spacing: DSSpacing.sectionGap) {
+                    SearchField(text: $query, prompt: "Search all channels")
+                        .accessibilityIdentifier("Home_Search")
 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // If video is currently playing, render the video player
-                        if playerService.currentChannel != nil {
-                            AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
-                                .frame(height: 220)
-                                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                                .padding(.horizontal, 16)
+                    if query.isEmpty {
+                        quickActions
+                        if playlistStore.playlists.isEmpty && localVideos.localVideos.isEmpty && history.entries.isEmpty {
+                            welcome
                         }
-
-                        // Main 4-Row Source Menu Card
-                        mainSourceMenuCard
-
-                        // Imported videos were previously saved but never listed anywhere,
-                        // so the user had no way to play them.
-                        if localVideoManager.isImporting || !localVideoManager.localVideos.isEmpty {
-                            localVideosSection
-                        }
-
-                        // CarPlay Connection Illustration & Status Section
-                        carPlayStatusSection
-                    }
-                    .padding(.top, 10)
-                    .padding(.bottom, 110) // clearance for LiquidCapsuleTabBar
-                }
-            }
-            .navigationTitle("Cast")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 8) {
-                        if !appState.isProLifetimeUnlocked {
-                            Button {
-                                appState.showPaywall = true
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "crown.fill")
-                                        .font(.system(size: 11))
-                                    Text("PRO")
-                                        .font(.system(size: 12, weight: .heavy))
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(LinearGradient.dashProGoldGradient)
-                                .foregroundStyle(Color.black)
-                                .clipShape(Capsule())
-                            }
-                        }
-
-                        Button {
-                            showingCastGuide = true
-                        } label: {
-                            Image(systemName: "questionmark")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Color.dashTextPrimary)
-                                .frame(width: 34, height: 34)
-                                .background(Color.dashSurface)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
-                        }
-
-                        Button {
-                            showingFavorites = true
-                        } label: {
-                            Image(systemName: "heart.fill")
-                                .font(.system(size: 13))
-                                .foregroundStyle(Color.dashTextPrimary)
-                                .frame(width: 34, height: 34)
-                                .background(Color.dashSurface)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
-                        }
+                        continueWatching
+                        favorites
+                        recents
+                        sources
+                        carDisplayCard
+                    } else {
+                        searchResults
                     }
                 }
+                .padding(.top, DSSpacing.sm)
+                .padding(.bottom, bottomInset)
             }
-            .sheet(isPresented: $showingCastGuide) {
-                CarCastGuideModalView()
+            .scrollDismissesKeyboard(.interactively)
+            .background(Color.dcBackground.ignoresSafeArea())
+            .navigationTitle("DashCast")
+            .toolbar { toolbar }
+        }
+        .tint(Color.dcAccent)
+        .sheet(item: $library) { launch in
+            LibraryView(initialRoute: launch.route)
+        }
+        .sheet(isPresented: $showingAddSource) { AddSourceSheet() }
+        .sheet(isPresented: $showingGuide) { CarCastGuideModalView() }
+        .sheet(isPresented: $showingWebBrowser) { WebVideoBrowserView() }
+        .sheet(isPresented: $showingMirror) { MirrorScreenSheet() }
+        .sheet(isPresented: Binding(
+            get: { showingCarPlaySimulator || appState.showCarPlaySimulator },
+            set: {
+                showingCarPlaySimulator = $0
+                appState.showCarPlaySimulator = $0
             }
-            .sheet(isPresented: $showingWebBrowser) {
-                WebVideoBrowserView()
-            }
-            .sheet(isPresented: $showingPlaylistsSheet) {
-                mediaSourcePlaylistsSheet
-            }
-            .sheet(isPresented: $showingFavorites) {
-                favoritesSheet
-            }
-            .sheet(isPresented: Binding(
-                get: { showingCarPlaySimulator || appState.showCarPlaySimulator },
-                set: {
-                    showingCarPlaySimulator = $0
-                    appState.showCarPlaySimulator = $0
+        )) {
+            CarPlaySimulatorView()
+        }
+        .photosPicker(isPresented: $showingPhotoPicker, selection: $pickedPhotoItem,
+                      matching: .videos, preferredItemEncoding: .current)
+        .onChange(of: pickedPhotoItem) { _, item in
+            guard let item else { return }
+            Task {
+                do {
+                    let channel = try await localVideos.importVideo(from: item)
+                    presentation.play(channel)
+                } catch {
+                    localImportError = error.localizedDescription
                 }
-            )) {
-                CarPlaySimulatorView()
+                // Reset so picking the same video again still triggers onChange.
+                pickedPhotoItem = nil
             }
-            .sheet(isPresented: $showingBroadcastPicker) {
-                NavigationStack {
-                    ZStack {
-                        Color.dashBackground.ignoresSafeArea()
-                        VStack(spacing: 24) {
-                            Text("Mirror iPhone Screen")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(Color.dashTextPrimary)
-
-                            // The old RPSystemBroadcastPickerView needs a Broadcast Upload
-                            // extension this app doesn't ship, so it showed an empty list.
-                            // Mirroring is a system feature; the app can only point to it.
-                            Text("Mirror your iPhone to an AirPlay screen (Apple TV, AirPlay-capable car display or TV), or plug in a USB-C/HDMI adapter. DashCast then shows the video full screen there.")
-                                .font(.system(size: 14))
-                                .foregroundStyle(Color.dashTextSecondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-
-                            VStack(alignment: .leading, spacing: 8) {
-                                Label("Tap the AirPlay button below to send video, or", systemImage: "1.circle.fill")
-                                Label("Open Control Center → Screen Mirroring", systemImage: "2.circle.fill")
-                            }
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(Color.dashTextPrimary)
-                            .padding(.horizontal, 24)
-
-                            AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
-                                .frame(width: 64, height: 64)
-                                .background(Color.dashSurface)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.dashYellow.opacity(0.4), lineWidth: 2))
-
-                            Text("CarPlay itself does not allow third-party apps to show video; in a CarPlay car only the audio plays through the car.")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.dashTextMuted)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-
-                            Spacer()
-                        }
-                        .padding(.top, 40)
-                    }
-                    .navigationTitle("Screen Mirroring")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button("Close") { showingBroadcastPicker = false }
-                                .foregroundStyle(Color.dashYellow)
-                        }
-                    }
-                }
-            }
-            .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
-                guard let newItem = newItem else { return }
-                Task {
-                    do {
-                        let channel = try await localVideoManager.importVideo(from: newItem)
-                        playerService.load(channel: channel)
-                    } catch {
-                        localImportError = error.localizedDescription
-                    }
-                    // Reset so picking the same video again still triggers onChange.
-                    selectedPhotoItem = nil
-                }
-            }
-            .alert("Couldn't import video", isPresented: Binding(
-                get: { localImportError != nil },
-                set: { if !$0 { localImportError = nil } }
-            )) {
-                Button("OK", role: .cancel) { localImportError = nil }
-            } message: {
-                Text(localImportError ?? "")
-            }
+        }
+        .alert("Couldn't import video", isPresented: Binding(
+            get: { localImportError != nil },
+            set: { if !$0 { localImportError = nil } }
+        )) {
+            Button("OK", role: .cancel) { localImportError = nil }
+        } message: {
+            Text(localImportError ?? "")
         }
     }
 
-    // MARK: - 4-Row Source Menu Card
+    // MARK: - Toolbar
 
-    private var mainSourceMenuCard: some View {
-        VStack(spacing: 1) {
-            // Row 1: Media Source
-            Button {
-                showingPlaylistsSheet = true
-            } label: {
-                menuRow(
-                    icon: "play.tv.fill",
-                    title: "Media Source",
-                    subtitle: "Your M3U / M3U8 playlists"
-                )
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
+        ToolbarItemGroup(placement: .topBarTrailing) {
+            if !appState.isProLifetimeUnlocked {
+                Button {
+                    appState.showPaywall = true
+                } label: {
+                    Label("Pro", systemImage: "crown.fill")
+                        .labelStyle(.iconOnly)
+                        .foregroundStyle(Color.dcPro)
+                }
+                .accessibilityLabel(Text("DashCast Pro"))
+                .accessibilityIdentifier("Home_Pro")
             }
-            .buttonStyle(.plain)
+            Menu {
+                Button("Playlist or Server", systemImage: "list.bullet.rectangle") { showingAddSource = true }
+                Button("Video from Photos", systemImage: "photo.on.rectangle") { showingPhotoPicker = true }
+            } label: {
+                Image(systemName: "plus")
+            }
+            .accessibilityLabel(Text("Add"))
+            .accessibilityIdentifier("Home_Add")
+        }
+    }
+
+    // MARK: - Quick actions
+
+    private var quickActions: some View {
+        LazyVGrid(columns: gridColumns, spacing: DSSpacing.gridGap) {
+            SourceTile(title: "Library", subtitle: "\(playlistStore.allChannels.count) channels",
+                       systemImage: "square.stack.fill") {
+                library = LibraryLaunch(route: nil)
+            }
             .accessibilityIdentifier("Cast_MediaSourceRow")
 
-            Divider().background(Color.dashBorder.opacity(0.6))
-
-            // Row 2: Local Videos
-            PhotosPicker(selection: $selectedPhotoItem, matching: .videos, preferredItemEncoding: .current) {
-                menuRow(
-                    icon: "folder.fill",
-                    title: "Local Videos",
-                    subtitle: localVideoManager.isImporting ? "Importing…" : "Import from Photos"
-                )
-            }
-            .buttonStyle(.plain)
-
-            Divider().background(Color.dashBorder.opacity(0.6))
-
-            // Row 3: Mirror iPhone
-            Button {
-                showingBroadcastPicker = true
-            } label: {
-                menuRow(
-                    icon: "rectangle.on.rectangle.fill",
-                    title: "Mirror iPhone",
-                    subtitle: "Share your screen live"
-                )
-            }
-            .buttonStyle(.plain)
-
-            Divider().background(Color.dashBorder.opacity(0.6))
-
-            // Row 4: Browser
-            Button {
+            SourceTile(title: "Web Video", subtitle: "Send a page's video to the car",
+                       systemImage: "safari.fill", tint: .dcInfo) {
                 showingWebBrowser = true
-            } label: {
-                menuRow(
-                    icon: "globe",
-                    title: "Browser",
-                    subtitle: "Explore websites"
-                )
             }
-            .buttonStyle(.plain)
             .accessibilityIdentifier("Cast_BrowserRow")
+
+            SourceTile(title: "Mirror Screen", subtitle: "AirPlay or a cable",
+                       systemImage: "rectangle.on.rectangle", tint: .dcWarning) {
+                showingMirror = true
+            }
+            .accessibilityIdentifier("Cast_MirrorRow")
+
+            SourceTile(title: "Car Mode", subtitle: "Big buttons, landscape",
+                       systemImage: "car.fill", tint: .dcPro) {
+                presentation.openCarMode()
+            }
+            .accessibilityIdentifier("Cast_CarModeRow")
         }
-        .background(Color.dashSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .stroke(Color.dashBorder, lineWidth: 1)
+        .padding(.horizontal, DSSpacing.screenGutter)
+    }
+
+    private var welcome: some View {
+        EmptyStateView(
+            systemImage: "play.tv",
+            title: "Bring your own videos",
+            message: "Add an M3U playlist, connect a Jellyfin or Emby server, or import videos from Photos. Nothing leaves your iPhone.",
+            actionTitle: "Add a Source", action: { showingAddSource = true },
+            secondaryActionTitle: "Browse sample streams", secondaryAction: { library = LibraryLaunch(route: .samples) }
         )
-        .padding(.horizontal, 16)
+        .dsCard()
+        .padding(.horizontal, DSSpacing.screenGutter)
     }
 
-    // MARK: - Imported local videos
+    // MARK: - Shelves
 
-    private var localVideosSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Your Videos")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(Color.dashYellow)
-                Spacer()
-                if localVideoManager.isImporting {
-                    ProgressView().tint(.dashYellow)
-                }
-            }
-            .padding(.horizontal, 20)
-
-            VStack(spacing: 1) {
-                ForEach(localVideoManager.localVideos) { video in
-                    HStack(spacing: 12) {
-                        Button {
-                            playerService.load(channel: video)
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: playerService.currentChannel?.id == video.id ? "speaker.wave.2.fill" : "play.rectangle.fill")
-                                    .foregroundStyle(Color.dashYellow)
-                                Text(video.name)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(Color.dashTextPrimary)
-                                    .lineLimit(1)
-                                Spacer()
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-
-                        Button(role: .destructive) {
-                            if playerService.currentChannel?.id == video.id {
-                                playerService.stop()
-                            }
-                            localVideoManager.deleteVideo(video)
-                        } label: {
-                            Image(systemName: "trash")
-                                .foregroundStyle(Color.dashTextMuted)
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Delete \(video.name)")
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color.dashSurface)
-                }
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .padding(.horizontal, 16)
-        }
-    }
-
-    private func menuRow(icon: String, title: String, subtitle: String) -> some View {
-        HStack(spacing: 16) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color(red: 0.12, green: 0.15, blue: 0.22))
-                    .frame(width: 46, height: 46)
-
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundStyle(Color.dashYellow)
-            }
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(Color.dashTextPrimary)
-
-                Text(subtitle)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.dashTextSecondary)
-            }
-
-            Spacer()
-
-            Image(systemName: "arrow.up.right")
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(Color.dashTextMuted)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .contentShape(Rectangle())
-    }
-
-    // MARK: - CarPlay Connection Visual Section
-
-    private var carPlayStatusSection: some View {
-        VStack(spacing: 16) {
-            // Visual hardware mockup: iPhone and Car Head Unit screen
-            HStack(spacing: 20) {
-                // iPhone silhouette
-                ZStack {
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(Color(red: 0.28, green: 0.32, blue: 0.40), lineWidth: 3)
-                        .frame(width: 70, height: 125)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color(red: 0.08, green: 0.09, blue: 0.12))
-                        )
-
-                    VStack(spacing: 6) {
-                        Capsule()
-                            .fill(Color.white.opacity(0.3))
-                            .frame(width: 20, height: 3)
-
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundStyle(Color.dashYellow)
-
-                        Text("DashCast")
-                            .font(.system(size: 8, weight: .bold))
-                            .foregroundStyle(Color.dashTextSecondary)
-                    }
-                }
-
-                // Wireless connection link symbol with waves
-                VStack(spacing: 4) {
-                    Image(systemName: "wave.3.right")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(externalDisplay.isExternalDisplayConnected ? Color.dashGreen : Color.dashYellow)
-
-                    Image(systemName: externalDisplay.isExternalDisplayConnected ? "link.circle.fill" : "link")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(externalDisplay.isExternalDisplayConnected ? Color.dashGreen : Color.dashYellow)
-
-                    Image(systemName: "wave.3.left")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(externalDisplay.isExternalDisplayConnected ? Color.dashGreen : Color.dashYellow)
-                }
-
-                // Car Head Unit Dashboard Screen
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(Color(red: 0.28, green: 0.32, blue: 0.40), lineWidth: 3.5)
-                        .frame(width: 170, height: 110)
-                        .background(
-                            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                .fill(Color(red: 0.07, green: 0.08, blue: 0.11))
-                        )
-
-                    if externalDisplay.isExternalDisplayConnected {
-                        VStack(spacing: 6) {
-                            Image(systemName: "car.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(Color.dashGreen)
-                            Text("Display Connected")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(Color.dashGreen)
-                        }
-                    } else {
-                        VStack(spacing: 6) {
-                            Image(systemName: "car.side.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(Color.dashYellow.opacity(0.8))
-                            Text("CarPlay Screen")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(Color.dashTextMuted)
-                        }
-                    }
-                }
-            }
-            .frame(height: 135)
-            .padding(.top, 4)
-
-            // Status Text
-            VStack(spacing: 6) {
-                Text(externalDisplay.isExternalDisplayConnected ? "External display connected" : "No external display (use AirPlay or a cable)")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(Color.dashTextPrimary)
-
-                Text(externalDisplay.isExternalDisplayConnected
-                     ? "Playing video & audio on car display while parked."
-                     : "Connect to watch in your car. You can still explore on iPhone.")
-                    .font(.system(size: 13))
-                    .foregroundStyle(Color.dashTextSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 32)
-            }
-
-            // AirPlay, Guide & CarPlay Mode Simulator buttons
-            HStack(spacing: 10) {
-                Button {
-                    showingCarPlaySimulator = true
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "car.side.fill")
-                        Text("CarPlay Mode")
-                    }
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.black)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(LinearGradient.dashAccentGradient)
-                    .clipShape(Capsule())
-                    .shadow(color: Color.dashYellow.opacity(0.35), radius: 6, y: 3)
-                }
-
-                Button {
-                    showingCastGuide = true
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "info.circle")
-                        Text("Help")
-                    }
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.dashYellow)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.dashYellow.opacity(0.12))
-                    .clipShape(Capsule())
-                }
-
-                AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
-                    .frame(width: 36, height: 36)
-                    .background(Color.dashSurface)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
-            }
-            .padding(.bottom, 10)
-        }
-        .padding(.horizontal, 16)
-    }
-
-    // MARK: - Playlists Sheet
-
-    private var mediaSourcePlaylistsSheet: some View {
-        NavigationStack {
-            ZStack {
-                Color.dashBackground.ignoresSafeArea()
-
-                ScrollView {
-                    VStack(spacing: 14) {
-                        HStack {
-                            Text(playlistStore.playlists.isEmpty ? "Sample Streams" : "Your Channels")
-                                .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Color.dashYellow)
-                            Spacer()
-                            Menu("+ Add Playlist") {
-                                Button("From URL", systemImage: "link") { showingAddM3UDialog = true }
-                                Button("From Files", systemImage: "folder") { showingPlaylistFileImporter = true }
-                                if !playlistStore.playlists.isEmpty {
-                                    Button("Refresh All", systemImage: "arrow.clockwise") {
-                                        Task { await playlistStore.refreshAll() }
-                                    }
+    @ViewBuilder
+    private var continueWatching: some View {
+        let items = history.continueWatching
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: DSSpacing.sm) {
+                SectionHeader("Continue Watching")
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: DSSpacing.gridGap) {
+                        ForEach(items) { entry in
+                            ResumeCard(entry: entry) { presentation.play(entry.channel) }
+                                .contextMenu {
+                                    Button("Remove from Continue Watching", systemImage: "xmark") { history.remove(entry) }
                                 }
-                            }
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(Color.dashYellow)
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 12)
+                    }
+                    .padding(.horizontal, DSSpacing.screenGutter)
+                }
+            }
+        }
+    }
 
-                        if let importSuccessMessage {
-                            Text(importSuccessMessage)
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(Color.dashYellow)
-                                .padding(.horizontal)
-                        }
-
-                        ForEach(playlistStore.playlists) { playlist in
-                            HStack {
-                                Image(systemName: "list.bullet.rectangle")
-                                    .foregroundStyle(Color.dashYellow)
-                                Text("\(playlist.title) · \(playlist.channels.count) channels")
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .foregroundStyle(Color.dashTextSecondary)
-                                Spacer()
-                                Button(role: .destructive) {
-                                    playlistStore.removePlaylist(id: playlist.id)
-                                } label: {
-                                    Image(systemName: "trash")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(Color.dashTextMuted)
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-
-                        ForEach(playlistStore.allChannels) { channel in
+    @ViewBuilder
+    private var favorites: some View {
+        let items = playlistStore.favoriteChannels
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: DSSpacing.sm) {
+                SectionHeader("Favorites", count: items.count) { library = LibraryLaunch(route: .favorites) }
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(alignment: .top, spacing: DSSpacing.gridGap) {
+                        ForEach(items) { channel in
                             Button {
-                                playerService.load(channel: channel)
-                                showingPlaylistsSheet = false
+                                presentation.play(channel)
                             } label: {
-                                HStack(spacing: 14) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(Color.dashSurfaceHighlight)
-                                            .frame(width: 44, height: 44)
-
-                                        Image(systemName: "tv.fill")
-                                            .foregroundStyle(Color.dashYellow)
-                                    }
-
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(channel.name)
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundStyle(Color.dashTextPrimary)
-
-                                        Text(channel.groupTitle)
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(Color.dashTextSecondary)
-                                    }
-
-                                    Spacer()
-
-                                    Button {
-                                        playlistStore.toggleFavorite(channel)
-                                    } label: {
-                                        Image(systemName: playlistStore.isFavorite(channel) ? "heart.fill" : "heart")
-                                            .font(.system(size: 18))
-                                            .foregroundStyle(Color.dashYellow)
-                                    }
-                                    .buttonStyle(.plain)
-
-                                    Image(systemName: "play.circle.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundStyle(Color.dashYellow)
+                                VStack(spacing: DSSpacing.xs) {
+                                    ChannelLogo(url: channel.logoURL, name: channel.name, size: 72)
+                                        .overlay(alignment: .bottomTrailing) {
+                                            if channel.streamURL == player.currentChannel?.streamURL {
+                                                Image(systemName: "waveform")
+                                                    .font(.caption.weight(.bold))
+                                                    .foregroundStyle(Color.dcOnAccent)
+                                                    .padding(4)
+                                                    .background(Color.dcAccent, in: Circle())
+                                            }
+                                        }
+                                    Text(channel.name)
+                                        .font(DSTypography.caption)
+                                        .foregroundStyle(Color.dcTextPrimary)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.center)
+                                        .frame(width: 84)
                                 }
-                                .padding()
-                                .background(Color.dashSurface)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .padding(.horizontal)
                             }
                             .buttonStyle(.plain)
-                            .accessibilityIdentifier("MediaSources_Channel")
+                            .accessibilityLabel(Text(channel.name))
+                            .accessibilityHint(Text("Plays this channel"))
                         }
                     }
-                    .padding(.bottom, 30)
-                }
-            }
-            .sheet(isPresented: $showingAddM3UDialog) {
-                addM3UDialogSheet
-            }
-            .fileImporter(
-                isPresented: $showingPlaylistFileImporter,
-                allowedContentTypes: PlaylistStore.playlistContentTypes,
-                allowsMultipleSelection: false
-            ) { result in
-                switch result {
-                case .success(let urls):
-                    guard let url = urls.first else { return }
-                    do {
-                        let playlist = try playlistStore.importPlaylist(fileURL: url)
-                        importSuccessMessage = "Imported \(playlist.channels.count) channels from \(playlist.title)"
-                    } catch {
-                        importErrorMessage = error.localizedDescription
-                    }
-                case .failure(let error):
-                    importErrorMessage = error.localizedDescription
-                }
-            }
-            .alert("Couldn't import playlist", isPresented: Binding(
-                get: { importErrorMessage != nil },
-                set: { if !$0 { importErrorMessage = nil } }
-            )) {
-                Button("OK", role: .cancel) { importErrorMessage = nil }
-            } message: {
-                Text(importErrorMessage ?? "")
-            }
-            .navigationTitle("Media Sources")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") { showingPlaylistsSheet = false }
-                        .foregroundStyle(Color.dashYellow)
+                    .padding(.horizontal, DSSpacing.screenGutter)
                 }
             }
         }
     }
 
-    private var favoritesSheet: some View {
+    @ViewBuilder
+    private var recents: some View {
+        let items = Array(history.recents.prefix(5))
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                SectionHeader("Recently Watched", actionTitle: "Clear") { history.clear() }
+                VStack(spacing: 0) {
+                    ForEach(items) { entry in
+                        Button {
+                            presentation.play(entry.channel)
+                        } label: {
+                            ChannelRow(
+                                title: entry.channel.name,
+                                subtitle: entry.channel.groupTitle,
+                                logoURL: entry.channel.logoURL,
+                                isLive: entry.isLive && !entry.channel.streamURL.isFileURL,
+                                isPlaying: entry.channel.streamURL == player.currentChannel?.streamURL,
+                                isFavorite: playlistStore.isFavorite(entry.channel),
+                                progress: entry.isResumable ? entry.progress : nil,
+                                onToggleFavorite: { playlistStore.toggleFavorite(entry.channel) }
+                            )
+                            .padding(.horizontal, DSSpacing.md)
+                        }
+                        .buttonStyle(.plain)
+                        if entry.id != items.last?.id {
+                            Divider().overlay(Color.dcSeparator).padding(.leading, DSSpacing.md)
+                        }
+                    }
+                }
+                .dsCard(padding: 0)
+                .padding(.horizontal, DSSpacing.screenGutter)
+            }
+        }
+    }
+
+    private var sources: some View {
+        VStack(alignment: .leading, spacing: DSSpacing.sm) {
+            SectionHeader("Your Sources", subtitle: "Playlists, servers and videos")
+            LazyVGrid(columns: gridColumns, spacing: DSSpacing.gridGap) {
+                ForEach(playlistStore.playlists) { playlist in
+                    SourceTile(title: playlist.title,
+                               subtitle: "\(playlist.channels.count) channels",
+                               systemImage: "list.bullet.rectangle.portrait.fill",
+                               badge: playlist.url == nil ? "FILE" : "M3U") {
+                        library = LibraryLaunch(route: .playlist(playlist.id))
+                    }
+                }
+                SourceTile(title: "On This iPhone",
+                           subtitle: localVideos.isImporting ? "Importing…" : "\(localVideos.localVideos.count) videos",
+                           systemImage: "iphone", tint: .dcInfo,
+                           status: localVideos.isImporting ? .loading : .ready) {
+                    library = LibraryLaunch(route: .onThisPhone)
+                }
+                SourceTile.add { showingAddSource = true }
+            }
+            .padding(.horizontal, DSSpacing.screenGutter)
+        }
+    }
+
+    // MARK: - Car display
+
+    private var carDisplayCard: some View {
+        let connected = externalDisplay.isExternalDisplayConnected
+        return VStack(alignment: .leading, spacing: DSSpacing.md) {
+            HStack(spacing: DSSpacing.md) {
+                Image(systemName: connected ? "checkmark.circle.fill" : "car.side")
+                    .font(.system(.title2, weight: .semibold))
+                    .foregroundStyle(connected ? Color.dcSuccess : Color.dcTextSecondary)
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                    Text(connected ? "Car display connected" : "Not connected to a car display")
+                        .font(DSTypography.headline)
+                        .foregroundStyle(Color.dcTextPrimary)
+                    Text(connected
+                         ? "Video plays full screen on the connected display. For passengers, or while parked."
+                         : "Use AirPlay or a USB-C / HDMI adapter. You can keep browsing on your iPhone.")
+                        .font(DSTypography.footnote)
+                        .foregroundStyle(Color.dcTextSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                AirPlayRoutePickerRepresentable(tintColor: .dcAccent)
+                    .frame(width: DSLayout.minTapTarget, height: DSLayout.minTapTarget)
+                    .accessibilityLabel(Text("Choose a screen"))
+            }
+            .accessibilityElement(children: .contain)
+
+            HStack(spacing: DSSpacing.sm) {
+                PrimaryButton("How to connect", systemImage: "questionmark.circle", kind: .secondary, size: .compact) {
+                    showingGuide = true
+                }
+                PrimaryButton("Preview car screen", systemImage: "rectangle.inset.filled", kind: .tertiary, size: .compact) {
+                    showingCarPlaySimulator = true
+                }
+            }
+        }
+        .dsCard()
+        .padding(.horizontal, DSSpacing.screenGutter)
+        .accessibilityIdentifier("Home_CarDisplayCard")
+    }
+
+    // MARK: - Search
+
+    @ViewBuilder
+    private var searchResults: some View {
+        let needle = query.trimmingCharacters(in: .whitespaces)
+        let results = (playlistStore.allChannels + localVideos.localVideos)
+            .filter { $0.name.localizedCaseInsensitiveContains(needle) || $0.groupTitle.localizedCaseInsensitiveContains(needle) }
+        if results.isEmpty {
+            EmptyStateView(systemImage: "magnifyingglass", title: "No matches",
+                           message: "Nothing called “\(needle)” in your sources yet.",
+                           actionTitle: "Add a Source", action: { showingAddSource = true })
+        } else {
+            VStack(alignment: .leading, spacing: DSSpacing.xs) {
+                SectionHeader("Channels", count: results.count)
+                LazyVStack(spacing: 0) {
+                    ForEach(results.prefix(100)) { channel in
+                        Button {
+                            presentation.play(channel)
+                        } label: {
+                            ChannelRow(
+                                channel: channel,
+                                isLive: history.looksLive(channel),
+                                isPlaying: channel.streamURL == player.currentChannel?.streamURL,
+                                isFavorite: playlistStore.isFavorite(channel),
+                                onToggleFavorite: { playlistStore.toggleFavorite(channel) }
+                            )
+                            .padding(.horizontal, DSSpacing.screenGutter)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("Home_SearchResult")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// 16:9 "Continue Watching" card with a resume progress bar.
+private struct ResumeCard: View {
+    let entry: WatchHistoryStore.Entry
+    let action: () -> Void
+    @ScaledMetric(relativeTo: .body) private var width: CGFloat = 220
+
+    var body: some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: DSSpacing.sm) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous)
+                        .fill(Color.dcSurfaceRaised)
+                    ChannelLogo(url: entry.channel.logoURL, name: entry.channel.name, size: 56)
+                    Image(systemName: "play.fill")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(Color.dcOnAccent)
+                        .frame(width: 40, height: 40)
+                        .background(Color.dcAccent, in: Circle())
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                        .padding(DSSpacing.sm)
+                }
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .overlay(alignment: .bottom) {
+                    if let progress = entry.progress {
+                        GeometryReader { proxy in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(Color.dcStroke)
+                                Capsule().fill(Color.dcAccent).frame(width: proxy.size.width * progress)
+                            }
+                        }
+                        .frame(height: 4)
+                        .padding(.horizontal, DSSpacing.sm)
+                        .padding(.bottom, 6)
+                    }
+                }
+                VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                    Text(entry.channel.name)
+                        .font(DSTypography.headline)
+                        .foregroundStyle(Color.dcTextPrimary)
+                        .lineLimit(1)
+                    Text("\(TimecodeFormatter.string(max(entry.duration - entry.position, 0))) left")
+                        .font(DSTypography.footnote)
+                        .foregroundStyle(Color.dcTextSecondary)
+                }
+            }
+            .frame(width: width)
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Resume \(entry.channel.name)"))
+        .accessibilityValue(Text("\(Int(((entry.progress ?? 0) * 100).rounded())) percent watched"))
+        .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// Explains how to mirror the iPhone or send video to an AirPlay screen.
+struct MirrorScreenSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
         NavigationStack {
-            ZStack {
-                Color.dashBackground.ignoresSafeArea()
-                VStack(spacing: 16) {
-                    Image(systemName: "heart.slash")
-                        .font(.system(size: 40))
-                        .foregroundStyle(Color.dashTextMuted)
-                    Text("No Favorites Yet")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color.dashTextPrimary)
-                    Text("Save videos and web bookmarks to quickly access them in your car.")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.dashTextSecondary)
+            ScrollView {
+                VStack(spacing: DSSpacing.xl) {
+                    AirPlayRoutePickerRepresentable(tintColor: .dcAccent)
+                        .frame(width: 72, height: 72)
+                        .background(Color.dcAccentSoft, in: Circle())
+                        .accessibilityLabel(Text("Choose an AirPlay screen"))
+
+                    Text("Show DashCast on a bigger screen")
+                        .font(DSTypography.title3)
+                        .foregroundStyle(Color.dcTextPrimary)
                         .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
-                }
-            }
-            .navigationTitle("Favorites")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") { showingFavorites = false }
-                        .foregroundStyle(Color.dashYellow)
-                }
-            }
-        }
-    }
 
-    private var addM3UDialogSheet: some View {
-        NavigationStack {
-            ZStack {
-                Color.dashBackground.ignoresSafeArea()
-                VStack(spacing: 20) {
-                    Text("Add Custom M3U / M3U8 Stream")
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundStyle(Color.dashTextPrimary)
-
-                    TextField("https://example.com/playlist.m3u", text: $m3uURLInput)
-                        .padding()
-                        .background(Color.dashSurface)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.dashBorder, lineWidth: 1))
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .padding(.horizontal)
-
-                    Button {
-                        loadM3UFromURL()
-                    } label: {
-                        Text(isImportingPlaylist ? "Importing…" : "Import Playlist")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(Color.black)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 14)
-                            .background(LinearGradient.dashAccentGradient)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .padding(.horizontal)
+                    VStack(alignment: .leading, spacing: DSSpacing.md) {
+                        step(1, "Tap the AirPlay button above and pick your car display, Apple TV or TV.")
+                        step(2, "Or open Control Center and choose Screen Mirroring.")
+                        step(3, "With a USB-C or HDMI adapter, DashCast detects the screen on its own.")
                     }
+                    .dsCard()
 
-                    .disabled(isImportingPlaylist || m3uURLInput.isEmpty)
-
-                    Text("Paste an M3U / M3U8 playlist link or a single HLS stream URL.")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.dashTextSecondary)
-                        .padding(.horizontal)
-
-                    Spacer()
+                    Text("CarPlay itself doesn't let apps show video. In a CarPlay car, the sound plays through the car speakers.")
+                        .font(DSTypography.footnote)
+                        .foregroundStyle(Color.dcTextTertiary)
+                        .multilineTextAlignment(.center)
                 }
-                .padding(.top, 30)
+                .padding(DSSpacing.screenGutter)
+                .padding(.top, DSSpacing.xl)
             }
-            .navigationTitle("Add Stream")
+            .background(Color.dcBackgroundElevated.ignoresSafeArea())
+            .navigationTitle("Mirror Screen")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { showingAddM3UDialog = false }
-                        .foregroundStyle(Color.dashYellow)
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
                 }
             }
         }
+        .tint(Color.dcAccent)
+        .presentationDetents([.medium, .large])
     }
 
-    private func loadM3UFromURL() {
-        let input = m3uURLInput.trimmingCharacters(in: .whitespacesAndNewlines)
-        isImportingPlaylist = true
-        Task {
-            defer { isImportingPlaylist = false }
-            do {
-                // A bare .m3u8 HLS stream is a single channel, not a channel list.
-                if let url = URL(string: input), url.pathExtension.lowercased() == "m3u8",
-                   let data = try? await URLSession.shared.data(from: url).0,
-                   let text = IPTVParser.decode(data), text.contains("#EXT-X-") {
-                    let channel = ChannelModel(name: url.deletingPathExtension().lastPathComponent,
-                                               streamURL: url, groupTitle: "Streams")
-                    let m3u = "#EXTM3U\n#EXTINF:-1 group-title=\"Streams\",\(channel.name)\n\(url.absoluteString)\n"
-                    try playlistStore.addPlaylist(data: Data(m3u.utf8), sourceURL: nil, title: channel.name)
-                    playerService.load(channel: channel)
-                    importSuccessMessage = "Added stream \(channel.name)"
-                } else {
-                    let playlist = try await playlistStore.importPlaylist(from: input)
-                    importSuccessMessage = "Imported \(playlist.channels.count) channels from \(playlist.title)"
-                }
-                m3uURLInput = ""
-                showingAddM3UDialog = false
-            } catch {
-                importErrorMessage = error.localizedDescription
-                showingAddM3UDialog = false
-            }
+    private func step(_ number: Int, _ text: String) -> some View {
+        Label {
+            Text(text)
+                .font(DSTypography.callout)
+                .foregroundStyle(Color.dcTextPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        } icon: {
+            Image(systemName: "\(number).circle.fill")
+                .foregroundStyle(Color.dcAccent)
         }
     }
 }

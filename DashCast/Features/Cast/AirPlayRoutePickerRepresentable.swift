@@ -4,14 +4,14 @@ import AVKit
 public struct AirPlayRoutePickerRepresentable: UIViewRepresentable {
     public var tintColor: Color
 
-    public init(tintColor: Color = .dashYellow) {
+    public init(tintColor: Color = .dcAccent) {
         self.tintColor = tintColor
     }
 
     public func makeUIView(context: Context) -> AVRoutePickerView {
         let routePicker = AVRoutePickerView()
         routePicker.tintColor = UIColor(tintColor)
-        routePicker.activeTintColor = UIColor(Color.dashGreen)
+        routePicker.activeTintColor = UIColor(Color.dcSuccess)
         routePicker.prioritizesVideoDevices = true
         routePicker.backgroundColor = .clear
         return routePicker
