@@ -132,7 +132,7 @@ public final class WatchHistoryStore: ObservableObject {
         player.$currentTime
             .sink { [weak self, weak player] time in
                 MainActor.assumeIsolated {
-                    guard let self, let player, let channel = player.currentChannel else { return }
+                    guard let self, let player, let channel = player.currentChannel, time > 0 else { return }
                     // Throttle disk writes to every 5 s of playback.
                     let now = Date()
                     guard now.timeIntervalSince(self.lastSavedAt) >= 5 else { return }

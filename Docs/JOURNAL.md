@@ -87,6 +87,12 @@
 
 ## Log
 
+### 2026-11-05 01:30 (Bogotá) — Redesign 2A: Home / Library / Player / Car Mode (claude/redesign-cast-home)
+- Opened [#32](https://github.com/Xanderco/iOSCarPlayVideo/pull/32) into `claude/ci-and-core-fixes`. It rebuilds the Cast tab and playback on design system v2 with original layouts and copy (D2, D4). Home: search, quick actions, Continue Watching, Favorites, Recents, Your Sources, car-display card. Library: sources → groups → channels, with Add Source (Link/File/QR/Server). Full-screen `PlayerScreen` with Up Next. Persistent `MiniPlayerBar` (via `MiniPlayerHost` in `MainTabView`). Landscape `CarModeView` with 72 pt targets. New `WatchHistoryStore` for on-device recents/resume, with unit tests.
+- CarDash / "1:1" references removed from Cast, `AppState` and the browser/simulator comments. Still remaining, in other sessions' areas: `DriveNotificationService`, `DriveSettingsView`, `MeHomeView`, `WidgetEditorView`.
+- UI tests: identifiers unchanged. The Library sheet's title is now "Library" (was "Media Sources"), and the smoke test is updated to match.
+- Follow-ups: gate Car Mode behind Pro once `EntitlementGate` lands (paywall session). The 4-tab restructure (spec §3) still has to be done, and it will retire the 110 pt tab-bar padding the other tabs use (the mini player can overlap their last row). Check Car Mode's forced landscape and resume-seek on a real device.
+
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #21 (claude/drop-territory-icon-media)
 - Merged [#21](https://github.com/Xanderco/iOSCarPlayVideo/pull/21): Territory removed (D3), new original app icon, App Store media pipeline (`appstore-media.yml`, compositor scripts, `AppStoreMedia/metadata.md`), passenger safety notice, privacy manifest, demo-data seeder, App Review checklist.
 - Conflict in `MeHomeView.swift`: kept #19's Media Servers sheet and dropped the fake "Rate DashCast" alert, as #21 intended (it uses `requestReview`).
