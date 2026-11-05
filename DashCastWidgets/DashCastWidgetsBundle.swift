@@ -7,6 +7,7 @@ struct DashCastWidgetsBundle: WidgetBundle {
         CarWidget()
         TripStatsWidget()
         QuickCastWidget()
+        DoodleWidget()
     }
 }
 

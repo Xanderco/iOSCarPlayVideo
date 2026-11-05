@@ -45,19 +45,36 @@ public struct SharedTripSnapshot: Codable, Equatable {
         distanceMeters: 12_400, score: 92, date: Date(timeIntervalSince1970: 1_793_000_000), durationSeconds: 1_380)
 }
 
+/// A user photo or hand-drawn doodle shown on the "Photo / Doodle" small widget.
+public struct SharedDoodle: Codable, Equatable {
+    public enum Kind: String, Codable { case photo, doodle }
+    public var kind: Kind
+    /// PNG (doodle) or JPEG (photo), already downscaled by the app.
+    public var imageData: Data
+    public var caption: String?
+
+    public init(kind: Kind, imageData: Data, caption: String? = nil) {
+        self.kind = kind
+        self.imageData = imageData
+        self.caption = caption
+    }
+}
+
 public struct WidgetSharedPayload: Codable, Equatable {
     public static let currentVersion = 1
     public var version: Int
     public var car: SharedCarSnapshot?
     public var lastTrip: SharedTripSnapshot?
+    public var doodle: SharedDoodle?
     public var usesMiles: Bool
     public var updatedAt: Date
 
     public init(car: SharedCarSnapshot? = nil, lastTrip: SharedTripSnapshot? = nil,
-                usesMiles: Bool = false, updatedAt: Date = Date()) {
+                doodle: SharedDoodle? = nil, usesMiles: Bool = false, updatedAt: Date = Date()) {
         self.version = Self.currentVersion
         self.car = car
         self.lastTrip = lastTrip
+        self.doodle = doodle
         self.usesMiles = usesMiles
         self.updatedAt = updatedAt
     }
