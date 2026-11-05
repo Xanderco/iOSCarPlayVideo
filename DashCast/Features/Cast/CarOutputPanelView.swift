@@ -67,7 +67,7 @@ struct CarOutputPanelView: View {
         }
     }
 
-    private var parkedTitle: String {
+    private var parkedTitle: LocalizedStringKey {
         switch parkedGuard.state {
         case .parked: return "Parked · car video available"
         case .moving: return "Vehicle moving · video paused"
@@ -75,7 +75,7 @@ struct CarOutputPanelView: View {
         }
     }
 
-    private var parkedSubtitle: String {
+    private var parkedSubtitle: LocalizedStringKey {
         switch parkedGuard.state {
         case .parked: return "Video resumes only while the car stays parked."
         case .moving: return "Pull over and park to continue watching on the car display."
@@ -200,7 +200,7 @@ struct CarOutputPanelView: View {
         .modifier(CardStyle())
     }
 
-    private func cardHeader(icon: String, title: String, badge: String?) -> some View {
+    private func cardHeader(icon: String, title: LocalizedStringKey, badge: LocalizedStringKey?) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
                 .foregroundStyle(Color.dashYellow)

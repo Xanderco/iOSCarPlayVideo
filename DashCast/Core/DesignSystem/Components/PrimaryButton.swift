@@ -10,7 +10,7 @@ public struct PrimaryButton: View {
     public enum Kind { case primary, secondary, tertiary, destructive }
     public enum Size { case compact, regular, car }
 
-    private let title: String
+    private let title: LocalizedStringKey
     private let systemImage: String?
     private let kind: Kind
     private let size: Size
@@ -19,7 +19,7 @@ public struct PrimaryButton: View {
     private let action: () -> Void
 
     public init(
-        _ title: String,
+        _ title: LocalizedStringKey,
         systemImage: String? = nil,
         kind: Kind = .primary,
         size: Size = .regular,
@@ -34,6 +34,26 @@ public struct PrimaryButton: View {
         self.isLoading = isLoading
         self.fullWidth = fullWidth
         self.action = action
+    }
+
+    public init(
+        _ titleString: String,
+        systemImage: String? = nil,
+        kind: Kind = .primary,
+        size: Size = .regular,
+        isLoading: Bool = false,
+        fullWidth: Bool = true,
+        action: @escaping () -> Void
+    ) {
+        self.init(
+            LocalizedStringKey(titleString),
+            systemImage: systemImage,
+            kind: kind,
+            size: size,
+            isLoading: isLoading,
+            fullWidth: fullWidth,
+            action: action
+        )
     }
 
     public var body: some View {

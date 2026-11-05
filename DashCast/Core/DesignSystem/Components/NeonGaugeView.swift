@@ -53,7 +53,7 @@ public struct NeonGaugeView: View {
 
             // Digital readout
             VStack(spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(DSTypography.badge)
                     .foregroundStyle(Color.dcTextTertiary)
                     .tracking(1.5)
@@ -62,7 +62,7 @@ public struct NeonGaugeView: View {
                     .font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit())
                     .foregroundStyle(Color.dcTextPrimary)
 
-                Text(unit)
+                Text(LocalizedStringKey(unit))
                     .font(DSTypography.caption)
                     .foregroundStyle(accentColor)
                     .fontWeight(.bold)

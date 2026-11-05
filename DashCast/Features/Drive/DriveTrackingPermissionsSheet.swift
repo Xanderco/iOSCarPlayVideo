@@ -130,7 +130,7 @@ public struct DriveTrackingPermissionsSheet: View {
             .foregroundStyle(Color.dashGreen)
     }
 
-    private var locationSubtitle: String {
+    private var locationSubtitle: LocalizedStringKey {
         switch locationService.authorizationStatus {
         case .authorizedAlways: return "Always allowed."
         case .authorizedWhenInUse: return "Allowed while using DashCast; trips keep recording when the screen locks."
@@ -152,8 +152,8 @@ public struct DriveTrackingPermissionsSheet: View {
 
     private func permissionCard<Trailing: View>(
         icon: String,
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         @ViewBuilder trailing: () -> Trailing
     ) -> some View {
         HStack(spacing: 14) {

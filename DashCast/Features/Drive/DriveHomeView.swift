@@ -24,7 +24,7 @@ public struct DriveHomeView: View {
         }
     }
 
-    private var trackingChipTitle: String {
+    private var trackingChipTitle: LocalizedStringKey {
         if !locationService.isAuthorized {
             return locationService.authorizationStatus == .notDetermined ? "Enable Location" : "Location Off"
         }
@@ -270,7 +270,7 @@ public struct DriveHomeView: View {
         .background(Color.dashBackground)
     }
 
-    private func statColumn(title: String, value: String) -> some View {
+    private func statColumn(title: LocalizedStringKey, value: String) -> some View {
         VStack(spacing: 2) {
             Text(title)
                 .font(ThemeFonts.hudCaption(size: 10))

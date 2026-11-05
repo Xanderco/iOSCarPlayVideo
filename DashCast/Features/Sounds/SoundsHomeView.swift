@@ -119,8 +119,8 @@ public struct SoundsHomeView: View {
     private func triggerCard(
         icon: String,
         iconColor: Color,
-        title: String,
-        subtitle: String,
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
         currentSoundId: String,
         slotKey: String
     ) -> some View {

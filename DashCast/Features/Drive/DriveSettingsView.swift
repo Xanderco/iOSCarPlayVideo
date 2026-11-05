@@ -313,7 +313,7 @@ public struct DriveSettingsView: View {
         }
     }
 
-    private func permissionRow(title: String, statusText: String, color: Color, action: @escaping () -> Void) -> some View {
+    private func permissionRow(title: LocalizedStringKey, statusText: LocalizedStringKey, color: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
                 Text(title)

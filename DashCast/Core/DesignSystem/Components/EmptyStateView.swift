@@ -71,12 +71,12 @@ public struct EmptyStateView: View {
         VStack(spacing: DSSpacing.lg) {
             icon
             VStack(spacing: DSSpacing.sm) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(DSTypography.title3)
                     .foregroundStyle(Color.dcTextPrimary)
                     .accessibilityAddTraits(.isHeader)
                 if let message {
-                    Text(message)
+                    Text(LocalizedStringKey(message))
                         .font(DSTypography.callout)
                         .foregroundStyle(Color.dcTextSecondary)
                 }
@@ -86,10 +86,10 @@ public struct EmptyStateView: View {
             if actionTitle != nil || secondaryActionTitle != nil {
                 VStack(spacing: DSSpacing.sm) {
                     if let actionTitle, let action {
-                        PrimaryButton(actionTitle, kind: kind == .error ? .secondary : .primary, action: action)
+                        PrimaryButton(LocalizedStringKey(actionTitle), kind: kind == .error ? .secondary : .primary, action: action)
                     }
                     if let secondaryActionTitle, let secondaryAction {
-                        PrimaryButton(secondaryActionTitle, kind: .tertiary, action: secondaryAction)
+                        PrimaryButton(LocalizedStringKey(secondaryActionTitle), kind: .tertiary, action: secondaryAction)
                     }
                 }
                 .frame(maxWidth: 320)

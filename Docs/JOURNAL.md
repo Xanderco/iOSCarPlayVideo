@@ -92,6 +92,14 @@
 
 ## Log
 
+### 2026-11-05 04:30 (Bogotá) — T8: Localization — Spanish String Catalog [CARAA-37] [DI-31]
+- **Introduced Xcode String Catalog (`Localizable.xcstrings`)** with 479 extracted user-facing strings covering all 5 tabs (Cast, Drive, Widgets, Sounds, Me), CarPlay templates, Onboarding, Safety Notice, Paywall, Media Servers, and error alerts.
+- **Added `es` (Spanish) translations** across all entries using natural, neutral automotive terminology conforming to iOS guidelines.
+- **Created `InfoPlist.xcstrings`** localizing required privacy usage strings (`NSLocationWhenInUseUsageDescription`, `NSLocationAlwaysAndWhenInUseUsageDescription`, `NSMotionUsageDescription`, `NSPhotoLibraryUsageDescription`, `NSCameraUsageDescription`).
+- **Updated SwiftUI view components**: Replaced raw string parameters with `LocalizedStringKey` in `menuRow`, `permissionRow`, `statColumn`, `menuItemRow`, `sliderRow`, `cardHeader`, `PrimaryButton`, `GlowButton`, `EmptyStateView`, and `SectionHeader`.
+- **Added in-app Language picker** in Profile Settings (`System`, `English`, `Español`) in `MeHomeView` with reactive `AppState.effectiveLocale` environment propagation.
+- **Added unit test suite `LocalizationTests.swift`** with 4 automated test cases validating JSON integrity, translation completeness, and language switching.
+
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
 - **Codebase state**: All classic UI components, 5-page onboarding walkthrough, native tab bar (LiquidCapsuleTabBar for iOS 17, native tab bar for iOS 26), Drive live map with automated trip tracking, StoreKit 2 lifetime ($19.99) restore purchases API, and the low-latency H.264 CarPlay video mirror pipeline (PR #37) are now fully integrated into the PR #14 integration branch.

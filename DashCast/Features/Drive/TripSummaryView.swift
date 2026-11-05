@@ -95,14 +95,14 @@ public struct TripSummaryView: View {
         return .dashRed
     }
 
-    private var scoreMessage: String {
+    private var scoreMessage: LocalizedStringKey {
         if trip.drivingScore >= 90 { return "Flawless Driving!" }
         if trip.drivingScore >= 80 { return "Smooth & Safe Drive" }
         if trip.drivingScore >= 70 { return "Moderate Ride" }
         return "Aggressive Driving Detected"
     }
 
-    private func statCard(title: String, value: String, icon: String) -> some View {
+    private func statCard(title: LocalizedStringKey, value: String, icon: String) -> some View {
         AutomotiveCard {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -120,7 +120,7 @@ public struct TripSummaryView: View {
         }
     }
 
-    private func telemetryPill(label: String, count: Int, color: Color) -> some View {
+    private func telemetryPill(label: LocalizedStringKey, count: Int, color: Color) -> some View {
         VStack(spacing: 2) {
             Text("\(count)")
                 .font(ThemeFonts.hudStat(size: 18))

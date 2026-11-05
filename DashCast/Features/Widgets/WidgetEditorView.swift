@@ -261,7 +261,7 @@ public struct WidgetEditorView: View {
         }
     }
 
-    private func sliderRow(title: String, value: Binding<Double>, range: ClosedRange<Double>, leadingIcon: String, trailingIcon: String) -> some View {
+    private func sliderRow(title: LocalizedStringKey, value: Binding<Double>, range: ClosedRange<Double>, leadingIcon: String, trailingIcon: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title)
                 .font(.system(size: 13, weight: .medium))

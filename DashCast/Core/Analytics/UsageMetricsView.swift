@@ -104,7 +104,7 @@ public struct UsageMetricsView: View {
         }
     }
 
-    private func metricCard(title: String, value: String, icon: String, color: Color) -> some View {
+    private func metricCard(title: LocalizedStringKey, value: String, icon: String, color: Color) -> some View {
         AutomotiveCard {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
