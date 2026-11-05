@@ -92,6 +92,16 @@
 
 ## Log
 
+### 2026-11-05 13:30 (Bogotá) — G1: App Store Listing Polish & Spanish Metadata [CARAA-38] [DI-45]
+- **AppStoreMedia/metadata.md updated**:
+  - Replaced provisional free tier notes with concrete, implemented `EntitlementGate` enforcement details: 1 playlist limit, local playback, basic drive stats, 1 widget, 1 arrival chime on the free tier; unlimited playlists, external car display mirroring (AirPlay/HDMI/adapter), all widgets, all sounds, and route replay unlocked with lifetime DashCast Pro ($19.99 USD, pay once).
+  - Added complete, copy-ready Spanish App Store Connect metadata section (`es-419` / `es-ES`): App Name (`DashCast - Reproductor M3U`), Subtitle (`Video en auto. Pago único.`), Promotional Text (165 chars), full Spanish Description, 100-character trademark-free Spanish Keywords, and What's New copy.
+  - Reviewer notes updated with exact Free vs Pro split, live demo playlist URL details, and background location justification for automatic drive logging (`UIBackgroundModes = location`).
+- **Docs/AppReview-checklist.md updated**:
+  - Item 17 marked ✅ reflecting real `EntitlementGate.swift` enforcement across Cast, Widgets, Sounds, and Drive tabs.
+  - Item 13 updated with background location justification for Core Motion / automatic trip detection.
+- **Base branch**: `claude/classic-ui`.
+
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
 - **Codebase state**: All classic UI components, 5-page onboarding walkthrough, native tab bar (LiquidCapsuleTabBar for iOS 17, native tab bar for iOS 26), Drive live map with automated trip tracking, StoreKit 2 lifetime ($19.99) restore purchases API, and the low-latency H.264 CarPlay video mirror pipeline (PR #37) are now fully integrated into the PR #14 integration branch.
