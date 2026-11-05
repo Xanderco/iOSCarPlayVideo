@@ -76,8 +76,9 @@ public enum DashCastLinks {
 
     public static func destination(for url: URL) -> Destination? {
         guard url.scheme?.lowercased() == scheme else { return nil }
-        let target = (url.host ?? url.pathComponents.dropFirst().first ?? "").lowercased()
-        return Destination(rawValue: target)
+        let host = url.host ?? ""
+        let target = host.isEmpty ? (url.pathComponents.first { $0 != "/" } ?? "") : host
+        return Destination(rawValue: target.lowercased())
     }
 }
 
