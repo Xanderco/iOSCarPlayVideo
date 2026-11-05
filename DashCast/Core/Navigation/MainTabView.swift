@@ -1,50 +1,21 @@
 import SwiftUI
 
+/// Root: Home · Library · Cast · Settings (redesign spec §3). Car Extras live in Settings.
 public struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
-    @AppStorage(PassengerSafetyNotice.acceptedKey) private var passengerNoticeAccepted = false
+    @AppStorage(OnboardingView.completedKey) private var hasCompletedOnboarding = false
 
     public init() {}
 
     public var body: some View {
         ZStack(alignment: .bottom) {
-            Color.dashBackground.ignoresSafeArea()
+            Color.dcBackground.ignoresSafeArea()
 
             ZStack {
-                CastHomeView()
-                    .opacity(appState.selectedTab == .cast ? 1 : 0)
-                    .allowsHitTesting(appState.selectedTab == .cast)
-                    .accessibilityHidden(appState.selectedTab != .cast)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("Screen_Cast")
-
-                DriveHomeView()
-                    .opacity(appState.selectedTab == .drive ? 1 : 0)
-                    .allowsHitTesting(appState.selectedTab == .drive)
-                    .accessibilityHidden(appState.selectedTab != .drive)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("Screen_Drive")
-
-                WidgetsHomeView()
-                    .opacity(appState.selectedTab == .widgets ? 1 : 0)
-                    .allowsHitTesting(appState.selectedTab == .widgets)
-                    .accessibilityHidden(appState.selectedTab != .widgets)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("Screen_Widgets")
-
-                SoundsHomeView()
-                    .opacity(appState.selectedTab == .sounds ? 1 : 0)
-                    .allowsHitTesting(appState.selectedTab == .sounds)
-                    .accessibilityHidden(appState.selectedTab != .sounds)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("Screen_Sounds")
-
-                MeHomeView()
-                    .opacity(appState.selectedTab == .me ? 1 : 0)
-                    .allowsHitTesting(appState.selectedTab == .me)
-                    .accessibilityHidden(appState.selectedTab != .me)
-                    .accessibilityElement(children: .contain)
-                    .accessibilityIdentifier("Screen_Me")
+                tabScreen(.home) { CastHomeView() } // pads itself for the tab bar
+                tabScreen(.library) { MediaServersHomeView().safeAreaInset(edge: .bottom) { tabBarClearance } }
+                tabScreen(.cast) { CastMirrorView().safeAreaInset(edge: .bottom) { tabBarClearance } }
+                tabScreen(.settings) { SettingsView().safeAreaInset(edge: .bottom) { tabBarClearance } }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
@@ -55,10 +26,26 @@ public struct MainTabView: View {
             LifetimePaywallView()
         }
         .fullScreenCover(isPresented: Binding(
-            get: { !passengerNoticeAccepted && !PassengerSafetyNotice.shouldSkip },
+            get: { !hasCompletedOnboarding && !OnboardingView.shouldSkipForLaunch },
             set: { _ in }
         )) {
-            PassengerSafetyNoticeView { passengerNoticeAccepted = true }
+            OnboardingView()
+                .environmentObject(appState)
         }
+    }
+
+    private var tabBarClearance: some View {
+        Color.clear.frame(height: 72).allowsHitTesting(false)
+    }
+
+    /// All tabs stay alive (state and scroll position survive tab switches); only the selected one is visible.
+    private func tabScreen<Content: View>(_ tab: AppState.TabItem, @ViewBuilder content: () -> Content) -> some View {
+        let isSelected = appState.selectedTab == tab
+        return content()
+            .opacity(isSelected ? 1 : 0)
+            .allowsHitTesting(isSelected)
+            .accessibilityHidden(!isSelected)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("Screen_\(tab.rawValue)")
     }
 }

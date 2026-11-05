@@ -87,6 +87,16 @@
 
 ## Log
 
+### 2026-11-05 00:54 (Bogotá) — Integrator: merged #31 (claude/redesign-secondary)
+- Merged [#31](https://github.com/Xanderco/iOSCarPlayVideo/pull/31), redesign 2B (de-cloning). Adds `Docs/Originality-audit.md`, removes `MediaToAnalyze/`, `Screenshots/` and the manufacturer-style car renders from the repo or bundle, and leaves no CarDash/CarTV/"1:1" text in code.
+  - Tabs are now **Home · Library · Cast · Settings**. Settings replaces Me and has Restore, Privacy, Terms, Appearance and Safety. Car Extras holds Trip Log, Car Screen and Chime (O2 proposal in the audit §3). Adds onboarding with the passenger-only notice.
+  - The legacy `TabItem.drive/.widgets/.sounds/.me` values are deprecated aliases that route to Settings.
+- Conflicts resolved:
+  - `AppState`: kept #27's `handleDeepLink`, remapped to the new tabs (`cast` → Cast tab, `drive` → `open(.tripLog)`), and kept #31's `open(_:)`.
+  - `DashCastApp`: #31's appearance preference plus #27's `.onOpenURL`.
+  - `Info.plist`: #31's photo-library string plus #25's `NSSupportsLiveActivities` and `NSLocalNetworkUsageDescription`.
+- Follow-ups: owner decision O2 (keep Car Extras or cut them); privacy/terms URLs are still placeholders.
+
 ### 2026-11-05 00:53 (Bogotá) — Integrator: merged #27 (claude/home-widgets)
 - Merged [#27](https://github.com/Xanderco/iOSCarPlayVideo/pull/27): the `DashCastWidgets` WidgetKit extension, with My Car, Last Trip and Quick Cast plus Lock Screen variants. Data is shared via app group `group.com.xanderco.dashcast` (`WidgetSharedStore`, versioned JSON). The extension uses the `dashcast://` deep-link scheme, handled in `AppState.handleDeepLink`. Adds `WidgetSharedStoreTests`.
 - Conflict in `project.yml`: all three extensions are kept as separate targets, each an app dependency: `DashCastBroadcast` (from #25/#28, now also compiling `MirrorFrameTransport.swift`), `DashCastCastWidget` (the casting Live Activity from #25) and `DashCastWidgets`. All of them use the one app group.
@@ -116,6 +126,13 @@
 
 ### 2026-11-05 00:36 (Bogotá) — Integrator: merged #29 (claude/paperclip-handoff)
 - Merged [#29](https://github.com/Xanderco/iOSCarPlayVideo/pull/29), docs only: `Docs/Paperclip/HANDOFF_2026-11-05.md` (the backlog for Paperclip/OpenCode agents after the cloud sprint) and an "outdated" banner on `PAPERCLIP.md`. The integrator keeps the handoff's §2/§3 status precise at the end of the sprint.
+
+### 2026-11-05 (Bogotá) — Redesign 2B: de-cloning, 4 tabs, Car Extras, onboarding (`claude/redesign-secondary`)
+- **Originality audit** → `Docs/Originality-audit.md` (D2). Removed from the repo (git-ignored, still in history): `MediaToAnalyze/` (31 CarDash screenshots), `Screenshots/` (clone-era shots + CarTV ad frames). Removed from the **app bundle**: 8 manufacturer-style car renders (×2). No "CarDash"/"1:1" text left in shipped code.
+- **Tabs:** Home · Library · Cast · Settings (`AppState.TabItem`). Interim hosts until redesign 2A lands: Home = `CastHomeView`, Library = `MediaServersHomeView`, Cast = new thin `CastMirrorView`. Legacy `-initialTab drive|widgets|sounds|me` and the deprecated `TabItem.drive/.widgets/.sounds/.me` aliases still work (→ Settings / Extras), so `claude/home-widgets` deep links keep compiling.
+- **O2 proposal implemented (reversible):** Drive/Widgets/Sounds → Settings › **Car Extras** with new UI and copy: **Trip Log** (no scores shown, passenger check), **Car Screen** (car-display text + own photo/plate for the widget; `WidgetConfigModel` untouched), **Car Chime** (13 synthesized chimes with original names + real Shortcuts action `PlayCarChimeIntent`). Me tab → native **Settings** (Pro card, Restore Purchases, Privacy, Terms (Apple EULA), Feedback via Mail, Appearance System/Dark/Light, safety notice).
+- **Onboarding:** Welcome → passenger-only notice (must be acknowledged; shares `PassengerSafetyNotice.acceptedKey`) → add a source.
+- Follow-ups for others: see audit §6 (Porsche defaults in model/Cast fallbacks, score in trip widget, real Library/Home from 2A).
 
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #21 (claude/drop-territory-icon-media)
 - Merged [#21](https://github.com/Xanderco/iOSCarPlayVideo/pull/21): Territory removed (D3), new original app icon, App Store media pipeline (`appstore-media.yml`, compositor scripts, `AppStoreMedia/metadata.md`), passenger safety notice, privacy manifest, demo-data seeder, App Review checklist.

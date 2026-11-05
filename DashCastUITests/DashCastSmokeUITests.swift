@@ -7,12 +7,12 @@ final class DashCastSmokeUITests: XCTestCase {
     private var app: XCUIApplication!
 
     /// Tabs in display order; raw values match `AppState.TabItem`.
-    private let tabs = ["Cast", "Drive", "Widgets", "Sounds", "Me"]
+    private let tabs = ["Home", "Library", "Cast", "Settings"]
 
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
-        app.launchArguments += ["-UITests", "-initialTab", "cast"]
+        app.launchArguments += ["-UITests", "-initialTab", "home"]
 
         // Dismiss any system permission alert (location, notifications…).
         addUIInterruptionMonitor(withDescription: "System alert") { alert in
@@ -35,11 +35,11 @@ final class DashCastSmokeUITests: XCTestCase {
 
     // MARK: - Tests
 
-    func testAppLaunchesToCastTab() throws {
+    func testAppLaunchesToHomeTab() throws {
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15), "App did not reach foreground")
-        let castTab = app.buttons["Tab_Cast"]
-        XCTAssertTrue(castTab.waitForExistence(timeout: 15), "Tab bar did not appear")
-        XCTAssertTrue(app.otherElements["Screen_Cast"].waitForExistence(timeout: 10), "Cast screen missing")
+        let homeTab = app.buttons["Tab_Home"]
+        XCTAssertTrue(homeTab.waitForExistence(timeout: 15), "Tab bar did not appear")
+        XCTAssertTrue(app.otherElements["Screen_Home"].waitForExistence(timeout: 10), "Home screen missing")
         snapshot("01-launch")
     }
 
@@ -76,7 +76,7 @@ final class DashCastSmokeUITests: XCTestCase {
         snapshot("03-media-sources")
 
         app.navigationBars["Media Sources"].buttons["Done"].tap()
-        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Home tab")
     }
 
     func testBrowserSheetOpens() throws {
@@ -90,7 +90,7 @@ final class DashCastSmokeUITests: XCTestCase {
         snapshot("04-browser")
 
         exit.tap()
-        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Home tab")
     }
 
     // MARK: - Helpers
