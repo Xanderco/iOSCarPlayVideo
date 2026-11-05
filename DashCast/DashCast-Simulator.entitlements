@@ -3,13 +3,17 @@
 <plist version="1.0">
 <!--
   SIMULATOR ONLY (selected by CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*] in project.yml).
+  com.apple.developer.carplay-video = CarPlay VIDEO app category (iOS 27; key confirmed by
+  Apple DTS in developer forums thread 838529). It cannot be combined with carplay-audio
+  (thread 851377). Needs Xcode 27's CarPlay simulator with "video in car" support; on Xcode 26
+  switch this key back to com.apple.developer.carplay-audio to see the audio-style app.
   The CarPlay key lets DashCast appear in Simulator > I/O > External Displays > CarPlay.
   Device/release builds use DashCast.entitlements, which has NO CarPlay key until Apple
   grants one (see Docs/CarPlay.md). Do not copy this key there before the grant: device
   signing fails without a provisioning profile that contains it.
 -->
 <dict>
-	<key>com.apple.developer.carplay-audio</key>
+	<key>com.apple.developer.carplay-video</key>
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
