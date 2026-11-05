@@ -78,6 +78,18 @@ emulator applies.
 - [ ] Wired CarPlay: app launch, playback and the dashboard all work. Audio routes to the car speakers.
 - [ ] Wireless CarPlay: same checks.
 
+## 6d. Drive: live map and automatic trips (Simulator)
+Trip Log is under Settings › Car Extras › Trip Log (2B may move the entry; the screen is the same).
+- [ ] Fresh install: Trip Log shows the "Show where you are" card. Tap **Allow Location** → *Allow While Using App*.
+- [ ] Simulator menu **Features › Location › Apple** (or any custom location): the map centres on the blue dot, not the whole region. Pan away → **Recenter** appears and brings you back. The location button (top right of the map) also recentres.
+- [ ] The card now asks for **Allow All the Time**. Tap it → *Change to Always Allow*. The card disappears and "Detect trips automatically" turns on by itself, showing "Watching for drives".
+- [ ] **Features › Location › Freeway Drive** (~100 km/h; the Simulator has no Core Motion, so speed alone counts): status goes to "Possible drive detected…" and after ~60 s to "Recording a drive". The recording panel appears and the map follows heading with the route line.
+- [ ] Switch to **Features › Location › None** (or a fixed custom location). After ~3 min the trip is saved: it appears under Saved trips and a "Trip saved" notification arrives (allow notifications when asked; background the app to see the banner).
+- [ ] Turn the toggle off, repeat Freeway Drive: nothing records.
+- [ ] Start a trip by hand, then stop moving for 3+ minutes: the manual trip is **not** auto-stopped.
+- [ ] Settings › Privacy › Location › DashCast › Never: Trip Log shows "Location is off for DashCast" with **Open Settings**, which opens the app's settings page.
+- [ ] Real device only: lock the phone, drive ≥ 2 km, park 3+ min → trip saved + notification without opening the app.
+
 ## 7. Regression & stability
 - [ ] Switching quickly between all 5 tabs ×10 causes no crash or frozen UI.
 - [ ] Low Power Mode and airplane mode: the app degrades gracefully (streams show errors, no hang).
