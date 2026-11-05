@@ -92,6 +92,15 @@
 
 ## Log
 
+### 2026-11-05 07:15 (Bogotá) — R2: Port trip history and route replay into classic Drive tab [CARAA-33] [DI-43]
+- **Ported trip history + route replay into the classic Drive tab** (`DriveHomeView`, `TripHistoryView`, `TripDetailView`, `TripSummaryView`, `TripReplayMapView`).
+- **Features added**:
+  1. `TripReplayMapView`: interactive route replay with Play/Pause controls, 0...1 progress slider scrubber, dynamic dual-color polyline (muted route + neon accent traveled), and animated car marker Annotation. Hardened with empty coordinates guards.
+  2. `TripSummaryView` & `TripDetailView`: integrated a segmented mode switcher allowing drivers to toggle between interactive Route Replay and Speed Gradient Heatmap. Added unit-aware distance/speed conversions (`appState.useMilesPerHour`).
+  3. `TripHistoryView`: dedicated automotive trip log sheet featuring overall drive stats (Total Drives, Total Distance, Avg Score), trip list with score badges, swipe-to-delete with persistence sync, clear-all alert, and `NavigationLink` drill-down into `TripDetailView`.
+  4. `DriveHomeView`: wired quick "Trips" access button alongside Start Drive in the HUD console, plus the top-right map history button.
+  5. `DashCastTests/TripHistoryAndReplayTests.swift`: added comprehensive test suite covering index boundary clamping, coordinate mapping, unit conversion, map mode enumeration, and persistence round-trips.
+
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
 - **Codebase state**: All classic UI components, 5-page onboarding walkthrough, native tab bar (LiquidCapsuleTabBar for iOS 17, native tab bar for iOS 26), Drive live map with automated trip tracking, StoreKit 2 lifetime ($19.99) restore purchases API, and the low-latency H.264 CarPlay video mirror pipeline (PR #37) are now fully integrated into the PR #14 integration branch.

@@ -1,11 +1,50 @@
 import SwiftUI
+import MapKit
+
+public enum TripMapMode: String, CaseIterable, Identifiable {
+    case replay = "Route Replay"
+    case heatmap = "Speed Heatmap"
+    public var id: String { rawValue }
+}
 
 public struct TripSummaryView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var appState: AppState
     public let trip: TripModel
+
+    @State private var mapMode: TripMapMode = .replay
 
     public init(trip: TripModel) {
         self.trip = trip
+    }
+
+    private var coordinates: [CLLocationCoordinate2D] {
+        trip.points.map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }
+    }
+
+    private var formattedDistance: String {
+        if appState.useMilesPerHour {
+            let miles = trip.distanceMeters * 0.000621371
+            return String(format: "%.2f mi", miles)
+        } else {
+            return String(format: "%.2f km", trip.distanceKilometers)
+        }
+    }
+
+    private var formattedAvgSpeed: String {
+        if appState.useMilesPerHour {
+            return String(format: "%.0f mph", trip.averageSpeedKmh * 0.621371)
+        } else {
+            return String(format: "%.0f km/h", trip.averageSpeedKmh)
+        }
+    }
+
+    private var formattedTopSpeed: String {
+        if appState.useMilesPerHour {
+            return String(format: "%.0f mph", trip.maxSpeedKmh * 0.621371)
+        } else {
+            return String(format: "%.0f km/h", trip.maxSpeedKmh)
+        }
     }
 
     public var body: some View {
@@ -15,10 +54,35 @@ public struct TripSummaryView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Route Map Preview
-                        SpeedGradientRouteView(points: trip.points)
-                            .frame(height: 220)
-                            .padding(.horizontal)
+                        // Map Section with Route Replay & Speed Heatmap toggle
+                        if coordinates.count >= 2 {
+                            VStack(spacing: 10) {
+                                Picker("Map Mode", selection: $mapMode) {
+                                    ForEach(TripMapMode.allCases) { mode in
+                                        Text(mode.rawValue).tag(mode)
+                                    }
+                                }
+                                .pickerStyle(.segmented)
+                                .padding(.horizontal)
+
+                                if mapMode == .replay {
+                                    TripReplayMapView(coordinates: coordinates)
+                                        .padding(.horizontal)
+                                } else {
+                                    SpeedGradientRouteView(points: trip.points)
+                                        .frame(height: 260)
+                                        .clipShape(RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
+                                        .padding(.horizontal)
+                                }
+                            }
+                        } else if coordinates.count == 1 {
+                            TripReplayMapView(coordinates: coordinates)
+                                .padding(.horizontal)
+                        } else {
+                            SpeedGradientRouteView(points: trip.points)
+                                .frame(height: 220)
+                                .padding(.horizontal)
+                        }
 
                         // Driving Score Circle
                         VStack(spacing: 6) {
@@ -49,10 +113,10 @@ public struct TripSummaryView: View {
 
                         // Stats Grid
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                            statCard(title: "DISTANCE", value: String(format: "%.2f km", trip.distanceKilometers), icon: "road.lanes")
+                            statCard(title: "DISTANCE", value: formattedDistance, icon: "road.lanes")
                             statCard(title: "DURATION", value: formatDuration(trip.durationSeconds), icon: "clock.fill")
-                            statCard(title: "AVG SPEED", value: String(format: "%.0f km/h", trip.averageSpeedKmh), icon: "gauge.medium")
-                            statCard(title: "TOP SPEED", value: String(format: "%.0f km/h", trip.maxSpeedKmh), icon: "bolt.fill")
+                            statCard(title: "AVG SPEED", value: formattedAvgSpeed, icon: "gauge.medium")
+                            statCard(title: "TOP SPEED", value: formattedTopSpeed, icon: "bolt.fill")
                         }
                         .padding(.horizontal)
 
@@ -67,37 +131,42 @@ public struct TripSummaryView: View {
                                 HStack {
                                     telemetryPill(label: "Hard Brakes", count: trip.harshBrakingCount, color: .dashOrange)
                                     Spacer()
-                                    telemetryPill(label: "Rapid Accel", count: trip.harshAccelerationCount, color: .dashYellow)
+                                    telemetryPill(label: "Rapid Accel", count: trip.rapidAccelerationCount, color: .dashOrange)
                                     Spacer()
-                                    telemetryPill(label: "Sharp Turns", count: trip.harshCorneringCount, color: .dashGold)
+                                    telemetryPill(label: "Sharp Turns", count: trip.sharpTurnCount, color: .dashOrange)
+                                    Spacer()
+                                    telemetryPill(label: "Smoothness", count: trip.drivingScore, color: .dashGreen)
                                 }
                             }
                         }
                         .padding(.horizontal)
-
-                        GlowButton(title: "Done", iconName: "checkmark") {
-                            dismiss()
-                        }
-                        .padding(.horizontal)
-                        .padding(.top, 10)
                     }
                     .padding(.vertical)
                 }
             }
             .navigationTitle("Trip Summary")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color.dashYellow)
+                }
+            }
         }
     }
 
     private var scoreColor: Color {
         if trip.drivingScore >= 85 { return .dashGreen }
-        if trip.drivingScore >= 70 { return .dashOrange }
+        if trip.drivingScore >= 70 { return .dashYellow }
         return .dashRed
     }
 
     private var scoreMessage: String {
-        if trip.drivingScore >= 90 { return "Flawless Driving!" }
-        if trip.drivingScore >= 80 { return "Smooth & Safe Drive" }
+        if trip.drivingScore >= 90 { return "Smooth & Efficient" }
+        if trip.drivingScore >= 80 { return "Good Driving" }
         if trip.drivingScore >= 70 { return "Moderate Ride" }
         return "Aggressive Driving Detected"
     }
