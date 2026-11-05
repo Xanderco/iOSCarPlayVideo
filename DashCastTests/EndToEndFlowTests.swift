@@ -23,7 +23,7 @@ final class EndToEndFlowTests: XCTestCase {
         // Step 1: Initial Launch
         let appState = AppState(isProLifetimeUnlocked: false)
         XCTAssertFalse(appState.isProLifetimeUnlocked)
-        XCTAssertEqual(appState.selectedTab, .cast)
+        XCTAssertEqual(appState.selectedTab, .home)
 
         // Step 2: Trigger and Unlock Lifetime Pro Pass (Pay Once, Own Forever)
         appState.showPaywall = true
@@ -62,7 +62,7 @@ final class EndToEndFlowTests: XCTestCase {
         XCTAssertEqual(completedTrip.drivingScore, 96)
         XCTAssertEqual(completedTrip.points.count, 4)
 
-        // Step 4: Configure Custom CarPlay Widget
+        // Step 4: Configure the Car Screen text
         let customWidget = WidgetConfigModel(
             carBrand: "Ford",
             carModelName: "Mustang Dark Horse",
@@ -75,15 +75,13 @@ final class EndToEndFlowTests: XCTestCase {
         XCTAssertEqual(loadedWidgets.count, 1)
         XCTAssertEqual(loadedWidgets.first?.driverGreeting, "Track Mode")
 
-        // Step 5: Configure Siri Shortcuts Automotive Sound Trigger
+        // Step 5: Pick the car chime played by the "Play Car Chime" Shortcuts action
         let prefs = UserPreferences(
             useMilesPerHour: true,
             isProLifetimeUnlocked: true,
-            connectionSoundId: "sport_startup",
-            disconnectionSoundId: "luxury_chime",
-            homeArrivalSoundId: "welcome_traveler"
+            connectionSoundId: "warm_start"
         )
-        XCTAssertEqual(prefs.connectionSoundId, "sport_startup")
-        XCTAssertEqual(prefs.disconnectionSoundId, "luxury_chime")
+        XCTAssertEqual(prefs.connectionSoundId, "warm_start")
+        XCTAssertEqual(SoundCatalogService.shared.selectedSound(preferences: prefs).title, "Warm Start")
     }
 }

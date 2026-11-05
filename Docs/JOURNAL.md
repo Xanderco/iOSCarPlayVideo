@@ -87,6 +87,13 @@
 
 ## Log
 
+### 2026-11-05 (Bogotá) — Redesign 2B: de-cloning, 4 tabs, Car Extras, onboarding (`claude/redesign-secondary`)
+- **Originality audit** → `Docs/Originality-audit.md` (D2). Removed from the repo (git-ignored, still in history): `MediaToAnalyze/` (31 CarDash screenshots), `Screenshots/` (clone-era shots + CarTV ad frames). Removed from the **app bundle**: 8 manufacturer-style car renders (×2). No "CarDash"/"1:1" text left in shipped code.
+- **Tabs:** Home · Library · Cast · Settings (`AppState.TabItem`). Interim hosts until redesign 2A lands: Home = `CastHomeView`, Library = `MediaServersHomeView`, Cast = new thin `CastMirrorView`. Legacy `-initialTab drive|widgets|sounds|me` and the deprecated `TabItem.drive/.widgets/.sounds/.me` aliases still work (→ Settings / Extras), so `claude/home-widgets` deep links keep compiling.
+- **O2 proposal implemented (reversible):** Drive/Widgets/Sounds → Settings › **Car Extras** with new UI and copy: **Trip Log** (no scores shown, passenger check), **Car Screen** (car-display text + own photo/plate for the widget; `WidgetConfigModel` untouched), **Car Chime** (13 synthesized chimes with original names + real Shortcuts action `PlayCarChimeIntent`). Me tab → native **Settings** (Pro card, Restore Purchases, Privacy, Terms (Apple EULA), Feedback via Mail, Appearance System/Dark/Light, safety notice).
+- **Onboarding:** Welcome → passenger-only notice (must be acknowledged; shares `PassengerSafetyNotice.acceptedKey`) → add a source.
+- Follow-ups for others: see audit §6 (Porsche defaults in model/Cast fallbacks, score in trip widget, real Library/Home from 2A).
+
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #21 (claude/drop-territory-icon-media)
 - Merged [#21](https://github.com/Xanderco/iOSCarPlayVideo/pull/21): Territory removed (D3), new original app icon, App Store media pipeline (`appstore-media.yml`, compositor scripts, `AppStoreMedia/metadata.md`), passenger safety notice, privacy manifest, demo-data seeder, App Review checklist.
 - Conflict in `MeHomeView.swift`: kept #19's Media Servers sheet and dropped the fake "Rate DashCast" alert, as #21 intended (it uses `requestReview`).

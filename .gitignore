@@ -37,3 +37,8 @@ DashCast.xcodeproj/
 AppStoreMedia/raw/
 AppStoreMedia/*-inch_*/
 AppStoreMedia/AppIcon-1024.png
+
+# Competitor / reference media must never live in the repo (see Docs/Originality-audit.md)
+MediaToAnalyze/
+Screenshots/
+ReferenceMedia/

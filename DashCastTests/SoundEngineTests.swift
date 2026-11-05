@@ -6,42 +6,49 @@ final class SoundEngineTests: XCTestCase {
         let catalog = SoundCatalogService.shared
         XCTAssertGreaterThan(catalog.sounds.count, 10)
 
+        let ids = catalog.sounds.map(\.id)
+        XCTAssertEqual(Set(ids).count, ids.count, "Chime ids must be unique")
+
         for sound in catalog.sounds {
             XCTAssertFalse(sound.id.isEmpty)
             XCTAssertFalse(sound.title.isEmpty)
-            XCTAssertGreaterThan(sound.frequencyHz, 50)
-            XCTAssertLessThan(sound.frequencyHz, 5000)
+            XCTAssertNotEqual(sound.category, .all)
+            XCTAssertFalse(sound.notes.isEmpty)
+            for note in sound.notes {
+                XCTAssertGreaterThan(note, 50)
+                XCTAssertLessThan(note, 5000)
+            }
+            XCTAssertGreaterThan(sound.duration, 0)
         }
     }
 
     func testCategoryFiltering() {
         let catalog = SoundCatalogService.shared
-        let engineSounds = catalog.sounds(for: .engine)
-        XCTAssertGreaterThan(engineSounds.count, 0)
-        for s in engineSounds {
-            XCTAssertEqual(s.category, .engine)
-        }
+        XCTAssertEqual(catalog.sounds(for: .all).count, catalog.sounds.count)
 
-        let voiceSounds = catalog.sounds(for: .voices)
-        XCTAssertGreaterThan(voiceSounds.count, 0)
-        for s in voiceSounds {
-            XCTAssertEqual(s.category, .voices)
+        for category in SoundCategory.pickable {
+            let items = catalog.sounds(for: category)
+            XCTAssertGreaterThan(items.count, 0, "\(category.rawValue) should not be empty")
+            XCTAssertTrue(items.allSatisfy { $0.category == category })
         }
+        XCTAssertFalse(SoundCategory.pickable.contains(.all))
     }
 
-    func testPreferencesSoundAssignments() {
-        let prefs = UserPreferences(
-            connectionSoundId: "jet_startup",
-            disconnectionSoundId: "airline_dingy",
-            homeArrivalSoundId: "welcome_sir"
-        )
+    func testDefaultAndSelectedChime() {
+        let catalog = SoundCatalogService.shared
+        XCTAssertNotNil(catalog.sound(withId: SoundCatalogService.defaultSoundId))
+        XCTAssertNil(catalog.sound(withId: nil))
 
-        let encoded = try? JSONEncoder().encode(prefs)
-        XCTAssertNotNil(encoded)
+        let prefs = UserPreferences(connectionSoundId: "quick_ping")
+        XCTAssertEqual(catalog.selectedSound(preferences: prefs).id, "quick_ping")
 
-        let decoded = try? JSONDecoder().decode(UserPreferences.self, from: encoded!)
-        XCTAssertEqual(decoded?.connectionSoundId, "jet_startup")
-        XCTAssertEqual(decoded?.disconnectionSoundId, "airline_dingy")
-        XCTAssertEqual(decoded?.homeArrivalSoundId, "welcome_sir")
+        let unset = UserPreferences(connectionSoundId: nil)
+        XCTAssertEqual(catalog.selectedSound(preferences: unset).id, SoundCatalogService.defaultSoundId)
+    }
+
+    func testPreferencesChimeRoundTrip() throws {
+        let prefs = UserPreferences(connectionSoundId: "glass_bell")
+        let decoded = try JSONDecoder().decode(UserPreferences.self, from: JSONEncoder().encode(prefs))
+        XCTAssertEqual(decoded.connectionSoundId, "glass_bell")
     }
 }

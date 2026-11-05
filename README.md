@@ -3,7 +3,7 @@
 > **The Ultimate Parked Video, Drive Telemetry & In-Car Sound Experience.**  
 > *Pay Once. Own Forever. Zero Subscriptions.*
 
-A modern, high-performance iOS application designed for in-car enthusiasts and CarPlay owners. DashCast provides all the premium capabilities of subscription-based apps like CarDash, but with a transparent **one-time purchase** lifetime model.
+DashCast plays the passenger's own videos and playlists on iPhone and on the car display, privately and with a single **one-time purchase**: no subscription.
 
 ---
 
