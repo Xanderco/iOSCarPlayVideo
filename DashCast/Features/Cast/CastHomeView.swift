@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 
 public struct CastHomeView: View {
     @EnvironmentObject private var appState: AppState
@@ -17,7 +18,11 @@ public struct CastHomeView: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
     @State private var m3uURLInput: String = ""
-    @State private var channels: [ChannelModel] = IPTVParser.samplePlaylist
+    @StateObject private var playlistStore = PlaylistStore.shared
+    @State private var isImportingPlaylist: Bool = false
+    @State private var showingPlaylistFileImporter: Bool = false
+    @State private var importErrorMessage: String?
+    @State private var importSuccessMessage: String?
 
     public init() {}
 
@@ -413,12 +418,18 @@ public struct CastHomeView: View {
                 ScrollView {
                     VStack(spacing: 14) {
                         HStack {
-                            Text("Sample Automotive Streams")
+                            Text(playlistStore.playlists.isEmpty ? "Sample Streams" : "Your Channels")
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(Color.dashYellow)
                             Spacer()
-                            Button("+ Add M3U URL") {
-                                showingAddM3UDialog = true
+                            Menu("+ Add Playlist") {
+                                Button("From URL", systemImage: "link") { showingAddM3UDialog = true }
+                                Button("From Files", systemImage: "folder") { showingPlaylistFileImporter = true }
+                                if !playlistStore.playlists.isEmpty {
+                                    Button("Refresh All", systemImage: "arrow.clockwise") {
+                                        Task { await playlistStore.refreshAll() }
+                                    }
+                                }
                             }
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(Color.dashYellow)
@@ -426,7 +437,33 @@ public struct CastHomeView: View {
                         .padding(.horizontal)
                         .padding(.top, 12)
 
-                        ForEach(channels) { channel in
+                        if let importSuccessMessage {
+                            Text(importSuccessMessage)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(Color.dashYellow)
+                                .padding(.horizontal)
+                        }
+
+                        ForEach(playlistStore.playlists) { playlist in
+                            HStack {
+                                Image(systemName: "list.bullet.rectangle")
+                                    .foregroundStyle(Color.dashYellow)
+                                Text("\(playlist.title) · \(playlist.channels.count) channels")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(Color.dashTextSecondary)
+                                Spacer()
+                                Button(role: .destructive) {
+                                    playlistStore.removePlaylist(id: playlist.id)
+                                } label: {
+                                    Image(systemName: "trash")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Color.dashTextMuted)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+
+                        ForEach(playlistStore.allChannels) { channel in
                             Button {
                                 playerService.load(channel: channel)
                                 showingPlaylistsSheet = false
@@ -453,6 +490,15 @@ public struct CastHomeView: View {
 
                                     Spacer()
 
+                                    Button {
+                                        playlistStore.toggleFavorite(channel)
+                                    } label: {
+                                        Image(systemName: playlistStore.isFavorite(channel) ? "heart.fill" : "heart")
+                                            .font(.system(size: 18))
+                                            .foregroundStyle(Color.dashYellow)
+                                    }
+                                    .buttonStyle(.plain)
+
                                     Image(systemName: "play.circle.fill")
                                         .font(.system(size: 22))
                                         .foregroundStyle(Color.dashYellow)
@@ -467,6 +513,32 @@ public struct CastHomeView: View {
                     }
                     .padding(.bottom, 30)
                 }
+            }
+            .fileImporter(
+                isPresented: $showingPlaylistFileImporter,
+                allowedContentTypes: PlaylistStore.playlistContentTypes,
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    guard let url = urls.first else { return }
+                    do {
+                        let playlist = try playlistStore.importPlaylist(fileURL: url)
+                        importSuccessMessage = "Imported \(playlist.channels.count) channels from \(playlist.title)"
+                    } catch {
+                        importErrorMessage = error.localizedDescription
+                    }
+                case .failure(let error):
+                    importErrorMessage = error.localizedDescription
+                }
+            }
+            .alert("Couldn't import playlist", isPresented: Binding(
+                get: { importErrorMessage != nil },
+                set: { if !$0 { importErrorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) { importErrorMessage = nil }
+            } message: {
+                Text(importErrorMessage ?? "")
             }
             .navigationTitle("Media Sources")
             .navigationBarTitleDisplayMode(.inline)
@@ -528,9 +600,8 @@ public struct CastHomeView: View {
 
                     Button {
                         loadM3UFromURL()
-                        showingAddM3UDialog = false
                     } label: {
-                        Text("Import Stream")
+                        Text(isImportingPlaylist ? "Importing…" : "Import Playlist")
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(Color.black)
                             .frame(maxWidth: .infinity)
@@ -539,6 +610,13 @@ public struct CastHomeView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                             .padding(.horizontal)
                     }
+
+                    .disabled(isImportingPlaylist || m3uURLInput.isEmpty)
+
+                    Text("Paste an M3U / M3U8 playlist link or a single HLS stream URL.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.dashTextSecondary)
+                        .padding(.horizontal)
 
                     Spacer()
                 }
@@ -556,18 +634,30 @@ public struct CastHomeView: View {
     }
 
     private func loadM3UFromURL() {
-        guard let url = URL(string: m3uURLInput) else { return }
+        let input = m3uURLInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        isImportingPlaylist = true
         Task {
+            defer { isImportingPlaylist = false }
             do {
-                let (data, _) = try await URLSession.shared.data(from: url)
-                if let content = String(data: data, encoding: .utf8) {
-                    let parsed = IPTVParser.parseM3U(content: content)
-                    if !parsed.isEmpty {
-                        self.channels.append(contentsOf: parsed)
-                    }
+                // A bare .m3u8 HLS stream is a single channel, not a channel list.
+                if let url = URL(string: input), url.pathExtension.lowercased() == "m3u8",
+                   let data = try? await URLSession.shared.data(from: url).0,
+                   let text = IPTVParser.decode(data), text.contains("#EXT-X-") {
+                    let channel = ChannelModel(name: url.deletingPathExtension().lastPathComponent,
+                                               streamURL: url, groupTitle: "Streams")
+                    let m3u = "#EXTM3U\n#EXTINF:-1 group-title=\"Streams\",\(channel.name)\n\(url.absoluteString)\n"
+                    try playlistStore.addPlaylist(data: Data(m3u.utf8), sourceURL: nil, title: channel.name)
+                    playerService.load(channel: channel)
+                    importSuccessMessage = "Added stream \(channel.name)"
+                } else {
+                    let playlist = try await playlistStore.importPlaylist(from: input)
+                    importSuccessMessage = "Imported \(playlist.channels.count) channels from \(playlist.title)"
                 }
+                m3uURLInput = ""
+                showingAddM3UDialog = false
             } catch {
-                print("Failed to download M3U: \(error)")
+                importErrorMessage = error.localizedDescription
+                showingAddM3UDialog = false
             }
         }
     }
