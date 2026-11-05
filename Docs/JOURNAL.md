@@ -87,6 +87,17 @@
 
 ## Log
 
+### 2026-11-05 01:30 (Bogotá) — Session 18 wrap-up / handoff for Paperclip agents (Drive, [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35))
+- **Done (on `claude/drive-auto`, not merged yet):** live follow-user map plus permission rationale and Settings deep link; automatic trip detection (`TripDetectionStateMachine` + `AutoTripService`, toggle in Trip Log, default ON with Always); "Trip saved" notification for automatic trips; route replay in trip detail; `TripDetectionTests` + `TripReplayTests`; QA steps in `Docs/QA/smoke-test.md` §6d.
+- **Already existed:** trip history list (Trip Log, with swipe-to-delete and totals) and trip detail (stats).
+- **Remaining:**
+  1. Integrator: merge #35 once CI is green. CI run 41978850846 (commit c778208): **build succeeded**, 206 tests ran, 4 assertion failures, all in StoreKit/entitlement tests not touched by this PR (`EntitlementGateTests.testPlayerRefusesToCastWhenFreeAllowanceIsUsedUp`, `StoreKitTests.testRestoreWithNothingPurchasedReportsFalse`). They look flaky or come from the base branch (StoreKit test session state). Check them against the base branch's CI before merging.
+  2. Seed the first ~60 s of an automatic trip into the route; today recording starts only once the trip is detected.
+  3. Drop tiny or false automatic trips (e.g. under 300 m or under 2 min), and let the user undo an automatic trip from the notification.
+  4. Real-device test: background relaunch through significant-location changes, lock-screen drive, battery use, Core Motion thresholds (15 km/h, 60 s, 3 min).
+  5. Redesign 2B: move the Trip Log entry where the spec says (O2). The screen itself needs no change.
+  6. Optional: speed-coloured replay (`SpeedGradientRouteView` exists), trip export (GPX), widget "Last Trip" refresh after an automatic save (already happens via `saveTrips`).
+
 ### 2026-11-05 01:15 (Bogotá) — Session 18: Drive live location + automatic trips (`claude/drive-auto`, [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35))
 - Owner feedback: the Drive map showed the whole region, and trips weren't detected automatically.
 - New `DashCast/Features/Drive/`: `DriveLiveMapView` (camera follows the user and their heading while recording, `UserAnnotation`, `MapUserLocationButton`, Recenter, live route) plus `LocationPermissionCard` (When-In-Use → Always with explanations; denied opens Settings; restricted shows a message). The map sits at the top of Trip Log.
