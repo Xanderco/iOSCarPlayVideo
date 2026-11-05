@@ -1,0 +1,7 @@
+#EXTM3U
+#EXTINF:-1 group-title="Local",Relative One
+streams/one.m3u8
+#EXTINF:-1 group-title="Local",Root Relative
+/hls/two.m3u8
+#EXTINF:-1 group-title="Local",Absolute Three
+https://other.example.org/three.m3u8

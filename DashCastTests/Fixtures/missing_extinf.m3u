@@ -1,0 +1,6 @@
+#EXTM3U
+https://stream.example.com/live/bare_channel.m3u8
+#EXTVLCOPT:http-user-agent=DashCast
+#EXTINF:-1 group-title="Live",Named Channel
+https://stream.example.com/live/named.m3u8
+https://stream.example.com/live/another.ts
