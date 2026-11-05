@@ -33,11 +33,17 @@ final class DashCastSmokeUITests: XCTestCase {
         app = nil
     }
 
+    /// Native system tab bar on iOS 18+ (Liquid Glass on iOS 26); custom capsule bar on iOS 17.
+    private func tabButton(_ name: String) -> XCUIElement {
+        let native = app.tabBars.buttons[name]
+        return native.exists || app.tabBars.firstMatch.waitForExistence(timeout: 5) ? native : app.buttons["Tab_\(name)"]
+    }
+
     // MARK: - Tests
 
     func testAppLaunchesToCastTab() throws {
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15), "App did not reach foreground")
-        let castTab = app.buttons["Tab_Cast"]
+        let castTab = tabButton("Cast")
         XCTAssertTrue(castTab.waitForExistence(timeout: 15), "Tab bar did not appear")
         XCTAssertTrue(app.otherElements["Screen_Cast"].waitForExistence(timeout: 10), "Cast screen missing")
         snapshot("01-launch")
@@ -45,7 +51,7 @@ final class DashCastSmokeUITests: XCTestCase {
 
     func testEveryTabOpens() throws {
         for (index, tab) in tabs.enumerated() {
-            let button = app.buttons["Tab_\(tab)"]
+            let button = tabButton(tab)
             XCTAssertTrue(button.waitForExistence(timeout: 15), "Tab button \(tab) missing")
             button.tap()
 
