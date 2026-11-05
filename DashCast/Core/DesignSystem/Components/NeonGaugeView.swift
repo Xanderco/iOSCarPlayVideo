@@ -31,7 +31,7 @@ public struct NeonGaugeView: View {
             Circle()
                 .trim(from: 0.15, to: 0.85)
                 .stroke(
-                    Color.dcSurfaceHighlight,
+                    Color.dcSurfaceRaised,
                     style: StrokeStyle(lineWidth: 12, lineCap: .round)
                 )
                 .rotationEffect(.degrees(90))
