@@ -32,9 +32,9 @@ final class TripHistoryAndReplayTests: XCTestCase {
     func testTripCoordinatesExtraction() {
         let t0 = Date()
         let points = [
-            TripPoint(latitude: 37.7749, longitude: -122.4194, speedKmh: 45.0, timestamp: t0),
-            TripPoint(latitude: 37.7750, longitude: -122.4180, speedKmh: 50.0, timestamp: t0.addingTimeInterval(10)),
-            TripPoint(latitude: 37.7760, longitude: -122.4170, speedKmh: 55.0, timestamp: t0.addingTimeInterval(20))
+            TripPoint(latitude: 37.7749, longitude: -122.4194, speedKmh: 45.0, altitudeMeters: 15.0, timestamp: t0),
+            TripPoint(latitude: 37.7750, longitude: -122.4180, speedKmh: 50.0, altitudeMeters: 16.0, timestamp: t0.addingTimeInterval(10)),
+            TripPoint(latitude: 37.7760, longitude: -122.4170, speedKmh: 55.0, altitudeMeters: 18.0, timestamp: t0.addingTimeInterval(20))
         ]
 
         let trip = TripModel(
@@ -42,7 +42,6 @@ final class TripHistoryAndReplayTests: XCTestCase {
             startTime: t0,
             endTime: t0.addingTimeInterval(20),
             distanceMeters: 1500,
-            durationSeconds: 20,
             averageSpeedKmh: 50.0,
             maxSpeedKmh: 55.0,
             drivingScore: 92,
@@ -58,14 +57,16 @@ final class TripHistoryAndReplayTests: XCTestCase {
         XCTAssertEqual(coordinates[0].longitude, -122.4194, accuracy: 0.0001)
         XCTAssertEqual(coordinates[2].latitude, 37.7760, accuracy: 0.0001)
         XCTAssertEqual(coordinates[2].longitude, -122.4170, accuracy: 0.0001)
+        XCTAssertEqual(trip.durationSeconds, 20, accuracy: 0.1)
     }
 
     func testTripDistanceAndSpeedConversions() {
+        let t0 = Date()
         let trip = TripModel(
             id: UUID(),
-            startTime: Date(),
+            startTime: t0,
+            endTime: t0.addingTimeInterval(300),
             distanceMeters: 5000, // 5 km = ~3.10686 miles
-            durationSeconds: 300,
             averageSpeedKmh: 60.0, // ~37.28 mph
             maxSpeedKmh: 90.0,     // ~55.92 mph
             drivingScore: 88
@@ -86,6 +87,9 @@ final class TripHistoryAndReplayTests: XCTestCase {
         // Max Speed mph
         let topMph = trip.maxSpeedKmh * 0.621371
         XCTAssertEqual(topMph, 55.92, accuracy: 0.1)
+
+        // Duration seconds
+        XCTAssertEqual(trip.durationSeconds, 300, accuracy: 0.1)
     }
 
     func testTripMapModeEnum() {
@@ -102,7 +106,6 @@ final class TripHistoryAndReplayTests: XCTestCase {
             startTime: Date(timeIntervalSince1970: 1000),
             endTime: Date(timeIntervalSince1970: 1600),
             distanceMeters: 12000,
-            durationSeconds: 600,
             averageSpeedKmh: 72.0,
             maxSpeedKmh: 110.0,
             drivingScore: 95
