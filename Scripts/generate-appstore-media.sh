@@ -49,13 +49,15 @@ rm -rf "$RAW" "$OUT"/*-inch_*
 mkdir -p "$RAW"
 
 # name|launch arguments
+# Classic UI. Launch args are read by AppState / ScreenshotLaunch / CastHomeView.
 SCREENS=(
-  "01_home|-initialTab home"
-  "02_cardisplay|-initialTab cast"
-  "03_library|-initialTab library"
-  "04_cast|-initialTab cast"
-  "05_paywall|-showPaywall"
-  "06_settings|-initialTab settings"
+  "01_cast|-initialTab cast"
+  "02_paywall|-initialTab cast -showPaywall"
+  "03_sources|-initialTab cast -showMediaSources"
+  "04_player|-initialTab cast -playDemoVideo"
+  "05_drive|-initialTab drive"
+  "06_widgets|-showWidgetEditor"
+  "07_onboarding|-showOnboarding"
 )
 
 for entry in "${SCREENS[@]}"; do

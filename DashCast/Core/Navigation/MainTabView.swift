@@ -38,7 +38,7 @@ public struct MainTabView: View {
             LifetimePaywallView()
         }
         .fullScreenCover(isPresented: Binding(
-            get: { !passengerNoticeAccepted && !PassengerSafetyNotice.shouldSkip },
+            get: { (!passengerNoticeAccepted && !PassengerSafetyNotice.shouldSkip) || ScreenshotLaunch.showOnboarding },
             set: { _ in }
         )) {
             // First-run walkthrough; includes the required passenger-only acknowledgement.
