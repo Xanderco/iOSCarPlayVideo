@@ -109,6 +109,10 @@
 - Merged [#18](https://github.com/Xanderco/iOSCarPlayVideo/pull/18), the core bug audit. Fixes the audio session (category options were invalid, so the silent switch muted video and background audio stopped). Player state now comes from `timeControlStatus`, with Retry/Close on errors, Now Playing info and remote commands. Also fixes local videos, external display and Drive tracking. Full list in `Docs/Audit-2026-11.md`.
 - Follow-ups: the items marked *needs-device* in the audit go on the Mac/real-device checklist.
 
+### 2026-11-05 (Bogotá) — Session 15 follow-up: CI fix + Photo / Doodle merged into #27
+- The CarPlay-layout commit had broken the build with a stray `}` in `DashCastWidgets/DashCastWidgetsBundle.swift`. It's fixed now, and CI is green on `3faac1e`.
+- Merged `claude/home-widgets-doodle` into `claude/home-widgets`. CI was green on the combined code (`c3f2ab8`; this merge has the same code plus this journal entry). PR #27 now ships 4 widgets: My Car, Last Trip, Quick Cast and Photo / Doodle. This replaces the "Not merged" note in the wrap-up below.
+
 ### 2026-11-05 01:22 (Bogotá) — Session 15 wrap-up (budget end)
 - **Done (PR [#27](https://github.com/Xanderco/iOSCarPlayVideo/pull/27), `claude/home-widgets`):** `DashCastWidgets` extension with My Car, Last Trip and Quick Cast (including Lock Screen); app-group shared store with reload on edit; `dashcast://cast|drive` deep links; CarPlay-eligible, easy-to-read small layouts with a WCAG accent check; `Docs/CarPlay.md` widget section; `WidgetSharedStoreTests`. CI was green on `a63f4d7`; the CarPlay-layout commit was queued for CI at wrap-up (check the PR's checks).
 - **Not merged:** the Photo / Doodle small widget is complete on branch `claude/home-widgets-doodle` (commit `c4fdd0a`, on top of #27), but its CI run was cancelled for budget, so it hasn't been compiled. Next session: re-run CI on that branch, and if it's green, fast-forward it into `claude/home-widgets` or open a follow-up PR.
