@@ -21,10 +21,10 @@ public struct CarPlayExternalDisplayView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            if playerService.isPlaying || playerService.currentChannel != nil {
+            if playerService.currentChannel != nil {
                 // Video is active: Render video full-screen on the car display
                 ZStack(alignment: .bottom) {
-                    CustomVideoPlayerRepresentable(player: playerService.player)
+                    CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
                         .ignoresSafeArea()
 
                     // Minimal CarPlay status watermark
@@ -91,12 +91,15 @@ public struct CarPlayExternalDisplayView: View {
 
                                 Spacer()
 
-                                HStack(spacing: 4) {
-                                    Image(systemName: "sun.max.fill")
-                                        .foregroundStyle(Color.dashGold)
-                                    Text("72°F")
-                                        .font(.system(size: 12, weight: .bold))
-                                        .foregroundStyle(.white)
+                                // Was a hardcoded "72°F" weather badge; show the real clock instead.
+                                TimelineView(.everyMinute) { context in
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "clock.fill")
+                                            .foregroundStyle(Color.dashGold)
+                                        Text(context.date, style: .time)
+                                            .font(.system(size: 12, weight: .bold))
+                                            .foregroundStyle(.white)
+                                    }
                                 }
                             }
                             .padding(.horizontal, 16)

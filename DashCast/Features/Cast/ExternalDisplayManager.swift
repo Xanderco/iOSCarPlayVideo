@@ -2,6 +2,17 @@ import UIKit
 import SwiftUI
 import AVKit
 
+/// Tracks a wired (HDMI/USB-C) or AirPlay-mirrored external screen and renders
+/// `CarPlayExternalDisplayView` on it.
+///
+/// iOS only hands the app a dedicated external-display scene when Info.plist declares a
+/// `UIWindowSceneSessionRoleExternalDisplayNonInteractive` configuration (see
+/// `ExternalDisplaySceneDelegate`). Without it the screen is simply mirrored. The old
+/// implementation relied on `UIScreen.didConnectNotification` + `window.screen = …`, which is
+/// ignored in scene-based apps, and it created a new window on every scene activation.
+///
+/// Note: the CarPlay head unit itself is NOT an external display. Third-party apps cannot draw
+/// video on CarPlay; CarPlay scenes are `CPTemplateApplicationScene`s and are excluded here.
 @MainActor
 public final class ExternalDisplayManager: ObservableObject {
     public static let shared = ExternalDisplayManager()
@@ -10,132 +21,74 @@ public final class ExternalDisplayManager: ObservableObject {
     @Published public private(set) var externalDisplayResolution: CGSize = .zero
 
     private var externalWindow: UIWindow?
+    private weak var externalScene: UIWindowScene?
 
-    public init() {
-        setupNotifications()
-        checkForExistingExternalDisplay()
+    public init() {}
+
+    /// Whether a scene session role is a non-interactive external display.
+    nonisolated public static func isExternalDisplayRole(_ role: UISceneSession.Role) -> Bool {
+        role == .windowExternalDisplayNonInteractive
     }
 
-    private func setupNotifications() {
-        // Scene Notifications (iOS 13+)
-        NotificationCenter.default.addObserver(
-            forName: UIScene.didActivateNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self = self, let scene = notification.object as? UIWindowScene else { return }
-            Task { @MainActor [weak self] in
-                self?.handleSceneActivation(scene)
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: UIScene.didDisconnectNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self = self, let scene = notification.object as? UIWindowScene else { return }
-            Task { @MainActor [weak self] in
-                self?.handleSceneDisconnect(scene)
-            }
-        }
-
-        // Screen Notifications Fallback (for CarPlay and direct video displays)
-        NotificationCenter.default.addObserver(
-            forName: UIScreen.didConnectNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self = self, let screen = notification.object as? UIScreen else { return }
-            Task { @MainActor [weak self] in
-                self?.connectExternalScreen(screen)
-            }
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: UIScreen.didDisconnectNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                self?.disconnectExternalDisplay()
-            }
-        }
-    }
-
+    /// Picks up an external display scene that connected before this manager was created.
     public func checkForExistingExternalDisplay() {
-        // Check window scenes first
-        for scene in UIApplication.shared.connectedScenes {
-            if let windowScene = scene as? UIWindowScene, isExternalScene(windowScene) {
-                connectExternalScene(windowScene)
-                return
-            }
-        }
-
-        // Check connected screens fallback
-        if UIScreen.screens.count > 1 {
-            let externalScreen = UIScreen.screens[1]
-            connectExternalScreen(externalScreen)
+        guard externalScene == nil else { return }
+        for case let windowScene as UIWindowScene in UIApplication.shared.connectedScenes
+        where Self.isExternalDisplayRole(windowScene.session.role) {
+            attach(to: windowScene)
+            return
         }
     }
 
-    private func handleSceneActivation(_ scene: UIWindowScene) {
-        if isExternalScene(scene) {
-            connectExternalScene(scene)
-        }
-    }
-
-    private func handleSceneDisconnect(_ scene: UIWindowScene) {
-        if isExternalScene(scene) {
-            disconnectExternalDisplay()
-        }
-    }
-
-    private func isExternalScene(_ windowScene: UIWindowScene) -> Bool {
-        if windowScene.session.role == .windowExternalDisplayNonInteractive { return true }
-        if windowScene.session.role.rawValue.contains("CarPlay") { return true }
-        if windowScene.screen != UIScreen.main { return true }
-        return false
-    }
-
-    private func connectExternalScene(_ windowScene: UIWindowScene) {
-        self.isExternalDisplayConnected = true
-        self.externalDisplayResolution = windowScene.coordinateSpace.bounds.size
+    /// Called by `ExternalDisplaySceneDelegate` when the system connects the external screen.
+    public func attach(to windowScene: UIWindowScene) {
+        if externalScene === windowScene, externalWindow != nil { return }
+        externalWindow?.isHidden = true
 
         let window = UIWindow(windowScene: windowScene)
         let hostingController = UIHostingController(
             rootView: CarPlayExternalDisplayView()
                 .preferredColorScheme(.dark)
         )
-
         window.rootViewController = hostingController
         window.isHidden = false
-        window.makeKeyAndVisible()
-        self.externalWindow = window
+
+        externalWindow = window
+        externalScene = windowScene
+        isExternalDisplayConnected = true
+        externalDisplayResolution = windowScene.coordinateSpace.bounds.size
     }
 
-    private func connectExternalScreen(_ screen: UIScreen) {
-        self.isExternalDisplayConnected = true
-        self.externalDisplayResolution = screen.bounds.size
+    /// Called when the external display scene disconnects.
+    public func detach(from windowScene: UIWindowScene?) {
+        if let windowScene, let current = externalScene, current !== windowScene { return }
+        externalWindow?.isHidden = true
+        externalWindow = nil
+        externalScene = nil
+        isExternalDisplayConnected = false
+        externalDisplayResolution = .zero
+    }
+}
 
-        let window = UIWindow(frame: screen.bounds)
-        window.screen = screen
+/// Scene delegate for `UIWindowSceneSessionRoleExternalDisplayNonInteractive`, registered in Info.plist.
+public final class ExternalDisplaySceneDelegate: UIResponder, UIWindowSceneDelegate {
+    public var window: UIWindow?
 
-        let hostingController = UIHostingController(
-            rootView: CarPlayExternalDisplayView()
-                .preferredColorScheme(.dark)
-        )
-
-        window.rootViewController = hostingController
-        window.isHidden = false
-        window.makeKeyAndVisible()
-        self.externalWindow = window
+    public func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let windowScene = scene as? UIWindowScene else { return }
+        MainActor.assumeIsolated {
+            ExternalDisplayManager.shared.attach(to: windowScene)
+        }
     }
 
-    private func disconnectExternalDisplay() {
-        self.isExternalDisplayConnected = false
-        self.externalDisplayResolution = .zero
-        self.externalWindow?.isHidden = true
-        self.externalWindow = nil
+    public func sceneDidDisconnect(_ scene: UIScene) {
+        let windowScene = scene as? UIWindowScene
+        MainActor.assumeIsolated {
+            ExternalDisplayManager.shared.detach(from: windowScene)
+        }
     }
 }

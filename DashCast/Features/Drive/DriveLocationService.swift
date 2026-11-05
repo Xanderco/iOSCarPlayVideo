@@ -17,6 +17,12 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
     @Published public private(set) var isPaused: Bool = false
     @Published public private(set) var currentLocation: CLLocation?
     @Published public private(set) var tripPoints: [TripPoint] = []
+    @Published public private(set) var authorizationStatus: CLAuthorizationStatus = .notDetermined
+    @Published public private(set) var lastErrorMessage: String?
+
+    public var isAuthorized: Bool {
+        authorizationStatus == .authorizedWhenInUse || authorizationStatus == .authorizedAlways
+    }
 
     private let locationManager = CLLocationManager()
     private var lastLocation: CLLocation?
@@ -28,7 +34,23 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         locationManager.distanceFilter = 2 // 2 meters
-        locationManager.allowsBackgroundLocationUpdates = false
+        locationManager.activityType = .automotiveNavigation
+        locationManager.pausesLocationUpdatesAutomatically = false
+        authorizationStatus = locationManager.authorizationStatus
+    }
+
+    /// Background updates must be enabled while a trip records, otherwise tracking stops as soon
+    /// as the phone locks (previously hardcoded to `false` despite the `location` background mode).
+    /// Only enabled when Info.plist declares the mode, since setting it without the mode crashes.
+    private func setBackgroundUpdates(_ enabled: Bool) {
+        let modes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String] ?? []
+        guard modes.contains("location") else { return }
+        locationManager.allowsBackgroundLocationUpdates = enabled
+        locationManager.showsBackgroundLocationIndicator = enabled
+    }
+
+    public func clearError() {
+        lastErrorMessage = nil
     }
 
     public func requestPermissions() {
@@ -40,7 +62,18 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
     }
 
     public func startTrip() {
-        requestPermissions()
+        lastErrorMessage = nil
+        if authorizationStatus == .notDetermined {
+            requestPermissions()
+        } else if !isAuthorized {
+            lastErrorMessage = "Location access is off. Enable it in Settings › DashCast › Location to record trips."
+        }
+        // Each trip starts clean: previously the scorer kept events from before the trip and
+        // the first fix was measured from the previous trip's last location.
+        DrivingScorer.shared.reset()
+        lastLocation = nil
+        currentLocation = nil
+        currentSpeedKmh = 0
         distanceMeters = 0
         topSpeedKmh = 0
         averageSpeedKmh = 0
@@ -51,6 +84,7 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         isPaused = false
         tripStartTime = Date()
 
+        setBackgroundUpdates(true)
         locationManager.startUpdatingLocation()
         startTimer()
     }
@@ -58,6 +92,8 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
     public func pauseTrip() {
         isPaused = true
         locationManager.stopUpdatingLocation()
+        // Don't measure a straight line from where we paused to where we resume.
+        lastLocation = nil
     }
 
     public func resumeTrip() {
@@ -69,7 +105,9 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         isTracking = false
         isPaused = false
         locationManager.stopUpdatingLocation()
+        setBackgroundUpdates(false)
         stopTimer()
+        currentSpeedKmh = 0
 
         let score = DrivingScorer.shared.calculateScore()
         let trip = TripModel(
@@ -130,11 +168,41 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
     }
 
     nonisolated public func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location manager error: \(error.localizedDescription)")
+        let message = error.localizedDescription
+        let denied = (error as? CLError)?.code == .denied
+        Task { @MainActor [weak self] in
+            // kCLErrorLocationUnknown is transient; only surface real failures.
+            if denied { self?.lastErrorMessage = "Location access was denied. Enable it in Settings to record trips." }
+            print("Location manager error: \(message)")
+        }
+    }
+
+    nonisolated public func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        let status = manager.authorizationStatus
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.authorizationStatus = status
+            if self.isAuthorized {
+                self.lastErrorMessage = nil
+            } else if status == .denied || status == .restricted {
+                self.lastErrorMessage = "Location access is off. Enable it in Settings › DashCast › Location to record trips."
+            }
+        }
+    }
+
+    /// Whether a fix is good enough to add to distance / route. Exposed for tests.
+    nonisolated static func isUsableFix(horizontalAccuracy: Double, age: TimeInterval) -> Bool {
+        horizontalAccuracy >= 0 && horizontalAccuracy <= 50 && age < 10
     }
 
     private func handleLocationUpdate(_ location: CLLocation) {
         guard isTracking, !isPaused else { return }
+        // Skip invalid, very inaccurate, or cached (stale) fixes; they caused distance jumps
+        // and phantom speed at trip start.
+        guard Self.isUsableFix(
+            horizontalAccuracy: location.horizontalAccuracy,
+            age: -location.timestamp.timeIntervalSinceNow
+        ) else { return }
 
         self.currentLocation = location
 
@@ -168,7 +236,11 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         tripPoints.append(point)
 
         // Pass motion acceleration to scorer
-        DrivingScorer.shared.recordPoint(speedKmh: speedKmh)
+        DrivingScorer.shared.recordPoint(
+            speedKmh: speedKmh,
+            course: location.courseAccuracy >= 0 ? location.course : -1,
+            timestamp: location.timestamp
+        )
     }
 
     // Manual simulation injection for tests & preview

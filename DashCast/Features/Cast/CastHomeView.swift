@@ -23,6 +23,7 @@ public struct CastHomeView: View {
     @State private var showingPlaylistFileImporter: Bool = false
     @State private var importErrorMessage: String?
     @State private var importSuccessMessage: String?
+    @State private var localImportError: String?
 
     public init() {}
 
@@ -41,8 +42,14 @@ public struct CastHomeView: View {
                                 .padding(.horizontal, 16)
                         }
 
-                        // Main 4-Row Source Menu Card (Exact 1:1 CarDash layout)
+                        // Main 4-Row Source Menu Card
                         mainSourceMenuCard
+
+                        // Imported videos were previously saved but never listed anywhere,
+                        // so the user had no way to play them.
+                        if localVideoManager.isImporting || !localVideoManager.localVideos.isEmpty {
+                            localVideosSection
+                        }
 
                         // CarPlay Connection Illustration & Status Section
                         carPlayStatusSection
@@ -129,21 +136,34 @@ public struct CastHomeView: View {
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundStyle(Color.dashTextPrimary)
 
-                            Text("Broadcast your entire iOS screen live to your car's CarPlay display via AirPlay.")
+                            // The old RPSystemBroadcastPickerView needs a Broadcast Upload
+                            // extension this app doesn't ship, so it showed an empty list.
+                            // Mirroring is a system feature; the app can only point to it.
+                            Text("Mirror your iPhone to an AirPlay screen (Apple TV, AirPlay-capable car display or TV), or plug in a USB-C/HDMI adapter. DashCast then shows the video full screen there.")
                                 .font(.system(size: 14))
                                 .foregroundStyle(Color.dashTextSecondary)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 24)
 
-                            ScreenBroadcastPickerView()
-                                .frame(width: 80, height: 80)
-                                .padding()
+                            VStack(alignment: .leading, spacing: 8) {
+                                Label("Tap the AirPlay button below to send video, or", systemImage: "1.circle.fill")
+                                Label("Open Control Center → Screen Mirroring", systemImage: "2.circle.fill")
+                            }
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundStyle(Color.dashTextPrimary)
+                            .padding(.horizontal, 24)
+
+                            AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
+                                .frame(width: 64, height: 64)
                                 .background(Color.dashSurface)
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.dashYellow.opacity(0.4), lineWidth: 2))
 
-                            AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
-                                .frame(width: 50, height: 50)
+                            Text("CarPlay itself does not allow third-party apps to show video; in a CarPlay car only the audio plays through the car.")
+                                .font(.system(size: 11))
+                                .foregroundStyle(Color.dashTextMuted)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 24)
 
                             Spacer()
                         }
@@ -162,8 +182,23 @@ public struct CastHomeView: View {
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
                 guard let newItem = newItem else { return }
                 Task {
-                    await localVideoManager.importVideo(from: newItem)
+                    do {
+                        let channel = try await localVideoManager.importVideo(from: newItem)
+                        playerService.load(channel: channel)
+                    } catch {
+                        localImportError = error.localizedDescription
+                    }
+                    // Reset so picking the same video again still triggers onChange.
+                    selectedPhotoItem = nil
                 }
+            }
+            .alert("Couldn't import video", isPresented: Binding(
+                get: { localImportError != nil },
+                set: { if !$0 { localImportError = nil } }
+            )) {
+                Button("OK", role: .cancel) { localImportError = nil }
+            } message: {
+                Text(localImportError ?? "")
             }
         }
     }
@@ -187,11 +222,11 @@ public struct CastHomeView: View {
             Divider().background(Color.dashBorder.opacity(0.6))
 
             // Row 2: Local Videos
-            PhotosPicker(selection: $selectedPhotoItem, matching: .videos) {
+            PhotosPicker(selection: $selectedPhotoItem, matching: .videos, preferredItemEncoding: .current) {
                 menuRow(
                     icon: "folder.fill",
                     title: "Local Videos",
-                    subtitle: "From Photos & Files"
+                    subtitle: localVideoManager.isImporting ? "Importing…" : "Import from Photos"
                 )
             }
             .buttonStyle(.plain)
@@ -231,6 +266,62 @@ public struct CastHomeView: View {
                 .stroke(Color.dashBorder, lineWidth: 1)
         )
         .padding(.horizontal, 16)
+    }
+
+    // MARK: - Imported local videos
+
+    private var localVideosSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Your Videos")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.dashYellow)
+                Spacer()
+                if localVideoManager.isImporting {
+                    ProgressView().tint(.dashYellow)
+                }
+            }
+            .padding(.horizontal, 20)
+
+            VStack(spacing: 1) {
+                ForEach(localVideoManager.localVideos) { video in
+                    HStack(spacing: 12) {
+                        Button {
+                            playerService.load(channel: video)
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: playerService.currentChannel?.id == video.id ? "speaker.wave.2.fill" : "play.rectangle.fill")
+                                    .foregroundStyle(Color.dashYellow)
+                                Text(video.name)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(Color.dashTextPrimary)
+                                    .lineLimit(1)
+                                Spacer()
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+
+                        Button(role: .destructive) {
+                            if playerService.currentChannel?.id == video.id {
+                                playerService.stop()
+                            }
+                            localVideoManager.deleteVideo(video)
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundStyle(Color.dashTextMuted)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Delete \(video.name)")
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.dashSurface)
+                }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.horizontal, 16)
+        }
     }
 
     private func menuRow(icon: String, title: String, subtitle: String) -> some View {
@@ -327,7 +418,7 @@ public struct CastHomeView: View {
                             Image(systemName: "car.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(Color.dashGreen)
-                            Text("CarPlay Connected")
+                            Text("Display Connected")
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(Color.dashGreen)
                         }
@@ -348,7 +439,7 @@ public struct CastHomeView: View {
 
             // Status Text
             VStack(spacing: 6) {
-                Text(externalDisplay.isExternalDisplayConnected ? "CarPlay Connected" : "CarPlay not connected")
+                Text(externalDisplay.isExternalDisplayConnected ? "External display connected" : "No external display (use AirPlay or a cable)")
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(Color.dashTextPrimary)
 

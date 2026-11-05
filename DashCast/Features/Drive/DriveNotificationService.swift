@@ -25,7 +25,7 @@ public final class DriveNotificationService {
     public func sendDriveRecordingNotification(distanceKm: Double) {
         let content = UNMutableNotificationContent()
         content.title = "Recording your drive"
-        content.body = String(format: "%.1f km so far · CarDash is tracking this trip.", distanceKm)
+        content.body = String(format: "%.1f km so far · DashCast is tracking this trip.", distanceKm)
         content.sound = .default
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)

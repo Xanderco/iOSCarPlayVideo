@@ -3,6 +3,7 @@ import AVKit
 
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
+    @ObservedObject var externalDisplay = ExternalDisplayManager.shared
     @State private var showControls: Bool = true
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
@@ -17,7 +18,7 @@ public struct AutomotiveVideoPlayerView: View {
             Color.black
 
             if playerService.currentChannel != nil {
-                CustomVideoPlayerRepresentable(player: playerService.player)
+                CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.25)) {
@@ -25,7 +26,16 @@ public struct AutomotiveVideoPlayerView: View {
                         }
                     }
 
-                if showControls {
+                if playerService.isBuffering && playerService.playbackError == nil {
+                    ProgressView()
+                        .tint(.white)
+                        .scaleEffect(1.4)
+                        .allowsHitTesting(false)
+                }
+
+                if let error = playerService.playbackError {
+                    errorOverlay(error)
+                } else if showControls {
                     controlsOverlay
                         .transition(.opacity)
                 }
@@ -49,6 +59,40 @@ public struct AutomotiveVideoPlayerView: View {
         .background(Color.dashSurface)
     }
 
+    private func errorOverlay(_ message: String) -> some View {
+        VStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 32))
+                .foregroundStyle(Color.dashOrange)
+            Text("Can't play \(playerService.currentChannel?.name ?? "this video")")
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
+            Text(message)
+                .font(.system(size: 12))
+                .foregroundStyle(Color.dashTextSecondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(3)
+            HStack(spacing: 12) {
+                Button("Retry") {
+                    if let channel = playerService.currentChannel {
+                        playerService.load(channel: channel)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.dashYellow)
+                .foregroundStyle(.black)
+
+                Button("Close") { playerService.stop() }
+                    .buttonStyle(.bordered)
+                    .tint(.white)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.opacity(0.75))
+    }
+
     private var controlsOverlay: some View {
         ZStack {
             Color.black.opacity(0.45)
@@ -67,13 +111,28 @@ public struct AutomotiveVideoPlayerView: View {
                             Circle()
                                 .fill(Color.dashGreen)
                                 .frame(width: 6, height: 6)
-                            Text("Parked Video · Audio over CarPlay")
+                            Text(externalDisplay.isExternalDisplayConnected ? "Showing on external display" : "Parked Video · AirPlay / CarPlay audio")
                                 .font(.system(size: 11))
                                 .foregroundStyle(Color.dashTextSecondary)
                         }
                     }
 
                     Spacer()
+
+                    AirPlayRoutePickerRepresentable(tintColor: .white)
+                        .frame(width: 34, height: 34)
+
+                    Button {
+                        playerService.stop()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(9)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
+                    }
+                    .accessibilityLabel("Close player")
 
                     Button {
                         withAnimation {
@@ -174,18 +233,35 @@ public struct AutomotiveVideoPlayerView: View {
     }
 }
 
-public struct CustomVideoPlayerRepresentable: UIViewControllerRepresentable {
-    public let player: AVPlayer
+/// AVPlayerLayer-backed view. Unlike AVPlayerViewController, any number of these can share one
+/// AVPlayer, so the phone and the external display can render the same video at the same time.
+public struct CustomVideoPlayerRepresentable: UIViewRepresentable {
+    public let player: AVPlayer?
 
-    public func makeUIViewController(context: Context) -> AVPlayerViewController {
-        let controller = AVPlayerViewController()
-        controller.player = player
-        controller.showsPlaybackControls = false
-        controller.videoGravity = .resizeAspect
-        return controller
+    public init(player: AVPlayer?) {
+        self.player = player
     }
 
-    public func updateUIViewController(_ uiViewController: AVPlayerViewController, context: Context) {
-        uiViewController.player = player
+    public func makeUIView(context: Context) -> PlayerLayerView {
+        let view = PlayerLayerView()
+        view.backgroundColor = .black
+        view.playerLayer.videoGravity = .resizeAspect
+        view.playerLayer.player = player
+        return view
     }
+
+    public func updateUIView(_ uiView: PlayerLayerView, context: Context) {
+        if uiView.playerLayer.player !== player {
+            uiView.playerLayer.player = player
+        }
+    }
+
+    public static func dismantleUIView(_ uiView: PlayerLayerView, coordinator: ()) {
+        uiView.playerLayer.player = nil
+    }
+}
+
+public final class PlayerLayerView: UIView {
+    public override static var layerClass: AnyClass { AVPlayerLayer.self }
+    public var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
 }
