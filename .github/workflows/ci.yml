@@ -9,25 +9,70 @@ on:
 jobs:
   test:
     name: Build & Test
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install XcodeGen
-        run: brew install xcodegen
+        run: |
+          which xcodegen || brew install xcodegen
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+      - name: Select Xcode 16
+        run: |
+          XCODE_APP=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -n 1)
+          if [ -n "$XCODE_APP" ]; then
+            echo "Selecting $XCODE_APP"
+            sudo xcode-select -s "$XCODE_APP/Contents/Developer"
+          else
+            echo "No Xcode 16 found matching pattern, using default Xcode"
+            sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          fi
+          xcodebuild -version
+
+      - name: List Available Simulators & Select Device
+        run: |
+          xcrun simctl list devices available
+          DEVICE_LINE=$(xcrun simctl list devices available | grep -E "iPhone (16|15)" | head -1)
+          DEVICE_ID=$(echo "$DEVICE_LINE" | grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' || true)
+          DEVICE_NAME=$(echo "$DEVICE_LINE" | sed -E 's/^[[:space:]]*([^(]+).*/\1/' | xargs || true)
+          if [ -n "$DEVICE_ID" ]; then
+            DESTINATION="platform=iOS Simulator,id=$DEVICE_ID"
+          elif [ -n "$DEVICE_NAME" ]; then
+            DESTINATION="platform=iOS Simulator,name=$DEVICE_NAME"
+          else
+            DESTINATION="platform=iOS Simulator,name=iPhone 16"
+          fi
+          echo "Selected Destination: $DESTINATION"
+          echo "DESTINATION=$DESTINATION" >> $GITHUB_ENV
 
       - name: Generate Xcode Project
         run: xcodegen generate
+
+      - name: Build DashCast
+        run: |
+          xcodebuild build \
+            -project DashCast.xcodeproj \
+            -scheme DashCast \
+            -destination "$DESTINATION" \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Run Automated Test Suite
         run: |
           xcodebuild test \
             -project DashCast.xcodeproj \
             -scheme DashCast \
-            -destination "platform=iOS Simulator,name=iPhone 15" \
-            -configuration Debug
+            -destination "$DESTINATION" \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath TestResults.xcresult
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults.xcresult
+          if-no-files-found: ignore
