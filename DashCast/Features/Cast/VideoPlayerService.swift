@@ -106,6 +106,10 @@ public final class VideoPlayerService: ObservableObject {
         isBuffering = true
 
         let playerItem = AVPlayerItem(asset: AVURLAsset(url: channel.streamURL))
+        if channel.id == CarPlayMirrorPlayback.channelID {
+            // Live iPhone mirror: keep the buffer (and so the delay) short.
+            playerItem.preferredForwardBufferDuration = 1
+        }
         observe(item: playerItem)
 
         player.replaceCurrentItem(with: playerItem)
