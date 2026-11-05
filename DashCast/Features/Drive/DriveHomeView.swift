@@ -158,7 +158,7 @@ public struct DriveHomeView: View {
                     maxValue: appState.useMilesPerHour ? 140 : 220,
                     title: "SPEED",
                     unit: speedUnit,
-                    tintColor: .dashYellow
+                    accentColor: .dashYellow
                 )
                 .frame(width: 140, height: 140)
 
