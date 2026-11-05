@@ -50,13 +50,12 @@ mkdir -p "$RAW"
 
 # name|launch arguments
 SCREENS=(
-  "01_cast|-initialTab cast"
-  "02_paywall|-showPaywall"
-  "03_cardisplay|-carplayDashboard"
-  "04_drive|-initialTab drive"
-  "05_widgets|-initialTab widgets"
-  "06_sounds|-initialTab sounds"
-  "07_me|-initialTab me"
+  "01_home|-initialTab home"
+  "02_cardisplay|-carplayDashboard"
+  "03_library|-initialTab library"
+  "04_cast|-initialTab cast"
+  "05_paywall|-showPaywall"
+  "06_settings|-initialTab settings"
 )
 
 for entry in "${SCREENS[@]}"; do

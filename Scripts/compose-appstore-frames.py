@@ -20,13 +20,12 @@ SIZES = {
 }
 
 HEADLINES = {
-    "cast": ("Your videos.\nYour car screen.", "Playlists, IPTV and local files, ready when you park."),
+    "home": ("Your videos.\nYour car screen.", "Playlists, IPTV and local files, ready when you park."),
     "cardisplay": ("Made for the\ncar display", "A big, beautiful player for passengers and parked breaks."),
-    "drive": ("Every drive,\nbeautifully tracked", "Speed, distance and a smooth-driving score."),
-    "widgets": ("Make the dash\nyours", "Car widgets, live wallpapers and stickers."),
-    "sounds": ("Sounds for\nevery arrival", "Welcome chimes and engine sounds, triggered automatically."),
+    "library": ("Bring your\nown library", "Jellyfin and Emby servers, QR playlist import."),
+    "cast": ("Cast it\nyour way", "AirPlay, a cable or screen mirroring."),
     "paywall": ("Pay once.\nKeep it forever.", "No subscriptions. One purchase unlocks DashCast Pro."),
-    "me": ("Your garage,\nyour stats", "Pick your car and see every mile."),
+    "settings": ("Private by\ndesign", "No account. Everything stays on your iPhone."),
 }
 FOOTNOTE = "For passengers & parked use only. Never watch while driving."
 
