@@ -41,7 +41,6 @@ enum WidgetPalette {
         return Color(red: c.r, green: c.g, blue: c.b)
     }
 }
-}
 
 /// CarPlay (iOS 26) shows `.systemSmall` widgets on the car display. There is no CarPlay-specific
 /// environment value, so small layouts are written to work in every rendering context:
