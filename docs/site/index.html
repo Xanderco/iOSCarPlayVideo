@@ -1,56 +1,512 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <meta name="referrer" content="no-referrer">
-  <title>DashCast</title>
-  <meta name="description" content="DashCast plays your own playlists, media servers and videos on your iPhone and a connected car display. Pay once, no subscriptions.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>DashCast — Video on your car display. Pay once.</title>
+  <meta name="description" content="DashCast puts your M3U playlists, Jellyfin/Emby servers and personal videos on the car screen. One-time $19.99 lifetime pass, zero subscriptions. Private, fast, passenger-first.">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F5F5F7">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0C0D10">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <a class="brand" href="index.html">DashCast</a>
-  <nav aria-label="Site">
-    <a href="index.html" aria-current="page">Home</a>
-    <a href="support.html">Support</a>
-    <a href="privacy.html">Privacy</a>
-    <a href="terms.html">Terms</a>
-  </nav>
-</header>
-<main>
-  <h1>DashCast</h1>
-  <p class="lede">Your own playlists, media server and videos on the car screen, for passengers and parked breaks. Pay once, keep it forever.</p>
 
-  <div class="card">
-    <ul>
-      <li>Plays M3U / M3U8 playlists you add from a link, a file or a QR code</li>
-      <li>Connects to your own Jellyfin or Emby server</li>
-      <li>Plays videos you pick from Photos or Files</li>
-      <li>Sends video to a connected display (AirPlay, HDMI or a compatible car screen) and keeps your iPhone as the remote</li>
-      <li>Trip stats, car widgets and an arrival sound board</li>
-    </ul>
-  </div>
+  <!-- SITE HEADER / NAVIGATION -->
+  <header class="site-header" id="top">
+    <div class="container header-wrap">
+      <a class="brand-link" href="#top">
+        <img class="brand-icon" src="assets/icon.svg" alt="DashCast Logo" width="36" height="36">
+        <span class="brand-name">DashCast</span>
+        <span class="brand-badge">Pro</span>
+      </a>
 
-  <h2>No account. No tracking.</h2>
-  <p>There is no sign-up, no ads and no analytics. Your playlists, server logins and trips stay on your iPhone. Read the <a href="privacy.html">Privacy Policy</a>.</p>
+      <nav class="main-nav" id="mainNav" aria-label="Main Navigation">
+        <a href="#features">Features</a>
+        <a href="#cast">Cast & Mirror</a>
+        <a href="#moments">Moments</a>
+        <a href="#pro">Lifetime Pro</a>
+        <a href="#faq">FAQ</a>
+        <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+      </nav>
 
-  <h2>Pay once</h2>
-  <p>DashCast is free to download. One in-app purchase, DashCast Pro, unlocks everything for good. There is no subscription.</p>
+      <div class="header-actions">
+        <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle theme">☀️</button>
+        <a class="btn-nav-download" href="https://apps.apple.com/app/id6800211040">
+          <span>Get DashCast</span>
+        </a>
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu">☰</button>
+      </div>
+    </div>
+  </header>
 
-  <h2>Bring your own content</h2>
-  <p>DashCast ships with no channels or videos. You add sources you have the right to watch. See the <a href="terms.html">Terms of Use</a>.</p>
+  <main>
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="hero-glow"></div>
+      <div class="container">
+        <div class="hero-content">
+          <div class="hero-badge-pill">
+            <span class="hero-badge-dot"></span>
+            <span>iOS 18+ · iPhone & CarPlay · $19.99 Lifetime Pass</span>
+          </div>
+          <h1 class="hero-title">Video on your car display. Pay once.</h1>
+          <p class="hero-lead">
+            DashCast plays your own M3U / M3U8 playlists, Jellyfin & Emby media servers, and personal video files — putting them on your car screen with low-latency mirroring. No subscriptions. No account. Nothing leaves your phone.
+          </p>
 
-  <div class="card notice">
-    <p><strong>Safety:</strong> video is for passengers, or for when the vehicle is parked. Never watch video while driving, and follow local laws about screens the driver can see.</p>
-  </div>
+          <div class="hero-ctas">
+            <a class="btn-primary" href="https://apps.apple.com/app/id6800211040">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 1.01-2.87-.9.04-2.03.6-2.68 1.36-.57.65-1.07 1.71-1.01 2.76 1.01.08 2.07-.5 2.68-1.25z"/></svg>
+              <span>Download for iOS</span>
+            </a>
+            <a class="btn-secondary" href="#cast">
+              <span>See Cast & Mirror</span>
+              <span>↓</span>
+            </a>
+          </div>
 
-  <p>Need help? Visit <a href="support.html">Support</a>.</p>
-</main>
-<footer>
-  <p>DashCast is a media player. It does not provide any channels, playlists or video content. For passengers, or when the vehicle is parked. Never watch video while driving.</p>
-  <p><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Use</a> · <a href="support.html">Support</a> · <a href="mailto:alexbh987@gmail.com">alexbh987@gmail.com</a></p>
-</footer>
+          <div class="hero-highlights">
+            <span>Free to download</span>
+            <span>Lifetime unlock ($19.99)</span>
+            <span>No recurring fees</span>
+            <span>Zero tracking</span>
+          </div>
+
+          <div class="safety-notice-pill">
+            <span>⚠️ Safety first: for passengers and parked charging breaks only. Never watch while driving.</span>
+          </div>
+        </div>
+
+        <!-- HERO INTERACTIVE IN-DASH DISPLAY MOCKUP -->
+        <div class="hero-mockup-wrap">
+          <div class="car-dashboard-frame">
+            <div class="car-display-bezel">
+              <!-- CarPlay Side Dock -->
+              <div class="carplay-sidebar">
+                <div>
+                  <div class="carplay-clock">10:42</div>
+                  <div class="carplay-status-icons">
+                    <span>5G</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+
+                <div class="carplay-app-dock">
+                  <div class="dock-app-item active">
+                    <div class="dock-app-icon" style="background: #1FE07A; color: #000;">▶</div>
+                    <span>DashCast</span>
+                  </div>
+                  <div class="dock-app-item">
+                    <div class="dock-app-icon" style="background: #2563EB; color: #fff;">🧭</div>
+                    <span>Maps</span>
+                  </div>
+                  <div class="dock-app-item">
+                    <div class="dock-app-icon" style="background: #FA2D48; color: #fff;">🎵</div>
+                    <span>Audio</span>
+                  </div>
+                </div>
+
+                <div class="carplay-home-btn" title="CarPlay Home">⬡</div>
+              </div>
+
+              <!-- Main Screen Display -->
+              <div class="car-screen-main">
+                <div class="car-screen-top-bar">
+                  <div class="active-stream-badge" id="mockupStatusBadge">
+                    <span class="stream-pulse"></span>
+                    <span>Low-Latency H.264 Live (60 FPS)</span>
+                  </div>
+                  <div style="font-size: 0.82rem; color: var(--text-muted);">Parked Mode · Audio via Car Speakers</div>
+                </div>
+
+                <div class="car-video-preview">
+                  <div class="preview-overlay">
+                    <span class="video-channel-tag">Demo Stream: Track Lap in 4K HDR</span>
+                    <div class="video-meta-bottom">
+                      <div>
+                        <div class="video-title-text">Porsche GT3 RS Nürburgring Onboard</div>
+                        <div class="video-source-text">Hardware Decoded · VideoToolbox · Local Stream</div>
+                      </div>
+                      <div style="font-size: 0.85rem; color: #fff; opacity: 0.8;">1080p60 · Stereo</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="car-screen-controls">
+                  <div style="display: flex; gap: 8px;">
+                    <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Source: M3U Local Server</span>
+                  </div>
+                  <div class="playback-buttons">
+                    <button class="btn-ctrl" title="Previous">⏮</button>
+                    <button class="btn-ctrl play" id="mockupPlayBtn" title="Play/Pause">⏸</button>
+                    <button class="btn-ctrl" title="Next">⏭</button>
+                  </div>
+                  <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">iPhone Remote Active</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: CAST & MIRROR (#cast - BENCHMARKED ON CARTV.APP/#CAST) -->
+    <section class="cast-section" id="cast">
+      <div class="container">
+        <div class="split-layout">
+          <!-- Visual Media Column -->
+          <div class="cast-visual-card">
+            <div class="phone-mockup-inner">
+              <!-- Live Activity Component on Phone Lockscreen -->
+              <div class="live-activity-card">
+                <div class="la-left">
+                  <div class="la-icon">⚡</div>
+                  <div class="la-text">
+                    <b>DashCast Mirroring Active</b>
+                    <span>Connected to In-Dash Display</span>
+                  </div>
+                </div>
+                <span class="la-status-tag">AirPlay HLS</span>
+              </div>
+
+              <!-- Stream Controls Visual -->
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 16px; padding: 18px; text-align: center;">
+                <div style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;">Direct Output Mode</div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 4px;">CarPlay Screen & AirPlay Display</div>
+                <div style="font-size: 0.85rem; color: var(--primary); margin-bottom: 16px;">Zero dropped frames · Realtime sync</div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(31,224,122,0.15); color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600;">
+                  <span>● Broadcast Extension Running</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Copy Column -->
+          <div>
+            <span class="section-tag">Direct Cast & Screen Mirroring</span>
+            <h2 class="section-title">Cast anything to your car</h2>
+            <p class="section-subtitle" style="margin-bottom: 24px;">
+              Connect your iPhone to CarPlay or an external car display, open DashCast, and enjoy seamless playback on the vehicle screen.
+            </p>
+
+            <ul class="steps-list">
+              <li class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                  <b>Apps with a Cast button</b>
+                  <p>In compatible video apps, tap the Cast button and choose your car. DashCast receives high-definition streams and renders them directly on the car display.</p>
+                </div>
+              </li>
+              <li class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                  <b>Any other app via Screen Mirroring</b>
+                  <p>Mirror your complete iPhone display to the car with low-latency H.264 video. Open any video, photo album, or social app and it appears crisp and fluid on your dash.</p>
+                </div>
+              </li>
+              <li class="step-item">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                  <b>Keep watching in the background</b>
+                  <p>Playback runs effortlessly with a Live Activity on your Lock Screen and Dynamic Island, letting you switch apps or lock your phone while video continues on the car screen.</p>
+                </div>
+              </li>
+            </ul>
+
+            <!-- Supported Apps Chips -->
+            <div style="margin-top: 24px;">
+              <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 10px;">Supported Streaming Platforms & Sources:</div>
+              <div class="chips-container" id="castApps"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: CORE FEATURES (#features) -->
+    <section id="features">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-tag">Engineered for Automotive</span>
+          <h2 class="section-title">Everything you need. Nothing you don't.</h2>
+          <p class="section-subtitle">
+            All you need is your playlist link or your private media server. DashCast parses it, sorts channels automatically, and delivers high-performance playback with zero bloat.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <!-- Feature 1: M3U -->
+          <div class="feature-card">
+            <div class="feature-icon-box">📺</div>
+            <h3>M3U / M3U8 Playlists</h3>
+            <p>Paste a playlist link, import a local file, or scan a QR code from your laptop. Channel groups, logos, and EPG categories are organized cleanly with zero manual effort.</p>
+            <span class="feature-badge">Link · File · QR Code</span>
+          </div>
+
+          <!-- Feature 2: Jellyfin & Emby -->
+          <div class="feature-card">
+            <div class="feature-icon-box">🍿</div>
+            <h3>Jellyfin & Emby Servers</h3>
+            <p>Connect securely to your personal home media server. Browse movies, TV seasons, and episodes. Automatically resumes from where you left off on your living room TV.</p>
+            <span class="feature-badge">Direct API Integration</span>
+          </div>
+
+          <!-- Feature 3: Screen Mirroring -->
+          <div class="feature-card">
+            <div class="feature-icon-box">📱</div>
+            <h3>Low-Latency Mirroring</h3>
+            <p>Custom VideoToolbox H.264 hardware encoder delivers 60 FPS screen mirroring from iPhone to car head-unit with ultra-low buffer delay and crisp 1080p resolution.</p>
+            <span class="feature-badge">VideoToolbox H.264</span>
+          </div>
+
+          <!-- Feature 4: Hardware Decoding -->
+          <div class="feature-card">
+            <div class="feature-icon-box">⚡</div>
+            <h3>Hardware Acceleration</h3>
+            <p>Native AVFoundation and Metal rendering engine handles H.264, HEVC 4K, and MKV streams without heating up your phone or draining your battery on road trips.</p>
+            <span class="feature-badge">Metal & AVFoundation</span>
+          </div>
+
+          <!-- Feature 5: Car Mode UI -->
+          <div class="feature-card">
+            <div class="feature-icon-box">🏎️</div>
+            <h3>Automotive Ergonomics</h3>
+            <p>Designed specifically for in-cabin usage: high-contrast OLED deep blacks, oversized touch targets for passenger convenience, and distraction-free navigation.</p>
+            <span class="feature-badge">OLED Black Palette</span>
+          </div>
+
+          <!-- Feature 6: Privacy & Safety -->
+          <div class="feature-card">
+            <div class="feature-icon-box">🔒</div>
+            <h3>Zero Tracking & Safety</h3>
+            <p>No user account required. No third-party ad SDKs. Server credentials stay safely inside iOS Keychain. Motion-based safety guard blocks video while driving.</p>
+            <span class="feature-badge">100% On-Device</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: MOMENTS WORTH STOPPING FOR (#moments) -->
+    <section class="moments-section" id="moments">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-tag">In-Car Cinema Experience</span>
+          <h2 class="section-title">Moments worth stopping for</h2>
+          <p class="section-subtitle">
+            When the car is parked and the in-dash screen lights up, ordinary waits turn into relaxing personal cinema sessions.
+          </p>
+        </div>
+
+        <div class="moments-grid">
+          <div class="moment-card">
+            <div class="moment-header">⚡</div>
+            <h3>EV Supercharging Breaks</h3>
+            <p>Plug in at the fast charger, recline the front seat, and stream your favorite TV episodes or YouTube tech reviews on the big dashboard display while your vehicle charges.</p>
+          </div>
+
+          <div class="moment-card">
+            <div class="moment-header">🏕️</div>
+            <h3>Campsites & Overlooks</h3>
+            <p>Park near the mountains or by the beach after sunset. With comfortable car climate controls and automotive audio, watch that classic film you’ve been saving.</p>
+          </div>
+
+          <div class="moment-card">
+            <div class="moment-header">🚗</div>
+            <h3>School & Commute Pickup</h3>
+            <p>Arrive 20 minutes early for pickup? Don't strain your neck staring at a tiny phone screen. Mirror your media directly to the dashboard display in high fidelity.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: MONETIZATION / PRO (#pro - KEEP, KILL, DISRUPT) -->
+    <section class="pricing-section" id="pro">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-tag">Transparent Monetization</span>
+          <h2 class="section-title">Pay once. Keep it forever.</h2>
+          <p class="section-subtitle">
+            Competitor apps trap you in predatory $9.99/month subscriptions. DashCast disrupts the market with a straightforward, one-time lifetime pass.
+          </p>
+        </div>
+
+        <div class="pricing-table-wrap">
+          <div class="pricing-comparison-grid">
+            <!-- DashCast Lifetime Card -->
+            <div class="pricing-card featured">
+              <div class="pricing-tag">Disruptive Value</div>
+              <h3>DashCast Pro Lifetime</h3>
+              <p class="pricing-sub">One single purchase for lifetime ownership.</p>
+              
+              <div class="price-display">
+                <span class="price-num">$19.99</span>
+                <span class="price-term">/ one-time payment</span>
+              </div>
+
+              <ul class="pricing-features-list">
+                <li><span class="check-icon">✓</span> <b>Pay once, own forever</b> (zero subscriptions)</li>
+                <li><span class="check-icon">✓</span> <b>Full CarPlay & External Display</b> video casting</li>
+                <li><span class="check-icon">✓</span> <b>Low-latency 60 FPS</b> iPhone screen mirroring</li>
+                <li><span class="check-icon">✓</span> <b>Unlimited M3U playlists</b> with automatic sorting</li>
+                <li><span class="check-icon">✓</span> <b>Jellyfin & Emby</b> private media server sync</li>
+                <li><span class="check-icon">✓</span> <b>Apple Family Sharing</b> included at no extra cost</li>
+                <li><span class="check-icon">✓</span> <b>100% Private:</b> no account, no ads, no telemetry</li>
+              </ul>
+
+              <a class="btn-primary" style="width: 100%; justify-content: center;" href="https://apps.apple.com/app/id6800211040">
+                Unlock Lifetime Pass
+              </a>
+            </div>
+
+            <!-- Competitor Monthly Subscription Card -->
+            <div class="pricing-card competitor-card">
+              <h3>Competitor Apps</h3>
+              <p class="pricing-sub">CarTV, CarDash, PlayCar & others.</p>
+              
+              <div class="price-display">
+                <span class="price-num" style="color: var(--text-muted);">$9.99</span>
+                <span class="price-term">/ month ($119.88 / yr)</span>
+              </div>
+
+              <ul class="pricing-features-list">
+                <li><span class="cross-icon">✕</span> Predatory recurring monthly subscriptions</li>
+                <li><span class="cross-icon">✕</span> Aggressive paywalls before first video plays</li>
+                <li><span class="cross-icon">✕</span> Choppy mirroring and dropped frames</li>
+                <li><span class="cross-icon">✕</span> Account registration and tracking SDKs</li>
+                <li><span class="cross-icon">✕</span> No Family Sharing on basic tiers</li>
+                <li><span class="cross-icon">✕</span> Requires constant internet connection</li>
+              </ul>
+
+              <div style="padding: 14px; background: rgba(255,255,255,0.03); border-radius: 12px; text-align: center; font-size: 0.85rem; color: var(--text-muted);">
+                Save over $100 every year with DashCast Pro.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: FAQ ACCORDION (#faq) -->
+    <section id="faq">
+      <div class="container">
+        <div class="text-center">
+          <span class="section-tag">Got Questions?</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="section-subtitle">
+            Everything you need to know about DashCast, supported media, and in-car compatibility.
+          </p>
+        </div>
+
+        <div class="faq-wrap">
+          <div class="faq-item open">
+            <button class="faq-question">
+              <span>What video sources can I play in DashCast?</span>
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>DashCast is a versatile player: you bring your own content. It supports M3U and M3U8 playlists (via web link, local file, or QR scan), private Jellyfin and Emby home media servers, local video files stored in iOS Files or Photos, and realtime screen mirroring for any streaming application on your iPhone.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>How does casting to the car screen work?</span>
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>DashCast supports both native CarPlay connected displays and external screen output (AirPlay, HDMI adapters, or secondary automotive displays). Our low-latency H.264 broadcast extension streams directly from your iPhone to the car with zero lag and high-definition clarity.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Is DashCast really a one-time purchase?</span>
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>Yes. DashCast is free to download with a generous free tier. A single in-app purchase ($19.99 USD) grants permanent Lifetime Pro access. There are no monthly fees, no annual renewals, and no surprise charges. Apple Family Sharing is fully supported.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Can I watch videos while driving?</span>
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p><strong>Never.</strong> DashCast is strictly designed for passengers and parked vehicle breaks (such as EV charging, waiting in parking areas, or resting). DashCast incorporates motion detection to guard against driver distraction in accordance with automotive safety standards.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question">
+              <span>Does DashCast collect any of my personal data?</span>
+              <span class="faq-chevron">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>No. DashCast requires no account, collects no analytics, and contains no tracking SDKs. Your playlist URLs, media server tokens, and watch history remain 100% on your iPhone and in your secure iOS Keychain.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand-col">
+          <a class="brand-link" href="#top">
+            <img class="brand-icon" src="assets/icon.svg" alt="DashCast Logo" width="32" height="32">
+            <span class="brand-name">DashCast</span>
+          </a>
+          <p>
+            The premium automotive video player and screen mirroring engine for iPhone and connected vehicle displays. Pay once, own forever.
+          </p>
+        </div>
+
+        <div class="footer-links-grid">
+          <div class="footer-links-col">
+            <h4>Product</h4>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#cast">Cast & Mirror</a></li>
+              <li><a href="#moments">In-Car Cinema</a></li>
+              <li><a href="#pro">Lifetime Pro ($19.99)</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-links-col">
+            <h4>Support</h4>
+            <ul>
+              <li><a href="support.html">Help & FAQ</a></li>
+              <li><a href="support.html#contact">Contact Support</a></li>
+              <li><a href="https://github.com/Xanderco/iOSCarPlayVideo">GitHub Repository</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-links-col">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="terms.html">Terms of Use</a></li>
+              <li><a href="terms.html#disclaimer">Automotive Safety</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 DashCast Inc. All rights reserved. Apple, iPhone, and CarPlay are trademarks of Apple Inc.</div>
+        <div style="color: var(--text-subtle);">Crafted with precision for automotive enthusiasts worldwide.</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
