@@ -59,22 +59,6 @@ public final class AppState: ObservableObject {
             self.selectedTab = .widgets
         }
 
-        if ProcessInfo.processInfo.arguments.contains("-carplaySimulator") {
-            self.showCarPlaySimulator = true
-            self.selectedTab = .cast
-        }
-
-        if ProcessInfo.processInfo.arguments.contains("-carplayDashboard") {
-            self.showCarPlaySimulator = true
-            self.initialCarPlayMode = "CarPlay Dashboard"
-            self.selectedTab = .cast
-        }
-
-        if ProcessInfo.processInfo.arguments.contains("-carplayHomeMenu") {
-            self.showCarPlaySimulator = true
-            self.initialCarPlayMode = "CarPlay Home Menu"
-            self.selectedTab = .cast
-        }
     }
 
     /// Handles `dashcast://cast` and `dashcast://drive` links from Home/Lock Screen widgets.

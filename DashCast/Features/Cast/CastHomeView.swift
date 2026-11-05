@@ -14,7 +14,6 @@ public struct CastHomeView: View {
     @State private var showingCastGuide: Bool = false
     @State private var showingFavorites: Bool = false
     @State private var showingBroadcastPicker: Bool = false
-    @State private var showingCarPlaySimulator: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
     @State private var m3uURLInput: String = ""
@@ -125,19 +124,6 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingFavorites) {
                 favoritesSheet
-                    // The tab-level paywall can't present over this sheet, so present it here too.
-                    .sheet(isPresented: $appState.showPaywall) {
-                        LifetimePaywallView().environmentObject(appState)
-                    }
-            }
-            .sheet(isPresented: Binding(
-                get: { showingCarPlaySimulator || appState.showCarPlaySimulator },
-                set: {
-                    showingCarPlaySimulator = $0
-                    appState.showCarPlaySimulator = $0
-                }
-            )) {
-                CarPlaySimulatorView()
                     // The tab-level paywall can't present over this sheet, so present it here too.
                     .sheet(isPresented: $appState.showPaywall) {
                         LifetimePaywallView().environmentObject(appState)
@@ -431,24 +417,8 @@ public struct CastHomeView: View {
                     .padding(.horizontal, 32)
             }
 
-            // AirPlay, Guide & CarPlay Mode Simulator buttons
+            // AirPlay + Guide buttons
             HStack(spacing: 10) {
-                Button {
-                    showingCarPlaySimulator = true
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "car.side.fill")
-                        Text("CarPlay Mode")
-                    }
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(Color.black)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(LinearGradient.dashAccentGradient)
-                    .clipShape(Capsule())
-                    .shadow(color: Color.dashYellow.opacity(0.35), radius: 6, y: 3)
-                }
-
                 Button {
                     showingCastGuide = true
                 } label: {

@@ -127,6 +127,13 @@ public struct DriveHomeView: View {
             .sheet(isPresented: $showingPermissions) {
                 DriveTrackingPermissionsSheet()
             }
+            .onAppear {
+                // Show the user's own location as soon as Drive opens (the map otherwise falls back
+                // to the whole region). Asks once; afterwards the chip/Settings handle changes.
+                if locationService.authorizationStatus == .notDetermined {
+                    locationService.requestPermissions()
+                }
+            }
             .sheet(isPresented: $showingDriveSettings) {
                 DriveSettingsView()
             }
