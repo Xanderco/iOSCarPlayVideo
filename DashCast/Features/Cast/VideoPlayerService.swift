@@ -6,7 +6,8 @@ import UIKit
 
 @MainActor
 public final class VideoPlayerService: ObservableObject {
-    public static let shared = VideoPlayerService()
+    /// The only instance that owns the lock-screen / CarPlay / headset remote commands.
+    public static let shared = VideoPlayerService(handlesRemoteCommands: true)
 
     @Published public private(set) var currentChannel: ChannelModel?
     /// Mirrors the player's real `timeControlStatus` (not just the last button tap).
@@ -31,12 +32,19 @@ public final class VideoPlayerService: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var wantsToPlay = false
 
-    public init() {
+    private var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
+    /// Number of MPRemoteCommandCenter targets this instance registered. Exposed for tests.
+    var remoteCommandTargetCount: Int { remoteCommandTargets.count }
+
+    /// - Parameter handlesRemoteCommands: only `shared` passes `true`. Every extra instance (tests,
+    ///   previews) used to add its own play/pause/toggle targets to the process-wide
+    ///   `MPRemoteCommandCenter`, and a toggle delivered to two targets flips twice (= no-op).
+    public init(handlesRemoteCommands: Bool = false) {
         player.allowsExternalPlayback = true
         setupTimeObserver()
         observeTimeControlStatus()
         observeAppLifecycleAndInterruptions()
-        setupRemoteCommands()
+        if handlesRemoteCommands { setupRemoteCommands() }
     }
 
     deinit {
@@ -285,18 +293,21 @@ public final class VideoPlayerService: ObservableObject {
 
     private func setupRemoteCommands() {
         let commands = MPRemoteCommandCenter.shared()
-        commands.playCommand.addTarget { [weak self] _ in
+        let play = commands.playCommand.addTarget { [weak self] _ in
             Task { @MainActor in self?.play() }
             return .success
         }
-        commands.pauseCommand.addTarget { [weak self] _ in
+        let pause = commands.pauseCommand.addTarget { [weak self] _ in
             Task { @MainActor in self?.pause() }
             return .success
         }
-        commands.togglePlayPauseCommand.addTarget { [weak self] _ in
+        let toggle = commands.togglePlayPauseCommand.addTarget { [weak self] _ in
             Task { @MainActor in self?.togglePlayPause() }
             return .success
         }
+        remoteCommandTargets = [(commands.playCommand, play),
+                                (commands.pauseCommand, pause),
+                                (commands.togglePlayPauseCommand, toggle)]
     }
 
     private func updateNowPlayingInfo() {

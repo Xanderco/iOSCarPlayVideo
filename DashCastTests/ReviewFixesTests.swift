@@ -64,4 +64,13 @@ final class ReviewFixesTests: XCTestCase {
         XCTAssertNil(service.currentChannel)
         XCTAssertNil(service.player.currentItem)
     }
+
+    // MARK: Remote commands are owned by exactly one player
+
+    @MainActor
+    func testOnlySharedPlayerRegistersRemoteCommands() {
+        XCTAssertEqual(VideoPlayerService.shared.remoteCommandTargetCount, 3)
+        XCTAssertEqual(VideoPlayerService().remoteCommandTargetCount, 0,
+                       "Extra instances must not add duplicate MPRemoteCommandCenter targets")
+    }
 }
