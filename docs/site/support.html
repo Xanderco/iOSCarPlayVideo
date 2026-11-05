@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <title>Support · DashCast</title>
+  <meta name="description" content="DashCast help: adding playlists, Jellyfin and Emby, playback problems, car displays and restoring purchases.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a class="brand" href="index.html">DashCast</a>
+  <nav aria-label="Site">
+    <a href="index.html">Home</a>
+    <a href="support.html" aria-current="page">Support</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+  </nav>
+</header>
+<main>
+  <h1>Support</h1>
+  <p class="lede">Answers to common questions. Still stuck? Email <a href="mailto:alexbh987@gmail.com">alexbh987@gmail.com</a>.</p>
+
+  <h2>Playlists and sources</h2>
+  <details>
+    <summary>How do I add an M3U playlist?</summary>
+    <p>Open the Cast tab → Media Sources → Add Playlist. You can paste a link (an <code>.m3u</code> or <code>.m3u8</code> URL), pick a file from the Files app, or scan a QR code that contains the link. Tap refresh at any time to reload a playlist from its link.</p>
+  </details>
+  <details>
+    <summary>How do I connect Jellyfin or Emby?</summary>
+    <p>Open Me → Media Servers, add a server and enter its address (for example <code>http://192.168.1.20:8096</code>) with your user name and password. DashCast signs in directly to your server and keeps the access token in the iOS Keychain. Your iPhone must be able to reach the server, so use your home network or a remote address your server exposes.</p>
+  </details>
+  <details>
+    <summary>Why doesn't a stream or video play?</summary>
+    <ul>
+      <li>The link may be offline, expired or blocked in your region. Try it in another player.</li>
+      <li>The format may not be supported by iOS. DashCast plays HLS and video that iOS can decode, such as MP4, MOV and M4V (H.264 / HEVC). Some formats (for example MKV with certain codecs, or MPEG-TS that is not HLS) may not play.</li>
+      <li>Some servers require special headers, cookies or a login that a plain link can't provide.</li>
+      <li>Check your connection. Mobile data or a weak Wi-Fi signal can stall live streams.</li>
+    </ul>
+  </details>
+  <details>
+    <summary>Can I watch Netflix, Disney+ or other subscription services?</summary>
+    <p>No. Services that protect video with DRM can't be played or sent to the car by DashCast. Use those services' own apps and the options they officially support.</p>
+  </details>
+  <details>
+    <summary>Does DashCast include any channels?</summary>
+    <p>No. DashCast is only a player. You add your own sources and are responsible for having the right to watch them.</p>
+  </details>
+
+  <h2>In the car</h2>
+  <details>
+    <summary>Can I watch while driving?</summary>
+    <p>No. Video is for passengers, or for when the vehicle is parked. DashCast can pause video on a car display while it detects the car is moving. Follow local laws about screens the driver can see.</p>
+  </details>
+  <details>
+    <summary>Will DashCast work with my car screen?</summary>
+    <p>It depends on your car and on Apple. DashCast can send video to displays connected through AirPlay, HDMI or a compatible adapter. Any CarPlay features depend on Apple granting the app the required entitlement and on what your car's system supports, so they may not be available in every car or region.</p>
+  </details>
+
+  <h2>Purchases</h2>
+  <details>
+    <summary>How do I restore DashCast Pro?</summary>
+    <p>DashCast Pro is a one-time purchase tied to your Apple ID. On a new or reset iPhone, sign in with the same Apple ID, then open the DashCast Pro screen and tap Restore Purchases.</p>
+  </details>
+  <details>
+    <summary>Is there a subscription?</summary>
+    <p>No. DashCast Pro is paid once. Refunds are handled by Apple at <a href="https://reportaproblem.apple.com" rel="noopener">reportaproblem.apple.com</a>.</p>
+  </details>
+
+  <h2>Contact</h2>
+  <div class="card">
+    <p>Email <a href="mailto:alexbh987@gmail.com">alexbh987@gmail.com</a>. Please include your iPhone model, iOS version, the DashCast version and, for playback problems, the type of source (M3U link, Jellyfin, Emby or a local file). Please don't send passwords or private playlist links.</p>
+  </div>
+</main>
+<footer>
+  <p>DashCast is a media player. It does not provide any channels, playlists or video content. For passengers, or when the vehicle is parked. Never watch video while driving.</p>
+  <p><a href="privacy.html">Privacy Policy</a> · <a href="terms.html">Terms of Use</a> · <a href="support.html">Support</a> · <a href="mailto:alexbh987@gmail.com">alexbh987@gmail.com</a></p>
+</footer>
+</body>
+</html>

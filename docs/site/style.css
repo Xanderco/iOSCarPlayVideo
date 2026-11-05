@@ -1,0 +1,46 @@
+:root {
+  --bg: #0b0d12;
+  --surface: #151922;
+  --border: #252b38;
+  --text: #e8ebf1;
+  --muted: #9aa3b5;
+  --accent: #4fb3ff;
+  --warn: #ffb547;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover, a:focus-visible { text-decoration: underline; }
+header, main, footer { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding-top: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.brand { font-weight: 700; font-size: 1.15rem; color: var(--text); }
+nav { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .95rem; }
+nav a { color: var(--muted); }
+nav a[aria-current="page"] { color: var(--text); font-weight: 600; }
+main { padding-top: 24px; padding-bottom: 40px; }
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 8px 0 4px; }
+h2 { font-size: 1.25rem; margin: 32px 0 8px; }
+h3 { font-size: 1.05rem; margin: 20px 0 4px; }
+p, li { color: var(--text); }
+.lede { color: var(--muted); font-size: 1.05rem; margin-top: 0; }
+.updated { color: var(--muted); font-size: .9rem; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; margin: 16px 0; }
+.card > :first-child { margin-top: 0; }
+.card > :last-child { margin-bottom: 0; }
+.notice { border-color: var(--warn); }
+.notice strong { color: var(--warn); }
+ul { padding-left: 1.2em; }
+li + li { margin-top: 4px; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin: 10px 0; }
+summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 8px; }
+code { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 1px 5px; font-size: .9em; overflow-wrap: anywhere; }
+footer { border-top: 1px solid var(--border); padding-top: 16px; padding-bottom: 32px; color: var(--muted); font-size: .9rem; }
+footer a { color: var(--muted); }
