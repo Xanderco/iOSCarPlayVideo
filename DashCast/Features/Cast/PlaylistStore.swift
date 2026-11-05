@@ -159,3 +159,16 @@ public final class PlaylistStore: ObservableObject {
         NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
     }
 }
+
+import UniformTypeIdentifiers
+
+public extension PlaylistStore {
+    /// Content types accepted by the Files importer for playlists.
+    static var playlistContentTypes: [UTType] {
+        var types: [UTType] = [.plainText, .text, .data]
+        for ext in ["m3u", "m3u8"] {
+            if let t = UTType(filenameExtension: ext) { types.insert(t, at: 0) }
+        }
+        return types
+    }
+}

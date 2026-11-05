@@ -111,9 +111,6 @@ public struct CastHomeView: View {
             .sheet(isPresented: $showingFavorites) {
                 favoritesSheet
             }
-            .sheet(isPresented: $showingAddM3UDialog) {
-                addM3UDialogSheet
-            }
             .sheet(isPresented: Binding(
                 get: { showingCarPlaySimulator || appState.showCarPlaySimulator },
                 set: {
@@ -513,6 +510,9 @@ public struct CastHomeView: View {
                     }
                     .padding(.bottom, 30)
                 }
+            }
+            .sheet(isPresented: $showingAddM3UDialog) {
+                addM3UDialogSheet
             }
             .fileImporter(
                 isPresented: $showingPlaylistFileImporter,
