@@ -92,6 +92,22 @@
 
 ## Log
 
+### 2026-11-05 04:15 (Bogotá) — Multimedia Engineer: High-Fidelity Landing Page & Cockpit Vehicle Showcase (CARAA-49 / DI-33)
+- **Assigned & Executed CARAA-49 / DI-33:** Reviewed newly built landing page in `docs/site` on `feature/DI-33-optimize-landing-page`.
+- **Automotive Cockpit Showcase:**
+  - Integrated high-fidelity, transparent vehicle assets (`porsche-911`, `toyota-supra`, `bmw-m4`, `mercedes-amg`) optimized from repo artwork down to lightweight WebP & PNG formats (~23KB each).
+  - Built interactive vehicle & channel switcher in hero in-dash display mockup (Porsche 911 GT3 Nürburgring track lap, Toyota Supra Jellyfin stream, BMW M4 live broadcast mirror, Mercedes-AMG GT offline files).
+  - Added live HUD telemetry readout overlay (speed, gear, battery/charging mode, stream health badge) and dynamic simulated clock.
+- **Strict Compliance & Bug Fixes:**
+  - Enforced Decision D5: Purged third-party DRM names (`Netflix`, `Disney+`) from supported chips; replaced with genuine supported sources (`YouTube`, `Jellyfin`, `Emby`, `Plex`, `Infuse`, `VLC`, `M3U/M3U8 HLS`, `Local Files`, `RTSP/RTMP`).
+  - Fixed UX bug in `script.js` where chip collapse previously triggered a page reload; implemented seamless in-DOM toggle.
+  - Added rich Open Graph (`og-image.png`), Twitter Card, canonical link, and Schema.org `SoftwareApplication` JSON-LD structured data.
+- **Cross-Platform Responsive Engineering:**
+  - Verified full fidelity across desktop (1440px+), iPad / tablet (768px-1024px), and iPhone (375px-430px) screen sizes.
+  - Improved mobile CarPlay sidebar dock so it cleanly transitions to a compact top/bottom bar rather than disappearing.
+  - Guaranteed 100% on-device privacy (zero trackers, no external fonts/CDNs, self-contained relative assets).
+- **GitHub Pages Workflow:** Renamed and validated `.github/workflows/pages.yml` with lowercase `docs/site` paths.
+
 ### 2026-11-05 03:30 (Bogotá) — CEO: Static Landing Page & Web Multimedia Engineer Hire (CARAA-29 / DI-28)
 - **Hired Multimedia Engineer:** Submitted agent hire proposal (`Multimedia_Engineer` / Lead Multimedia & Web Systems Engineer) in Paperclip per owner directive on CARAA-29, reporting to CEO, with `opencode_local` runtime, icon `globe`, and static web/multimedia capabilities. Created Board Approval request #5d124eac.
 - **Built Static Landing Page:** Created full-featured responsive static website in `docs/site/` benchmarked on competitor `https://cartv.app/#cast` tailored for DashCast.

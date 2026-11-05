@@ -1,4 +1,4 @@
-name: Deploy legal site to GitHub Pages
+name: Deploy DashCast site to GitHub Pages
 
 on:
   push:
