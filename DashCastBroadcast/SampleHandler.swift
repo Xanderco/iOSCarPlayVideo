@@ -25,6 +25,8 @@ final class SampleHandler: RPBroadcastSampleHandler {
     private var finished = false
     /// CarPlay mirror transport (feature-flagged); created on broadcast start.
     private var frameWriter: MirrorFrameWriter?
+    /// CarPlay video path: H.264 low-latency HLS on 127.0.0.1:8088/hls/live.m3u8 (feature-flagged).
+    private var hlsEncoder: MirrorHLSEncoder?
     private let frameQueue = DispatchQueue(label: "com.xanderco.dashcast.broadcast.frames")
 
     override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
@@ -35,6 +37,11 @@ final class SampleHandler: RPBroadcastSampleHandler {
 
         server.onViewerCountChange = { [weak self] count in
             self?.updateStatus { $0.viewerCount = count }
+        }
+        if CarMirrorFeature.isEnabled() {
+            let encoder = MirrorHLSEncoder()
+            hlsEncoder = encoder
+            server.hlsStore = encoder.store
         }
         server.start()
 
@@ -61,6 +68,8 @@ final class SampleHandler: RPBroadcastSampleHandler {
     override func broadcastFinished() {
         server.stop()
         frameWriter = nil
+        hlsEncoder?.stop()
+        hlsEncoder = nil
         updateStatus { status in
             if status.state == .live {
                 status = .idle
@@ -80,6 +89,9 @@ final class SampleHandler: RPBroadcastSampleHandler {
                 return
             }
         }
+
+        // HLS gets every frame (the encoder throttles to 30 fps); MJPEG stays at ~12 fps below.
+        hlsEncoder?.encode(sampleBuffer)
 
         let writer = frameWriter
         let wantsLAN = server.hasViewers
@@ -132,6 +144,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
         guard !alreadyFinished else { return }
 
         server.stop()
+        hlsEncoder?.stop()
         let message = "DashCast stopped screen mirroring because your vehicle is moving. Mirroring to the car is only available while parked."
         updateStatus {
             $0.state = .stoppedForMotion

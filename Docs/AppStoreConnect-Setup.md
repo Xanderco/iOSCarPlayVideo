@@ -25,8 +25,7 @@ Fix these before you press "Submit for Review". The setup steps below can be don
 | B1 | `https://xanderco.github.io/iOSCarPlayVideo/support.html` and `privacy.html` return **404** today. There is no `docs/` folder or `gh-pages` branch in the repo yet. | A dead support or privacy URL is a rejection (Guideline 1.5 and 5.1.1). App Store Connect will also refuse to publish the privacy label without a privacy URL. | Publish the two pages (GitHub repo → Settings → Pages), then open both links on your phone. |
 | B2 | The app links to `https://dashcast.app/privacy` and `https://dashcast.app/support` (`LegalLinks.swift` lines 7 and 10, and `LifetimePaywallView.swift` line 8). Those are placeholders. | The links inside the app must open the same live pages as the listing. | Change both files to the GitHub Pages URLs in a code session, then build a new TestFlight build. |
 | B3 | The **Feedback** screen (Me → Feedback) sends nothing. "Send Feedback" only shows a "Feedback Sent" alert, and the "Add" screenshot button does nothing. | A fake feature is a Guideline 2.1 / 2.3.1 rejection. | In a code session either remove the Feedback row, or make it open a `mailto:` to your support address. Also remove the "Diagnostics sent with feedback" sentence; nothing is sent. |
-| B4 | `NSLocalNetworkUsageDescription` says the app "can mirror your screen to your parked car's browser display". No code in the app does that (no local server). | Permission strings must describe what the app really does (5.1.1). | Shorten it to the media server part: *"DashCast connects to media servers on your local network, such as a Jellyfin or Emby server at home."* |
-| B5 | `AppStoreMedia/reviewer-demo.m3u` points to `dashcast.app`, which is not live. | The reviewer must be able to play something. | Not needed any more. Section 6 uses Apple's own public test stream instead. |
+| B4 | `AppStoreMedia/reviewer-demo.m3u` points to `dashcast.app`, which is not live. | The reviewer must be able to play something. | Not needed any more. Section 6 uses Apple's own public test stream instead. |
 
 ---
 
@@ -205,6 +204,7 @@ I checked the code for every way data could leave the phone:
 | Camera (QR scan for playlist links) | `PlaylistQRImportView`. Frames are processed on the device, not saved or sent. | No |
 | Photos (pick videos to play) | Copied into the app container. | No |
 | Network calls | Only to addresses the user enters: playlist URLs (`PlaylistStore`, `CastHomeView`), their own Jellyfin or Emby server (`MediaServerClient`, password in the Keychain), and websites in the browser. We run no server. | No |
+| Screen mirror (broadcast extension) | `DashCastBroadcast/MirrorStreamServer.swift` serves the user's own screen as a live stream on the phone itself and on the local network, so the car display or CarPlay player can show it. It goes straight from the iPhone to the user's screen; we never receive it. | No |
 | Feedback form | Sends nothing today (blocker B3). | No |
 
 The privacy manifest agrees: `NSPrivacyTracking = false`, no tracking domains, no collected data types.
@@ -365,7 +365,10 @@ PASSENGERS AND PARKED USE ONLY
 Video in the car is for passengers, or for when the vehicle is parked. A full-screen notice says this on first launch and must be accepted, it can be read again in Me > Settings, and every App Store screenshot repeats it. The app also uses motion activity to pause video on a car display while the car is moving.
 
 CARPLAY
-The app contains a CarPlay scene, but we have not been granted a CarPlay entitlement yet (we have applied for the Audio category). Without it nothing appears on a car's CarPlay screen, and the app does not claim CarPlay support anywhere in its listing. Please review the iPhone app, AirPlay and external display output.
+The app contains a CarPlay scene, but we have not been granted a CarPlay entitlement yet (we have applied for the Video category). Without it nothing appears on a car's CarPlay screen, and the app does not claim CarPlay support anywhere in its listing. Please review the iPhone app, AirPlay and external display output.
+
+SCREEN MIRROR AND LOCAL NETWORK
+"Mirror iPhone" uses the system broadcast picker. Our broadcast extension serves the screen as a live stream from the iPhone itself (127.0.0.1) and on the local network, so a parked car's display can play it. Nothing goes to us. This is also why the app asks for local network access, together with connecting to the user's own Jellyfin or Emby server.
 
 BACKGROUND LOCATION
 The "location" background mode is used only by the optional automatic trip log: when the user grants Always access, the app notices the start of a drive and records the trip. Trips stay on the device. Nothing is uploaded.
@@ -406,7 +409,7 @@ uploads. Full background is in `Docs/QA/testflight.md`.
 
 ### 7b. Every build
 
-1. Make sure the branch you build from has the B2, B3 and B4 fixes.
+1. Make sure the branch you build from has the B2 and B3 fixes.
 2. GitHub → **Actions** → **TestFlight** (left list) → **Run workflow** → pick the branch → leave both fields empty
    (build number becomes 100 + run number, version stays 1.0.0) → **Run workflow**.
 3. Wait for the green tick (about 15 to 25 minutes). If it fails, download the `testflight-logs` artifact and look
@@ -429,7 +432,6 @@ Tick every line before **Add for Review** → **Submit to App Review**.
 - [ ] B1 support and privacy pages are live (open both URLs on your phone).
 - [ ] B2 in-app Privacy and Support links open those same pages (Me → Settings → Legal, and the paywall footer).
 - [ ] B3 Feedback screen removed or really sends mail.
-- [ ] B4 local network permission text no longer mentions mirroring to a car browser.
 
 **Build**
 - [ ] CI is green on the branch the build came from.
