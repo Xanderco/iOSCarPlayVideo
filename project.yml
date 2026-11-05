@@ -9,7 +9,7 @@ options:
 settings:
   base:
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
-    SWIFT_VERSION: "5.9"
+    SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     ASSETCATALOG_COMPILER_GENERATE_ASSET_SYMBOL_EXTENSIONS: YES
@@ -43,3 +43,16 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcastTests
         GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  DashCast:
+    build:
+      targets:
+        DashCast: all
+        DashCastTests: [test]
+    test:
+      config: Debug
+      targets:
+        - DashCastTests
+    run:
+      config: Debug

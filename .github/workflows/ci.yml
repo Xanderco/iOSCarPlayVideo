@@ -2,32 +2,82 @@ name: DashCast CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'claude/**', 'fix/**', 'feature/**', 'feat/**' ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
+  build-and-test:
     name: Build & Test
-    runs-on: macos-14
+    runs-on: macos-15
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Select Xcode 16
+        run: |
+          XC=$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)
+          echo "Using $XC"
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-
-      - name: Generate Xcode Project
+      - name: Generate Xcode project
         run: xcodegen generate
 
-      - name: Run Automated Test Suite
+      - name: Pick simulator
+        id: sim
         run: |
-          xcodebuild test \
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)['devices']
+          c=[(rt,x) for rt,xs in d.items() if 'iOS' in rt for x in xs if x['name'].startswith('iPhone')]
+          c.sort(key=lambda t:t[0])
+          print(c[-1][1]['udid'])")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available | grep "$UDID"
+
+      - name: Build
+        run: |
+          set -o pipefail
+          xcodebuild build-for-testing \
             -project DashCast.xcodeproj \
             -scheme DashCast \
-            -destination "platform=iOS Simulator,name=iPhone 15" \
-            -configuration Debug
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build.log | grep -E "error:|warning: unre|BUILD (SUCCEEDED|FAILED)|TEST BUILD" || true
+          grep -q "TEST BUILD SUCCEEDED\|BUILD SUCCEEDED" build.log
+
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild test-without-building \
+            -project DashCast.xcodeproj \
+            -scheme DashCast \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/TestResults.xcresult \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee test.log | grep -E "error:|Test Case .* failed|Executed|TEST (SUCCEEDED|FAILED)" || true
+          grep -q "TEST EXECUTE SUCCEEDED\|TEST SUCCEEDED" test.log
+
+      - name: Upload logs and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-results
+          path: |
+            build.log
+            test.log
+            build/TestResults.xcresult
+          if-no-files-found: ignore
