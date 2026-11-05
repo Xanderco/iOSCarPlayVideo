@@ -1,3 +1,5 @@
+> ⚠️ **OUTDATED — read [`Docs/Paperclip/HANDOFF_2026-11-05.md`](Docs/Paperclip/HANDOFF_2026-11-05.md) and [`Docs/JOURNAL.md`](Docs/JOURNAL.md) first.** The "1:1 CarDash" plan below was abandoned on 2026-11-05 (App Review copycat risk). Base branch is now `claude/ci-and-core-fixes` (PR #14), not `feat/cardash-yellow-redesign`.
+
 # DashCast 🚗💨 — Paperclip Project Definition & Status
 
 **Project:** CarDash / DashCast Redesign & CarPlay Video Engine
