@@ -246,14 +246,8 @@ public struct TripDetailView: View {
         List {
             Section {
                 if coordinates.count > 1 {
-                    Map(initialPosition: .automatic) {
-                        MapPolyline(coordinates: coordinates)
-                            .stroke(Color.dcAccent, lineWidth: 5)
-                    }
-                    .frame(height: 240)
-                    .clipShape(RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
-                    .listRowInsets(EdgeInsets())
-                    .accessibilityLabel(Text("Route map"))
+                    TripReplayMapView(coordinates: coordinates)
+                        .listRowInsets(EdgeInsets())
                 } else {
                     EmptyStateView(
                         systemImage: "map",

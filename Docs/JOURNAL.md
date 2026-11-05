@@ -93,7 +93,8 @@
 - `TripDetectionStateMachine` is pure logic driven by an injected clock. It starts a trip after 60 s of automotive motion (confidence ≥ medium) above 15 km/h, or above 25 km/h when there is no Core Motion (Simulator). It ends the trip after 3 min stationary, reusing `ParkedStateEvaluator`. `AutoTripService` connects Core Motion and significant-change/standard location to `DriveLocationService`, which saves through `PersistenceController`, then sends the "Trip saved" notification. It starts at launch. Manual trips are never auto-ended.
 - Pref `autoTripDetectionEnabled` (nil means ON once Always is granted). Toggle in Trip Log. Info.plist usage strings updated; the `location` background mode was already set.
 - Tests: `TripDetectionTests`. QA steps: `Docs/QA/smoke-test.md` §6d (Freeway Drive).
-- Follow-ups: route replay in trip detail; the first ~60 s of an auto trip isn't in the route (could seed it from the detector's fixes); needs a real-device drive test (background relaunch, battery).
+- Trip detail now has route replay (`TripReplayMapView`: Play/scrub, car marker, travelled part highlighted).
+- Follow-ups: the first ~60 s of an auto trip isn't in the route (could seed it from the detector's fixes); needs a real-device drive test (background relaunch, battery).
 
 ### 2026-11-05 01:01 (Bogotá) — Integrator: merged #32 follow-up a39798d
 - The #32 session pushed `a39798d` after my merge: the same `canStep` return fix, plus explicit initializers for `ResumeCard` and the internal `LibraryView` subviews (memberwise inits were inaccessible). Merged it. The only conflict was `MirrorScreenSheet`, which stays removed (superseded by #25's `CarOutputPanelView`, see the #32 entry).

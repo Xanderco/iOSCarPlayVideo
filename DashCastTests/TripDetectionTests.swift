@@ -118,3 +118,14 @@ final class TripDetectionTests: XCTestCase {
         XCTAssertEqual(decoded.autoTripDetectionEnabled, false)
     }
 }
+
+final class TripReplayTests: XCTestCase {
+    func testReplayIndexMapping() {
+        XCTAssertEqual(TripReplayMapView.index(for: 0, count: 11), 0)
+        XCTAssertEqual(TripReplayMapView.index(for: 0.5, count: 11), 5)
+        XCTAssertEqual(TripReplayMapView.index(for: 1, count: 11), 10)
+        XCTAssertEqual(TripReplayMapView.index(for: 2, count: 11), 10)
+        XCTAssertEqual(TripReplayMapView.index(for: -1, count: 11), 0)
+        XCTAssertEqual(TripReplayMapView.index(for: 0.5, count: 0), 0)
+    }
+}
