@@ -37,7 +37,7 @@ final class DashCastSmokeUITests: XCTestCase {
 
     func testAppLaunchesToHomeTab() throws {
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15), "App did not reach foreground")
-        let homeTab = app.buttons["Tab_Home"]
+        let homeTab = tabButton("Home")
         XCTAssertTrue(homeTab.waitForExistence(timeout: 15), "Tab bar did not appear")
         XCTAssertTrue(app.otherElements["Screen_Home"].waitForExistence(timeout: 10), "Home screen missing")
         snapshot("01-launch")
@@ -45,7 +45,7 @@ final class DashCastSmokeUITests: XCTestCase {
 
     func testEveryTabOpens() throws {
         for (index, tab) in tabs.enumerated() {
-            let button = app.buttons["Tab_\(tab)"]
+            let button = tabButton(tab)
             XCTAssertTrue(button.waitForExistence(timeout: 15), "Tab button \(tab) missing")
             button.tap()
 
@@ -94,6 +94,16 @@ final class DashCastSmokeUITests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// iOS 26+ uses the system tab bar (buttons labelled by tab name); iOS 17–25 uses the custom
+    /// capsule (buttons identified as `Tab_<name>`).
+    private func tabButton(_ name: String) -> XCUIElement {
+        let custom = app.buttons["Tab_\(name)"]
+        if custom.exists { return custom }
+        let system = app.tabBars.buttons[name]
+        if system.waitForExistence(timeout: 5) { return system }
+        return custom
+    }
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers
     /// (for `Screen_*` identifiers), which makes XCUITest report their children as

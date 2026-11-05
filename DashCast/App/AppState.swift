@@ -74,6 +74,7 @@ public final class AppState: ObservableObject {
         // App Store media pipeline: populate trips/metrics with demo content.
         DemoDataSeeder.seedIfRequested()
         CarScreenDefaults.seedIfNeeded()
+        OnboardingView.applyLaunchOverrides()
 
         if ProcessInfo.processInfo.arguments.contains("-showPaywall") {
             self.showPaywall = true
