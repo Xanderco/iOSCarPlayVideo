@@ -5,11 +5,13 @@ final class MediaSourcesEntryTests: XCTestCase {
 
     // MARK: - MediaServerKind Tests
 
-    func testMediaServerKindDisplayNamesAndPorts() {
+    func testMediaServerKindDisplayNamesAndProperties() {
         XCTAssertEqual(MediaServerKind.jellyfin.displayName, "Jellyfin")
         XCTAssertEqual(MediaServerKind.emby.displayName, "Emby")
-        XCTAssertEqual(MediaServerKind.jellyfin.defaultPort, 8096)
-        XCTAssertEqual(MediaServerKind.emby.defaultPort, 8096)
+        XCTAssertEqual(MediaServerKind.jellyfin.apiPathPrefix, "")
+        XCTAssertEqual(MediaServerKind.emby.apiPathPrefix, "/emby")
+        XCTAssertEqual(MediaServerKind.jellyfin.authorizationHeaderName, "Authorization")
+        XCTAssertEqual(MediaServerKind.emby.authorizationHeaderName, "X-Emby-Authorization")
         XCTAssertEqual(MediaServerKind.allCases.count, 2)
     }
 
@@ -93,14 +95,14 @@ final class MediaSourcesEntryTests: XCTestCase {
         let streamURL = account.baseURL.appendingPathComponent("Videos/item-777/stream.m3u8")
         let channel = ChannelModel(
             name: "Grand Tour Season 1 Episode 3",
-            streamURL: streamURL.absoluteString,
+            streamURL: streamURL,
             groupTitle: "\(account.serverName) (Jellyfin)",
             logoURL: nil
         )
 
         XCTAssertEqual(channel.name, "Grand Tour Season 1 Episode 3")
         XCTAssertEqual(channel.groupTitle, "Basement Jellyfin (Jellyfin)")
-        XCTAssertTrue(channel.streamURL.contains("item-777"))
+        XCTAssertTrue(channel.streamURL.absoluteString.contains("item-777"))
     }
 
     // MARK: - Store Integration Tests
