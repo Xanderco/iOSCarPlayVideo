@@ -9,13 +9,14 @@ A modern, high-performance iOS application designed for in-car enthusiasts and C
 
 ## 🌟 Core Features
 
-### 1. 📺 Cast & Video Player (For Parked Break / EV Charging)
-- **IPTV / M3U Stream Engine**: Parse any personal M3U / M3U8 streaming playlist with category tagging (Movies, Live, Sports, News).
-- **Secondary Car Display Output**: Automatically detects external screens (CarPlay head units, AirPlay, HDMI, CarlinKit adapters) and renders dedicated video playback on the car display while retaining driver controls on iPhone.
-- **In-App Web Video Browser**: Integrated `WKWebView` with URL search bar and quick bookmarks (YouTube, Vimeo, Twitch).
-- **Local Video Importer**: Import your own video files from Apple Photos or Files app into the car playlist.
-- **Screen Broadcast Mirroring**: System-level `RPSystemBroadcastPickerView` integration.
-- **Automotive Safety Notice**: Clear parked-only safety disclosure.
+### 1. 📺 In-Car Media & Video Theater (For Parked Breaks / EV Charging)
+- **High-Fidelity Dashboard Theater**: Full-screen OLED True Black video player optimized for mounted iPhone viewing while parked or charging, routing high-definition audio directly through the vehicle's speakers.
+- **In-Dash CarPlay Audio & Remote Controls**: Native CarPlay audio station (`com.apple.developer.carplay-audio`) with full `CPNowPlayingTemplate` metadata, transport controls, and M3U audio stream browsing on the head unit.
+- **AirPlay Video Route Integration**: Seamless `AVRoutePickerView` route picker for vehicles, rear-seat monitors, or aftermarket HDMI adapters that support AirPlay Video.
+- **IPTV / M3U Stream Engine**: Parse personal M3U / M3U8 streaming playlists with category tagging (Movies, Live, Sports, News).
+- **In-App Web Video Browser**: Integrated `WKWebView` with URL search bar and quick bookmarks (YouTube, Vimeo, Twitch) with stream extraction.
+- **Local Video Importer**: Import personal video files from Apple Photos or Files app into the car playlist.
+- **Automotive Safety & Legal Compliance**: Conforms strictly with NHTSA and Apple driver-safety regulations. Full architectural rationale documented in [`Docs/ADR-001-carplay-video.md`](Docs/ADR-001-carplay-video.md).
 
 ### 2. ⚡ Drive Telemetry & Smoothness Scoring
 - **Speedometer HUD**: Circular neon speedometer gauge with instant toggle between `KM/H` and `MPH`.
