@@ -87,6 +87,27 @@
 
 ## Log
 
+### 2026-11-05 01:25 (Bogotá) — Redesign 2B wrap-up (budget end): status for U2 / Paperclip
+PR [#31](https://github.com/Xanderco/iOSCarPlayVideo/pull/31) `claude/redesign-secondary` → `claude/ci-and-core-fixes`.
+**CI:** green on `2699733` (125 unit + 4 UI tests). The final commits (Drive tab restore, onboarding v2, tab bar) were **pushed but their CI was still queued at wrap-up**. Check the PR checks first; if red, read `gh run view <id> --log-failed`. The likely risk spots are listed below.
+
+**Finished (in the PR):**
+- Originality audit `Docs/Originality-audit.md`. Competitor and clone-era media removed from the repo (git-ignored); third-party car renders removed from the bundle; no CarDash/CarTV/1:1 text in Swift code.
+- Tabs Home · Library · Cast · Drive · Settings. iOS 26+: native `TabView`/`Tab` (Liquid Glass, `.tabBarMinimizeBehavior(.onScrollDown)`). iOS 17–25: `LiquidCapsuleTabBar` (single material, `matchedGeometryEffect` indicator).
+- Drive restored unchanged as its own tab (owner decision O2); only a "1:1" comment and the "Chevrolet Trax" default changed.
+- Settings (Pro card, Restore, Privacy, Terms = Apple EULA, Feedback via Mail, Appearance, safety). Car Extras: Car Screen, Car Chime + `PlayCarChimeIntent`.
+- Onboarding v2: 5 pages with SwiftUI heroes, required "I understand" on the safety page, Pro optional. Shown once, replayable from Settings, `-forceOnboarding` for tests, `OnboardingUITests`.
+
+**Remaining (next agent):**
+1. Confirm CI green on the PR head. Uncompiled risk spots: `MainTabView.nativeTabs` (`Tab` in `ForEach`, iOS 26 API), `OnboardingView` heroes, `OnboardingUITests` (iOS 26 simulator, page TabView taps).
+2. Native iOS 26 tab buttons have no `Tab_*` identifiers (UI tests use `app.tabBars.buttons[name]`); add identifiers once a Mac confirms the `TabContent` API.
+3. Interim tab hosts: Home = `CastHomeView`, Library = `MediaServersHomeView` (its "Done" button is a no-op there), Cast = thin `CastMirrorView`. Redesign 2A should replace them and add the mini player.
+4. Drive session: its own take instead of CarDash's score / garage / tip-notification loop; `Image("car_porsche_911")` in `DriveTrackingPermissionsSheet` (asset removed); the vehicle picker has no photos now.
+5. Porsche defaults in `WidgetConfigModel` and the Cast fallbacks (unreachable in practice: a neutral config is seeded); the trip widget on `claude/home-widgets` shows a score.
+6. Merge conflicts to expect: `claude/home-widgets` (`DashCastApp.swift` `.onOpenURL` line, `AppState`); `claude/loving-archimedes-bxc7wp` UI tests target the old Me tab and the `Tab_*` buttons.
+7. Owner: licence of `Resources/Videos/*.mp4`; host `https://dashcast.app/privacy` and `support@dashcast.app`; new App Store screenshots from the 4+1-tab app (script updated).
+8. Archive `PROGRESS.md` / `PAPERCLIP.md` / `.paperclip` prompts that still say "1:1 parity" **before resuming Paperclip agents**.
+
 ### 2026-11-05 (Bogotá) — Redesign 2B: de-cloning, 4 tabs, Car Extras, onboarding (`claude/redesign-secondary`)
 - **Originality audit** → `Docs/Originality-audit.md` (D2). Removed from the repo (git-ignored, still in history): `MediaToAnalyze/` (31 CarDash screenshots), `Screenshots/` (clone-era shots + CarTV ad frames). Removed from the **app bundle**: 8 manufacturer-style car renders (×2). No "CarDash"/"1:1" text left in shipped code.
 - **Tabs:** Home · Library · Cast · Drive · Settings (`AppState.TabItem`). Interim hosts until redesign 2A lands: Home = `CastHomeView`, Library = `MediaServersHomeView`, Cast = new thin `CastMirrorView`. Legacy `-initialTab widgets|sounds|me` and deprecated `TabItem.widgets/.sounds/.me` aliases still work (→ Settings / Extras); `.drive` is a real tab again, so `claude/home-widgets` deep links keep compiling.
