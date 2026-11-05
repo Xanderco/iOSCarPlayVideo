@@ -303,10 +303,17 @@ struct GroupListView: View {
     let title: String
     let playlistID: UUID?
     let channels: [ChannelModel]
-    var onRefresh: (() async -> Void)? = nil
+    var onRefresh: (() async -> Void)?
 
-    @ObservedObject var playlistStore = PlaylistStore.shared
-    @State var filter = ""
+    @ObservedObject private var playlistStore = PlaylistStore.shared
+    @State private var filter = ""
+
+    init(title: String, playlistID: UUID?, channels: [ChannelModel], onRefresh: (() async -> Void)? = nil) {
+        self.title = title
+        self.playlistID = playlistID
+        self.channels = channels
+        self.onRefresh = onRefresh
+    }
 
     private var groups: [(group: String, channels: [ChannelModel])] {
         let all = playlistStore.groupedChannels(channels)
@@ -363,12 +370,17 @@ struct ChannelListView: View {
     let title: String
     let channels: [ChannelModel]
 
-    @Environment(\.dismiss) var dismiss
-    @ObservedObject var playlistStore = PlaylistStore.shared
-    @ObservedObject var history = WatchHistoryStore.shared
-    @ObservedObject var player = VideoPlayerService.shared
-    @State var sort: Sort = .playlist
-    @State var filter = ""
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var playlistStore = PlaylistStore.shared
+    @ObservedObject private var history = WatchHistoryStore.shared
+    @ObservedObject private var player = VideoPlayerService.shared
+    @State private var sort: Sort = .playlist
+    @State private var filter = ""
+
+    init(title: String, channels: [ChannelModel]) {
+        self.title = title
+        self.channels = channels
+    }
 
     private var sorted: [ChannelModel] {
         var list = filter.isEmpty ? channels : channels.filter { $0.name.localizedCaseInsensitiveContains(filter) }
@@ -432,9 +444,10 @@ struct ChannelListView: View {
 // MARK: - Favorites
 
 struct FavoritesListView: View {
-    @ObservedObject var playlistStore = PlaylistStore.shared
-    @ObservedObject var player = VideoPlayerService.shared
-    @ObservedObject var history = WatchHistoryStore.shared
+    init() {}
+    @ObservedObject private var playlistStore = PlaylistStore.shared
+    @ObservedObject private var player = VideoPlayerService.shared
+    @ObservedObject private var history = WatchHistoryStore.shared
 
     var body: some View {
         Group {
@@ -474,12 +487,13 @@ struct FavoritesListView: View {
 // MARK: - On This iPhone
 
 struct LocalVideosListView: View {
-    @ObservedObject var localVideos = LocalVideoManager.shared
-    @ObservedObject var player = VideoPlayerService.shared
-    @ObservedObject var history = WatchHistoryStore.shared
-    @State var showingPicker = false
-    @State var pickedItem: PhotosPickerItem?
-    @State var importError: String?
+    init() {}
+    @ObservedObject private var localVideos = LocalVideoManager.shared
+    @ObservedObject private var player = VideoPlayerService.shared
+    @ObservedObject private var history = WatchHistoryStore.shared
+    @State private var showingPicker = false
+    @State private var pickedItem: PhotosPickerItem?
+    @State private var importError: String?
 
     var body: some View {
         Group {

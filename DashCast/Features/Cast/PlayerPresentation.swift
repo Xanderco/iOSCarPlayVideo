@@ -44,7 +44,7 @@ public final class PlayerPresentation: ObservableObject {
 
     public func canStep(player: VideoPlayerService? = nil) -> Bool {
         let player = player ?? .shared
-        PlaybackQueue.siblings(of: player.currentChannel).count > 1
+        return PlaybackQueue.siblings(of: player.currentChannel).count > 1
     }
 }
 

@@ -392,6 +392,11 @@ private struct ResumeCard: View {
     let action: () -> Void
     @ScaledMetric(relativeTo: .body) private var width: CGFloat = 220
 
+    init(entry: WatchHistoryStore.Entry, action: @escaping () -> Void) {
+        self.entry = entry
+        self.action = action
+    }
+
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: DSSpacing.sm) {
@@ -444,6 +449,8 @@ private struct ResumeCard: View {
 /// Explains how to mirror the iPhone or send video to an AirPlay screen.
 struct MirrorScreenSheet: View {
     @Environment(\.dismiss) private var dismiss
+
+    init() {}
 
     var body: some View {
         NavigationStack {
