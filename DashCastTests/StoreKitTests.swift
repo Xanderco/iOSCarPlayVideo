@@ -147,6 +147,8 @@ final class StoreKitTests: XCTestCase {
     func testRestoreWithNothingPurchasedReportsFalse() async throws {
         _ = try makeSession()
         let manager = StoreKitManager(defaults: makeDefaults(), startImmediately: false)
+        let cleared = await refresh(manager, until: { !manager.isPro })
+        XCTAssertTrue(cleared, "StoreKit session transactions must be cleared before asserting on restore")
 
         let restored = try await manager.restorePurchases(sync: {})
 
@@ -158,6 +160,8 @@ final class StoreKitTests: XCTestCase {
     func testRestoreSurfacesSyncErrorOnlyWhenNothingWasFound() async throws {
         _ = try makeSession()
         let manager = StoreKitManager(defaults: makeDefaults(), startImmediately: false)
+        let cleared = await refresh(manager, until: { !manager.isPro })
+        XCTAssertTrue(cleared, "StoreKit session transactions must be cleared before asserting on restore")
 
         do {
             try await manager.restorePurchases(sync: { throw SyncFailure() })
