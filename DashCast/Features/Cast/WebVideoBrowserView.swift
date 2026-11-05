@@ -68,7 +68,8 @@ public struct WebVideoBrowserView: View {
                         urlString: $urlString,
                         canGoBack: $canGoBack,
                         canGoForward: $canGoForward,
-                        title: $currentTitle
+                        title: $currentTitle,
+                        onNavigationCommitted: { extractor.resetReports() }
                     )
                     .ignoresSafeArea(edges: .bottom)
                 }
@@ -346,6 +347,9 @@ public struct WebViewRepresentable: UIViewRepresentable {
     @Binding public var canGoBack: Bool
     @Binding public var canGoForward: Bool
     @Binding public var title: String
+    /// Called when a new main-frame navigation commits (link taps included),
+    /// so stale video reports from the previous page are discarded.
+    public var onNavigationCommitted: (() -> Void)? = nil
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -366,6 +370,10 @@ public struct WebViewRepresentable: UIViewRepresentable {
 
         init(_ parent: WebViewRepresentable) {
             self.parent = parent
+        }
+
+        public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            parent.onNavigationCommitted?()
         }
 
         public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

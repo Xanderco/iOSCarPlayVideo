@@ -90,7 +90,7 @@ public final class WebVideoExtractor: NSObject, ObservableObject, WKScriptMessag
 
     /// Asks the main frame for its current video and merges it with the
     /// latest report from any iframe.
-    public func requestCurrentVideo(completion: @escaping (WebVideoExtractionResult) -> Void) {
+    public func requestCurrentVideo(completion: @escaping @MainActor (WebVideoExtractionResult) -> Void) {
         webView.evaluateJavaScript("window.__dashcast ? window.__dashcast.scan(true) : null") { [weak self] value, _ in
             guard let self else { return }
             let mainReport = WebVideoReport(dictionary: value)
