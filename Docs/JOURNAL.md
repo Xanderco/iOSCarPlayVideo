@@ -92,6 +92,14 @@
 
 ## Log
 
+### 2026-11-05 02:30 (Bogotá) · Session 24: App Store Connect submission pack (`claude/asc-pack`)
+- Added `Docs/AppStoreConnect-Setup.md`: a click-by-click guide for the owner (about 30 minutes) covering the app record, the `pro.lifetime` IAP (Non-Consumable, USD 19.99, Family Sharing on, English and Spanish text, review note), categories, age rating answers (Unrestricted Web Access, expect 18+), content rights, the privacy label, final version-page copy, review notes, TestFlight secrets and a pre-submission checklist.
+- Privacy label is **Data Not Collected**, verified in code: no analytics/ads/crash SDKs, no tracking APIs, network calls only go to user-entered URLs and servers, location/motion/camera stay on device, purchases via StoreKit only.
+- Reviewer demo now uses Apple's public developer HLS sample (`devstreaming-cdn.apple.com/.../img_bipbop_adv_example_fmp4/master.m3u8`, checked HTTP 200); the "From URL" dialog accepts a single `.m3u8`. `AppStoreMedia/reviewer-demo.m3u` (dashcast.app) is not needed.
+- Free vs Pro copy now matches `EntitlementGate`: free = 1 playlist source + 15 min of playback a day; Pro removes both.
+- **Blockers found (code sessions):** B1 GitHub Pages `support.html`/`privacy.html` return 404; B2 `LegalLinks.swift` and `LifetimePaywallView.swift` still link to `dashcast.app`; B3 Me → Feedback is fake (shows "Feedback Sent", sends nothing; "Add" screenshot button is a no-op); B4 `NSLocalNetworkUsageDescription` claims mirroring to a car browser that does not exist. Details in the guide §0.
+- `AppStoreMedia/metadata.md` is partly stale (product id `com.dashcast.lifetime`, dashcast.app URLs, free tier "not implemented"); a pointer to the new guide was added at its top.
+
 ### 2026-11-05 01:45 (Bogotá) — Owner reverted the redesign UI (branch claude/classic-ui)
 - Owner tested the integrated build on his Mac and found the redesign (#31 2B, #32/#34 2A: Home/Library/Cast/Settings tabs, onboarding, Extras) **confusing**; he wants the **previous UI** (Cast / Drive / Widgets / Sounds / Me) with the new functionality.
 - `claude/classic-ui` restores all app/test/UI-test code to `integration complete: phase 2` (dc5962c: old UI + widgets #27 + CarPlay mirror #28 + paywall #24 + car video #25) and re-applies only functional work from later merges: Info.plist ATS (http IPTV), simulator-only CarPlay entitlements + CarPlay scene delegates, IPTVParser (own demo videos only), VideoPlayerService + MediaServerStore + DemoDataSeeder review fixes, Drive live map (`DriveLiveMapView` replaces the static route map in the old DriveHomeView) and automatic trips (`AutoTripService`, `TripDetectionStateMachine`) wired to the existing "Auto-detect drives" toggle, plus their tests (TripDetection, ReviewFixes, CarPlayScene, CastEngine, EntitlementGate).

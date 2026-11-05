@@ -1,5 +1,7 @@
 # DashCast: App Store Connect listing
 
+> **Superseded for submission by `Docs/AppStoreConnect-Setup.md`** (2026-11-05, Session 24). That guide has the final copy, the real product id `pro.lifetime`, the GitHub Pages URLs, the implemented free tier and a working reviewer demo stream. Keep this file as background.
+
 Copy-ready metadata for App Store Connect. All copy is original. The positioning (utility video player that
 plays the user's own M3U/IPTV playlists and media, with a car-display mode) follows the category
 and structure that comparable player apps have used to pass review. No competitor text is reused.
