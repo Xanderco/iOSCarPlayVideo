@@ -34,14 +34,16 @@ public final class PlayerPresentation: ObservableObject {
     }
 
     /// Plays the previous/next channel in the current group.
-    public func step(_ offset: Int, player: VideoPlayerService = .shared) {
+    public func step(_ offset: Int, player: VideoPlayerService? = nil) {
+        let player = player ?? .shared
         let list = PlaybackQueue.siblings(of: player.currentChannel)
         if let target = PlaybackQueue.neighbor(of: player.currentChannel, offset: offset, in: list) {
             WatchHistoryStore.shared.play(target)
         }
     }
 
-    public func canStep(player: VideoPlayerService = .shared) -> Bool {
+    public func canStep(player: VideoPlayerService? = nil) -> Bool {
+        let player = player ?? .shared
         PlaybackQueue.siblings(of: player.currentChannel).count > 1
     }
 }

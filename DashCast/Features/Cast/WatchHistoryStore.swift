@@ -115,7 +115,8 @@ public final class WatchHistoryStore: ObservableObject {
     // MARK: - Player integration
 
     /// Starts recording plays and positions from the shared player. Safe to call repeatedly.
-    public func startObserving(_ player: VideoPlayerService = .shared) {
+    public func startObserving(_ player: VideoPlayerService? = nil) {
+        let player = player ?? .shared
         guard !isObserving else { return }
         isObserving = true
 
@@ -144,7 +145,8 @@ public final class WatchHistoryStore: ObservableObject {
     }
 
     /// Plays `channel`, jumping back to the saved position for on-demand videos.
-    public func play(_ channel: ChannelModel, on player: VideoPlayerService = .shared) {
+    public func play(_ channel: ChannelModel, on player: VideoPlayerService? = nil) {
+        let player = player ?? .shared
         let resumeAt = entry(for: channel).flatMap { $0.isResumable ? $0.position : nil }
         player.load(channel: channel)
         if let resumeAt {
@@ -172,10 +174,10 @@ public final class WatchHistoryStore: ObservableObject {
 public enum PlaybackQueue {
     /// Channels that share the current channel's group, across all sources.
     public static func siblings(of channel: ChannelModel?,
-                                store: PlaylistStore = .shared,
-                                localVideos: [ChannelModel] = LocalVideoManager.shared.localVideos) -> [ChannelModel] {
+                                store: PlaylistStore? = nil,
+                                localVideos: [ChannelModel]? = nil) -> [ChannelModel] {
         guard let channel else { return [] }
-        let pool = store.allChannels + localVideos
+        let pool = (store ?? .shared).allChannels + (localVideos ?? LocalVideoManager.shared.localVideos)
         let group = pool.filter { $0.groupTitle == channel.groupTitle }
         return group.isEmpty ? [channel] : group
     }
