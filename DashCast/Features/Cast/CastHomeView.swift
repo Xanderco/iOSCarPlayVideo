@@ -111,12 +111,24 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingWebBrowser) {
                 WebVideoBrowserView()
+                    // The tab-level paywall can't present over this sheet, so present it here too.
+                    .sheet(isPresented: $appState.showPaywall) {
+                        LifetimePaywallView().environmentObject(appState)
+                    }
             }
             .sheet(isPresented: $showingPlaylistsSheet) {
                 mediaSourcePlaylistsSheet
+                    // The tab-level paywall can't present over this sheet, so present it here too.
+                    .sheet(isPresented: $appState.showPaywall) {
+                        LifetimePaywallView().environmentObject(appState)
+                    }
             }
             .sheet(isPresented: $showingFavorites) {
                 favoritesSheet
+                    // The tab-level paywall can't present over this sheet, so present it here too.
+                    .sheet(isPresented: $appState.showPaywall) {
+                        LifetimePaywallView().environmentObject(appState)
+                    }
             }
             .sheet(isPresented: Binding(
                 get: { showingCarPlaySimulator || appState.showCarPlaySimulator },
@@ -126,6 +138,10 @@ public struct CastHomeView: View {
                 }
             )) {
                 CarPlaySimulatorView()
+                    // The tab-level paywall can't present over this sheet, so present it here too.
+                    .sheet(isPresented: $appState.showPaywall) {
+                        LifetimePaywallView().environmentObject(appState)
+                    }
             }
             .sheet(isPresented: $showingBroadcastPicker) {
                 NavigationStack {

@@ -1,228 +1,320 @@
 import SwiftUI
 import StoreKit
 
+/// Legal links shown on the paywall (App Review guideline 3.1.2 / 5.1.1).
+public enum PaywallLegal {
+    /// Apple's standard EULA. Swap for a custom EULA URL if one is set in App Store Connect.
+    public static let termsOfUse = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    public static let privacyPolicy = URL(string: "https://dashcast.app/privacy")!
+}
+
+/// DashCast Pro paywall: a single one-time, non-consumable purchase. No subscription.
 public struct LifetimePaywallView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var appState: AppState
-    @StateObject private var storeKit = StoreKitManager.shared
+    @Environment(\.purchase) private var purchaseAction
+    @ObservedObject private var store: StoreKitManager
+    @ObservedObject private var gate: EntitlementGate
 
-    @State private var showingError = false
-    @State private var errorMessage = ""
-    @State private var showingSuccess = false
+    @State private var alert: PaywallAlert?
 
-    public init() {}
+    public init(store: StoreKitManager = .shared, gate: EntitlementGate = .shared) {
+        self.store = store
+        self.gate = gate
+    }
 
     public var body: some View {
-        NavigationStack {
-            ZStack {
-                Color.dashBackground.ignoresSafeArea()
+        ZStack(alignment: .topTrailing) {
+            Color.dashBackground.ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: 24) {
-                        headerSection
-
-                        valueComparisonCard
-
-                        featuresList
-
-                        purchaseCTASection
-
-                        legalLinks
+            ScrollView {
+                VStack(spacing: 20) {
+                    header
+                    if let reason = gate.lastBlock?.message, !store.isPro {
+                        limitBanner(reason)
                     }
-                    .padding()
+                    noSubscriptionPledge
+                    comparisonTable
+                    priceAndPurchase
+                    finePrint
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 56)
+                .padding(.bottom, 32)
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundStyle(Color.dashTextMuted)
-                    }
-                }
-            }
-            .alert("Purchase Error", isPresented: $showingError) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text(errorMessage)
-            }
-            .alert("Welcome to DashCast Pro!", isPresented: $showingSuccess) {
-                Button("Let's Drive!", role: .cancel) {
-                    dismiss()
-                }
-            } message: {
-                Text("Lifetime access is permanently unlocked on all your devices.")
-            }
+
+            closeButton
+        }
+        .task {
+            if store.proProduct == nil { await store.loadProducts() }
+        }
+        .alert(item: $alert) { alert in
+            Alert(title: Text(alert.title),
+                  message: Text(alert.message),
+                  dismissButton: .default(Text("OK")) {
+                      if alert.dismissesPaywall { dismiss() }
+                  })
         }
     }
 
-    private var headerSection: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.dashGold.opacity(0.15))
-                    .frame(width: 90, height: 90)
+    // MARK: Sections
 
-                Image(systemName: "crown.fill")
-                    .font(.system(size: 46))
-                    .foregroundStyle(LinearGradient.dashProGoldGradient)
-                    .shadow(color: Color.dashGold.opacity(0.6), radius: 14)
-            }
-
-            VStack(spacing: 6) {
-                Text("DashCast Pro")
-                    .font(ThemeFonts.speedDisplay(size: 32))
-                    .foregroundStyle(Color.dashTextPrimary)
-
-                Text("Pay Once · Own Forever")
-                    .font(ThemeFonts.hudTitle(size: 16))
-                    .foregroundStyle(Color.dashGold)
-                    .tracking(0.5)
-            }
+    private var closeButton: some View {
+        Button {
+            dismiss()
+        } label: {
+            Image(systemName: "xmark")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Color.dashTextSecondary)
+                .frame(width: 34, height: 34)
+                .background(Color.dashSurfaceHighlight)
+                .clipShape(Circle())
         }
+        .padding(.trailing, 16)
+        .padding(.top, 12)
+        .accessibilityLabel("Close")
+        .accessibilityIdentifier("paywall.close")
     }
 
-    private var valueComparisonCard: some View {
-        AutomotiveCard(cornerRadius: 18, borderColor: Color.dashGold.opacity(0.3)) {
-            VStack(spacing: 14) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Traditional Apps")
-                            .font(ThemeFonts.hudCaption(size: 13))
-                            .foregroundStyle(Color.dashTextMuted)
-                        Text("$4.99 / Month")
-                            .font(ThemeFonts.hudStat(size: 17))
-                            .strikethrough()
-                            .foregroundStyle(Color.dashRed)
-                        Text("$59.88 every year forever")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.dashTextMuted)
-                    }
+    private var header: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "key.fill")
+                .font(.system(size: 34, weight: .bold))
+                .foregroundStyle(Color.black)
+                .frame(width: 76, height: 76)
+                .background(LinearGradient.dashProGoldGradient)
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .shadow(color: Color.dashGold.opacity(0.45), radius: 16, y: 6)
 
-                    Spacer()
+            Text("DashCast Pro")
+                .font(ThemeFonts.speedDisplay(size: 30))
+                .foregroundStyle(Color.dashTextPrimary)
 
-                    Divider()
-                        .frame(height: 50)
-                        .background(Color.dashBorder)
-
-                    Spacer()
-
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text("DashCast Lifetime")
-                            .font(ThemeFonts.hudCaption(size: 13))
-                            .foregroundStyle(Color.dashGold)
-                            .fontWeight(.bold)
-                        Text(storeKit.lifetimeProduct?.displayPrice ?? "$19.99")
-                            .font(ThemeFonts.hudStat(size: 22))
-                            .foregroundStyle(Color.dashGreen)
-                        Text("One single payment")
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(Color.dashGreen)
-                    }
-                }
-
-                HStack {
-                    Image(systemName: "sparkles")
-                        .foregroundStyle(Color.dashGold)
-                    Text("Save over $100 in the first 2 years alone")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Color.dashGold)
-                }
-                .padding(.vertical, 6)
-                .frame(maxWidth: .infinity)
-                .background(Color.dashGold.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-            }
-        }
-    }
-
-    private var featuresList: some View {
-        VStack(spacing: 12) {
-            featureRow(icon: "play.tv.fill", title: "Unlimited IPTV & Local Video Cast", subtitle: "Import any M3U playlist & Photos/Files videos")
-            featureRow(icon: "car.side.fill", title: "Car Display & External Screen Output", subtitle: "For passengers or while parked, on compatible car screens")
-            featureRow(icon: "gauge.with.dots.needle.67percent", title: "Drive Stats & Trip History", subtitle: "Speed, distance and smooth-driving score for every trip")
-            featureRow(icon: "sparkle", title: "All Car Widgets & Live Wallpapers", subtitle: "Every vehicle design, plate, countdown & sticker")
-            featureRow(icon: "speaker.wave.3.fill", title: "Full Sound Library & Shortcuts Triggers", subtitle: "Arrival, connect & disconnect sounds, played automatically")
-            featureRow(icon: "checkmark.seal.fill", title: "All Future Updates Included", subtitle: "Never pay another cent for new features")
-        }
-        .padding()
-        .background(Color.dashSurface)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-    }
-
-    private func featureRow(icon: String, title: String, subtitle: String) -> some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 18, weight: .bold))
+            Text("Pay once. Own it forever.")
+                .font(ThemeFonts.hudTitle(size: 17))
                 .foregroundStyle(Color.dashYellow)
-                .frame(width: 24)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+    }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
+    private func limitBanner(_ text: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "info.circle.fill")
+                .foregroundStyle(Color.dashAmber)
+            Text(text)
+                .font(ThemeFonts.hudCaption(size: 13))
+                .foregroundStyle(Color.dashTextPrimary)
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(Color.dashAmber.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    /// The key differentiator, stated plainly and only with things that are true of this purchase.
+    private var noSubscriptionPledge: some View {
+        AutomotiveCard(cornerRadius: 18, borderColor: Color.dashYellow.opacity(0.35)) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("No subscription")
+                    .font(ThemeFonts.hudTitle(size: 18))
                     .foregroundStyle(Color.dashTextPrimary)
-
-                Text(subtitle)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.dashTextSecondary)
+                pledgeRow("1.circle.fill", "You're charged once, at purchase.")
+                pledgeRow("arrow.triangle.2.circlepath", "It never renews, so there's nothing to cancel.")
+                pledgeRow("person.3.fill", "Shared with your family through Family Sharing.")
+                pledgeRow("iphone.and.arrow.forward", "Restore it free on any device with your Apple Account.")
             }
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
-    private var purchaseCTASection: some View {
-        VStack(spacing: 14) {
-            let priceText = storeKit.lifetimeProduct?.displayPrice ?? "$19.99"
-            GlowButton(
-                title: storeKit.isLoading ? "Connecting to App Store..." : "Own DashCast Forever · \(priceText)",
-                iconName: "crown.fill",
-                gradient: .dashProGoldGradient
-            ) {
-                Task {
-                    do {
-                        let success = try await storeKit.purchaseLifetime()
-                        if success {
-                            appState.unlockProLifetime()
-                            showingSuccess = true
-                        }
-                    } catch {
-                        errorMessage = error.localizedDescription
-                        showingError = true
-                    }
+    private func pledgeRow(_ icon: String, _ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.dashYellow)
+                .frame(width: 20)
+            Text(text)
+                .font(.system(size: 14))
+                .foregroundStyle(Color.dashTextSecondary)
+        }
+    }
+
+    private var comparisonTable: some View {
+        let limits = gate.limits
+        return VStack(spacing: 0) {
+            comparisonRow("", free: "Free", pro: "Pro", isHeader: true)
+            Divider().background(Color.dashBorder)
+            comparisonRow("Playlist sources",
+                          free: "\(limits.maxPlaylistSources)",
+                          pro: "Unlimited")
+            Divider().background(Color.dashBorder)
+            comparisonRow("Casting time",
+                          free: "\(limits.dailyCastingMinutes) min / day",
+                          pro: "Unlimited")
+        }
+        .padding(.horizontal, 14)
+        .background(Color.dashSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+
+    private func comparisonRow(_ title: String, free: String, pro: String, isHeader: Bool = false) -> some View {
+        HStack {
+            Text(title)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundStyle(Color.dashTextPrimary)
+            Text(free)
+                .frame(width: 92)
+                .foregroundStyle(Color.dashTextSecondary)
+            Text(pro)
+                .frame(width: 84)
+                .foregroundStyle(isHeader ? Color.dashYellow : Color.dashTextPrimary)
+        }
+        .font(isHeader ? ThemeFonts.hudCaption(size: 12).weight(.bold) : .system(size: 14, weight: .medium))
+        .padding(.vertical, 12)
+    }
+
+    @ViewBuilder
+    private var priceAndPurchase: some View {
+        VStack(spacing: 12) {
+            if store.isPro {
+                Label("DashCast Pro is unlocked", systemImage: "checkmark.seal.fill")
+                    .font(ThemeFonts.hudTitle(size: 17))
+                    .foregroundStyle(Color.dashGreen)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+            } else if let product = store.proProduct {
+                VStack(spacing: 2) {
+                    Text(product.displayPrice)
+                        .font(ThemeFonts.hudStat(size: 34))
+                        .foregroundStyle(Color.dashTextPrimary)
+                    Text("one-time purchase")
+                        .font(ThemeFonts.hudCaption(size: 13))
+                        .foregroundStyle(Color.dashTextSecondary)
                 }
+                .accessibilityElement(children: .combine)
+
+                GlowButton(
+                    title: store.isPurchasing ? "Contacting the App Store…" : "Unlock Pro for \(product.displayPrice)",
+                    iconName: "lock.open.fill",
+                    gradient: .dashProGoldGradient
+                ) {
+                    buy()
+                }
+                .disabled(store.isPurchasing || store.isRestoring)
+                .accessibilityIdentifier("paywall.purchase")
+            } else if case .failed(let message) = store.loadState {
+                VStack(spacing: 10) {
+                    Text(message)
+                        .font(.system(size: 13))
+                        .foregroundStyle(Color.dashTextSecondary)
+                        .multilineTextAlignment(.center)
+                    Button("Try Again") {
+                        Task { await store.loadProducts() }
+                    }
+                    .font(ThemeFonts.hudTitle(size: 15))
+                    .foregroundStyle(Color.dashYellow)
+                }
+                .padding(.vertical, 8)
+            } else {
+                ProgressView()
+                    .tint(Color.dashYellow)
+                    .padding(.vertical, 20)
             }
-            .disabled(storeKit.isLoading)
 
             Button {
-                Task {
-                    await storeKit.restorePurchases()
-                    if storeKit.isPurchased {
-                        appState.unlockProLifetime()
-                        showingSuccess = true
-                    }
-                }
+                restore()
             } label: {
-                Text("Restore Previous Purchase")
+                Text(store.isRestoring ? "Restoring…" : "Restore Purchases")
                     .font(ThemeFonts.hudCaption(size: 14))
-                    .foregroundStyle(Color.dashTextMuted)
+                    .foregroundStyle(Color.dashTextSecondary)
                     .underline()
             }
-            .disabled(storeKit.isLoading)
+            .disabled(store.isPurchasing || store.isRestoring)
+            .accessibilityIdentifier("paywall.restore")
         }
     }
 
-    private var legalLinks: some View {
-        HStack(spacing: 16) {
-            Link("Privacy Policy", destination: LegalLinks.privacyPolicy)
-            Text("·").foregroundStyle(Color.dashTextMuted)
-            Link("Terms of Use (EULA)", destination: LegalLinks.termsOfUse)
+    private var finePrint: some View {
+        VStack(spacing: 10) {
+            if let product = store.proProduct, !store.isPro {
+                Text("\(product.displayPrice) is charged once to your Apple Account when you confirm the purchase. This is not a subscription and will never renew.")
+                    .multilineTextAlignment(.center)
+            }
+            HStack(spacing: 14) {
+                Link("Terms of Use (EULA)", destination: PaywallLegal.termsOfUse)
+                Text("·")
+                Link("Privacy Policy", destination: PaywallLegal.privacyPolicy)
+            }
         }
-        .font(.system(size: 12))
+        .font(.system(size: 11))
         .foregroundStyle(Color.dashTextMuted)
-        .padding(.top, 8)
+        .tint(Color.dashTextSecondary)
+    }
+
+    // MARK: Actions
+
+    private func buy() {
+        Task {
+            do {
+                let outcome = try await store.purchasePro { product in
+                    try await purchaseAction(product)
+                }
+                switch outcome {
+                case .purchased:
+                    alert = .purchased
+                case .pending:
+                    alert = .pending
+                case .cancelled:
+                    break
+                }
+            } catch {
+                alert = .error(error.localizedDescription)
+            }
+        }
+    }
+
+    private func restore() {
+        Task {
+            do {
+                let restored = try await store.restorePurchases()
+                alert = restored ? .restored : .nothingToRestore
+            } catch {
+                alert = .error(error.localizedDescription)
+            }
+        }
+    }
+}
+
+private enum PaywallAlert: Identifiable {
+    case purchased, restored, pending, nothingToRestore
+    case error(String)
+
+    var id: String { title + message }
+
+    var title: String {
+        switch self {
+        case .purchased: return "Welcome to DashCast Pro"
+        case .restored: return "Purchase Restored"
+        case .pending: return "Waiting for Approval"
+        case .nothingToRestore: return "Nothing to Restore"
+        case .error: return "Something Went Wrong"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .purchased: return "Pro is unlocked on this device and on any device signed in to your Apple Account."
+        case .restored: return "DashCast Pro is unlocked again."
+        case .pending: return "Your purchase is waiting for approval. Pro unlocks automatically once it's approved."
+        case .nothingToRestore: return "No DashCast Pro purchase was found for this Apple Account."
+        case .error(let message): return message
+        }
+    }
+
+    var dismissesPaywall: Bool {
+        switch self {
+        case .purchased, .restored: return true
+        default: return false
+        }
     }
 }

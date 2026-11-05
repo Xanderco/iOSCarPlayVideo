@@ -87,6 +87,14 @@
 
 ## Log
 
+### 2026-11-05 00:36 (Bogotá) — Integrator: merged #24 (claude/paywall-storekit)
+- Merged [#24](https://github.com/Xanderco/iOSCarPlayVideo/pull/24): DashCast Pro is a single non-consumable `pro.lifetime` purchase (USD 19.99, Family Sharing), per D1. No subscriptions. StoreKit 2 manager with refund/revocation relock and Restore, `EntitlementGate` free-tier limits (playlist sources, daily casting time), and a rewritten paywall with a "No subscription" pledge.
+- Conflicts resolved:
+  - `VideoPlayerService.play()` combines #18's real-state player (`wantsToPlay`, audio session, `timeControlStatus`) with #24's casting-allowance gate.
+  - The periodic time observer keeps #18's `MainActor.assumeIsolated` and calls `trackCastingTime()`.
+  - `LifetimePaywallView` and `DashCastStore.storekit` take #24's versions. They supersede #21's copy tweaks with the same intent: pay-once wording and no inflated claims.
+- Follow-ups: create `pro.lifetime` in App Store Connect (human); check the free-tier limits on a device.
+
 ### 2026-11-05 00:36 (Bogotá) — Integrator: merged #29 (claude/paperclip-handoff)
 - Merged [#29](https://github.com/Xanderco/iOSCarPlayVideo/pull/29), docs only: `Docs/Paperclip/HANDOFF_2026-11-05.md` (the backlog for Paperclip/OpenCode agents after the cloud sprint) and an "outdated" banner on `PAPERCLIP.md`. The integrator keeps the handoff's §2/§3 status precise at the end of the sprint.
 

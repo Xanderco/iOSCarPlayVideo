@@ -10,17 +10,18 @@
       "internalID" : "1679776410",
       "localizations" : [
         {
-          "description" : "Unlock every DashCast feature for good. Pay once.",
+          "description" : "Unlock everything in DashCast with one payment. No subscription.",
           "displayName" : "DashCast Pro",
           "locale" : "en_US"
         }
       ],
-      "productID" : "com.dashcast.lifetime",
-      "referenceName" : "DashCast Pro Lifetime",
+      "productID" : "pro.lifetime",
+      "referenceName" : "DashCast Pro (Lifetime)",
       "type" : "NonConsumable"
     }
   ],
   "settings" : {
+    "_askToBuyEnabled" : false,
     "_failTransactionsEnabled" : false,
     "_locale" : "en_US",
     "_storefront" : "USA",
