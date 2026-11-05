@@ -1,70 +1,294 @@
 import CarPlay
+import Combine
+import MediaPlayer
 import UIKit
 
+/// CarPlay scene. Shows the user's imported playlists (from `PlaylistStore.shared`),
+/// their favorites and a short info tab. Selecting a channel starts playback through
+/// `VideoPlayerService.shared` and shows the system Now Playing screen.
+///
+/// NOTE: CarPlay only shows this app once Apple grants a CarPlay entitlement.
+/// See Docs/CarPlay.md.
+///
+/// `UIResponder` is `@MainActor`, so this whole class (and every closure it creates
+/// for CarPlay templates) runs on the main actor.
+@MainActor
 public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
     public var interfaceController: CPInterfaceController?
+
+    private var libraryTemplate: CPListTemplate?
+    private var favoritesTemplate: CPListTemplate?
+    private var playlistObserver: NSObjectProtocol?
+    private var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
+    private var playerCancellable: AnyCancellable?
+
+    /// CarPlay audio apps may stack at most five templates (root included); pushing more
+    /// raises an exception in CarPlay. Now Playing counts towards the depth.
+    private static let maximumTemplateDepth = 5
+
+    // MARK: - Scene lifecycle
 
     public func templateApplicationScene(
         _ templateApplicationScene: CPTemplateApplicationScene,
         didConnect interfaceController: CPInterfaceController
     ) {
         self.interfaceController = interfaceController
-        setupCarPlayRootTemplate(interfaceController: interfaceController)
+
+        let library = CPListTemplate(title: "Library", sections: [])
+        library.tabTitle = "Library"
+        library.tabImage = UIImage(systemName: "tv.fill")
+        library.emptyViewTitleVariants = ["No channels"]
+        library.emptyViewSubtitleVariants = ["Import an M3U playlist on your iPhone"]
+        libraryTemplate = library
+
+        let favorites = CPListTemplate(title: "Favorites", sections: [])
+        favorites.tabTitle = "Favorites"
+        favorites.tabImage = UIImage(systemName: "heart.fill")
+        favorites.emptyViewTitleVariants = ["No Favorites Yet"]
+        favorites.emptyViewSubtitleVariants = ["Tap the heart on a channel on your iPhone"]
+        favoritesTemplate = favorites
+
+        let tabs: [CPTemplate] = [library, favorites, makeInfoTemplate()]
+        let tabBar = CPTabBarTemplate(templates: Array(tabs.prefix(Int(CPTabBarTemplate.maximumTabCount))))
+
+        rebuildTemplates()
+        interfaceController.setRootTemplate(tabBar, animated: false, completion: nil)
+
+        playlistObserver = NotificationCenter.default.addObserver(
+            forName: PlaylistStore.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.rebuildTemplates()
+            }
+        }
+
+        configureRemoteCommands()
+        observePlayer()
     }
 
     public func templateApplicationScene(
         _ templateApplicationScene: CPTemplateApplicationScene,
         didDisconnectInterfaceController interfaceController: CPInterfaceController
     ) {
+        if let playlistObserver {
+            NotificationCenter.default.removeObserver(playlistObserver)
+        }
+        playlistObserver = nil
+        removeRemoteCommands()
+        playerCancellable = nil
+        libraryTemplate = nil
+        favoritesTemplate = nil
         self.interfaceController = nil
     }
 
-    private func setupCarPlayRootTemplate(interfaceController: CPInterfaceController) {
-        // Tab 1: Library (Channels & Videos)
-        let libraryItems: [CPListItem] = IPTVParser.samplePlaylist.map { channel in
-            let item = CPListItem(text: channel.name, detailText: channel.groupTitle)
-            item.handler = { [weak self] _, completion in
-                Task { @MainActor in
-                    VideoPlayerService.shared.load(channel: channel)
-                    completion()
+    // MARK: - Templates
+
+    /// Rebuilds Library and Favorites from the current playlist store.
+    private func rebuildTemplates() {
+        let store = PlaylistStore.shared
+        libraryTemplate?.updateSections(makeLibrarySections(store: store))
+        favoritesTemplate?.updateSections(makeFavoritesSections(store: store))
+
+        // Group lists pushed from Library carry their group name in `userInfo`;
+        // refresh them so they never show channels that were removed.
+        guard let interfaceController else { return }
+        let groups = store.groupedChannels(store.allChannels)
+        for case let template as CPListTemplate in interfaceController.templates {
+            guard let group = template.userInfo as? String else { continue }
+            let channels = groups.first(where: { $0.group == group })?.channels ?? []
+            template.updateSections(channelSections(channels, showGroup: false))
+        }
+    }
+
+    /// Updates the playing indicator on every visible channel row without rebuilding lists.
+    private func refreshPlayingIndicators() {
+        let playingURL = VideoPlayerService.shared.currentChannel?.streamURL
+        var templates: [CPListTemplate] = [libraryTemplate, favoritesTemplate].compactMap { $0 }
+        templates += interfaceController?.templates.compactMap { $0 as? CPListTemplate } ?? []
+        for template in templates {
+            for section in template.sections {
+                for case let item as CPListItem in section.items {
+                    guard let url = item.userInfo as? URL else { continue }
+                    item.isPlaying = url == playingURL
                 }
+            }
+        }
+    }
+
+    /// Library root: one row per group. Tapping a group pushes its channel list.
+    private func makeLibrarySections(store: PlaylistStore) -> [CPListSection] {
+        let maxItems = Int(CPListTemplate.maximumItemCount)
+        let groups = store.groupedChannels(store.allChannels)
+        guard !groups.isEmpty else { return [] }
+
+        let items: [CPListItem] = groups.prefix(maxItems).map { entry in
+            let group = entry.group
+            let channels = entry.channels
+            let item = CPListItem(
+                text: group.isEmpty ? "Other" : group,
+                detailText: channels.count == 1 ? "1 channel" : "\(channels.count) channels",
+                image: UIImage(systemName: "folder.fill")
+            )
+            item.accessoryType = .disclosureIndicator
+            item.handler = { [weak self] _, completion in
+                self?.pushGroup(group, title: group.isEmpty ? "Other" : group, channels: channels)
+                completion()
             }
             return item
         }
-        let libraryList = CPListTemplate(title: "Library", sections: [CPListSection(items: libraryItems)])
-        libraryList.tabTitle = "Library"
-        libraryList.tabImage = UIImage(systemName: "tv.fill")
+        return [CPListSection(items: items)]
+    }
 
-        // Tab 2: Favorites
-        let favoritesList = CPListTemplate(title: "Favorites", sections: [
-            CPListSection(items: [
-                CPListItem(text: "No Favorites Yet", detailText: "Add favorites from your iPhone")
-            ])
-        ])
-        favoritesList.tabTitle = "Favorites"
-        favoritesList.tabImage = UIImage(systemName: "heart.fill")
+    private func makeFavoritesSections(store: PlaylistStore) -> [CPListSection] {
+        let favorites = store.favoriteChannels
+        // An empty template shows `emptyViewTitleVariants` / `emptyViewSubtitleVariants`.
+        guard !favorites.isEmpty else { return [] }
+        // Favorites are sectioned by group, within CarPlay's section and item limits.
+        let maxSections = Int(CPListTemplate.maximumSectionCount)
+        var remaining = Int(CPListTemplate.maximumItemCount)
+        var sections: [CPListSection] = []
+        for entry in store.groupedChannels(favorites).prefix(maxSections) where remaining > 0 {
+            let items = entry.channels.prefix(remaining).map { makeChannelItem($0, showGroup: false) }
+            remaining -= items.count
+            sections.append(CPListSection(items: Array(items),
+                                          header: entry.group.isEmpty ? "Other" : entry.group,
+                                          sectionIndexTitle: nil))
+        }
+        return sections
+    }
 
-        // Tab 3: Cast (Status & Guidance - Matches "Your channels, on the big screen")
-        let castItems: [CPListItem] = [
-            CPListItem(text: "Your channels, on the big screen", detailText: "Cast IPTV, YouTube or local videos from iPhone"),
-            CPListItem(text: "Parked Video Mode", detailText: "Videos stream in full 1080p when parked")
+    /// One section of channels, capped at CarPlay's item limit.
+    private func channelSections(_ channels: [ChannelModel], showGroup: Bool) -> [CPListSection] {
+        guard !channels.isEmpty else { return [] }
+        let maxItems = Int(CPListTemplate.maximumItemCount)
+        let items = channels.prefix(maxItems).map { makeChannelItem($0, showGroup: showGroup) }
+        return [CPListSection(items: Array(items))]
+    }
+
+    private func makeChannelItem(_ channel: ChannelModel, showGroup: Bool) -> CPListItem {
+        let item = CPListItem(
+            text: channel.name,
+            detailText: showGroup ? channel.groupTitle : nil,
+            image: UIImage(systemName: "play.tv.fill")
+        )
+        item.userInfo = channel.streamURL
+        item.isPlaying = VideoPlayerService.shared.currentChannel?.streamURL == channel.streamURL
+        item.handler = { [weak self] _, completion in
+            self?.play(channel)
+            completion()
+        }
+        return item
+    }
+
+    private func pushGroup(_ group: String, title: String, channels: [ChannelModel]) {
+        guard let interfaceController, canPush(onto: interfaceController) else { return }
+        let template = CPListTemplate(title: title, sections: channelSections(channels, showGroup: false))
+        template.userInfo = group
+        template.emptyViewTitleVariants = ["No channels"]
+        interfaceController.pushTemplate(template, animated: true, completion: nil)
+    }
+
+    private func canPush(onto interfaceController: CPInterfaceController) -> Bool {
+        interfaceController.templates.count < Self.maximumTemplateDepth
+    }
+
+    private func makeInfoTemplate() -> CPListTemplate {
+        let items = [
+            CPListItem(text: "Your channels, on the big screen",
+                       detailText: "Import IPTV playlists on your iPhone"),
+            CPListItem(text: "Audio while driving",
+                       detailText: "Video is only shown when parked, via AirPlay")
         ]
-        let castList = CPListTemplate(title: "Cast", sections: [CPListSection(items: castItems)])
-        castList.tabTitle = "Cast"
-        castList.tabImage = UIImage(systemName: "rectangle.on.rectangle.fill")
+        for item in items {
+            item.handler = { _, completion in completion() }
+        }
+        let template = CPListTemplate(title: "DashCast", sections: [CPListSection(items: items)])
+        template.tabTitle = "Info"
+        template.tabImage = UIImage(systemName: "info.circle.fill")
+        return template
+    }
 
-        // Tab 4: Browser
-        let browserItems: [CPListItem] = [
-            CPListItem(text: "YouTube", detailText: "Stream online videos"),
-            CPListItem(text: "Twitch", detailText: "Live streams"),
-            CPListItem(text: "Vimeo", detailText: "High definition clips")
+    // MARK: - Playback
+
+    private func play(_ channel: ChannelModel) {
+        VideoPlayerService.shared.load(channel: channel)
+        updateNowPlayingInfo(for: channel, isPlaying: VideoPlayerService.shared.isPlaying)
+        refreshPlayingIndicators()
+        showNowPlaying()
+    }
+
+    private func showNowPlaying() {
+        guard let interfaceController else { return }
+        let nowPlaying = CPNowPlayingTemplate.shared
+        if interfaceController.topTemplate === nowPlaying { return }
+        if interfaceController.templates.contains(where: { $0 === nowPlaying }) {
+            interfaceController.pop(to: nowPlaying, animated: true, completion: nil)
+        } else if canPush(onto: interfaceController) {
+            interfaceController.pushTemplate(nowPlaying, animated: true, completion: nil)
+        } else {
+            // Stack is full: go back to the root and show Now Playing from there.
+            interfaceController.popToRootTemplate(animated: false) { _, _ in
+                interfaceController.pushTemplate(nowPlaying, animated: true, completion: nil)
+            }
+        }
+    }
+
+    /// Keeps Now Playing info and row indicators in sync when playback is changed
+    /// from the iPhone UI (or anywhere else), not just from CarPlay.
+    private func observePlayer() {
+        let service = VideoPlayerService.shared
+        playerCancellable = service.$currentChannel
+            .combineLatest(service.$isPlaying)
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] channel, isPlaying in
+                MainActor.assumeIsolated {
+                    self?.updateNowPlayingInfo(for: channel, isPlaying: isPlaying)
+                    self?.refreshPlayingIndicators()
+                }
+            }
+    }
+
+    private func updateNowPlayingInfo(for channel: ChannelModel?, isPlaying: Bool) {
+        guard let channel else {
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+            return
+        }
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = [
+            MPMediaItemPropertyTitle: channel.name,
+            MPMediaItemPropertyArtist: channel.groupTitle,
+            MPMediaItemPropertyAlbumTitle: "DashCast",
+            MPNowPlayingInfoPropertyIsLiveStream: true,
+            MPNowPlayingInfoPropertyMediaType: MPNowPlayingInfoMediaType.video.rawValue,
+            MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0
         ]
-        let browserList = CPListTemplate(title: "Browser", sections: [CPListSection(items: browserItems)])
-        browserList.tabTitle = "Browser"
-        browserList.tabImage = UIImage(systemName: "globe")
+    }
 
-        // Tab Bar Template hosting the 4 CarPlay tabs
-        let tabBar = CPTabBarTemplate(templates: [castList, libraryList, favoritesList, browserList])
-        interfaceController.setRootTemplate(tabBar, animated: false, completion: nil)
+    private func configureRemoteCommands() {
+        removeRemoteCommands()
+        let center = MPRemoteCommandCenter.shared()
+
+        func register(_ command: MPRemoteCommand, _ action: @escaping @MainActor @Sendable () -> Void) {
+            command.isEnabled = true
+            let token = command.addTarget { _ in
+                Task { @MainActor in action() }
+                return .success
+            }
+            remoteCommandTargets.append((command, token))
+        }
+
+        // Now Playing info follows `VideoPlayerService` via `observePlayer()`.
+        register(center.playCommand) { VideoPlayerService.shared.play() }
+        register(center.pauseCommand) { VideoPlayerService.shared.pause() }
+        register(center.togglePlayPauseCommand) { VideoPlayerService.shared.togglePlayPause() }
+    }
+
+    private func removeRemoteCommands() {
+        for (command, token) in remoteCommandTargets {
+            command.removeTarget(token)
+        }
+        remoteCommandTargets.removeAll()
     }
 }

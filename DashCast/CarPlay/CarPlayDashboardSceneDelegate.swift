@@ -1,6 +1,7 @@
 import CarPlay
 import UIKit
 
+@MainActor
 public final class CarPlayDashboardSceneDelegate: UIResponder, CPTemplateApplicationDashboardSceneDelegate {
     public func templateApplicationDashboardScene(
         _ templateApplicationDashboardScene: CPTemplateApplicationDashboardScene,
