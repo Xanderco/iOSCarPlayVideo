@@ -92,6 +92,14 @@
 
 ## Log
 
+### 2026-11-05 02:30 (Bogotá) — Session 22: Privacy / Support / Terms web pages (`claude/legal-pages`)
+- Added a small static site in `docs/site/` (plain HTML + one `style.css`, dark, mobile friendly, no JS, no trackers, no external fonts): `index.html`, `privacy.html` (no account/tracking/analytics; playlists, server details and trips stay on the iPhone; server tokens in Keychain; location/motion on-device only for Drive and parked-only safety; camera only for QR; photos only when the user picks; StoreKit purchases handled by Apple), `support.html` (FAQ: M3U, Jellyfin/Emby, why streams fail, no DRM services, passengers/parked only, CarPlay depends on Apple entitlement and the car, restore, contact), `terms.html` (Apple Standard EULA + short app terms: no content provided, user responsible for rights). Contact: alexbh987@gmail.com.
+- `.github/workflows/pages.yml` deploys `docs/site` to GitHub Pages on push to `main` (paths `docs/site/**`) and on `workflow_dispatch` (configure-pages + upload-pages-artifact + deploy-pages).
+- URLs: https://xanderco.github.io/iOSCarPlayVideo/ · `/privacy.html` · `/support.html` · `/terms.html`. Written into `AppStoreMedia/metadata.md` (§4, §6) and the shared constants file **`DashCast/Core/Legal/LegalLinks.swift`** (`privacyPolicy`, `support`, `appTerms`, `termsOfUse` = Apple EULA, `supportEmail`). `PaywallLegal` now just forwards to `LegalLinks` (no layout change). Session 21's Legal rows should use `LegalLinks`.
+- **Owner action:** enable Pages: repo Settings → Pages → Source: **GitHub Actions**. The workflow only runs on `main`, so either merge `docs/site` to `main` or run "Deploy legal site to GitHub Pages" manually (workflow_dispatch from `main` once the file is there). **Pages on a private repo needs a paid GitHub plan**: keep the repo public, or host `docs/site` elsewhere (any static host) and update `LegalLinks.swift` + metadata.
+- Note: `docs/site` hosts static documentation and landing pages for GitHub Pages.
+- Not done: the reviewer demo playlist (`AppStoreMedia/reviewer-demo.m3u`) still points at non-existent dashcast.app media, so it isn't hosted here; the owner needs real hosted CC-licensed files first.
+
 ### 2026-11-05 02:22 (Bogotá) — Session 19 close: classic UI + CarPlay video mirror merged
 - **`claude/classic-ui` now holds the classic UI (D10) plus the CarPlay video mirror.** [PR #37](https://github.com/Xanderco/iOSCarPlayVideo/pull/37) merged (merge commit 8395ccf). PR CI was green on cfcc819: build, entitlement check, unit tests and UI tests.
 - **Owner action:** request the CarPlay **VIDEO** entitlement (`com.apple.developer.carplay-video`, category "Video", not Audio) at developer.apple.com/contact/carplay. The steps and ready-to-paste justification are at the top of `Docs/CarPlay.md`.
