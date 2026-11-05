@@ -35,7 +35,7 @@ public final class VideoPlayerService: ObservableObject {
         Task.detached(priority: .userInitiated) {
             do {
                 let session = AVAudioSession.sharedInstance()
-                try session.setCategory(.playback, mode: .moviePlayback, options: [.allowBluetoothHFP, .allowBluetoothA2DP, .allowAirPlay])
+                try session.setCategory(.playback, mode: .moviePlayback, options: [])
                 try session.setActive(true)
             } catch {
                 print("Failed to configure audio session: \(error)")
