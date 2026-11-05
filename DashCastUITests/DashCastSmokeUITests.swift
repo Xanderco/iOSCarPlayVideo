@@ -7,12 +7,12 @@ final class DashCastSmokeUITests: XCTestCase {
     private var app: XCUIApplication!
 
     /// Tabs in display order; raw values match `AppState.TabItem`.
-    private let tabs = ["Home", "Library", "Cast", "Settings"]
+    private let tabs = ["Cast", "Drive", "Widgets", "Sounds", "Me"]
 
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
-        app.launchArguments += ["-UITests", "-initialTab", "home"]
+        app.launchArguments += ["-UITests", "-initialTab", "cast"]
 
         // Dismiss any system permission alert (location, notifications…).
         addUIInterruptionMonitor(withDescription: "System alert") { alert in
@@ -35,11 +35,11 @@ final class DashCastSmokeUITests: XCTestCase {
 
     // MARK: - Tests
 
-    func testAppLaunchesToHomeTab() throws {
+    func testAppLaunchesToCastTab() throws {
         XCTAssertTrue(app.wait(for: .runningForeground, timeout: 15), "App did not reach foreground")
-        let homeTab = app.buttons["Tab_Home"]
-        XCTAssertTrue(homeTab.waitForExistence(timeout: 15), "Tab bar did not appear")
-        XCTAssertTrue(app.otherElements["Screen_Home"].waitForExistence(timeout: 10), "Home screen missing")
+        let castTab = app.buttons["Tab_Cast"]
+        XCTAssertTrue(castTab.waitForExistence(timeout: 15), "Tab bar did not appear")
+        XCTAssertTrue(app.otherElements["Screen_Cast"].waitForExistence(timeout: 10), "Cast screen missing")
         snapshot("01-launch")
     }
 
@@ -64,8 +64,8 @@ final class DashCastSmokeUITests: XCTestCase {
         tapCenter(of: row)
 
         XCTAssertTrue(
-            app.navigationBars["Library"].waitForExistence(timeout: 10),
-            "Library sheet did not open"
+            app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
+            "Media Sources sheet did not open"
         )
         let firstChannel = app.buttons.matching(identifier: "MediaSources_Channel").firstMatch
         XCTAssertTrue(firstChannel.waitForExistence(timeout: 10), "No channels listed")
@@ -75,8 +75,8 @@ final class DashCastSmokeUITests: XCTestCase {
         )
         snapshot("03-media-sources")
 
-        app.navigationBars["Library"].buttons["Done"].tap()
-        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Home tab")
+        app.navigationBars["Media Sources"].buttons["Done"].tap()
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
     func testBrowserSheetOpens() throws {
@@ -90,7 +90,7 @@ final class DashCastSmokeUITests: XCTestCase {
         snapshot("04-browser")
 
         exit.tap()
-        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Home tab")
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
     // MARK: - Helpers

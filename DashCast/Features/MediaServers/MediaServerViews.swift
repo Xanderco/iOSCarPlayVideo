@@ -27,7 +27,7 @@ public struct MediaServersHomeView: View {
                         } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: "server.rack")
-                                    .foregroundStyle(Color.dcAccent)
+                                    .foregroundStyle(Color.dashYellow)
                                     .frame(width: 24)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(account.serverName).font(.headline)
@@ -80,7 +80,7 @@ public struct MediaServersHomeView: View {
                 PlaylistQRImportView()
             }
         }
-        .tint(Color.dcAccent)
+        .tint(Color.dashYellow)
     }
 }
 
@@ -97,10 +97,7 @@ public struct AddMediaServerView: View {
     @State private var isConnecting = false
     @State private var errorMessage: String?
 
-    /// `kind` preselects Jellyfin or Emby when opened from Library → Add Source.
-    public init(kind: MediaServerKind = .jellyfin) {
-        _kind = State(initialValue: kind)
-    }
+    public init() {}
 
     private var canSubmit: Bool {
         !address.trimmingCharacters(in: .whitespaces).isEmpty
@@ -341,10 +338,10 @@ struct MediaPosterCell: View {
                 image.resizable().scaledToFill()
             } placeholder: {
                 ZStack {
-                    Color.dcSurfaceRaised
+                    Color.dashSurfaceHighlight
                     Image(systemName: item.isSeries ? "tv" : "film")
                         .font(.title)
-                        .foregroundStyle(Color.dcTextTertiary)
+                        .foregroundStyle(Color.dashTextMuted)
                 }
             }
             .frame(height: 160)
@@ -370,7 +367,7 @@ struct MediaProgressBar: View {
         if let total = item.runtimeSeconds, total > 0, item.resumePositionSeconds > 0 {
             GeometryReader { geo in
                 Capsule()
-                    .fill(Color.dcAccent)
+                    .fill(Color.dashYellow)
                     .frame(width: geo.size.width * min(1, item.resumePositionSeconds / total), height: 3)
             }
             .frame(height: 3)
@@ -389,7 +386,7 @@ struct MediaItemRow: View {
             AsyncImage(url: client.imageURL(for: item, maxWidth: 200)) { image in
                 image.resizable().scaledToFill()
             } placeholder: {
-                Color.dcSurfaceRaised
+                Color.dashSurfaceHighlight
             }
             .frame(width: 96, height: 54)
             .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
@@ -397,7 +394,7 @@ struct MediaItemRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 if let label = item.episodeLabel {
-                    Text(label).font(.caption2.weight(.bold)).foregroundStyle(Color.dcAccent)
+                    Text(label).font(.caption2.weight(.bold)).foregroundStyle(Color.dashYellow)
                 }
                 Text(item.name).font(.subheadline.weight(.semibold)).lineLimit(2)
                 if let series = item.seriesName {

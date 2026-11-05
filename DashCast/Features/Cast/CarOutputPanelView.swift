@@ -16,13 +16,13 @@ struct CarOutputPanelView: View {
                 mirroringCard
                 Text("Video on the car display is for passengers and parked use only. DashCast pauses video and stops mirroring automatically when the vehicle starts moving.")
                     .font(.system(size: 12))
-                    .foregroundStyle(Color.dcTextTertiary)
+                    .foregroundStyle(Color.dashTextMuted)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 8)
             }
             .padding(16)
         }
-        .background(Color.dcBackground.ignoresSafeArea())
+        .background(Color.dashBackground.ignoresSafeArea())
         .onAppear { output.setPanelVisible(true) }
         .onDisappear { output.setPanelVisible(false) }
     }
@@ -38,15 +38,15 @@ struct CarOutputPanelView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(parkedTitle)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(Color.dcTextPrimary)
+                    .foregroundStyle(Color.dashTextPrimary)
                 Text(parkedSubtitle)
                     .font(.system(size: 12))
-                    .foregroundStyle(Color.dcTextSecondary)
+                    .foregroundStyle(Color.dashTextSecondary)
             }
             Spacer()
         }
         .padding(14)
-        .background(Color.dcSurface)
+        .background(Color.dashSurface)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(parkedColor.opacity(0.4), lineWidth: 1))
     }
@@ -61,9 +61,9 @@ struct CarOutputPanelView: View {
 
     private var parkedColor: Color {
         switch parkedGuard.state {
-        case .parked: return .dcSuccess
-        case .moving: return .dcWarning
-        case .unknown: return .dcTextSecondary
+        case .parked: return .dashGreen
+        case .moving: return .dashOrange
+        case .unknown: return .dashTextSecondary
         }
     }
 
@@ -91,55 +91,26 @@ struct CarOutputPanelView: View {
 
             Text("On iOS 26 and later, cars that support AirPlay video show up in the AirPlay menu while parked. AirPlay TVs, receivers and AirPlay-capable adapters work the same way.")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.dcTextSecondary)
+                .foregroundStyle(Color.dashTextSecondary)
 
             HStack(spacing: 12) {
-                AirPlayRoutePickerRepresentable(tintColor: .dcAccent)
+                AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
                     .frame(width: 44, height: 44)
-                    .background(Color.dcSurfaceRaised)
+                    .background(Color.dashSurfaceHighlight)
                     .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(airPlayStatusTitle)
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.dcTextPrimary)
+                        .foregroundStyle(Color.dashTextPrimary)
                     Text(output.multipleRoutesDetected ? "AirPlay displays found nearby" : "No AirPlay display found yet")
                         .font(.system(size: 12))
-                        .foregroundStyle(Color.dcTextTertiary)
+                        .foregroundStyle(Color.dashTextMuted)
                 }
                 Spacer()
             }
-
-            if !output.multipleRoutesDetected && !output.isExternalPlaybackActive {
-                noAirPlayDisplays
-            }
         }
         .modifier(CardStyle())
-    }
-
-    /// Without any receiver nearby the system AirPlay menu is empty, so the button seemed to do
-    /// nothing. Say so plainly and tell the user what to do.
-    private var noAirPlayDisplays: some View {
-        HStack(alignment: .top, spacing: DSSpacing.md) {
-            Image(systemName: "wifi.exclamationmark")
-                .font(.system(.title3, weight: .semibold))
-                .foregroundStyle(Color.dcWarning)
-                .accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
-                Text("No AirPlay displays found")
-                    .font(DSTypography.headline)
-                    .foregroundStyle(Color.dcTextPrimary)
-                Text("Connect your iPhone to your car's or Apple TV's Wi-Fi, then come back. Displays show up here automatically.")
-                    .font(DSTypography.footnote)
-                    .foregroundStyle(Color.dcTextSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(DSSpacing.md)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.dcWarning.opacity(0.10), in: RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
-        .accessibilityElement(children: .combine)
-        .accessibilityIdentifier("CarDisplay_NoAirPlay")
     }
 
     private var airPlayStatusTitle: String {
@@ -160,19 +131,19 @@ struct CarOutputPanelView: View {
 
             Text("For cars and adapters with a web browser: connect the car to your iPhone's Personal Hotspot (or the same Wi-Fi), start mirroring, then open the address below in the car's browser.")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.dcTextSecondary)
+                .foregroundStyle(Color.dashTextSecondary)
 
             Toggle(isOn: $mirrorToCarPlay) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Mirror to CarPlay screen (beta)")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.dcTextPrimary)
+                        .foregroundStyle(Color.dashTextPrimary)
                     Text("Shows the broadcast on the CarPlay display while parked, where supported.")
                         .font(.system(size: 12))
-                        .foregroundStyle(Color.dcTextTertiary)
+                        .foregroundStyle(Color.dashTextMuted)
                 }
             }
-            .tint(Color.dcAccent)
+            .tint(Color.dashYellow)
             .onChange(of: mirrorToCarPlay) { enabled in
                 CarMirrorFeature.setEnabled(enabled)
             }
@@ -180,17 +151,17 @@ struct CarOutputPanelView: View {
             HStack(spacing: 12) {
                 ScreenBroadcastPickerView()
                     .frame(width: 44, height: 44)
-                    .background(Color.dcSurfaceRaised)
+                    .background(Color.dashSurfaceHighlight)
                     .clipShape(Circle())
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(output.isBroadcasting ? "Mirroring is live" : "Tap to start mirroring")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color.dcTextPrimary)
+                        .foregroundStyle(Color.dashTextPrimary)
                     if output.isBroadcasting {
                         Text("\(output.broadcastStatus.viewerCount) car display(s) watching")
                             .font(.system(size: 12))
-                            .foregroundStyle(Color.dcTextTertiary)
+                            .foregroundStyle(Color.dashTextMuted)
                     }
                 }
                 Spacer()
@@ -204,26 +175,26 @@ struct CarOutputPanelView: View {
                     HStack {
                         Text(url)
                             .font(.system(size: 15, weight: .bold, design: .monospaced))
-                            .foregroundStyle(Color.dcAccent)
+                            .foregroundStyle(Color.dashYellow)
                         Spacer()
                         Image(systemName: copiedURL ? "checkmark" : "doc.on.doc")
-                            .foregroundStyle(Color.dcAccent)
+                            .foregroundStyle(Color.dashYellow)
                     }
                     .padding(12)
-                    .background(Color.dcAccent.opacity(0.1))
+                    .background(Color.dashYellow.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
             } else {
                 Text("Turn on Personal Hotspot or join Wi-Fi to get a viewer address.")
                     .font(.system(size: 12))
-                    .foregroundStyle(Color.dcTextTertiary)
+                    .foregroundStyle(Color.dashTextMuted)
             }
 
             if output.broadcastStatus.state == .stoppedForMotion, let message = output.broadcastStatus.message {
                 Label(message, systemImage: "exclamationmark.triangle.fill")
                     .font(.system(size: 12))
-                    .foregroundStyle(Color.dcWarning)
+                    .foregroundStyle(Color.dashOrange)
             }
         }
         .modifier(CardStyle())
@@ -232,10 +203,10 @@ struct CarOutputPanelView: View {
     private func cardHeader(icon: String, title: String, badge: String?) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
-                .foregroundStyle(Color.dcAccent)
+                .foregroundStyle(Color.dashYellow)
             Text(title)
                 .font(.system(size: 16, weight: .bold))
-                .foregroundStyle(Color.dcTextPrimary)
+                .foregroundStyle(Color.dashTextPrimary)
             Spacer()
             if let badge {
                 Text(badge)
@@ -243,7 +214,7 @@ struct CarOutputPanelView: View {
                     .foregroundStyle(Color.black)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color.dcSuccess)
+                    .background(Color.dashGreen)
                     .clipShape(Capsule())
             }
         }
@@ -255,29 +226,8 @@ private struct CardStyle: ViewModifier {
         content
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.dcSurface)
+            .background(Color.dashSurface)
             .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.dcStroke, lineWidth: 1))
-    }
-}
-
-/// The car-display panel wrapped for presentation as a sheet (Home, browser hand-off fallback).
-struct CarDisplaySheet: View {
-    @Environment(\.dismiss) private var dismiss
-
-    init() {}
-
-    var body: some View {
-        NavigationStack {
-            CarOutputPanelView()
-                .navigationTitle("Car Display")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button("Close") { dismiss() }
-                    }
-                }
-        }
-        .tint(Color.dcAccent)
+            .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.dashBorder, lineWidth: 1))
     }
 }

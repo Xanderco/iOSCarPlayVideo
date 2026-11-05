@@ -32,6 +32,7 @@
 | D6 | Never say "CarPlay" in name/subtitle/keywords/screenshots until Apple grants the CarPlay entitlement; say "car display". | 2026-11-05 | Trademark / review risk; competitors do the same. |
 | D7 | App Store: category **Utilities** (secondary Entertainment), **iPhone only**, original metadata. Honest age rating (in-app web browser ⇒ "Unrestricted Web Access" ⇒ likely 18+; open decision O1). | 2026-11-05 | Mirrors approved competitors. |
 | D8 | CI (GitHub Actions, macOS 15, newest Xcode 26.x, XcodeGen) is the source of truth. `DashCast.xcodeproj` is **generated**, not committed. Nothing is "done" without green CI. | 2026-11-04 | Every run before this failed; agents ran on Windows and couldn't compile. |
+| D10 | Keep the classic UI (Cast / Drive / Widgets / Sounds / Me). Redesign kept only on `claude/redesign-snapshot`; future UI changes incremental and owner-approved. | 2026-11-05 | Owner found the redesign confusing. |
 | D9 | Tests are never disabled/skipped to get green; fix code or test with justification. | 2026-11-05 | Owner wants "everything must pass" honestly. |
 | D10 | ATS: `NSAllowsArbitraryLoads = YES` alone (no granular keys: they disable it on iOS 10+). | 2026-11-05 | Users' playlists, streams and Jellyfin/Emby servers are mostly plain http; the app ships no content. Justification is in the review notes. |
 
@@ -90,6 +91,12 @@
 ---
 
 ## Log
+
+### 2026-11-05 01:45 (Bogotá) — Owner reverted the redesign UI (branch claude/classic-ui)
+- Owner tested the integrated build on his Mac and found the redesign (#31 2B, #32/#34 2A: Home/Library/Cast/Settings tabs, onboarding, Extras) **confusing**; he wants the **previous UI** (Cast / Drive / Widgets / Sounds / Me) with the new functionality.
+- `claude/classic-ui` restores all app/test/UI-test code to `integration complete: phase 2` (dc5962c: old UI + widgets #27 + CarPlay mirror #28 + paywall #24 + car video #25) and re-applies only functional work from later merges: Info.plist ATS (http IPTV), simulator-only CarPlay entitlements + CarPlay scene delegates, IPTVParser (own demo videos only), VideoPlayerService + MediaServerStore + DemoDataSeeder review fixes, Drive live map (`DriveLiveMapView` replaces the static route map in the old DriveHomeView) and automatic trips (`AutoTripService`, `TripDetectionStateMachine`) wired to the existing "Auto-detect drives" toggle, plus their tests (TripDetection, ReviewFixes, CarPlayScene, CastEngine, EntitlementGate).
+- The full redesign is preserved on branch **`claude/redesign-snapshot`** (do not delete). **Decision D10: keep the classic UI; any future visual change is incremental and approved by the owner screen by screen.** Supersedes the "4 tabs / Extras" plan in Docs/Design/redesign-spec.md and handoff U1/U2.
+- Not carried over (available in the snapshot if wanted later): onboarding, Settings screen with Terms/Privacy/Restore (App Review needs Terms/Privacy links + Restore somewhere — paywall has Restore), Add Source sheet (Jellyfin/QR entry still in Me tab), mini player, car mode, trip log/replay screens, removal of the in-app CarPlay emulator.
 
 ### 2026-11-05 01:16 (Bogotá) — Integrator: merged #35 (claude/drive-auto)
 - Merged [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35) (`claude/drive-auto`), implementing owner decision O2 (Drive stays a real feature) and fixing owner Mac finding #5.
