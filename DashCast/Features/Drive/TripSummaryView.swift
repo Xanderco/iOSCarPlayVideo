@@ -131,9 +131,9 @@ public struct TripSummaryView: View {
                                 HStack {
                                     telemetryPill(label: "Hard Brakes", count: trip.harshBrakingCount, color: .dashOrange)
                                     Spacer()
-                                    telemetryPill(label: "Rapid Accel", count: trip.rapidAccelerationCount, color: .dashOrange)
+                                    telemetryPill(label: "Rapid Accel", count: trip.harshAccelerationCount, color: .dashOrange)
                                     Spacer()
-                                    telemetryPill(label: "Sharp Turns", count: trip.sharpTurnCount, color: .dashOrange)
+                                    telemetryPill(label: "Sharp Turns", count: trip.harshCorneringCount, color: .dashOrange)
                                     Spacer()
                                     telemetryPill(label: "Smoothness", count: trip.drivingScore, color: .dashGreen)
                                 }

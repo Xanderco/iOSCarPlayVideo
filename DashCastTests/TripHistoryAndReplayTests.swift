@@ -48,8 +48,8 @@ final class TripHistoryAndReplayTests: XCTestCase {
             drivingScore: 92,
             points: points,
             harshBrakingCount: 0,
-            rapidAccelerationCount: 1,
-            sharpTurnCount: 0
+            harshAccelerationCount: 1,
+            harshCorneringCount: 0
         )
 
         let coordinates = trip.points.map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }
