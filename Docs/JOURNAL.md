@@ -87,6 +87,11 @@
 
 ## Log
 
+### 2026-11-05 01:00 (Bogotá) — Integrator: build fixes after phase 2 (#24 API in Settings, #32 missing return)
+- **CI on the phase-2 tip `dc5962c` was red** (build failed). `MeHomeView`'s restore row (from #21) still used the pre-#24 StoreKit API (`isPurchased`, `isLoading`). Phase 3 deletes `MeHomeView` (#31 replaced Me with Settings), but #31's new `SettingsView` had the same problem (`store.isPurchased`, `errorMessage`, a non-throwing `restorePurchases()`). Ported it to #24's API: `store.isPro`, `try await store.restorePurchases() -> Bool`, and errors from the thrown error. `StoreKitManager` mirrors the entitlement into `AppState`.
+- **#32's own head `96a3ece` was red**: `PlayerPresentation.canStep` had two statements and no `return`. Fixed here (one word).
+- `git grep` finds no other callers of the old StoreKit API (`isPurchased`, `purchaseLifetime`, `fetchProducts`, `lifetimeProduct`, `updatePurchasedStatus`).
+
 ### 2026-11-05 00:56 (Bogotá) — Integrator: merged #30 (claude/review-fixes)
 - Merged [#30](https://github.com/Xanderco/iOSCarPlayVideo/pull/30), the independent review of phase 1 (`Docs/Review-2026-11-05.md`). Adds narrow ATS exceptions (`NSAllowsArbitraryLoadsForMedia`, `NSAllowsLocalNetworking`) so http IPTV and LAN Jellyfin/Emby work on device. Fixes the double remote-command handlers: only `VideoPlayerService.shared` owns the targets, and CarPlay just enables them. Also fixes the observer cleanup in `stop()`, adds real assertions in `CarPlayDiagnosticTests`, and adds `ReviewFixesTests`. The later commit migrates leftover files to v2 tokens and adds a CI warning summary.
 - Conflicts resolved:

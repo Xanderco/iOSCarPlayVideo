@@ -69,7 +69,7 @@ public struct SettingsView: View {
 
     public init() {}
 
-    private var isPro: Bool { appState.isProLifetimeUnlocked || store.isPurchased }
+    private var isPro: Bool { appState.isProLifetimeUnlocked || store.isPro }
 
     private var speedUnitBinding: Binding<Bool> {
         Binding(
@@ -280,17 +280,17 @@ public struct SettingsView: View {
 
     private func restore() {
         isRestoring = true
-        store.errorMessage = nil
         Task { @MainActor in
-            await store.restorePurchases()
-            isRestoring = false
-            if store.isPurchased {
-                appState.unlockProLifetime()
-                restoreMessage = "Your DashCast Pro purchase has been restored."
-            } else if let error = store.errorMessage, !error.isEmpty {
-                restoreMessage = error
-            } else {
-                restoreMessage = "No previous DashCast Pro purchase was found for this Apple ID."
+            defer { isRestoring = false }
+            do {
+                // StoreKitManager (#24) mirrors the entitlement into AppState itself.
+                if try await store.restorePurchases() {
+                    restoreMessage = "Your DashCast Pro purchase has been restored."
+                } else {
+                    restoreMessage = "No previous DashCast Pro purchase was found for this Apple Account."
+                }
+            } catch {
+                restoreMessage = error.localizedDescription
             }
         }
     }
