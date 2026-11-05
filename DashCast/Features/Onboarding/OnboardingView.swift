@@ -294,6 +294,10 @@ private struct HeroBackdrop: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var breathe = false
 
+    init(tint: Color) {
+        self.tint = tint
+    }
+
     var body: some View {
         ZStack {
             LinearGradient(colors: [tint.opacity(0.28), Color.dcBackground], startPoint: .top, endPoint: .bottom)
