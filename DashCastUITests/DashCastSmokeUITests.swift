@@ -61,7 +61,7 @@ final class DashCastSmokeUITests: XCTestCase {
     func testMediaSourcesSheetListsChannels() throws {
         let row = app.buttons["Cast_MediaSourceRow"]
         XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
-        row.tap()
+        tapCenter(of: row)
 
         XCTAssertTrue(
             app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
@@ -82,7 +82,7 @@ final class DashCastSmokeUITests: XCTestCase {
     func testBrowserSheetOpens() throws {
         let row = app.buttons["Cast_BrowserRow"]
         XCTAssertTrue(row.waitForExistence(timeout: 15), "Browser row missing")
-        row.tap()
+        tapCenter(of: row)
 
         let exit = app.buttons["Exit"]
         XCTAssertTrue(exit.waitForExistence(timeout: 10), "Browser sheet did not open")
@@ -94,6 +94,13 @@ final class DashCastSmokeUITests: XCTestCase {
     }
 
     // MARK: - Helpers
+
+    /// Screens are wrapped in `accessibilityElement(children: .contain)` containers
+    /// (for `Screen_*` identifiers), which makes XCUITest report their children as
+    /// "not hittable" even when fully visible. Tap the element's center instead.
+    private func tapCenter(of element: XCUIElement) {
+        element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    }
 
     private func snapshot(_ name: String) {
         let attachment = XCTAttachment(screenshot: app.screenshot())
