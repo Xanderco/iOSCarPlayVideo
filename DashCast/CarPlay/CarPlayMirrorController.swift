@@ -183,7 +183,9 @@ final class CarPlayMirrorController {
     private var timer: Timer?
     private var lastSequence: UInt64 = 0
     private var lastFrameAt: Date?
-    private let parkedGuard = ParkedGuard()
+    /// The app-wide parked guard; we only stop it if we were the ones who started it.
+    private var parkedGuard: ParkedGuard { CarVideoOutputController.shared.parkedGuard }
+    private var startedParkedGuard = false
 
     var isAttached: Bool { rootView != nil }
 
@@ -194,12 +196,12 @@ final class CarPlayMirrorController {
         window.rootViewController = controller
         window.makeKeyAndVisible()
         rootView = root
+        state = .instructions
+        root.apply(.instructions)
 
-        guard CarMirrorFeature.isEnabled() else {
-            root.apply(.instructions)
-            return
-        }
-        parkedGuard.start()
+        // Poll even while the flag is off so turning it on from the phone takes
+        // effect without reconnecting CarPlay; with the flag off a tick is one
+        // defaults read.
         timer?.invalidate()
         let timer = Timer(timeInterval: Self.pollInterval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.tick() }
@@ -211,29 +213,57 @@ final class CarPlayMirrorController {
     func detach() {
         timer?.invalidate()
         timer = nil
-        parkedGuard.stop()
+        stopParkedGuardIfOurs()
         rootView = nil
         lastFrameAt = nil
+        lastSequence = 0
         state = .instructions
     }
 
     private func tick() {
         guard let rootView else { return }
+        let enabled = CarMirrorFeature.isEnabled()
+        if enabled {
+            startParkedGuardIfNeeded()
+        } else {
+            stopParkedGuardIfOurs()
+        }
+        guard enabled else {
+            if state != .instructions {
+                state = .instructions
+                rootView.apply(.instructions)
+            }
+            return
+        }
         let moving = CarCastShared.isVehicleMoving()
-        var displayed = false
         if !moving, let url = CarMirrorFeature.framesURL,
            let frame = MirrorFrameReader.latestFrame(at: url, newerThan: lastSequence) {
             lastSequence = frame.sequence
-            if rootView.renderer.display(jpeg: frame.jpeg) {
-                lastFrameAt = Date()
-                displayed = true
+            // Frame timestamps are wall-clock time from the extension, so a frame
+            // left over from an earlier broadcast is never shown as live.
+            let capturedAt = Date(timeIntervalSince1970: frame.timestamp)
+            if Date().timeIntervalSince(capturedAt) < CarMirrorDisplayState.staleFrameInterval,
+               rootView.renderer.display(jpeg: frame.jpeg) {
+                lastFrameAt = capturedAt
             }
         }
         let age = lastFrameAt.map { Date().timeIntervalSince($0) }
-        let next = CarMirrorDisplayState.resolve(featureEnabled: CarMirrorFeature.isEnabled(), vehicleMoving: moving, lastFrameAge: age)
-        if next != state || (displayed && next == .mirroring && rootView.renderer.isHidden) {
+        let next = CarMirrorDisplayState.resolve(featureEnabled: enabled, vehicleMoving: moving, lastFrameAge: age)
+        if next != state {
             state = next
             rootView.apply(next)
         }
+    }
+
+    private func startParkedGuardIfNeeded() {
+        guard !parkedGuard.isMonitoring else { return }
+        parkedGuard.start()
+        startedParkedGuard = true
+    }
+
+    private func stopParkedGuardIfOurs() {
+        guard startedParkedGuard else { return }
+        startedParkedGuard = false
+        parkedGuard.stop()
     }
 }
