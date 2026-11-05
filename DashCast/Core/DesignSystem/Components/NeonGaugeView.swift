@@ -12,7 +12,7 @@ public struct NeonGaugeView: View {
         maxValue: Double = 220,
         title: String = "SPEED",
         unit: String = "KM/H",
-        accentColor: Color = .dashYellow
+        accentColor: Color = .dcAccent
     ) {
         self.value = value
         self.maxValue = maxValue
@@ -31,7 +31,7 @@ public struct NeonGaugeView: View {
             Circle()
                 .trim(from: 0.15, to: 0.85)
                 .stroke(
-                    Color.dashSurfaceHighlight,
+                    Color.dcSurfaceHighlight,
                     style: StrokeStyle(lineWidth: 12, lineCap: .round)
                 )
                 .rotationEffect(.degrees(90))
@@ -41,29 +41,29 @@ public struct NeonGaugeView: View {
                 .trim(from: 0.15, to: 0.15 + (progress * 0.70))
                 .stroke(
                     LinearGradient(
-                        colors: [.dashYellow, .dashGold, .dashAmber],
+                        colors: [.dcAccent, .dcSuccess, .dcWarning],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
                     style: StrokeStyle(lineWidth: 12, lineCap: .round)
                 )
                 .rotationEffect(.degrees(90))
-                .shadow(color: Color.dashYellow.opacity(0.85), radius: 10, x: 0, y: 0)
+                .shadow(color: Color.dcAccent.opacity(0.85), radius: 10, x: 0, y: 0)
                 .animation(.easeOut(duration: 0.2), value: value)
 
             // Digital readout
             VStack(spacing: 2) {
                 Text(title)
-                    .font(ThemeFonts.hudCaption(size: 11))
-                    .foregroundStyle(Color.dashTextMuted)
+                    .font(DSTypography.badge)
+                    .foregroundStyle(Color.dcTextTertiary)
                     .tracking(1.5)
 
                 Text(String(format: "%.0f", value))
-                    .font(ThemeFonts.speedDisplay(size: 56))
-                    .foregroundStyle(Color.dashTextPrimary)
+                    .font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit())
+                    .foregroundStyle(Color.dcTextPrimary)
 
                 Text(unit)
-                    .font(ThemeFonts.hudCaption(size: 12))
+                    .font(DSTypography.caption)
                     .foregroundStyle(accentColor)
                     .fontWeight(.bold)
             }

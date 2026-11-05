@@ -23,17 +23,17 @@ public struct LiquidCapsuleTabBar: View {
                     VStack(spacing: 4) {
                         Image(systemName: item.iconName)
                             .font(.system(size: 20, weight: isSelected ? .bold : .medium))
-                            .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextMuted)
+                            .foregroundStyle(isSelected ? Color.dcAccent : Color.dcTextTertiary)
                             .frame(height: 22)
 
                         Text(item.rawValue)
                             .font(.system(size: 10, weight: isSelected ? .bold : .medium))
-                            .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextMuted)
+                            .foregroundStyle(isSelected ? Color.dcAccent : Color.dcTextTertiary)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
                     .background(
-                        isSelected ? Color.dashYellow.opacity(0.14) : Color.clear
+                        isSelected ? Color.dcAccent.opacity(0.14) : Color.clear
                     )
                     .clipShape(Capsule())
                     .contentShape(Rectangle())
@@ -46,7 +46,7 @@ public struct LiquidCapsuleTabBar: View {
         .padding(.vertical, 6)
         .background(
             ZStack {
-                Color.dashSurface.opacity(0.85)
+                Color.dcSurface.opacity(0.85)
                 Capsule()
                     .strokeBorder(Color.white.opacity(0.12), lineWidth: 1)
             }
