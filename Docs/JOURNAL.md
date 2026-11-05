@@ -64,11 +64,11 @@
 - **O1** In-app web browser: keep (honest 18+ rating) or remove (lower rating)?
 - ~~**O2** Drive / Widgets / Sounds: keep as secondary "Extras", or drop to sharpen the video focus?~~ **Resolved 2026-11-05 (owner): Drive stays a real feature** (live location + automatic trip detection, `claude/drive-auto`, which owns `Features/Drive`). Widgets and Sounds may move under Extras. *(Context: #31 had moved all three under Settings › Car Extras as Trip Log / Car Screen / Chime — see `Docs/Originality-audit.md` §3.)*
 - **O3** Which car-video path to promise (see ADR-002): AirPlay-when-parked on supported head units, screen mirroring, DLNA receive.
-- **O4** CarPlay entitlement category to request from Apple (likely Audio/Video-adjacent per ADR). *(2026-11-05: #28 recommends the **CarPlay Video App** entitlement, not Navigation; justification text in ADR-002 §7.3 — owner to submit.)*
+- **O4** CarPlay entitlement category to request from Apple (likely Audio/Video-adjacent per ADR). *(2026-11-05 00:50: #28 first recommended the CarPlay Video App entitlement. **Superseded 01:15 by carplay-mirror follow-up e7f0f72: request CarPlay _Audio_ (`com.apple.developer.carplay-audio`).** An Audio app appears in every CarPlay car; Video only shows in cars with "video in the car" support and can't be combined with Audio. Steps and justification are in `Docs/CarPlay.md` — owner to submit.)*
 
 ## 7. Human to-dos
 
-- [ ] Request CarPlay entitlement — developer.apple.com/contact/carplay. Category: **CarPlay Video App** (ADR-002 §7.3). Until granted, CarPlay shows nothing on a real head unit and the mirror flag stays off.
+- [ ] Request CarPlay entitlement — developer.apple.com/contact/carplay. Category: **Audio** (`com.apple.developer.carplay-audio`; steps and ready-to-paste justification at the top of `Docs/CarPlay.md`). Until granted, CarPlay shows nothing on a real head unit; the Xcode CarPlay simulator works now via `DashCast/DashCast-Simulator.entitlements`.
 - [ ] App Store Connect: create **one** non-consumable `pro.lifetime`, USD 19.99, Family Sharing on. No subscriptions (D1).
 - [ ] Apple Developer portal: register app group `group.com.xanderco.dashcast` and bundle IDs `com.xanderco.dashcast.broadcast`, `.castwidget`, `.widgets` (each with the app group). Needed before any device/TestFlight signing.
 - [ ] Privacy policy, terms (EULA) and support URLs (placeholders in metadata).
@@ -89,6 +89,16 @@
 ---
 
 ## Log
+
+### 2026-11-05 01:15 (Bogotá) — Integrator: merged carplay-mirror follow-up e7f0f72
+- Merged the `claude/carplay-mirror` follow-up `e7f0f72` (no PR; #28 was already merged). It adds `DashCast/DashCast-Simulator.entitlements` (carplay-audio + app group), selected via `CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]`, so DashCast appears in the Xcode CarPlay simulator. This fixes the owner's Mac finding #6. A CI step keeps CarPlay keys out of the device entitlements. Also adds `CarPlaySceneTests` and rewrites `Docs/CarPlay.md`.
+- **Decision change (O4):** request the CarPlay **Audio** entitlement, not Video. Journal §6/§7 and handoff H1/T4 are updated.
+- Conflicts resolved:
+  - `CarPlaySceneDelegate`: kept the integration's PlaylistStore-backed delegate, as the branch's own merge note asks. Added static `libraryTemplate()`, `favoritesTemplate()`, `mirrorInstructionsTemplate()` and `mirrorInstructionSteps`; tabs are now Library · Favorites · Info · Cast.
+  - **Bug fixed:** my phase-2 port of #28 had pushed a `CPInformationTemplate` from the Info tab. That template is **not allowed for CarPlay Audio apps** and would throw, so the instructions are now the disabled-row list tab "Cast".
+  - `ci.yml`: #30's warning summary plus the entitlement guard step.
+  - `project.yml`: the simulator entitlements line was added next to #21's device-family line.
+  - `Docs/CarPlay.md`: took the branch's version.
 
 ### 2026-11-05 01:13 (Bogotá) — Integrator: fix EntitlementGate test after #18 × #24
 - **CI on `cecc1e6`:** the build succeeded and 190 of 192 unit tests passed (1 skipped, pre-existing). **2 failures, both in `EntitlementGateTests.testPlayerRefusesToCastWhenFreeAllowanceIsUsedUp`.** This is a semantic clash between #18 and #24. #24's test assumed `play()` sets `isPlaying` synchronously. Since #18, `isPlaying` mirrors AVPlayer's asynchronous `timeControlStatus`, which never reaches `.playing` for the test's fake URL.

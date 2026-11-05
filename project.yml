@@ -32,6 +32,9 @@ targets:
         CODE_SIGN_ENTITLEMENTS: DashCast/DashCast.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1"
+        # Simulator only: adds the CarPlay key so DashCast shows up in
+        # Simulator > I/O > External Displays > CarPlay. See Docs/CarPlay.md.
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": DashCast/DashCast-Simulator.entitlements
     dependencies:
       - target: DashCastBroadcast
       - target: DashCastCastWidget

@@ -1,5 +1,60 @@
 # DashCast on CarPlay
 
+## What the owner must request from Apple (to appear on a REAL car dashboard)
+
+**Request the CarPlay _Audio_ entitlement: `com.apple.developer.carplay-audio`.**
+
+1. Account Holder/Admin of team `96YG38576A` opens <https://developer.apple.com/contact/carplay/>.
+2. Category: **Audio**. App: DashCast, bundle id `com.xanderco.dashcast`. Paste the justification below.
+3. When Apple approves: *Certificates, Identifiers & Profiles → Identifiers → com.xanderco.dashcast →
+   Additional Capabilities* → enable the CarPlay Audio capability; let Xcode refresh the profiles.
+4. Copy the `com.apple.developer.carplay-audio` key from `DashCast/DashCast-Simulator.entitlements`
+   into `DashCast/DashCast.entitlements` and remove the CI guard step "Check CarPlay simulator
+   entitlements" line that forbids it.
+
+Why Audio and not the iOS 27 Video entitlement: an Audio app shows on the CarPlay home screen of
+**every** CarPlay car; a Video app only appears in cars whose automaker ships "video in the car"
+(almost none yet), and the two cannot be combined (iOS 27.2). Video on the car screen still works
+for an Audio app through AirPlay video while parked (iOS 26). Revisit Video when cars support it
+(ADR-002 §7.2). Navigation (`carplay-maps`) is the only entitlement that gives a free drawing
+window, but Apple only grants it to turn-by-turn apps: do not request it.
+
+Ready-to-paste justification:
+
+> DashCast is a car companion app. In CarPlay it is an audio app: drivers browse their own live
+> channels and playlists (Library, Favorites) and listen to the audio through the car while
+> driving, using CPListTemplate, CPTabBarTemplate and CPNowPlayingTemplate with MPNowPlayingInfoCenter
+> and remote commands. DashCast never shows video while the vehicle is moving: video goes to the
+> car display only through AirPlay video in the car (iOS 26) while parked, and DashCast also stops
+> its own playback and screen broadcasts when GPS speed or Core Motion reports driving. The car
+> screen shows only standard CarPlay templates. DashCast does not offer DRM streaming services or
+> third-party channel presets; users add their own playlists and media servers.
+
+## How to see DashCast on the CarPlay simulator (no entitlement needed)
+
+Simulator builds use `DashCast/DashCast-Simulator.entitlements` (selected by
+`CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]` in `project.yml`), which contains
+`com.apple.developer.carplay-audio`. Simulator builds are not checked against a provisioning
+profile, so the key works there. Device/release builds keep `DashCast/DashCast.entitlements`
+without any CarPlay key (CI fails if one is added before the grant).
+
+1. On the Mac: `brew install xcodegen` (once), then in the repo `xcodegen generate`.
+2. Open `DashCast.xcodeproj`, scheme **DashCast**, destination any **iPhone simulator**
+   (iOS 17+), press **Run** (⌘R).
+3. With the Simulator in front: menu **I/O → External Displays → CarPlay**. A CarPlay window opens.
+4. On the CarPlay home screen tap the **DashCast** icon (swipe to the 2nd page if needed).
+5. You should see the tab bar: **Library**, **Favorites**, **Now Playing**, **Cast**. Tap a Library
+   channel → it starts playing and **Now Playing** shows it. **Cast** is the
+   "Mirror iPhone" instructions screen (3 steps: open DashCast → Cast → Car Display, turn on
+   "Mirror to CarPlay screen" and Start Broadcast, parked only).
+6. If the icon is missing: Product → Clean Build Folder, delete the app from the simulator, run
+   again, then re-open the CarPlay display (the entitlement is read at install time). Check with
+   `codesign -d --entitlements - <path to DashCast.app>` that `carplay-audio` is present.
+
+Limits: ReplayKit broadcasting does not run in the Simulator, so the mirror itself can only be
+tried on a device; the CarPlay window renderer (ADR-002 §7.4) is never used by an Audio app.
+
+
 ## Why DashCast does not show up on CarPlay yet
 
 CarPlay only lists apps whose provisioning profile carries a **CarPlay entitlement** granted by Apple.
@@ -11,9 +66,7 @@ signing fail ("Provisioning profile doesn't include the com.apple.developer.carp
 ## Requesting the entitlement
 
 1. Sign in as the Account Holder / Admin of team `96YG38576A`.
-2. Fill the form at <https://developer.apple.com/contact/carplay/>. Choose the category that matches
-   what the app does in the car (for DashCast: **Audio**, since live channels play as audio while
-   driving).
+2. Fill the form at <https://developer.apple.com/contact/carplay/>, category **Audio** (see top).
 3. When Apple approves it, in the developer portal open *Certificates, Identifiers & Profiles →
    Identifiers → com.xanderco.dashcast → Additional Capabilities* and enable the granted CarPlay
    capability, then regenerate/refresh provisioning profiles (Xcode Automatic signing does this).
@@ -40,13 +93,13 @@ signing fail ("Provisioning profile doesn't include the com.apple.developer.carp
 | Fueling | `com.apple.developer.carplay-fueling` |
 | Driving task | `com.apple.developer.carplay-driving-task` |
 
-There is no "video" category: CarPlay templates cannot play video while driving.
+iOS 27 adds a CarPlay **video app** entitlement (WWDC26), which only shows in cars that support
+"video in the car" and cannot be combined with Audio. See ADR-002 §7.
 
 ## Testing without a car
 
-- **Xcode iOS Simulator:** run the app, then *I/O → External Displays → CarPlay* in the Simulator
-  menu. For the simulator you can temporarily add the entitlement key locally (simulator builds are
-  not checked against a profile); do not commit it before Apple grants it.
+- **Xcode iOS Simulator:** see "How to see DashCast on the CarPlay simulator" above (the key is
+  committed in the simulator-only entitlements file).
 - **CarPlay Simulator (Mac app):** part of *Additional Tools for Xcode* (download from
   developer.apple.com/download/all). Connect an iPhone by USB running a build signed with the
   granted entitlement; the Mac acts as a head unit.
