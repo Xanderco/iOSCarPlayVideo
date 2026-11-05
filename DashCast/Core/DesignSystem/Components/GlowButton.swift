@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Legacy v1 button. Prefer `PrimaryButton` for new UI.
+
 public struct GlowButton: View {
     public let title: String
     public let iconName: String?
@@ -11,8 +13,8 @@ public struct GlowButton: View {
     public init(
         title: String,
         iconName: String? = nil,
-        gradient: LinearGradient = .dashAccentGradient,
-        textColor: Color = .black,
+        gradient: LinearGradient = .dcAccentGradient,
+        textColor: Color = .dcOnAccent,
         height: CGFloat = 52,
         action: @escaping () -> Void
     ) {
@@ -38,8 +40,8 @@ public struct GlowButton: View {
             .frame(maxWidth: .infinity)
             .frame(height: height)
             .background(gradient)
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .shadow(color: Color.dashYellow.opacity(0.4), radius: 10, x: 0, y: 5)
+            .clipShape(RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
+            .shadow(color: Color.dcAccent.opacity(0.3), radius: 10, x: 0, y: 5)
         }
         .buttonStyle(.plain)
     }

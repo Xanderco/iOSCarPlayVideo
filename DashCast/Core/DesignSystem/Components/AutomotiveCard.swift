@@ -1,13 +1,15 @@
 import SwiftUI
 
+/// Legacy v1 card. Prefer `.dsCard()` for new UI.
+
 public struct AutomotiveCard<Content: View>: View {
     public let content: Content
     public var cornerRadius: CGFloat
     public var borderColor: Color
 
     public init(
-        cornerRadius: CGFloat = 16,
-        borderColor: Color = .dashBorder.opacity(0.6),
+        cornerRadius: CGFloat = DSRadius.lg,
+        borderColor: Color = .dcStroke,
         @ViewBuilder content: () -> Content
     ) {
         self.cornerRadius = cornerRadius
@@ -18,12 +20,12 @@ public struct AutomotiveCard<Content: View>: View {
     public var body: some View {
         content
             .padding()
-            .background(Color.dashSurface)
+            .background(Color.dcSurface)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(borderColor, lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.35), radius: 8, x: 0, y: 4)
+            .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
     }
 }
