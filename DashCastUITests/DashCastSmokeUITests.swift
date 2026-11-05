@@ -99,6 +99,19 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    /// App Review 3.1.1 / 3.1.2: restore, terms and privacy are reachable from the Me tab itself.
+    func testMeTabShowsLegalSection() throws {
+        let meTab = tabButton("Me")
+        XCTAssertTrue(meTab.waitForExistence(timeout: 15), "Me tab missing")
+        meTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Me"].waitForExistence(timeout: 10), "Me screen missing")
+
+        for id in ["Me_RestorePurchases", "Me_TermsOfUse", "Me_PrivacyPolicy", "Me_ReplayWelcomeTour"] {
+            XCTAssertTrue(app.descendants(matching: .any)[id].waitForExistence(timeout: 10), "\(id) row missing")
+        }
+        snapshot("05-me-legal")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

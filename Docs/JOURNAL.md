@@ -92,6 +92,13 @@
 
 ## Log
 
+### 2026-11-05 02:30 (Bogotá) — Session 21: App Review blockers on the classic UI (`claude/review-blockers` → `claude/classic-ui`)
+- **Me tab → Legal card** (same row style as the existing menu card, added below it; no layout/navigation change per D10): Restore Purchases (StoreKit 2 `restorePurchases()`, result alert), Terms of Use (EULA), Privacy Policy, **Replay Welcome Tour** (clears `PassengerSafetyNotice.acceptedKey`, so `MainTabView` shows `WelcomeOnboardingView` again). Settings keeps its Restore + Legal rows; restore logic is now shared.
+- **Paywall:** `PaywallLegal` now forwards to `LegalLinks` (one source of truth). Price is `Product.displayPrice` of `pro.lifetime` (USD 19.99 non-consumable); only "no subscription / never renews" wording, no trial or billing-period copy.
+- **Originality (D2):** removed every `CarDash`/`1:1` comment in `DashCast/` and the "(Matching <reference>.jpeg)" MARK suffixes. `project.yml` excludes `MediaToAnalyze/`, `Screenshots/`, `ReferenceMedia/` from the app target (already gitignored).
+- **Tests:** `AppReviewBlockerTests` (https legal links, paywall = Me links, storekit is one 19.99 non-consumable with no subscriptions, no reference media in the bundle, replay-tour reset). UI: `testMeTabShowsLegalSection`.
+- Follow-ups (human): `https://dashcast.app/privacy` and `/support` are still placeholders until hosted (`LegalLinks.swift`); Terms = Apple standard EULA.
+
 ### 2026-11-05 01:45 (Bogotá) — Owner reverted the redesign UI (branch claude/classic-ui)
 - Owner tested the integrated build on his Mac and found the redesign (#31 2B, #32/#34 2A: Home/Library/Cast/Settings tabs, onboarding, Extras) **confusing**; he wants the **previous UI** (Cast / Drive / Widgets / Sounds / Me) with the new functionality.
 - `claude/classic-ui` restores all app/test/UI-test code to `integration complete: phase 2` (dc5962c: old UI + widgets #27 + CarPlay mirror #28 + paywall #24 + car video #25) and re-applies only functional work from later merges: Info.plist ATS (http IPTV), simulator-only CarPlay entitlements + CarPlay scene delegates, IPTVParser (own demo videos only), VideoPlayerService + MediaServerStore + DemoDataSeeder review fixes, Drive live map (`DriveLiveMapView` replaces the static route map in the old DriveHomeView) and automatic trips (`AutoTripService`, `TripDetectionStateMachine`) wired to the existing "Auto-detect drives" toggle, plus their tests (TripDetection, ReviewFixes, CarPlayScene, CastEngine, EntitlementGate).

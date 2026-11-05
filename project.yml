@@ -22,6 +22,11 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: DashCast
+        # Competitor/reference media must never ship in the app bundle (D2, Docs/Originality-audit.md).
+        excludes:
+          - "**/MediaToAnalyze/**"
+          - "**/Screenshots/**"
+          - "**/ReferenceMedia/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast

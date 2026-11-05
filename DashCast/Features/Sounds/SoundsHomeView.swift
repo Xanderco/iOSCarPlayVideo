@@ -291,7 +291,7 @@ public struct SoundsHomeView: View {
         }
     }
 
-    // MARK: - Sound Picker Sheet (Matching Select CarPlay Connection Sound.jpeg)
+    // MARK: - Sound Picker Sheet
 
     private func soundPickerSheet(for slot: String) -> some View {
         let title = slot == "disconnection" ? "Select Disconnection Sound" : "Select Connection Sound"

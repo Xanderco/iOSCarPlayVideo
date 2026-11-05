@@ -2,10 +2,10 @@ import SwiftUI
 import StoreKit
 
 /// Legal links shown on the paywall (App Review guideline 3.1.2 / 5.1.1).
+/// Same URLs as Me → Legal and About; the single source of truth is `LegalLinks`.
 public enum PaywallLegal {
-    /// Apple's standard EULA. Swap for a custom EULA URL if one is set in App Store Connect.
-    public static let termsOfUse = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
-    public static let privacyPolicy = URL(string: "https://dashcast.app/privacy")!
+    public static var termsOfUse: URL { LegalLinks.termsOfUse }
+    public static var privacyPolicy: URL { LegalLinks.privacyPolicy }
 }
 
 /// DashCast Pro paywall: a single one-time, non-consumable purchase. No subscription.
@@ -242,8 +242,10 @@ public struct LifetimePaywallView: View {
             }
             HStack(spacing: 14) {
                 Link("Terms of Use (EULA)", destination: PaywallLegal.termsOfUse)
+                    .accessibilityIdentifier("paywall.terms")
                 Text("·")
                 Link("Privacy Policy", destination: PaywallLegal.privacyPolicy)
+                    .accessibilityIdentifier("paywall.privacy")
             }
         }
         .font(.system(size: 11))

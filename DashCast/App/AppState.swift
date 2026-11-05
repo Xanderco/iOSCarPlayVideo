@@ -14,7 +14,7 @@ public final class AppState: ObservableObject {
     @Published public var isDriveActive: Bool = false
     @Published public var useMilesPerHour: Bool = false
 
-    // Matches CarDash exact 5 native tabs
+    // The five main tabs, in display order
     public enum TabItem: String, CaseIterable, Identifiable {
         case cast = "Cast"
         case drive = "Drive"

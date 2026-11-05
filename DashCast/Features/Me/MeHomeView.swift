@@ -12,6 +12,7 @@ public struct MeHomeView: View {
     @State private var showingAbout: Bool = false
     @State private var showingFeedback: Bool = false
     @State private var restoreMessage: String?
+    @State private var meRestoreMessage: String?
     @State private var showingDriveDetails: Bool = false
     @State private var showingMediaServers: Bool = false
     @State private var selectedVehicleIndex: Int = 0
@@ -42,14 +43,17 @@ public struct MeHomeView: View {
 
                 ScrollView {
                     VStack(spacing: 18) {
-                        // Top Profile & Selected Vehicle Card (Exact 1:1 match)
+                        // Top profile & selected vehicle card
                         topVehicleProfileCard
 
-                        // PRO Upgrade Banner (Exact 1:1 match)
+                        // PRO upgrade banner
                         proUpgradeBanner
 
-                        // Navigation Menu Rows (Exact 1:1 match)
+                        // Navigation menu rows
                         navigationMenuSection
+
+                        // Legal: restore, terms, privacy, welcome tour (App Review 3.1.1 / 3.1.2)
+                        legalMenuSection
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 10)
@@ -72,6 +76,14 @@ public struct MeHomeView: View {
             }
             .sheet(isPresented: $showingMediaServers) {
                 MediaServersHomeView()
+            }
+            .alert("Restore Purchases", isPresented: Binding(
+                get: { meRestoreMessage != nil },
+                set: { if !$0 { meRestoreMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(meRestoreMessage ?? "")
             }
         }
     }
@@ -271,6 +283,62 @@ public struct MeHomeView: View {
         )
     }
 
+    // MARK: - Legal Menu Rows
+
+    private var legalMenuSection: some View {
+        VStack(spacing: 1) {
+            menuItemRow(icon: "arrow.clockwise", title: storeKit.isRestoring ? "Restoring…" : "Restore Purchases") {
+                Task { meRestoreMessage = await restorePurchasesMessage() }
+            }
+            .disabled(storeKit.isRestoring || storeKit.isPurchasing)
+            .accessibilityIdentifier("Me_RestorePurchases")
+
+            Divider().background(Color.dashBorder.opacity(0.5))
+
+            Link(destination: LegalLinks.termsOfUse) {
+                menuItemLabel(icon: "doc.text.fill", title: "Terms of Use (EULA)")
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("Me_TermsOfUse")
+
+            Divider().background(Color.dashBorder.opacity(0.5))
+
+            Link(destination: LegalLinks.privacyPolicy) {
+                menuItemLabel(icon: "lock.shield.fill", title: "Privacy Policy")
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("Me_PrivacyPolicy")
+
+            Divider().background(Color.dashBorder.opacity(0.5))
+
+            menuItemRow(icon: "sparkles", title: "Replay Welcome Tour") {
+                // MainTabView observes the same key and presents WelcomeOnboardingView again.
+                PassengerSafetyNotice.replayWelcomeTour()
+                passengerNoticeAccepted = false
+            }
+            .accessibilityIdentifier("Me_ReplayWelcomeTour")
+        }
+        .background(Color.dashSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.dashBorder, lineWidth: 1)
+        )
+    }
+
+    /// Restores via StoreKit 2 (`AppStore.sync()` + current entitlements) and returns the alert text.
+    private func restorePurchasesMessage() async -> String {
+        do {
+            // StoreKitManager mirrors the entitlement into AppState itself.
+            if try await storeKit.restorePurchases() {
+                return "Your DashCast Pro purchase has been restored."
+            }
+            return "No previous DashCast Pro purchase was found for this Apple Account."
+        } catch {
+            return error.localizedDescription
+        }
+    }
+
     private func menuItemRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             menuItemLabel(icon: icon, title: title)
@@ -300,7 +368,7 @@ public struct MeHomeView: View {
             .contentShape(Rectangle())
     }
 
-    // MARK: - Settings Sheet (Matching SETTINGS.jpeg)
+    // MARK: - Settings Sheet
 
     private var settingsSheet: some View {
         NavigationStack {
@@ -339,18 +407,7 @@ public struct MeHomeView: View {
 
                             // Restore Purchase
                             Button {
-                                Task {
-                                    do {
-                                        // StoreKitManager mirrors the entitlement into AppState itself.
-                                        if try await storeKit.restorePurchases() {
-                                            restoreMessage = "Your DashCast Pro purchase has been restored."
-                                        } else {
-                                            restoreMessage = "No previous DashCast Pro purchase was found for this Apple Account."
-                                        }
-                                    } catch {
-                                        restoreMessage = error.localizedDescription
-                                    }
-                                }
+                                Task { restoreMessage = await restorePurchasesMessage() }
                             } label: {
                                 HStack(spacing: 12) {
                                     Image(systemName: "arrow.clockwise")
@@ -398,7 +455,7 @@ public struct MeHomeView: View {
         }
     }
 
-    // MARK: - About Sheet (Matching About Screen.jpeg)
+    // MARK: - About Sheet
 
     private var aboutSheet: some View {
         NavigationStack {

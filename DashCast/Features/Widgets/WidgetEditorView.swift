@@ -37,10 +37,10 @@ public struct WidgetEditorView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // 1:1 Widget Preview Card
+                        // Widget preview card
                         widgetPreviewCard
 
-                        // 1:1 Adjust Position Section with Sliders
+                        // Adjust-position section with sliders
                         adjustPositionSection
 
                         // License Plate Text Field
@@ -86,7 +86,7 @@ public struct WidgetEditorView: View {
         }
     }
 
-    // MARK: - Widget Preview Card (Matching Edit widgets on the same app.jpeg)
+    // MARK: - Widget Preview Card
 
     private var widgetPreviewCard: some View {
         VStack(spacing: 8) {
@@ -284,7 +284,7 @@ public struct WidgetEditorView: View {
         }
     }
 
-    // MARK: - License Plate Section (Matching Costumize Widgets with Plate and Car Picture.jpeg)
+    // MARK: - License Plate Section
 
     private var licensePlateSection: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -368,7 +368,7 @@ public struct WidgetEditorView: View {
         }
     }
 
-    // MARK: - Brand Watermark Toggle (Matching Car and Car Barnd Logo.jpeg)
+    // MARK: - Brand Watermark Toggle
 
     private var brandWatermarkSection: some View {
         Toggle(isOn: $config.showWatermark) {
@@ -431,7 +431,7 @@ public struct WidgetEditorView: View {
         }
     }
 
-    // MARK: - Text Color Section (Matching edit widgets on the app.jpeg)
+    // MARK: - Text Color Section
 
     private var textColorSection: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -461,7 +461,7 @@ public struct WidgetEditorView: View {
         }
     }
 
-    // MARK: - Font Selector Section (Matching edit widgets on the app.jpeg)
+    // MARK: - Font Selector Section
 
     private var fontSelectorSection: some View {
         VStack(alignment: .leading, spacing: 10) {

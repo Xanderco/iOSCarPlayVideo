@@ -9,6 +9,17 @@ public enum PassengerSafetyNotice {
         let args = ProcessInfo.processInfo.arguments
         return args.contains("-seedDemoData") || args.contains("-UITests")
     }
+
+    /// Me → "Replay Welcome Tour": clears the acknowledgement so `MainTabView` shows
+    /// `WelcomeOnboardingView` (which ends with this notice) again.
+    public static func replayWelcomeTour(defaults: UserDefaults = .standard) {
+        defaults.set(false, forKey: acceptedKey)
+    }
+
+    /// Whether the welcome tour / notice should be presented for the stored state.
+    public static func needsWelcomeTour(defaults: UserDefaults = .standard) -> Bool {
+        !defaults.bool(forKey: acceptedKey)
+    }
 }
 
 /// First-launch screen: video is for passengers or while parked, never for the driver while moving.

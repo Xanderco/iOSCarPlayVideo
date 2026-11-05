@@ -74,7 +74,7 @@ public struct WebVideoBrowserView: View {
                     .ignoresSafeArea(edges: .bottom)
                 }
 
-                // Bottom Browser Bar matching CarDash 1:1 (<, >, ⌂, 🔖, 🚗 Send to car)
+                // Bottom browser bar: back, forward, home, bookmarks, Send to car
                 bottomBrowserToolbar
             }
             .background(Color.dashBackground)
