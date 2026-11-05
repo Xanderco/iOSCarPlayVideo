@@ -37,6 +37,7 @@ public enum TripFormatting {
 public struct TripLogView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var location = DriveLocationService.shared
+    @ObservedObject private var autoTrips = AutoTripService.shared
 
     @State private var trips: [TripModel] = []
     @State private var showPassengerCheck = false
@@ -46,6 +47,30 @@ public struct TripLogView: View {
 
     public var body: some View {
         List {
+            Section {
+                DriveLiveMapView()
+                    .frame(height: 260)
+                    .listRowInsets(EdgeInsets())
+                LocationPermissionCard()
+            }
+
+            Section {
+                Toggle(isOn: Binding(
+                    get: { autoTrips.isEnabled },
+                    set: { autoTrips.setEnabled($0) }
+                )) {
+                    VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                        Text("Detect trips automatically")
+                            .font(DSTypography.headline)
+                        Text(autoTrips.statusText)
+                            .font(DSTypography.subheadline)
+                            .foregroundStyle(Color.dcTextSecondary)
+                    }
+                }
+            } footer: {
+                Text("Starts recording after about a minute of driving and saves the trip when the car has been stopped for about 3 minutes. Needs location set to Always. Nothing is uploaded.")
+            }
+
             if let error = location.lastErrorMessage {
                 Section {
                     Label(error, systemImage: "exclamationmark.triangle.fill")
@@ -96,6 +121,8 @@ public struct TripLogView: View {
             }
         }
         .onAppear(perform: reload)
+        .onReceive(NotificationCenter.default.publisher(for: .dashCastTripSaved)) { _ in reload() }
+        .onChange(of: location.isTracking) { _, _ in reload() }
         .confirmationDialog(
             "Are you a passenger?",
             isPresented: $showPassengerCheck,
@@ -219,14 +246,8 @@ public struct TripDetailView: View {
         List {
             Section {
                 if coordinates.count > 1 {
-                    Map(initialPosition: .automatic) {
-                        MapPolyline(coordinates: coordinates)
-                            .stroke(Color.dcAccent, lineWidth: 5)
-                    }
-                    .frame(height: 240)
-                    .clipShape(RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
-                    .listRowInsets(EdgeInsets())
-                    .accessibilityLabel(Text("Route map"))
+                    TripReplayMapView(coordinates: coordinates)
+                        .listRowInsets(EdgeInsets())
                 } else {
                     EmptyStateView(
                         systemImage: "map",

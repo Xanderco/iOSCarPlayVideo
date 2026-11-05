@@ -9,17 +9,21 @@ public struct UserPreferences: Codable {
     public var connectionSoundId: String?
     /// Post a local "Trip saved" notification when a Trip Log recording is stopped.
     public var driveNotificationsEnabled: Bool
+    /// Automatic trip detection. nil = not chosen yet, which means ON once Always location is granted.
+    public var autoTripDetectionEnabled: Bool?
 
     public init(
         useMilesPerHour: Bool = false,
         isProLifetimeUnlocked: Bool = false,
         connectionSoundId: String? = SoundCatalogService.defaultSoundId,
-        driveNotificationsEnabled: Bool = true
+        driveNotificationsEnabled: Bool = true,
+        autoTripDetectionEnabled: Bool? = nil
     ) {
         self.useMilesPerHour = useMilesPerHour
         self.isProLifetimeUnlocked = isProLifetimeUnlocked
         self.connectionSoundId = connectionSoundId
         self.driveNotificationsEnabled = driveNotificationsEnabled
+        self.autoTripDetectionEnabled = autoTripDetectionEnabled
     }
 
     enum CodingKeys: String, CodingKey {
@@ -27,6 +31,7 @@ public struct UserPreferences: Codable {
         case isProLifetimeUnlocked
         case connectionSoundId
         case driveNotificationsEnabled
+        case autoTripDetectionEnabled
     }
 
     public init(from decoder: Decoder) throws {
@@ -35,5 +40,6 @@ public struct UserPreferences: Codable {
         isProLifetimeUnlocked = try container.decodeIfPresent(Bool.self, forKey: .isProLifetimeUnlocked) ?? false
         connectionSoundId = try container.decodeIfPresent(String.self, forKey: .connectionSoundId) ?? SoundCatalogService.defaultSoundId
         driveNotificationsEnabled = try container.decodeIfPresent(Bool.self, forKey: .driveNotificationsEnabled) ?? true
+        autoTripDetectionEnabled = try container.decodeIfPresent(Bool.self, forKey: .autoTripDetectionEnabled)
     }
 }

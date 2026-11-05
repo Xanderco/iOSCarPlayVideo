@@ -91,6 +91,14 @@
 
 ## Log
 
+### 2026-11-05 01:16 (Bogotá) — Integrator: merged #35 (claude/drive-auto)
+- Merged [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35) (`claude/drive-auto`), implementing owner decision O2 (Drive stays a real feature) and fixing owner Mac finding #5.
+  - Live follow-user map at the top of Trip Log, with a permission-rationale card (When-In-Use → Always).
+  - **Automatic trip detection**: a pure `TripDetectionStateMachine` plus `AutoTripService` (Core Motion + significant-change location), on by default once Always is granted. Route replay in trip detail.
+  - `TripDetectionTests`, and Freeway Drive QA steps in `Docs/QA/smoke-test.md`.
+- Only the journal conflicted. The Info.plist strings auto-merged: one `NSMotionUsageDescription` now covers both auto-trips and #25's parked guard, and `UIBackgroundModes` = audio + location.
+- Follow-ups: verify on a device (Always permission flow, significant-change relaunch, battery). App Review needs a clear reason for the "location" background mode (the auto-trip feature); add it to the review notes (handoff G1).
+
 ### 2026-11-05 01:16 (Bogotá) — Integrator: merged #33 (claude/review-fixes follow-up)
 - Merged [#33](https://github.com/Xanderco/iOSCarPlayVideo/pull/33), the review-fixes follow-up for owner Mac finding #1 (http streams blocked).
   - ATS is now `NSAllowsArbitraryLoads = YES` **alone** (decision **D10**). This replaces #30's narrow media/LAN keys, which on iOS 10+ also *disable* `NSAllowsArbitraryLoads`, so http playlist downloads and remote http servers stayed blocked.
@@ -141,6 +149,15 @@
 - **Mac result** (owner, iPhone 17 sim): the build is OK, 118 unit and 4 UI tests pass, and there are no runtime issues. YouTube browsing works. The main playback bug was http-only playlists/streams being blocked by ATS.
 - `Info.plist` now sets `NSAllowsArbitraryLoads = YES` **alone**. On iOS 10+, adding `NSAllowsArbitraryLoadsForMedia`, `…InWebContent` or `NSAllowsLocalNetworking` makes iOS ignore it, so do not add them back. `ReviewFixesTests.testATSAllowsUserSuppliedHTTPSources` guards this.
 - The review justification is in `AppStoreMedia/metadata.md` §9 and `Docs/AppReview-checklist.md` #18. Recorded as **D10** (ATS off for user-supplied sources).
+
+### 2026-11-05 01:15 (Bogotá) — Session 18: Drive live location + automatic trips (`claude/drive-auto`, [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35))
+- Owner feedback: the Drive map showed the whole region, and trips weren't detected automatically.
+- New `DashCast/Features/Drive/`: `DriveLiveMapView` (camera follows the user and their heading while recording, `UserAnnotation`, `MapUserLocationButton`, Recenter, live route) plus `LocationPermissionCard` (When-In-Use → Always with explanations; denied opens Settings; restricted shows a message). The map sits at the top of Trip Log.
+- `TripDetectionStateMachine` is pure logic driven by an injected clock. It starts a trip after 60 s of automotive motion (confidence ≥ medium) above 15 km/h, or above 25 km/h when there is no Core Motion (Simulator). It ends the trip after 3 min stationary, reusing `ParkedStateEvaluator`. `AutoTripService` connects Core Motion and significant-change/standard location to `DriveLocationService`, which saves through `PersistenceController`, then sends the "Trip saved" notification. It starts at launch. Manual trips are never auto-ended.
+- Pref `autoTripDetectionEnabled` (nil means ON once Always is granted). Toggle in Trip Log. Info.plist usage strings updated; the `location` background mode was already set.
+- Tests: `TripDetectionTests`. QA steps: `Docs/QA/smoke-test.md` §6d (Freeway Drive).
+- Trip detail now has route replay (`TripReplayMapView`: Play/scrub, car marker, travelled part highlighted).
+- Follow-ups: the first ~60 s of an auto trip isn't in the route (could seed it from the detector's fixes); needs a real-device drive test (background relaunch, battery).
 
 ### 2026-11-05 01:01 (Bogotá) — Integrator: merged #32 follow-up a39798d
 - The #32 session pushed `a39798d` after my merge: the same `canStep` return fix, plus explicit initializers for `ResumeCard` and the internal `LibraryView` subviews (memberwise inits were inaccessible). Merged it. The only conflict was `MirrorScreenSheet`, which stays removed (superseded by #25's `CarOutputPanelView`, see the #32 entry).
