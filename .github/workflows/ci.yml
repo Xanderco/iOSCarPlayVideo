@@ -59,7 +59,7 @@ jobs:
             | tee build.log | grep -E "error:|warning: unre|BUILD (SUCCEEDED|FAILED)|TEST BUILD" || true
           grep -q "TEST BUILD SUCCEEDED\|BUILD SUCCEEDED" build.log
 
-      - name: Test
+      - name: Unit tests
         run: |
           set -o pipefail
           xcodebuild test-without-building \
@@ -68,9 +68,44 @@ jobs:
             -destination "id=${{ steps.sim.outputs.udid }}" \
             -derivedDataPath build/DerivedData \
             -resultBundlePath build/TestResults.xcresult \
+            -only-testing:DashCastTests \
             CODE_SIGNING_ALLOWED=NO \
             | tee test.log | grep -E "error:|Test Case .* failed|Executed|TEST (SUCCEEDED|FAILED)" || true
           grep -q "TEST EXECUTE SUCCEEDED\|TEST SUCCEEDED" test.log
+
+      - name: UI tests
+        run: |
+          set -o pipefail
+          xcrun simctl boot "${{ steps.sim.outputs.udid }}" || true
+          xcodebuild test-without-building \
+            -project DashCast.xcodeproj \
+            -scheme DashCast \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
+            -resultBundlePath build/UITestResults.xcresult \
+            -only-testing:DashCastUITests \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee uitest.log | grep -E "error:|Test Case .* (passed|failed)|Executed|TEST (SUCCEEDED|FAILED)" || true
+          grep -q "TEST EXECUTE SUCCEEDED\|TEST SUCCEEDED" uitest.log
+
+      - name: Export UI test screenshots
+        if: always()
+        run: |
+          mkdir -p build/screenshots
+          if [ -d build/UITestResults.xcresult ]; then
+            xcrun xcresulttool export attachments \
+              --path build/UITestResults.xcresult \
+              --output-path build/screenshots || echo "attachment export failed"
+            ls -la build/screenshots
+          fi
+
+      - name: Upload UI test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-screenshots
+          path: build/screenshots
+          if-no-files-found: warn
 
       - name: Upload logs and results
         if: always()
@@ -80,5 +115,7 @@ jobs:
           path: |
             build.log
             test.log
+            uitest.log
             build/TestResults.xcresult
+            build/UITestResults.xcresult
           if-no-files-found: ignore

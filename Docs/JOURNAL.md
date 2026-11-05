@@ -87,6 +87,10 @@
 
 ## Log
 
+### 2026-11-05 00:25 (Bogotá) — Integrator: merged #22 (claude/qa-ui-tests)
+- Merged [#22](https://github.com/Xanderco/iOSCarPlayVideo/pull/22): XCUITest smoke suite (`DashCastUITests`, 4 tests, screenshots exported as a CI artifact), a CI step that splits unit and UI tests, the `testflight.yml` workflow and `Docs/QA/`.
+- Follow-ups: TestFlight needs App Store Connect API secrets (human); the UI tests assume today's 5-tab layout, so update them when the redesign lands.
+
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #20 (claude/design-system-v2)
 - Merged [#20](https://github.com/Xanderco/iOSCarPlayVideo/pull/20): design system v2 (tokens and components) and `Docs/Design/redesign-spec.md` (four tabs: Home, Library, Cast & Mirror, Settings/Pro). No screens are rewritten yet; that is redesign 2A/2B in phase 2.
 - Open: O2 (Drive/Widgets/Sounds move under Settings → Car Extras, or get cut).

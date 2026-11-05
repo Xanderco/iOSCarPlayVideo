@@ -45,15 +45,32 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcastTests
         GENERATE_INFOPLIST_FILE: YES
 
+  DashCastUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: DashCastUITests
+    dependencies:
+      - target: DashCast
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcastUITests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: DashCast
+        DEVELOPMENT_TEAM: "96YG38576A"
+
 schemes:
   DashCast:
     build:
       targets:
         DashCast: all
         DashCastTests: [test]
+        DashCastUITests: [test]
     test:
       config: Debug
       targets:
         - DashCastTests
+        - DashCastUITests
     run:
       config: Debug
