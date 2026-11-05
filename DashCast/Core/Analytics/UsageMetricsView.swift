@@ -14,19 +14,19 @@ public struct UsageMetricsView: View {
     public var body: some View {
         NavigationStack {
             ZStack {
-                Color.dashBackground.ignoresSafeArea()
+                Color.dcBackground.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 20) {
                         // Header summary
                         VStack(spacing: 6) {
                             Text("Driver Analytics & Usage")
-                                .font(ThemeFonts.hudTitle(size: 22))
-                                .foregroundStyle(Color.dashTextPrimary)
+                                .font(DSTypography.title2)
+                                .foregroundStyle(Color.dcTextPrimary)
 
                             Text("100% Private · Stored locally on this device")
-                                .font(ThemeFonts.hudCaption(size: 13))
-                                .foregroundStyle(Color.dashGreen)
+                                .font(DSTypography.footnote)
+                                .foregroundStyle(Color.dcSuccess)
                         }
                         .padding(.top, 10)
 
@@ -36,11 +36,11 @@ public struct UsageMetricsView: View {
                                 ? String(format: "%.1f mi", metrics.totalDistanceMiles)
                                 : String(format: "%.1f km", metrics.totalDistanceKm)
 
-                            metricCard(title: "TOTAL DISTANCE", value: distanceStr, icon: "road.lanes", color: .dashCyan)
-                            metricCard(title: "TOTAL TRIPS", value: "\(metrics.totalTripsRecorded)", icon: "car.side.fill", color: .dashBlue)
-                            metricCard(title: "AVG SAFETY SCORE", value: String(format: "%.0f / 100", metrics.averageDrivingScore), icon: "shield.checkered", color: .dashGreen)
-                            metricCard(title: "VIDEOS WATCHED", value: "\(metrics.totalVideosWatched)", icon: "play.tv.fill", color: .dashGold)
-                            metricCard(title: "SOUNDS PLAYED", value: "\(metrics.totalSoundsPlayed)", icon: "speaker.wave.3.fill", color: .dashOrange)
+                            metricCard(title: "TOTAL DISTANCE", value: distanceStr, icon: "road.lanes", color: .dcAccent)
+                            metricCard(title: "TOTAL TRIPS", value: "\(metrics.totalTripsRecorded)", icon: "car.side.fill", color: .dcAccent)
+                            metricCard(title: "AVG SAFETY SCORE", value: String(format: "%.0f / 100", metrics.averageDrivingScore), icon: "shield.checkered", color: .dcSuccess)
+                            metricCard(title: "VIDEOS WATCHED", value: "\(metrics.totalVideosWatched)", icon: "play.tv.fill", color: .dcPro)
+                            metricCard(title: "SOUNDS PLAYED", value: "\(metrics.totalSoundsPlayed)", icon: "speaker.wave.3.fill", color: .dcWarning)
                         }
                         .padding(.horizontal)
 
@@ -48,22 +48,22 @@ public struct UsageMetricsView: View {
                         AutomotiveCard {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("DRIVE TIME TRACKED")
-                                    .font(ThemeFonts.hudCaption(size: 11))
-                                    .foregroundStyle(Color.dashTextMuted)
+                                    .font(DSTypography.caption)
+                                    .foregroundStyle(Color.dcTextTertiary)
                                     .tracking(1.0)
 
                                 HStack {
                                     let hours = Int(metrics.totalDurationSeconds) / 3600
                                     let mins = (Int(metrics.totalDurationSeconds) % 3600) / 60
                                     Text("\(hours)h \(mins)m")
-                                        .font(ThemeFonts.speedDisplay(size: 28))
-                                        .foregroundStyle(Color.dashTextPrimary)
+                                        .font(DSTypography.title.monospacedDigit())
+                                        .foregroundStyle(Color.dcTextPrimary)
 
                                     Spacer()
 
                                     Text("First active: \(metrics.firstLaunchDate.formatted(date: .abbreviated, time: .omitted))")
                                         .font(.system(size: 12))
-                                        .foregroundStyle(Color.dashTextMuted)
+                                        .foregroundStyle(Color.dcTextTertiary)
                                 }
                             }
                         }
@@ -74,7 +74,7 @@ public struct UsageMetricsView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "lock.shield.fill")
                                     .font(.system(size: 24))
-                                    .foregroundStyle(Color.dashGreen)
+                                    .foregroundStyle(Color.dcSuccess)
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text("On-Device Privacy Guarantee")
@@ -82,7 +82,7 @@ public struct UsageMetricsView: View {
                                         .foregroundStyle(.white)
                                     Text("DashCast never sells, uploads, or tracks your location or driving telemetry to external servers.")
                                         .font(.system(size: 11))
-                                        .foregroundStyle(Color.dashTextSecondary)
+                                        .foregroundStyle(Color.dcTextSecondary)
                                 }
                             }
                         }
@@ -98,7 +98,7 @@ public struct UsageMetricsView: View {
                     Button("Done") {
                         dismiss()
                     }
-                    .foregroundStyle(Color.dashCyan)
+                    .foregroundStyle(Color.dcAccent)
                 }
             }
         }
@@ -113,11 +113,11 @@ public struct UsageMetricsView: View {
                     Spacer()
                 }
                 Text(title)
-                    .font(ThemeFonts.hudCaption(size: 10))
-                    .foregroundStyle(Color.dashTextMuted)
+                    .font(DSTypography.caption)
+                    .foregroundStyle(Color.dcTextTertiary)
                 Text(value)
-                    .font(ThemeFonts.hudStat(size: 20))
-                    .foregroundStyle(Color.dashTextPrimary)
+                    .font(DSTypography.title3.monospacedDigit())
+                    .foregroundStyle(Color.dcTextPrimary)
             }
         }
     }

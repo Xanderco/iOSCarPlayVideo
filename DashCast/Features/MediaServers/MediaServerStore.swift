@@ -104,8 +104,9 @@ public final class MediaServerPlaybackCoordinator: ObservableObject {
     private var reportingTask: Task<Void, Never>?
     private let player: VideoPlayerService
 
-    public init(player: VideoPlayerService = .shared) {
-        self.player = player
+    public init(player: VideoPlayerService? = nil) {
+        // Resolved here, not as a default argument (those run nonisolated).
+        self.player = player ?? .shared
     }
 
     static func channelId(for item: MediaItem, account: MediaServerAccount) -> String {
