@@ -92,6 +92,12 @@
 
 ## Log
 
+### 2026-11-05 02:30 (Bogotá) — Session 20: CarPlay Video entitlement request (claude/entitlement-request)
+- Added `Docs/CarPlay-Video-Entitlement-Request.md`: every form field with the answer to paste (DashCast, `com.xanderco.dashcast`, team `96YG38576A`, category Video), a plain first-person justification (~980 chars, plus a ~400-char short version), Apple's checklist mapped to the code, what not to say, and the after-approval steps (`com.apple.developer.carplay-video` in `DashCast/DashCast.entitlements`, profile refresh, simulator entitlements and CI guard update). `Docs/CarPlay.md` points to it.
+- Sources: CarPlay Developer Guide (October 2026) confirms the key `com.apple.developer.carplay-video` (iOS 27) and that categories cannot be combined; forums thread 851377 confirms Audio + Video cannot be combined (iOS 27.2). The live form is behind Apple ID sign-in, so field labels come from the guide and public reports.
+- **Owner decision still open (O4):** Video makes DashCast appear only in cars with video-in-CarPlay support; Audio appears in every car. Request one, not both.
+- Must land before a Video build ships: remove the "Cast / Mirror iPhone" tab from the CarPlay scene (guideline: never ask the driver to use the iPhone), add `CPPlaybackConfiguration` on rows and a `CPSessionConfiguration` video check (iOS 27 SDK), verify audio-only fallback in the CarPlay Simulator.
+
 ### 2026-11-05 01:45 (Bogotá) — Owner reverted the redesign UI (branch claude/classic-ui)
 - Owner tested the integrated build on his Mac and found the redesign (#31 2B, #32/#34 2A: Home/Library/Cast/Settings tabs, onboarding, Extras) **confusing**; he wants the **previous UI** (Cast / Drive / Widgets / Sounds / Me) with the new functionality.
 - `claude/classic-ui` restores all app/test/UI-test code to `integration complete: phase 2` (dc5962c: old UI + widgets #27 + CarPlay mirror #28 + paywall #24 + car video #25) and re-applies only functional work from later merges: Info.plist ATS (http IPTV), simulator-only CarPlay entitlements + CarPlay scene delegates, IPTVParser (own demo videos only), VideoPlayerService + MediaServerStore + DemoDataSeeder review fixes, Drive live map (`DriveLiveMapView` replaces the static route map in the old DriveHomeView) and automatic trips (`AutoTripService`, `TripDetectionStateMachine`) wired to the existing "Auto-detect drives" toggle, plus their tests (TripDetection, ReviewFixes, CarPlayScene, CastEngine, EntitlementGate).

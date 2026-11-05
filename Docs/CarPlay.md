@@ -1,5 +1,12 @@
 # DashCast on CarPlay
 
+> **Video entitlement request (Session 20):** the full form walkthrough, ready-to-paste answers,
+> Apple's checklist and the after-approval steps for the CarPlay **Video** category
+> (`com.apple.developer.carplay-video`) are in
+> [`Docs/CarPlay-Video-Entitlement-Request.md`](CarPlay-Video-Entitlement-Request.md).
+> Video and Audio cannot be combined (CarPlay Developer Guide, October 2026): request one.
+> The Audio option below stays valid if the owner prefers DashCast in every CarPlay car.
+
 ## What the owner must request from Apple (to appear on a REAL car dashboard)
 
 **Request the CarPlay _Audio_ entitlement: `com.apple.developer.carplay-audio`.**
