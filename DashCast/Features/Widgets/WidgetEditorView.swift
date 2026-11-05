@@ -37,10 +37,10 @@ public struct WidgetEditorView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // 1:1 Widget Preview Card
+                        // Widget Preview Card
                         widgetPreviewCard
 
-                        // 1:1 Adjust Position Section with Sliders
+                        // Adjust Position Section with Sliders
                         adjustPositionSection
 
                         // License Plate Text Field

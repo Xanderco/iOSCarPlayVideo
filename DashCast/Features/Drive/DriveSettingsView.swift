@@ -20,7 +20,7 @@ public struct DriveSettingsView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // 1:1 Vehicle Card
+                        // Vehicle Card
                         vehicleCard
 
                         // TRACKING Section
