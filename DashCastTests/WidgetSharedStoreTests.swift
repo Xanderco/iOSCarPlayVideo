@@ -89,4 +89,28 @@ final class WidgetSharedStoreTests: XCTestCase {
         XCTAssertFalse(state.handleDeepLink(URL(string: "dashcast://widgets")!))
         XCTAssertEqual(state.selectedTab, .drive)
     }
+
+    // MARK: - CarPlay / glanceability contrast
+
+    func testBrandAccentIsReadableOnBackdrop() {
+        let accent = WidgetColorMath.components(hex: WidgetColorMath.fallbackAccentHex)!
+        let backdrop = WidgetColorMath.components(hex: WidgetColorMath.backdropHex)!
+        XCTAssertGreaterThanOrEqual(WidgetColorMath.contrastRatio(accent, backdrop), 7.0)
+        let white = (r: 1.0, g: 1.0, b: 1.0)
+        XCTAssertGreaterThanOrEqual(WidgetColorMath.contrastRatio(white, backdrop), 15.0)
+    }
+
+    func testContrastRatioKnownValues() {
+        let black = (r: 0.0, g: 0.0, b: 0.0), white = (r: 1.0, g: 1.0, b: 1.0)
+        XCTAssertEqual(WidgetColorMath.contrastRatio(black, white), 21, accuracy: 0.01)
+        XCTAssertEqual(WidgetColorMath.contrastRatio(white, white), 1, accuracy: 0.0001)
+    }
+
+    func testReadableAccentFallsBackForDarkOrInvalidColours() {
+        XCTAssertEqual(WidgetColorMath.readableAccentHex("#FFD60A"), "#FFD60A", "Bright yellow is readable")
+        XCTAssertEqual(WidgetColorMath.readableAccentHex("#1A1A40"), WidgetColorMath.fallbackAccentHex, "Navy is unreadable on dark")
+        XCTAssertEqual(WidgetColorMath.readableAccentHex("#FFFFFF"), WidgetColorMath.fallbackAccentHex, "White = default text colour")
+        XCTAssertEqual(WidgetColorMath.readableAccentHex("nope"), WidgetColorMath.fallbackAccentHex)
+        XCTAssertEqual(WidgetColorMath.readableAccentHex(nil), WidgetColorMath.fallbackAccentHex)
+    }
 }

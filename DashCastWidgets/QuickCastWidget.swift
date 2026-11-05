@@ -63,24 +63,30 @@ struct QuickCastView: View {
         case .accessoryInline:
             Label("Cast to car", systemImage: "dot.radiowaves.right")
         default:
-            VStack(alignment: .leading) {
-                ZStack {
-                    Circle().fill(WidgetPalette.signal)
-                    Image(systemName: "dot.radiowaves.right")
-                        .font(.system(size: 22, weight: .bold))
-                        .foregroundStyle(WidgetPalette.ink)
+            // Small layout doubles as the CarPlay widget: a single big target.
+            GlanceReader { ctx in
+                VStack(alignment: .leading, spacing: 2) {
+                    ZStack {
+                        Circle()
+                            .fill(ctx.isFullColor ? WidgetPalette.signal : Color.primary.opacity(0.2))
+                        Image(systemName: "dot.radiowaves.right")
+                            .font(.system(size: 26, weight: .bold))
+                            .foregroundStyle(ctx.isFullColor ? WidgetPalette.ink : Color.primary)
+                            .widgetAccentable()
+                    }
+                    .frame(width: 56, height: 56)
+                    Spacer(minLength: 0)
+                    Text("Cast")
+                        .font(.system(size: 30, weight: .heavy, design: .rounded))
+                        .foregroundStyle(ctx.primary)
+                    Text("Video to your car")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(ctx.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
-                .frame(width: 48, height: 48)
-                Spacer(minLength: 0)
-                Text("Cast")
-                    .font(.system(.title2, design: .rounded).weight(.heavy))
-                    .foregroundStyle(.white)
-                Text("Send video to your car")
-                    .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.65))
-                    .lineLimit(2)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

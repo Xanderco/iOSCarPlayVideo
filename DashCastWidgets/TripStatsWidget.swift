@@ -114,26 +114,38 @@ struct TripStatsView: View {
         .lineLimit(1)
     }
 
+    /// Small layout doubles as the CarPlay widget: one huge number, score as text + icon (not colour alone).
     private func small(_ trip: SharedTripSnapshot) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            header(trip)
-            Spacer(minLength: 0)
-            HStack(alignment: .firstTextBaseline, spacing: 3) {
-                Text(distance(trip))
-                    .font(.system(size: 34, weight: .heavy, design: .rounded))
-                    .foregroundStyle(.white)
-                Text(miles ? "mi" : "km")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(WidgetPalette.signal)
+        GlanceReader { ctx in
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 4) {
+                    Image(systemName: "flag.checkered").widgetAccentable()
+                    Text(trip.date, style: .relative)
+                }
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .foregroundStyle(ctx.secondary)
+                .lineLimit(1)
+                Spacer(minLength: 0)
+                HStack(alignment: .firstTextBaseline, spacing: 3) {
+                    Text(distance(trip))
+                        .font(.system(size: 44, weight: .heavy, design: .rounded))
+                        .foregroundStyle(ctx.primary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                    Text(miles ? "mi" : "km")
+                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                        .foregroundStyle(ctx.isFullColor ? WidgetPalette.signal : ctx.secondary)
+                }
+                HStack(spacing: 5) {
+                    Image(systemName: trip.score >= 80 ? "checkmark.seal.fill" : "exclamationmark.triangle.fill")
+                        .widgetAccentable()
+                    Text("Score \(trip.score)")
+                }
+                .font(.system(size: 16, weight: .bold, design: .rounded))
+                .foregroundStyle(ctx.isFullColor ? (trip.score >= 80 ? WidgetPalette.signal : WidgetPalette.amber) : ctx.primary)
             }
-            HStack(spacing: 4) {
-                Image(systemName: "gauge.with.dots.needle.67percent")
-                Text("Score \(trip.score)")
-            }
-            .font(.caption.weight(.semibold))
-            .foregroundStyle(trip.score >= 80 ? WidgetPalette.signal : WidgetPalette.amber)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func medium(_ trip: SharedTripSnapshot) -> some View {

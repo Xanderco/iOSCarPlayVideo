@@ -42,9 +42,10 @@ struct CarWidget: Widget {
 
 struct PlateBadge: View {
     let text: String
+    var large = false
     var body: some View {
         Text(text.uppercased())
-            .font(.system(size: 13, weight: .heavy, design: .monospaced))
+            .font(.system(size: large ? 17 : 13, weight: .heavy, design: .monospaced))
             .kerning(1.2)
             .lineLimit(1)
             .minimumScaleFactor(0.6)
@@ -91,23 +92,38 @@ struct CarWidgetView: View {
         }
     }
 
+    /// Small layout doubles as the CarPlay widget: photo, big name, big plate.
     private var small: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            CarArtwork(car: car)
-                .frame(width: 56, height: 56)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            Spacer(minLength: 0)
-            Text(car.name)
-                .font(.system(.subheadline, design: .rounded).weight(.bold))
-                .foregroundStyle(.white)
-                .lineLimit(1)
-            Text("\(car.brand) \(car.model)")
-                .font(.caption2)
-                .foregroundStyle(.white.opacity(0.65))
-                .lineLimit(1)
-            if let plate { PlateBadge(text: plate) }
+        GlanceReader { ctx in
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .top) {
+                    CarArtwork(car: car)
+                        .frame(width: 58, height: 58)
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    Spacer(minLength: 0)
+                    Image(systemName: "car.fill")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(ctx.isFullColor ? WidgetPalette.color(hex: car.accentHex) : ctx.secondary)
+                        .widgetAccentable()
+                }
+                Spacer(minLength: 0)
+                Text(car.name)
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundStyle(ctx.primary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                if let plate {
+                    PlateBadge(text: plate, large: true)
+                } else {
+                    Text(car.model)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(ctx.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var medium: some View {

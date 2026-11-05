@@ -33,13 +33,38 @@ enum WidgetPalette {
         LinearGradient(colors: [deep, ink], startPoint: .topTrailing, endPoint: .bottomLeading)
     }
 
+    /// Accent colour guaranteed to be readable on the dark backdrop (also on a car display).
     static func color(hex: String?) -> Color {
-        guard var h = hex?.trimmingCharacters(in: .whitespaces), !h.isEmpty else { return signal }
-        if h.hasPrefix("#") { h.removeFirst() }
-        guard h.count == 6, let v = UInt32(h, radix: 16) else { return signal }
-        let c = Color(red: Double((v >> 16) & 0xFF) / 255, green: Double((v >> 8) & 0xFF) / 255,
-                      blue: Double(v & 0xFF) / 255)
-        // White is the app default text colour; use the brand accent instead on widgets.
-        return v == 0xFFFFFF ? signal : c
+        let safe = WidgetColorMath.readableAccentHex(hex)
+        guard let c = WidgetColorMath.components(hex: safe) else { return signal }
+        return Color(red: c.r, green: c.g, blue: c.b)
+    }
+}
+}
+
+/// CarPlay (iOS 26) shows `.systemSmall` widgets on the car display. There is no CarPlay-specific
+/// environment value, so small layouts are written to work in every rendering context:
+/// - `widgetRenderingMode`: in `.accented`/`.vibrant` the system tints content, so meaning never
+///   depends on colour alone and key glyphs are marked `widgetAccentable()`.
+/// - `showsWidgetContainerBackground`: when the system removes our backdrop we drop decorative fills.
+/// - Large, heavy, rounded type with high-contrast white on the dark backdrop for glanceability.
+/// Do NOT add `.disfavoredLocations([.carPlay], for: [.systemSmall])` — that would hide these from CarPlay.
+struct GlanceContext {
+    let renderingMode: WidgetRenderingMode
+    let showsBackground: Bool
+
+    var isFullColor: Bool { renderingMode == .fullColor }
+    /// Primary text: pure white in full colour; system-styled otherwise.
+    var primary: Color { isFullColor ? .white : .primary }
+    var secondary: Color { isFullColor ? .white.opacity(0.78) : .secondary }
+}
+
+struct GlanceReader<Content: View>: View {
+    @Environment(\.widgetRenderingMode) private var renderingMode
+    @Environment(\.showsWidgetContainerBackground) private var showsBackground
+    @ViewBuilder let content: (GlanceContext) -> Content
+
+    var body: some View {
+        content(GlanceContext(renderingMode: renderingMode, showsBackground: showsBackground))
     }
 }

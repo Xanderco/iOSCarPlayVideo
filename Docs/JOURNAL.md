@@ -109,6 +109,12 @@
 - Merged [#18](https://github.com/Xanderco/iOSCarPlayVideo/pull/18), the core bug audit. Fixes the audio session (category options were invalid, so the silent switch muted video and background audio stopped). Player state now comes from `timeControlStatus`, with Retry/Close on errors, Now Playing info and remote commands. Also fixes local videos, external display and Drive tracking. Full list in `Docs/Audit-2026-11.md`.
 - Follow-ups: the items marked *needs-device* in the audit go on the Mac/real-device checklist.
 
+### 2026-11-05 01:05 (Bogotá) — Session 15b: widgets on the car display (CarPlay, iOS 26)
+- Owner input: the competitor markets widgets on the car screen. iOS 26 CarPlay shows `.systemSmall` widgets, so all three DashCast widgets are eligible (no `disfavoredLocations`). The small layouts were rebuilt for reading at a glance: 20–44 pt heavy rounded type, one key fact each, plus `GlanceContext` (adapts to `widgetRenderingMode` and `showsWidgetContainerBackground`; `widgetAccentable` glyphs; meaning never conveyed by colour alone).
+- `WidgetColorMath` (shared; WCAG contrast) makes the user's accent fall back to brand teal unless it reaches 4.5:1 on the backdrop. Unit tests added.
+- `Docs/CarPlay.md`: new "Widgets on the car display" section with eligibility rules and how to view them in the Simulator's CarPlay window.
+- Follow-up: there's no CarPlay-specific WidgetKit environment, so this is validated by design rules and tests, not by a rendered CarPlay snapshot; capture real screenshots on a device.
+
 ### 2026-11-05 00:40 (Bogotá) — Session 15: real Home Screen widgets (`claude/home-widgets`)
 - Added WidgetKit extension target `DashCastWidgets` (iOS 17, bundle `com.xanderco.dashcast.widgets`) with original designs: **My Car** (small/medium, AppIntentConfiguration with a "show plate" toggle: user photo or SF Symbol, name, brand/model, licence plate badge), **Last Trip** (small/medium, AppIntentConfiguration with units: distance, score ring, relative date, duration), **Quick Cast** (small + Lock Screen circular/rectangular/inline, opens `dashcast://cast`).
 - Shared data: `DashCast/Shared/WidgetSharedStore.swift` (compiled into app and extension) stores a versioned JSON payload in app group `group.com.xanderco.dashcast` (same group as PR #25), falling back to standard defaults when unsigned. `PersistenceController.saveWidgets/saveTrips` now publish to it (photo downscaled to 320px JPEG) and call `WidgetCenter.shared.reloadAllTimelines()`.
