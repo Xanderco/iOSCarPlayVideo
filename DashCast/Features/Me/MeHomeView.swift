@@ -77,9 +77,9 @@ public struct MeHomeView: View {
     private var topVehicleProfileCard: some View {
         let metrics = metricsManager.metrics
         let distanceStr = appState.useMilesPerHour
-            ? String(format: "%.1f mi", max(metrics.totalDistanceMiles, 11.4))
-            : String(format: "%.1f km", max(metrics.totalDistanceKm, 11.4))
-        let tripsCount = max(metrics.totalTripsRecorded, 2)
+            ? String(format: "%.1f mi", metrics.totalDistanceMiles)
+            : String(format: "%.1f km", metrics.totalDistanceKm)
+        let tripsCount = metrics.totalTripsRecorded
 
         return VStack(spacing: 16) {
             // Vehicle & Name Row
@@ -118,11 +118,11 @@ public struct MeHomeView: View {
                         }
                     }
 
-                    // Rank Pill Badge
+                    // Plan Pill Badge (Free / Pro lifetime)
                     HStack(spacing: 4) {
-                        Image(systemName: "road.lanes")
+                        Image(systemName: appState.isProLifetimeUnlocked ? "crown.fill" : "person.fill")
                             .font(.system(size: 10))
-                        Text("ROAD ROOKIE")
+                        Text(appState.isProLifetimeUnlocked ? "PRO · LIFETIME" : "FREE")
                             .font(.system(size: 10, weight: .heavy))
                     }
                     .padding(.horizontal, 10)
@@ -141,7 +141,7 @@ public struct MeHomeView: View {
                 Divider().frame(height: 28).background(Color.dashBorder)
                 statColumn(value: "\(tripsCount)", label: "drives")
                 Divider().frame(height: 28).background(Color.dashBorder)
-                statColumn(value: "1/15", label: "badges")
+                statColumn(value: tripsCount > 0 ? String(format: "%.0f", metrics.averageDrivingScore) : "–", label: "avg score")
             }
         }
         .padding(16)

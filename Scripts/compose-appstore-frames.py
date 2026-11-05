@@ -25,7 +25,7 @@ HEADLINES = {
     "drive": ("Every drive,\nbeautifully tracked", "Speed, distance and a smooth-driving score."),
     "widgets": ("Make the dash\nyours", "Car widgets, live wallpapers and stickers."),
     "sounds": ("Sounds for\nevery arrival", "Welcome chimes and engine sounds, triggered automatically."),
-    "paywall": ("Pay once.\nOwn it forever.", "No subscriptions. Every feature, every update."),
+    "paywall": ("Pay once.\nKeep it forever.", "No subscriptions. One purchase unlocks DashCast Pro."),
     "me": ("Your garage,\nyour stats", "Pick your car and see every mile."),
 }
 FOOTNOTE = "For passengers & parked use only. Never watch while driving."

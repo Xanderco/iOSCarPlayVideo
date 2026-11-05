@@ -14,14 +14,14 @@ Character limits are checked; counts are in brackets.
 |---|---|
 | **App name** (30) | `DashCast - M3U Player & Cast` [28] |
 | Alternatives | `DashCast: IPTV Player & Cast` [28] · `DashCast - Video Player & Cast` [30] |
-| **Subtitle** (30) | `Your videos on the car screen` [29] |
-| Alternative subtitles | `Video for passengers & parking` [30] · `Play your lists on any screen` [29] |
+| **Subtitle** (30) | `Car-screen video. Pay once.` [27] |
+| Alternative subtitles | `Pay once. No subscriptions.` [27] · `Your videos on the car screen` [29] |
 | Bundle ID | `com.xanderco.dashcast` |
 | SKU | `DASHCAST-IOS-001` |
 | Primary category | **Utilities** |
 | Secondary category | **Entertainment** |
 | Devices | **iPhone only** (`TARGETED_DEVICE_FAMILY = 1`) |
-| Price | **Free**, with an In-App Purchase |
+| Price | **Free download** with a limited free tier, plus **one** in-app purchase: **DashCast Pro** (lifetime, non-consumable, USD 19.99) |
 | Account | **None.** No sign-up and no login. |
 
 > ⚠️ Do **not** put the word "CarPlay" in the name, subtitle, keywords, promo text or screenshots
@@ -30,74 +30,89 @@ Character limits are checked; counts are in brackets.
 
 ---
 
-## 2. In-App Purchases
+## 2. Pricing model: pay once, keep it forever
 
-Currently configured (`DashCast/Resources/DashCastStore.storekit`, `StoreKitManager`):
+DashCast has **no subscriptions**. The download is free and includes a limited free tier. **One** in-app purchase unlocks everything for good.
+This is our main point of difference: comparable car-video and IPTV player apps charge weekly or yearly.
 
-| Product ID | Type | Reference name | Price | Display name |
-|---|---|---|---|---|
-| `com.dashcast.lifetime` | Non-Consumable | DashCast Pro Lifetime | $19.99 (Tier 20) | DashCast Pro – Lifetime |
+| Field | Value |
+|---|---|
+| Product ID | `com.dashcast.lifetime` (already used by `StoreKitManager` and `DashCastStore.storekit`) |
+| Type | **Non-Consumable** |
+| Reference name | DashCast Pro Lifetime |
+| Display name | **DashCast Pro** |
+| Description (≤ 55) | `Unlock every DashCast feature for good. Pay once.` [49] |
+| Price | **USD 19.99** (pick the 19.99 price point; App Store Connect sets other storefronts) |
+| Family Sharing | Optional. The local StoreKit config has `familyShareable: true`. Turn it on in App Store Connect only if you want it, and only then mention it in the copy. |
+| Review screenshot | `AppStoreMedia/6.9-inch_1320x2868_plain/02_paywall.png` |
+| Review note | *"Single non-consumable purchase. It unlocks DashCast Pro permanently on this Apple ID. There is no subscription. Restore Purchases is on the paywall and in Me → Settings."* |
 
-Optional (only if the owner adds them; they need code, the StoreKit config and paywall changes):
+Don't use any wording about trials, renewal or billing periods anywhere: in the app, the listing, the IAP or the screenshots.
 
-| Product ID | Type | Suggested price | Notes |
-|---|---|---|---|
-| `com.dashcast.pro.weekly` | Auto-renewable, group "DashCast Pro" | $2.99 / week | Paywall must show the price **and** the period. Add the 3.1.2 subscription disclosure text below. |
-| `com.dashcast.pro.yearly` | Auto-renewable, same group | $24.99 / year | Same as above. Show the per-week equivalent only as secondary text. |
-
-IAP review screenshot: the paywall (`AppStoreMedia/6.9-inch_1320x2868_plain/07_paywall.png`).
-
-IAP review note: *"Unlocks unlimited playlists, car-display output, widgets and sounds. One-time purchase, no
-account. Restore Purchases is in the paywall and in Me → Settings."*
-
----
+> ⚠️ **Free tier vs Pro must be implemented before submission.** Today `isProLifetimeUnlocked` only hides
+> the "PRO" toolbar buttons and changes banner text. No feature is actually limited for free users, so
+> the purchase unlocks nothing. Reviewers test this (Guidelines 2.1 and 3.1.1), and the listing must not
+> describe limits that don't exist (2.3.1). Pick the split and implement it in the Cast, Widgets and Sounds tabs. A suggested split that the
+> current features can support:
+>
+> | Free | DashCast Pro |
+> |---|---|
+> | 1 playlist, local videos, iPhone playback | Unlimited playlists and car/external-display output |
+> | 2 widget designs | All car models, stickers and live wallpapers |
+> | A few sounds | Full sound library and arrival/connection trigger sounds |
+> | Drive stats and trip history | (same, drive stats stay free) |
+>
+> Once it is implemented, replace the bracketed list in §4 "FREE VS PRO" and in the reviewer notes with the real split.
 
 ## 3. Promotional text (170)
 
 ```
-Turn the car screen into a cinema for your passengers. Play your own M3U playlists, media server streams and videos. One-time unlock, no account and no tracking.
+Pay once, keep it forever - no subscriptions. Play your own playlists, streams and videos on the car screen for passengers and parked breaks. No account, no tracking.
 ```
-[160]
+[166] (Promotional text can be changed at any time without a new build.)
 
 ---
 
 ## 4. Description
 
 ```
+PAY ONCE, KEEP IT FOREVER - NO SUBSCRIPTIONS.
+DashCast is free to download. One in-app purchase, DashCast Pro, unlocks everything for good. You pay one price, once. There's no weekly or yearly fee.
+
 DashCast plays the videos you already own, and the playlists and streams you already have, on your iPhone and on a connected car display. It is made for passengers and for parked breaks such as EV charging stops.
 
 DashCast ships with no channels or content. You add your own.
 
 WHAT IT DOES
-• Plays M3U and M3U8 playlists from a URL or a file, grouped by category
-• Plays HLS streams and common video files (MP4, MOV, M4V) that you import from Photos or Files
+• Plays M3U and M3U8 playlists that you add from a URL or the Files app
+• Plays HLS streams and video files that you import from Photos or Files
 • Sends video to a connected external display: a car screen through a compatible adapter, AirPlay or HDMI. Your iPhone stays the remote.
-• Picture in Picture: keep a passenger's video playing in a mini player while you use other apps
+• Mirrors your iPhone screen with the system screen-broadcast picker
 
 SUPPORTED FORMATS
 • Playlists: .m3u, .m3u8 (EXTINF titles, group-title and tvg-logo attributes)
-• Streams: HLS (.m3u8) and progressive HTTP(S) video
-• Files: anything AVFoundation can play, including H.264 and HEVC in MP4, MOV and M4V
+• Streams: HLS (.m3u8) and HTTP(S) video
+• Files: video formats that iOS can play, such as MP4, MOV and M4V (H.264 / HEVC)
 
 YOUR OWN MEDIA SERVER
-Point DashCast at a playlist that your home media server or NAS publishes and watch your personal library on the road. DashCast does not provide, host, sell or recommend any streams.
+Add the playlist link that your home media server or NAS publishes, then watch your own library on the road. DashCast does not provide, host, sell or recommend any streams.
 
 CAR MODE
-Car mode uses a big, simple interface with large controls that you can read at a glance. Video goes to the car display only while you are parked or when a passenger is watching. While the car is moving, use audio only.
+A simple layout with large controls for the car screen. Video is for passengers, or for when you're parked. While the car is moving, use audio only.
 
 PLAYLISTS
-Add playlists from a URL or the Files app, refresh them with one tap and remove the ones you no longer need. Mark favourites for quick access. Everything stays on your device.
+Add playlists from a link or a file, refresh them with one tap, remove the ones you don't need and mark favourite channels. Everything stays on your iPhone.
 
-DRIVE, WIDGETS & SOUNDS
-• Trip stats: speed, distance, duration and a smooth-driving score, all stored only on your iPhone
-• Dashboard widgets and live wallpapers with your car model, a greeting and stickers
-• Arrival and connection sounds that you can trigger with Shortcuts automations
+MORE THAN A PLAYER
+• Drive stats: live speed, distance and duration, a smooth-driving score and a speed-coloured route map for every trip, with trip history
+• Dashboard widgets and live wallpapers with your car model, a greeting, plates, countdowns and stickers
+• A sound board with arrival and connection sounds, plus a step-by-step Shortcuts guide to play them automatically
+
+FREE VS PRO
+[Fill in after the free tier is implemented, e.g. "Free: 1 playlist, iPhone playback, drive stats. DashCast Pro: unlimited playlists, car-display output, every widget and sound."]
 
 PRIVACY
-No account. No ads. No tracking. No analytics SDKs. Your playlists, history and trips stay on your iPhone. Location is used on-device to show speed and trip stats and is never uploaded.
-
-DASHCAST PRO
-Free to download. DashCast Pro is a one-time purchase that unlocks every feature for life, with no subscription. You can restore your purchase at any time from Settings.
+No account. No ads. No tracking. No analytics. Your playlists, history and trips stay on your iPhone. Location is used on the device to show speed and trip stats and is never uploaded.
 
 Privacy Policy: https://dashcast.app/privacy
 Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
@@ -110,11 +125,20 @@ SAFETY
 For passengers only, or when the vehicle is parked. Never watch video while driving. Follow local laws about screens that the driver can see.
 ```
 
-*If auto-renewable subscriptions are added, insert before "Privacy Policy":*
+### Our differentiators (every one exists in the current build)
 
-```
-Subscriptions: DashCast Pro Weekly and Yearly unlock all features for the period shown. Payment is charged to your Apple ID when you confirm the purchase. A subscription renews automatically unless you turn it off at least 24 hours before the current period ends. You can manage or cancel it in Settings → Apple ID → Subscriptions.
-```
+| Differentiator | Where in the app |
+|---|---|
+| **Pay once, keep it forever, no subscriptions** (one non-consumable, USD 19.99) | `LifetimePaywallView`, `StoreKitManager` |
+| No account, no ads, no tracking, no analytics, data stays on the device | `PrivacyInfo.xcprivacy`, no network backend |
+| Your own playlists (URL or Files), local video import, favourites | Cast tab → Media Sources / Local Videos / Favorites |
+| External display and AirPlay output with the iPhone as remote, plus screen mirroring | `ExternalDisplayManager`, `AirPlayRoutePickerRepresentable`, `ScreenBroadcastPickerView` |
+| Drive stats with a smooth-driving score, speed-coloured route map and trip history | Drive tab, `TripSummaryView`, `SpeedGradientRouteView` |
+| Car dashboard widgets and live wallpapers (car models, plates, countdowns, stickers) | Widgets tab, `WidgetEditorView` |
+| Arrival and connection sound board with a Shortcuts automation guide | Sounds tab, `ShortcutsGuideView` |
+| Passenger-only safety notice built in | first launch, Me → Settings |
+
+Don't claim anything that isn't in this table (for example Picture in Picture, playlist renaming or reordering, CarPlay, or any bundled channels) until it ships.
 
 ---
 
@@ -190,13 +214,16 @@ Export compliance: `ITSAppUsesNonExemptEncryption = NO` (HTTPS only, exempt).
 **Sign-in required:** No (the app has no accounts).
 **Contact:** owner name, phone and email *(fill in)*.
 
-**Notes for the reviewer** (paste into "Notes"):
+**Notes for the reviewer** (paste into "Notes"). Fill in the bracketed free/Pro split first:
 
 ```
 Thank you for reviewing DashCast.
 
 WHAT THE APP IS
 DashCast is a video player. It ships with NO channels, playlists or third-party content and does not provide, host or sell any streams. Users add their own M3U/M3U8 playlists, media-server links or video files from Photos/Files.
+
+PRICING
+Free download with a limited free tier. A single non-consumable in-app purchase, "DashCast Pro" (USD 19.99), unlocks everything permanently. There are no subscriptions. Pro unlocks: [list the Pro-only features once implemented].
 
 HOW TO TEST (about 2 minutes)
 1. Launch the app and read the passenger-safety notice, then tap "I Understand".
@@ -206,7 +233,7 @@ HOW TO TEST (about 2 minutes)
 3. Tap a channel to play it. Use the AirPlay or screen button to send video to an external display.
 4. Optional: Cast → Import → choose any video from Photos.
 5. Me → Settings shows Restore Purchases, Privacy Policy, Terms of Use (EULA) and Support.
-6. The paywall (Me → "Upgrade Now") shows the one-time price for DashCast Pro. Use the Sandbox account to test.
+6. The paywall (Me → "Upgrade Now", or the "PRO" button) shows the one-time USD 19.99 price for DashCast Pro and a Restore button. You can buy it with a Sandbox account. Restore Purchases is also in Me → Settings.
 
 HOW THE CAR DISPLAY WORKS
 DashCast uses the standard iOS external-display APIs (UIScreen / scene sessions and AVPlayer external playback via AirPlay). When a screen is connected through a compatible adapter, AirPlay receiver or HDMI, the player shows video on that screen and the iPhone becomes the remote. Without an external screen, video plays on the iPhone.
@@ -235,7 +262,7 @@ Generated in CI by `.github/workflows/appstore-media.yml` → `Scripts/generate-
 | 6.5" framed | 1284 × 2778 | `appstore-screenshots-framed` → `6.5-inch_1284x2778/` |
 | Plain (unframed) at exact sizes, plus raw captures | both | `appstore-screenshots-plain` |
 
-Order: 01 Cast · 02 Car display · 03 Drive · 04 Widgets · 05 Sounds · 06 Me · 07 Paywall.
+Order: 01 Cast · **02 Paywall ("Pay once. Keep it forever." + "No subscriptions")** · 03 Car display · 04 Drive · 05 Widgets · 06 Sounds · 07 Me.
 Every frame has the footer *"For passengers & parked use only. Never watch while driving."*
 
 **Before uploading, check each screenshot** (Guidelines 2.3.3, 2.3.7, 5.2): no third-party logos (Netflix,
@@ -247,5 +274,5 @@ The Cast and Car-display screens show whatever sample channels the Cast module b
 ## 11. What's New (first version)
 
 ```
-Welcome to DashCast: your own playlists and videos on the car display, for passengers and parked breaks.
+Welcome to DashCast: your own playlists and videos on the car display, for passengers and parked breaks. Pay once, keep it forever, with no subscriptions.
 ```

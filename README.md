@@ -25,13 +25,13 @@ A modern, high-performance iOS application designed for in-car enthusiasts and C
 - **Trip History & Summary**: Detailed route review with driving score breakdown.
 
 ### 3. 🎨 CarPlay Dashboard Widgets & Live Wallpapers
-- **100+ Automotive Brands**: Toyota, Chevrolet, Ford, Porsche, BMW, Mercedes-Benz, Audi, Tesla, Jeep, Ferrari, etc.
+- **Automotive Brands**: Toyota, Chevrolet, Ford, Porsche, BMW, Mercedes-Benz, Audi, Tesla, Jeep, Ferrari, etc.
 - **Live CarPlay Mockup**: Realistic in-car dashboard simulator previewing dual widgets and CarPlay sidebar.
 - **Widget Editor**: Customize vehicle models, brand watermarks, driver greetings ("Welcome, Driver"), and sticker badges (Route 66, Checkered Flag, Turbo).
 - **3.0-Second Live Video Trimmer**: Interactive loop trimmer for animated live wallpapers.
 
 ### 4. 🔊 Car Personality Sounds & Siri Shortcuts
-- **100+ Automotive Soundboard**: Curated sound effects across 6 categories (Voices, Engine revs, Futuristic warp pulses, Chimes, Cinematic drops).
+- **Automotive Soundboard**: Curated sound effects across 6 categories (Voices, Engine revs, Futuristic warp pulses, Chimes, Cinematic drops).
 - **Active Trigger Slots**: Assign custom sounds for **CarPlay Connection**, **Disconnection**, and **Home Arrival**.
 - **Tone Synthesizer Engine**: `AVAudioEngine` real-time acoustic tone synthesizer.
 - **Siri Shortcuts Automation Guide**: Interactive step-by-step tutorial to configure automatic triggers in iOS Shortcuts.
