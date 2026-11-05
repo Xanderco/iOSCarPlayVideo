@@ -141,6 +141,10 @@ public struct CastHomeView: View {
                             }
                         }
                 }
+                // The tab-level paywall can't present over this sheet, so present it here too.
+                .sheet(isPresented: $appState.showPaywall) {
+                    LifetimePaywallView().environmentObject(appState)
+                }
             }
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
                 guard let newItem = newItem else { return }

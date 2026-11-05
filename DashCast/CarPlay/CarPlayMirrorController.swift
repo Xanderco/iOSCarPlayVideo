@@ -178,6 +178,8 @@ final class CarPlayMirrorController {
     static let shared = CarPlayMirrorController()
     static let pollInterval: TimeInterval = 1.0 / 15.0
 
+    var entitlementGate: EntitlementGate = .shared
+
     private(set) var state: CarMirrorDisplayState = .instructions
     private var rootView: CarPlayMirrorRootView?
     private var timer: Timer?
@@ -228,7 +230,8 @@ final class CarPlayMirrorController {
         } else {
             stopParkedGuardIfOurs()
         }
-        guard enabled else {
+        let hasAllowance = entitlementGate.isPro || entitlementGate.remainingCastingSeconds > 0
+        guard enabled, hasAllowance else {
             if state != .instructions {
                 state = .instructions
                 rootView.apply(.instructions)

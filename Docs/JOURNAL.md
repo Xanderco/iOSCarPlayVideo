@@ -92,6 +92,17 @@
 
 ## Log
 
+### 2026-11-05 04:30 (Bogotá) — T2: Pro feature unlock & EntitlementGate enforcement [CARAA-31] [DI-34]
+- **Verified and hardened `EntitlementGate` enforcement across all real flows**:
+  - Free tier limits strictly enforced: exactly 1 playlist source allowed (`.playlistLimitReached(limit: 1)`), 15 minutes daily casting allowance (`.dailyCastingLimitReached(minutes: 15)`).
+  - Pro tier (`pro.lifetime`) grants unlimited playlist sources and unlimited daily casting.
+  - Re-importing / refreshing an existing playlist source URL does not consume a new source slot on free tier.
+  - `CarPlayMirrorController` wired to `entitlementGate` allowance, preventing unentitled mirroring when casting allowance expires.
+  - `CastHomeView` updated with paywall sheet presentation on `showingBroadcastPicker` for clean modal presentation over "Car Display".
+  - Added helper `remainingCastingMinutes` on `EntitlementGate`.
+- **Unit test suite expanded in `DashCastTests/EntitlementGateTests.swift`**:
+  - Full coverage for both Free and Pro states: limits, ceiling minute conversion, incremental time tracking, file & URL import gating, Pro unlock unblocking, refund/revocation re-locking, singleton wiring, and CarPlay mirror gate enforcement.
+
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
 - **Codebase state**: All classic UI components, 5-page onboarding walkthrough, native tab bar (LiquidCapsuleTabBar for iOS 17, native tab bar for iOS 26), Drive live map with automated trip tracking, StoreKit 2 lifetime ($19.99) restore purchases API, and the low-latency H.264 CarPlay video mirror pipeline (PR #37) are now fully integrated into the PR #14 integration branch.
