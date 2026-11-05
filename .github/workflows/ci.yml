@@ -2,66 +2,73 @@ name: DashCast CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'fix/**', 'feature/**', 'feat/**', 'claude/**' ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     name: Build & Test
     runs-on: macos-15
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install XcodeGen
-        run: brew install xcodegen
+        run: which xcodegen || brew install xcodegen
 
       - name: Select Xcode 16
         run: |
-          if [ -d "/Applications/Xcode_16.1.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.1.app/Contents/Developer
-          elif [ -d "/Applications/Xcode_16.0.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.0.app/Contents/Developer
-          elif [ -d "/Applications/Xcode_16.2.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.2.app/Contents/Developer
-          elif [ -d "/Applications/Xcode_16.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+          XCODE_APP=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -n 1)
+          if [ -n "$XCODE_APP" ]; then
+            echo "Selecting $XCODE_APP"
+            sudo xcode-select -s "$XCODE_APP/Contents/Developer"
           else
+            echo "Using default Xcode"
             sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
           fi
           xcodebuild -version
-          xcrun simctl list runtimes
 
       - name: Generate Xcode Project
         run: xcodegen generate
 
+      - name: Pick Simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)['devices']
+          c=[(rt,x) for rt,xs in d.items() if 'iOS' in rt for x in xs if x['name'].startswith('iPhone')]
+          c.sort(key=lambda t:t[0])
+          print(c[-1][1]['udid'])")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          echo "Selected Simulator UDID: $UDID"
+          xcrun simctl list devices available | grep "$UDID"
+
       - name: Build DashCast
         run: |
-          DEVICE=$(xcrun simctl list devices available | grep -E "iPhone (15|16)" | head -1 | sed -E 's/.*(iPhone [0-9]+).*/\1/')
-          if [ -z "$DEVICE" ]; then
-            DEVICE="iPhone 16"
-          fi
-          echo "Selected Build Simulator: $DEVICE"
+          set -o pipefail
           xcodebuild build \
             -project DashCast.xcodeproj \
             -scheme DashCast \
-            -destination "platform=iOS Simulator,name=$DEVICE" \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO
 
       - name: Run Automated Test Suite
         run: |
-          DEVICE=$(xcrun simctl list devices available | grep -E "iPhone (15|16)" | head -1 | sed -E 's/.*(iPhone [0-9]+).*/\1/')
-          if [ -z "$DEVICE" ]; then
-            DEVICE="iPhone 16"
-          fi
-          echo "Selected Test Simulator: $DEVICE"
+          set -o pipefail
           xcodebuild test \
             -project DashCast.xcodeproj \
             -scheme DashCast \
-            -destination "platform=iOS Simulator,name=$DEVICE" \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             -resultBundlePath TestResults.xcresult
@@ -72,3 +79,4 @@ jobs:
         with:
           name: test-results
           path: TestResults.xcresult
+          if-no-files-found: ignore
