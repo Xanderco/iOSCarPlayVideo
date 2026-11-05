@@ -1,9 +1,0 @@
-#EXTM3U x-tvg-url="https://epg.example.com/guide.xml"
-#EXTINF:-1 tvg-id="news1" tvg-name="News One" tvg-logo="https://cdn.example.com/logos/news1.png" group-title="News",News One HD
-https://stream.example.com/live/news1.m3u8
-#EXTINF:-1 tvg-id="sport1" tvg-logo="https://cdn.example.com/logos/sport1.png" group-title="Sports",Sport One
-https://stream.example.com/live/sport1.m3u8
-#EXTINF:-1 tvg-id="news2" tvg-logo="" group-title="News",News Two
-https://stream.example.com/live/news2.m3u8
-#EXTINF:-1 tvg-name="Fallback Name",
-https://stream.example.com/live/fallback.m3u8

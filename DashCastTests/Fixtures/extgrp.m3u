@@ -1,9 +1,0 @@
-#EXTM3U
-#EXTINF:-1,Documentary One
-#EXTGRP:Documentaries
-https://stream.example.com/doc1.m3u8
-#EXTINF:-1 group-title="Override",Documentary Two
-#EXTGRP:Documentaries
-https://stream.example.com/doc2.m3u8
-#EXTINF:-1,No Group
-https://stream.example.com/nogroup.m3u8

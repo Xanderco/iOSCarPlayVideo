@@ -1,6 +1,0 @@
-﻿#EXTM3U
-#EXTINF:-1 tvg-logo="https://cdn.example.com/a.png" group-title="Movies",Movie Channel
-https://stream.example.com/movies.m3u8
-
-#EXTINF:-1 group-title="Kids",Kids Channel
-https://stream.example.com/kids.m3u8
