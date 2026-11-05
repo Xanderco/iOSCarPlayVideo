@@ -87,6 +87,10 @@
 
 ## Log
 
+### 2026-11-05 00:25 (Bogotá) — Integrator: merged #19 (claude/jellyfin-emby-qr)
+- Merged [#19](https://github.com/Xanderco/iOSCarPlayVideo/pull/19): Jellyfin/Emby client (`Features/MediaServers/`, async/await, credentials in Keychain, direct play or HLS, progress reporting) and QR playlist import. The entry point is a "Media Servers" row in Me. Adds `NSCameraUsageDescription`.
+- Follow-ups: test against a real Jellyfin/Emby server; Plex/Xtream later (§8).
+
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #18 (claude/core-bugfixes)
 - Merged [#18](https://github.com/Xanderco/iOSCarPlayVideo/pull/18), the core bug audit. Fixes the audio session (category options were invalid, so the silent switch muted video and background audio stopped). Player state now comes from `timeControlStatus`, with Retry/Close on errors, Now Playing info and remote commands. Also fixes local videos, external display and Drive tracking. Full list in `Docs/Audit-2026-11.md`.
 - Follow-ups: the items marked *needs-device* in the audit go on the Mac/real-device checklist.

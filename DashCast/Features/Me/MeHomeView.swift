@@ -12,6 +12,7 @@ public struct MeHomeView: View {
     @State private var showingRateAlert: Bool = false
     @State private var showingShareSheet: Bool = false
     @State private var showingDriveDetails: Bool = false
+    @State private var showingMediaServers: Bool = false
     @State private var selectedVehicleIndex: Int = 0
 
     private let vehicles = VehicleCatalogService.shared.vehicles
@@ -67,6 +68,9 @@ public struct MeHomeView: View {
             }
             .sheet(isPresented: $showingDriveDetails) {
                 DriveSettingsView()
+            }
+            .sheet(isPresented: $showingMediaServers) {
+                MediaServersHomeView()
             }
             .alert("Rate DashCast", isPresented: $showingRateAlert) {
                 Button("5 Stars ⭐⭐⭐⭐⭐") {}
@@ -223,6 +227,12 @@ public struct MeHomeView: View {
         VStack(spacing: 1) {
             menuItemRow(icon: "car.fill", title: "Drive") {
                 showingDriveDetails = true
+            }
+
+            Divider().background(Color.dashBorder.opacity(0.5))
+
+            menuItemRow(icon: "server.rack", title: "Media Servers") {
+                showingMediaServers = true
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))

@@ -43,6 +43,8 @@
 	<string>DashCast tracks your route and speed while driving to score your trips.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>DashCast analyzes motion sensor data to detect smooth acceleration, braking, and cornering.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>DashCast uses the camera to scan QR codes that contain IPTV playlist links.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>DashCast accesses your photos so you can import personal videos and widget backgrounds.</string>
 	<key>UIApplicationSceneManifest</key>
