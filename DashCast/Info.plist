@@ -40,9 +40,9 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Trip Log uses your location to record the route and distance of a trip you start. Trips stay on this iPhone.</string>
+	<string>DashCast uses your location to record the route, distance and speed of your drives. Trips stay on this iPhone.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Allows Trip Log to keep recording a trip you started while DashCast is in the background. Trips stay on this iPhone.</string>
+	<string>Allows DashCast to keep recording a drive while the app is in the background. Trips stay on this iPhone.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>DashCast uses the camera to scan QR codes that contain IPTV playlist links.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

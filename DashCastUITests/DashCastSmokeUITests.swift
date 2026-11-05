@@ -7,7 +7,7 @@ final class DashCastSmokeUITests: XCTestCase {
     private var app: XCUIApplication!
 
     /// Tabs in display order; raw values match `AppState.TabItem`.
-    private let tabs = ["Home", "Library", "Cast", "Settings"]
+    private let tabs = ["Home", "Library", "Cast", "Drive", "Settings"]
 
     override func setUpWithError() throws {
         continueAfterFailure = false

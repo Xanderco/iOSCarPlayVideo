@@ -16,10 +16,10 @@ Legend: ✅ fixed in this PR · ➡️ owned by another session/PR (listed so it
 
 | Area | Finding | Status |
 |---|---|---|
-| Information architecture | 5 tabs copied 1:1 (Cast/Drive/Widgets/Sounds/Me, comment "Matches CarDash exact 5 native tabs") | ✅ 4 tabs per spec: Home · Library · Cast · Settings |
-| Drive / Widgets / Sounds | CarDash's core features, screens rebuilt from its screenshots | ✅ Cut down and redesigned as optional **Car Extras** in Settings (§3) |
+| Information architecture | 5 tabs copied 1:1 (Cast/Drive/Widgets/Sounds/Me, comment "Matches CarDash exact 5 native tabs") | ✅ Home · Library · Cast · Drive · Settings (Widgets/Sounds/Me gone as tabs) |
+| Drive / Widgets / Sounds | CarDash's core features, screens rebuilt from its screenshots | ✅ Widgets + Sounds redesigned as **Car Extras** in Settings · ➡️ Drive kept as a feature, owned by the Drive session (§3) |
 | "Me" profile | Copied 1:1 from CarDash ("ROAD ROOKIE" badge, km / drives / badges stats, PRO banner, menu order) | ✅ Replaced by native grouped **Settings** |
-| User-facing strings | "CarDash is tracking this trip", CarDash's sound names, notification "tips", "Chevrolet Trax" / "Colombia" defaults from a CarDash screenshot | ✅ Removed or rewritten |
+| User-facing strings | "CarDash is tracking this trip" (already fixed by #18), CarDash's sound names, "Chevrolet Trax" default from a CarDash screenshot | ✅ Rewritten (Drive: strings only) · ➡️ Drive's marketing "tip" notifications (§6) |
 | Competitor screenshots in repo | 31 CarDash screenshots in `MediaToAnalyze/`; CarTV TikTok ad frames in `Screenshots/VideoFrames/` | ✅ Removed from the tree and git-ignored (§4) |
 | Clone-era screenshots of our app | `Screenshots/*.png` (labelled "1to1", "Cast_Yellow", …) | ✅ Removed from the tree and git-ignored (§4) |
 | Third-party car photos **in the app bundle** | 8 manufacturer-style renders (Porsche, BMW, Mercedes-AMG, Corvette, …), twice: asset catalog + `Resources/CarImages` | ✅ Removed from the bundle (§5) |
@@ -39,38 +39,27 @@ matches only binary bytes inside the two sample `.mp4` files (no text hits).
 
 - **Product:** a player for the passenger's *own* video (playlists, links, files, servers) on iPhone and the car
   display. No trip scoring, no badges, no car-personality widgets as headline features.
-- **IA:** Home · Library · Cast · Settings (redesign spec §3). Extras live one level down in Settings.
+- **IA:** Home · Library · Cast · Drive · Settings. Car Extras (Car Screen, Car Chime) live one level down in Settings.
 - **Look:** DashCast design system v2 (Signal Green on OLED black, native lists/sheets, SF Symbols). No yellow
   racing theme, no capsule tab bar, no competitor colours.
 - **Copy:** all strings in Settings, Extras and onboarding were written fresh for this PR.
 - **Safety:** first-run onboarding with a passenger-only notice that has to be acknowledged; the notice is
-  also in Settings › Car › Passenger safety; Trip Log asks "Are you a passenger?" before recording.
+  also in Settings › Car › Passenger safety.
 - **Privacy:** no account, no analytics SDKs, on-device data; in-app privacy summary + links.
 
 ---
 
-## 3. Decision: Drive, Widgets and Sounds (Journal O2)
+## 3. Decision: Drive, Widgets and Sounds (Journal O2), resolved
 
-These three tabs *are* CarDash's identity (its App Store subtitle is literally "Drive Tracker, Scores &
-Sounds"). Keeping them as first-class tabs, in any skin, keeps us looking like CarDash.
+**Owner decision (2026-11-05): Drive stays as a real feature; Widgets and Sounds go under Extras.**
 
-**Proposal (implemented here, reversible):** keep a small, honest subset as optional **Settings › Car Extras**
-with new UI and scope. Everything CarDash-specific is cut:
-
-| Was (CarDash-derived) | Now (Car Extras) | Cut |
+| Was (CarDash-derived) | Now | Notes |
 |---|---|---|
-| **Drive** tab: live speedometer HUD on the phone, 0–100 driving **score**, harsh braking/acceleration/cornering detection (CoreMotion), badges/ranks, vehicle + country picker, marketing "tip" notifications | **Trip Log**: a passenger starts and stops a recording; list of trips with distance, duration, average speed and a route map; swipe to delete; optional "Trip saved" notification | Score UI, phone speed HUD, badges, vehicle picker, marketing "tip" notifications, unused `NSMotionUsageDescription`. **Kept under the hood:** `DrivingScorer` (fixed and tested in #18) still computes a score that is no longer shown in the app; background recording for a started trip (#18) stays, with honest permission strings |
-| **Widgets** tab: car brand/model catalogue with stock car photos, licence plate, stickers, countdowns, CarPlay dashboard mock-up, video trimmer | **Car Screen**: three short lines of text the car display shows between videos (live 16:9 preview), plus the user's *own* car photo and optional plate for the Home Screen widget (`claude/home-widgets`) | Brand catalogue, stock car photos, stickers, countdowns, dashboard mock-up, trimmer. `WidgetConfigModel` itself is unchanged (owned by the WidgetKit session) |
-| **Sounds** tab: CarDash's sound list ("Jet Startup", "Welcome Back Sir", "Sport Car Startup - 1", …), 3 slots (connect / disconnect / home arrival), trending cards, a Shortcuts guide for an action that didn't exist | **Car Chime**: 13 chimes with new names, synthesized on device; one slot; a real **"Play Car Chime"** Shortcuts action (`PlayCarChimeIntent`) for a CarPlay "Connects" automation | Disconnect / home-arrival slots, voice/engine "sounds" (they were only sine tones anyway), trending UI |
+| **Drive** tab | **Drive tab, kept** (Home · Library · Cast · Drive · Settings) | Owned by the Drive session (`Features/Drive/*`). This PR only placed it in navigation and fixed strings (a "1:1" comment, the "Chevrolet Trax" default). `DriveHomeView` is a tab-root screen with its own `NavigationStack`, so it stays a tab rather than a pushed Settings screen. To stay clear of 4.1, Drive needs its *own* take (see §6), not CarDash's score/badge/garage loop. |
+| **Widgets** tab: car brand/model catalogue with stock car photos, licence plate, stickers, countdowns, CarPlay dashboard mock-up, video trimmer | **Settings › Car Extras › Car Screen**: three short lines of text for the car display between videos (live 16:9 preview), plus the user's *own* car photo and optional plate for the Home Screen widget (`claude/home-widgets`) | Removed: dashboard mock-up, trimmer, stickers/countdown UI. `WidgetConfigModel` unchanged. `VehicleCatalogService` stays only because Drive's settings use it |
+| **Sounds** tab: CarDash's sound list ("Jet Startup", "Welcome Back Sir", "Sport Car Startup - 1", …), 3 slots, trending cards, a Shortcuts guide for an action that didn't exist | **Settings › Car Extras › Car Chime**: 13 chimes with new names, synthesized on device; one slot; a real **"Play Car Chime"** Shortcuts action (`PlayCarChimeIntent`) | Old sound ids in saved preferences fall back to the default chime |
 
-Deep links: `-initialTab drive|widgets|sounds` now open Settings and push Trip Log / Car Screen / Car Chime.
-
-**Recommendation for the owner:** ship v1.0 with Car Extras as implemented (low-key, original, honest). If
-review still finds them off-focus, or they get little use, remove them in 1.1. Only the three `Features/Extras`
-folders and the Settings section would need to go. The car display's speed readout (`CarPlayExternalDisplayView`)
-uses `DriveLocationService` only while a Trip Log recording is running.
-
----
+Deep links: `-initialTab drive` → Drive tab; `widgets` / `sounds` → Settings › Car Extras; `me` → Settings.
 
 ## 4. Reference media removed from the repository
 
@@ -180,9 +169,10 @@ change those defaults to neutral text and drop the `realCarImageView` slot.
 | File | What | Owner |
 |---|---|---|
 | `Core/Models/WidgetConfigModel.swift`, `Features/Cast/CarPlayExternalDisplayView.swift`, `Features/Cast/CarPlaySimulatorView.swift` | `Porsche / 911 GT3 RS / car_porsche_911` defaults (see §5) | WidgetKit session / Cast |
+| `Features/Drive/*` | Shows a driving **score**, a "garage" vehicle picker with brand catalogue, and schedules marketing "tip" notifications ("Make your CarPlay screen yours in 30 seconds"). These mirror CarDash's Drive loop. The vehicle picker now shows no photos because the stock renders were removed (§5) | Drive session |
+| `Features/Drive/DriveTrackingPermissionsSheet.swift` | `Image("car_porsche_911")` (asset removed, now renders nothing) | Drive session |
 | `Features/Pro/LifetimePaywallView.swift` | Check the feature list still matches the app (no Drive scores / sounds-as-headline) | Paywall session |
 | `DashCastWidgets/TripStatsWidget.swift` (`claude/home-widgets`) | Shows the trip **score**; the app no longer shows scores. Recommend distance/time only | WidgetKit session |
-| `Core/Analytics/UsageMetricsManager.swift`, `Features/Extras/TripLog/DrivingScorer.swift` | Score bookkeeping no longer surfaced in the app | Owner decision: remove scoring entirely in a follow-up |
 | `Features/MediaServers/MediaServerViews.swift` | Hosted as the Library tab root for now; its "Done" button does nothing there | Redesign 2A (real Library) |
 | `Features/Cast/CastHomeView.swift` | Hosted as the Home tab until 2A splits Home / Library / Cast & Mirror | Redesign 2A |
 
@@ -204,4 +194,4 @@ change those defaults to neutral text and drop the `realCarImageView` slot.
 - [ ] No third-party logos, photos, streams or sounds in `DashCast/Resources` (confirm the two sample videos)
 - [ ] App Store screenshots regenerated from the 4-tab app; none show Drive/Widgets/Sounds tabs or Territory
 - [ ] Metadata says "car display", not "CarPlay" (Journal D6); no competitor names in keywords
-- [ ] Privacy policy URL live; App Privacy answers: location (Trip Log, not linked to user, not used for tracking)
+- [ ] Privacy policy URL live; App Privacy answers: location (Drive, not linked to user, not used for tracking)

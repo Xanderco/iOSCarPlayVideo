@@ -14,11 +14,13 @@ public final class AppState: ObservableObject {
     @Published public var initialCarPlayMode: String = "App in CarPlay"
     @Published public var useMilesPerHour: Bool = false
 
-    /// Root tabs (redesign spec §3). Drive / Widgets / Sounds live under Settings › Car Extras.
+    /// Root tabs. Drive is a first-class feature (owner decision on O2); Widgets / Sounds live under
+    /// Settings › Car Extras.
     public enum TabItem: String, CaseIterable, Identifiable {
         case home = "Home"
         case library = "Library"
         case cast = "Cast"
+        case drive = "Drive"
         case settings = "Settings"
 
         public var id: String { rawValue }
@@ -28,13 +30,12 @@ public final class AppState: ObservableObject {
             case .home: return "house.fill"
             case .library: return "square.stack.fill"
             case .cast: return "airplayvideo"
+            case .drive: return "car.fill"
             case .settings: return "gearshape.fill"
             }
         }
 
         /// Former tab names, kept so older call sites and deep links still compile and land somewhere sensible.
-        @available(*, deprecated, message: "Drive is Settings › Car Extras › Trip Log; use AppState.open(_:)")
-        public static let drive: TabItem = .settings
         @available(*, deprecated, message: "Widgets is Settings › Car Extras › Car Screen; use AppState.open(_:)")
         public static let widgets: TabItem = .settings
         @available(*, deprecated, message: "Sounds is Settings › Car Extras › Car Chime; use AppState.open(_:)")
@@ -49,7 +50,7 @@ public final class AppState: ObservableObject {
             case "library": return (.library, nil)
             case "cast": return (.cast, nil)
             case "settings", "me": return (.settings, nil)
-            case "drive", "trips": return (.settings, .tripLog)
+            case "drive", "trips": return (.drive, nil)
             case "widgets", "carscreen": return (.settings, .carScreen)
             case "sounds", "chime": return (.settings, .chime)
             default: return nil

@@ -45,9 +45,8 @@ public enum AppearancePreference: String, CaseIterable, Identifiable {
     }
 }
 
-/// Screens reachable from Settings. Also used for `-initialTab drive|widgets|sounds` deep links.
+/// Screens reachable from Settings. Also used for `-initialTab widgets|sounds` deep links.
 public enum SettingsRoute: String, Hashable, CaseIterable {
-    case tripLog
     case carScreen
     case chime
     case safety
@@ -119,9 +118,6 @@ public struct SettingsView: View {
                     }
                     NavigationLink(value: SettingsRoute.chime) {
                         extraRow(title: "Car Chime", subtitle: "A short sound when your iPhone connects", systemImage: "bell.badge.fill")
-                    }
-                    NavigationLink(value: SettingsRoute.tripLog) {
-                        extraRow(title: "Trip Log", subtitle: "Passenger-recorded trips, kept on this iPhone", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
                     }
                 } header: {
                     Text("Car Extras")
@@ -261,7 +257,6 @@ public struct SettingsView: View {
     @ViewBuilder
     private func destination(for route: SettingsRoute) -> some View {
         switch route {
-        case .tripLog: TripLogView()
         case .carScreen: CarScreenView()
         case .chime: CarChimeView()
         case .safety: SafetyNoticeView()

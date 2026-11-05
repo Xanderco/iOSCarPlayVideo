@@ -38,7 +38,7 @@
 
 - Competitors: **CarDash** (Laigang Wang; Cast/Drive/Widgets/Sounds; weekly→annual subs) and **CarTV** (Lyntra; M3U/Jellyfin/Emby/Plex/Xtream, mirroring, DLNA receive; weekly/yearly/lifetime).
 - Our app was originally a literal CarDash clone (comments like "Exact 1:1 CarDash layout", strings "CarDash is tracking this trip"). Those must be gone before submission — see `Docs/Originality-audit.md` (redesign 2B session).
-- Drive/Widgets/Sounds are CarDash's identity; their future here is open decision O2.
+- Drive/Widgets/Sounds are CarDash's identity. O2 resolved: Drive stays (own session, needs its own take); Widgets/Sounds are Settings › Car Extras.
 
 ## 4. Architecture (current)
 
@@ -62,7 +62,7 @@
 ## 6. Open decisions (owner)
 
 - **O1** In-app web browser: keep (honest 18+ rating) or remove (lower rating)?
-- **O2** Drive / Widgets / Sounds: keep as secondary "Extras", or drop to sharpen the video focus?
+- ~~**O2** Drive / Widgets / Sounds: keep as secondary "Extras", or drop?~~ **Resolved 2026-11-05 (owner):** Drive stays as a feature/tab (own session); Widgets and Sounds → Settings › Car Extras. See `Docs/Originality-audit.md` §3.
 - **O3** Which car-video path to promise (see ADR-002): AirPlay-when-parked on supported head units, screen mirroring, DLNA receive.
 - **O4** CarPlay entitlement category to request from Apple (likely Audio/Video-adjacent per ADR).
 
@@ -89,8 +89,8 @@
 
 ### 2026-11-05 (Bogotá) — Redesign 2B: de-cloning, 4 tabs, Car Extras, onboarding (`claude/redesign-secondary`)
 - **Originality audit** → `Docs/Originality-audit.md` (D2). Removed from the repo (git-ignored, still in history): `MediaToAnalyze/` (31 CarDash screenshots), `Screenshots/` (clone-era shots + CarTV ad frames). Removed from the **app bundle**: 8 manufacturer-style car renders (×2). No "CarDash"/"1:1" text left in shipped code.
-- **Tabs:** Home · Library · Cast · Settings (`AppState.TabItem`). Interim hosts until redesign 2A lands: Home = `CastHomeView`, Library = `MediaServersHomeView`, Cast = new thin `CastMirrorView`. Legacy `-initialTab drive|widgets|sounds|me` and the deprecated `TabItem.drive/.widgets/.sounds/.me` aliases still work (→ Settings / Extras), so `claude/home-widgets` deep links keep compiling.
-- **O2 proposal implemented (reversible):** Drive/Widgets/Sounds → Settings › **Car Extras** with new UI and copy: **Trip Log** (no scores shown, passenger check), **Car Screen** (car-display text + own photo/plate for the widget; `WidgetConfigModel` untouched), **Car Chime** (13 synthesized chimes with original names + real Shortcuts action `PlayCarChimeIntent`). Me tab → native **Settings** (Pro card, Restore Purchases, Privacy, Terms (Apple EULA), Feedback via Mail, Appearance System/Dark/Light, safety notice).
+- **Tabs:** Home · Library · Cast · Drive · Settings (`AppState.TabItem`). Interim hosts until redesign 2A lands: Home = `CastHomeView`, Library = `MediaServersHomeView`, Cast = new thin `CastMirrorView`. Legacy `-initialTab widgets|sounds|me` and deprecated `TabItem.widgets/.sounds/.me` aliases still work (→ Settings / Extras); `.drive` is a real tab again, so `claude/home-widgets` deep links keep compiling.
+- **O2 resolved (owner):** Drive **stays** as a feature and tab, owned by the Drive session (`Features/Drive/*` restored byte-for-byte; only a "1:1" comment and the "Chevrolet Trax" default changed). Widgets/Sounds → Settings › **Car Extras** with new UI and copy: **Car Screen** (car-display text + own photo/plate for the widget; `WidgetConfigModel` untouched), **Car Chime** (13 synthesized chimes with original names + real Shortcuts action `PlayCarChimeIntent`). Me tab → native **Settings** (Pro card, Restore Purchases, Privacy, Terms (Apple EULA), Feedback via Mail, Appearance System/Dark/Light, safety notice).
 - **Onboarding:** Welcome → passenger-only notice (must be acknowledged; shares `PassengerSafetyNotice.acceptedKey`) → add a source.
 - Follow-ups for others: see audit §6 (Porsche defaults in model/Cast fallbacks, score in trip widget, real Library/Home from 2A).
 

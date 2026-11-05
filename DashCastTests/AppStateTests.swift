@@ -31,7 +31,7 @@ final class AppStateTests: XCTestCase {
     }
 
     func testTabsMatchRedesignSpec() {
-        XCTAssertEqual(AppState.TabItem.allCases.map(\.rawValue), ["Home", "Library", "Cast", "Settings"])
+        XCTAssertEqual(AppState.TabItem.allCases.map(\.rawValue), ["Home", "Library", "Cast", "Drive", "Settings"])
         for item in AppState.TabItem.allCases {
             XCTAssertFalse(item.iconName.isEmpty)
         }
@@ -45,8 +45,8 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(AppState.TabItem.resolve(launchValue: "me")?.tab, .settings)
 
         let drive = AppState.TabItem.resolve(launchValue: "drive")
-        XCTAssertEqual(drive?.tab, .settings)
-        XCTAssertEqual(drive?.route, .tripLog)
+        XCTAssertEqual(drive?.tab, .drive)
+        XCTAssertNil(drive?.route)
         XCTAssertEqual(AppState.TabItem.resolve(launchValue: "widgets")?.route, .carScreen)
         XCTAssertEqual(AppState.TabItem.resolve(launchValue: "sounds")?.route, .chime)
         XCTAssertNil(AppState.TabItem.resolve(launchValue: "territory"))

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Root: Home · Library · Cast · Settings (redesign spec §3). Car Extras live in Settings.
+/// Root: Home · Library · Cast · Drive · Settings. Car Extras (Car Screen, Car Chime) live in Settings.
 public struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
     @AppStorage(OnboardingView.completedKey) private var hasCompletedOnboarding = false
@@ -15,6 +15,7 @@ public struct MainTabView: View {
                 tabScreen(.home) { CastHomeView() } // pads itself for the tab bar
                 tabScreen(.library) { MediaServersHomeView().safeAreaInset(edge: .bottom) { tabBarClearance } }
                 tabScreen(.cast) { CastMirrorView().safeAreaInset(edge: .bottom) { tabBarClearance } }
+                tabScreen(.drive) { DriveHomeView() } // owned by the Drive session; pads itself
                 tabScreen(.settings) { SettingsView().safeAreaInset(edge: .bottom) { tabBarClearance } }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
