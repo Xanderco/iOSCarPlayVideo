@@ -1,6 +1,6 @@
 # DashCast 🚗💨
 
-> **The Ultimate Parked Video, Drive Telemetry, Territory Conquest & In-Car Sound Experience.**  
+> **The Ultimate Parked Video, Drive Telemetry & In-Car Sound Experience.**  
 > *Pay Once. Own Forever. Zero Subscriptions.*
 
 A modern, high-performance iOS application designed for in-car enthusiasts and CarPlay owners. DashCast provides all the premium capabilities of subscription-based apps like CarDash, but with a transparent **one-time purchase** lifetime model.
@@ -24,25 +24,19 @@ A modern, high-performance iOS application designed for in-car enthusiasts and C
 - **Smoothness Scoring (0–100)**: Real-time accelerometer telemetry analyzing harsh braking (>0.35g), aggressive acceleration (>0.30g), and sharp cornering (>0.45g).
 - **Trip History & Summary**: Detailed route review with driving score breakdown.
 
-### 3. 🔷 Claim Your Streets (Territory Hex Map)
-- **Hexagonal Spatial Grid Engine**: Pure Swift discrete hexagonal spatial indexer (`HexGridEngine`).
-- **Territory Conquest**: Every driven street unlocks glowing neon-cyan hexagonal map cells.
-- **Driver Ranks**: Climb from *Rookie Driver* ➔ *Street Cruiser* ➔ *Road Captain* ➔ *Road King* ➔ *Highway Legend*.
-- **Territory Metrics**: Total hexes claimed, weekly addition counter, and square miles/kilometers conquered.
-
-### 4. 🎨 CarPlay Dashboard Widgets & Live Wallpapers
-- **100+ Automotive Brands**: Toyota, Chevrolet, Ford, Porsche, BMW, Mercedes-Benz, Audi, Tesla, Jeep, Ferrari, etc.
+### 3. 🎨 CarPlay Dashboard Widgets & Live Wallpapers
+- **Automotive Brands**: Toyota, Chevrolet, Ford, Porsche, BMW, Mercedes-Benz, Audi, Tesla, Jeep, Ferrari, etc.
 - **Live CarPlay Mockup**: Realistic in-car dashboard simulator previewing dual widgets and CarPlay sidebar.
 - **Widget Editor**: Customize vehicle models, brand watermarks, driver greetings ("Welcome, Driver"), and sticker badges (Route 66, Checkered Flag, Turbo).
 - **3.0-Second Live Video Trimmer**: Interactive loop trimmer for animated live wallpapers.
 
-### 5. 🔊 Car Personality Sounds & Siri Shortcuts
-- **100+ Automotive Soundboard**: Curated sound effects across 6 categories (Voices, Engine revs, Futuristic warp pulses, Chimes, Cinematic drops).
+### 4. 🔊 Car Personality Sounds & Siri Shortcuts
+- **Automotive Soundboard**: Curated sound effects across 6 categories (Voices, Engine revs, Futuristic warp pulses, Chimes, Cinematic drops).
 - **Active Trigger Slots**: Assign custom sounds for **CarPlay Connection**, **Disconnection**, and **Home Arrival**.
 - **Tone Synthesizer Engine**: `AVAudioEngine` real-time acoustic tone synthesizer.
 - **Siri Shortcuts Automation Guide**: Interactive step-by-step tutorial to configure automatic triggers in iOS Shortcuts.
 
-### 6. 💎 Pay Once · Own Forever (StoreKit 2)
+### 5. 💎 Pay Once · Own Forever (StoreKit 2)
 - **No Monthly Fees**: Replaces predatory $4.99/month ($60/year) subscription models with a single **$19.99 Lifetime Pass** (`com.dashcast.lifetime`).
 - **StoreKit 2 Concurrency**: Built on Apple's modern Swift Concurrency StoreKit 2 APIs.
 - **Offline Entitlement Caching**: Unlocks features even when out of cellular coverage on remote roads.
@@ -57,7 +51,6 @@ A modern, high-performance iOS application designed for in-car enthusiasts and C
 - **UI**: SwiftUI (Deep Black & Neon Automotive Design System)
 - **Audio & Video**: `AVFoundation`, `AVKit`, `WebKit`, `ReplayKit`
 - **Sensors & Maps**: `CoreLocation`, `CoreMotion`, `MapKit`
-- **Spatial Indexing**: Flat-Topped Hexagonal Spatial Grid (`HexGridEngine`)
 - **Persistence**: `PersistenceController` with Swift Codable & App Group support
 - **In-App Purchase**: StoreKit 2 (`StoreKitManager`)
 - **Project Generation**: `XcodeGen` (`project.yml`)
@@ -93,6 +86,13 @@ open DashCast.xcodeproj
 
 ---
 
+## 🎨 App Icon & App Store Media
+
+- **App icon**: original vector source in `Design/AppIcon.svg` (a car-dashboard display with a glowing green play symbol). Run `Scripts/render-app-icon.sh` (needs `rsvg-convert` and Pillow) to render the 1024×1024 universal icon plus the **dark** and **tinted** variants into `AppIcon.appiconset`.
+- **Screenshots**: the **App Store Media** workflow (`.github/workflows/appstore-media.yml`) builds the app, boots a 6.9" simulator and launches the app with `-seedDemoData`. `Scripts/generate-appstore-media.sh` then captures each screen, and `Scripts/compose-appstore-frames.py` composes dark/green marketing frames at **1320×2868 (6.9")** and **1284×2778 (6.5")**. These are uploaded as the `appstore-screenshots-framed` and `appstore-screenshots-plain` artifacts.
+- **Listing & review**: `AppStoreMedia/metadata.md` has the name, subtitle, description, keywords, age rating, privacy label and reviewer notes. `Docs/AppReview-checklist.md` maps each risk to a review guideline.
+- **Safety**: on first launch the app shows a passenger-only notice. Video is for passengers or when parked. Never watch while driving.
+
 ## 🧪 Automated Testing Suite
 
 DashCast contains a comprehensive unit and integration test suite with **100% pass rate** on the iOS Simulator:
@@ -101,10 +101,9 @@ DashCast contains a comprehensive unit and integration test suite with **100% pa
 - `StoreKitTests`: StoreKit 2 identifiers, cached offline entitlements, and error states.
 - `CastEngineTests`: IPTV M3U parser, multi-attribute parsing, category tagging, and playlist integrity.
 - `DriveTelemetryTests`: Driving scoring penalties, floor boundaries, and simulated GPS location points.
-- `TerritoryEngineTests`: Hexagonal coordinate math, 6-vertex polygon geometry, driver ranks, and area calculations.
 - `WidgetCatalogTests`: Automotive catalog, brand filtering, sticker inventory, and widget persistence.
 - `SoundEngineTests`: Soundboard inventory, category filters, and preference serialization.
-- `EndToEndFlowTests`: Complete user lifecycle (Fresh launch ➔ Lifetime unlock ➔ Drive tracking ➔ Trip score ➔ Territory claim ➔ Widget customization ➔ Sound assignment).
+- `EndToEndFlowTests`: Complete user lifecycle (Fresh launch ➔ Lifetime unlock ➔ Drive tracking ➔ Trip score ➔ Widget customization ➔ Sound assignment).
 
 ---
 

@@ -39,7 +39,6 @@ public struct UsageMetricsView: View {
                             metricCard(title: "TOTAL DISTANCE", value: distanceStr, icon: "road.lanes", color: .dashCyan)
                             metricCard(title: "TOTAL TRIPS", value: "\(metrics.totalTripsRecorded)", icon: "car.side.fill", color: .dashBlue)
                             metricCard(title: "AVG SAFETY SCORE", value: String(format: "%.0f / 100", metrics.averageDrivingScore), icon: "shield.checkered", color: .dashGreen)
-                            metricCard(title: "HEXES CONQUERED", value: "\(metrics.totalHexesClaimed)", icon: "hexagon.fill", color: .dashCyan)
                             metricCard(title: "VIDEOS WATCHED", value: "\(metrics.totalVideosWatched)", icon: "play.tv.fill", color: .dashGold)
                             metricCard(title: "SOUNDS PLAYED", value: "\(metrics.totalSoundsPlayed)", icon: "speaker.wave.3.fill", color: .dashOrange)
                         }

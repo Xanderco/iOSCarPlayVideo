@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct MainTabView: View {
     @EnvironmentObject private var appState: AppState
+    @AppStorage(PassengerSafetyNotice.acceptedKey) private var passengerNoticeAccepted = false
 
     public init() {}
 
@@ -52,6 +53,12 @@ public struct MainTabView: View {
         .ignoresSafeArea(.keyboard)
         .sheet(isPresented: $appState.showPaywall) {
             LifetimePaywallView()
+        }
+        .fullScreenCover(isPresented: Binding(
+            get: { !passengerNoticeAccepted && !PassengerSafetyNotice.shouldSkip },
+            set: { _ in }
+        )) {
+            PassengerSafetyNoticeView { passengerNoticeAccepted = true }
         }
     }
 }

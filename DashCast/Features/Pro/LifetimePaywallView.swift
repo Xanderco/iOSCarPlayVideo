@@ -142,10 +142,10 @@ public struct LifetimePaywallView: View {
     private var featuresList: some View {
         VStack(spacing: 12) {
             featureRow(icon: "play.tv.fill", title: "Unlimited IPTV & Local Video Cast", subtitle: "Import any M3U playlist & Photos/Files videos")
-            featureRow(icon: "car.side.fill", title: "Full CarPlay & External Display Support", subtitle: "Project parked video to compatible car screens")
-            featureRow(icon: "hexagon.fill", title: "Unlimited Territory Hex Claims", subtitle: "Track every drive and climb to Highway Legend")
-            featureRow(icon: "sparkle", title: "100+ Car Brands & Live Widgets", subtitle: "Full access to vehicle designs, stickers & live video")
-            featureRow(icon: "speaker.wave.3.fill", title: "100+ Viral Sounds & Shortcuts Automations", subtitle: "Jet startup, welcome sir & custom arrival alerts")
+            featureRow(icon: "car.side.fill", title: "Car Display & External Screen Output", subtitle: "For passengers or while parked, on compatible car screens")
+            featureRow(icon: "gauge.with.dots.needle.67percent", title: "Drive Stats & Trip History", subtitle: "Speed, distance and smooth-driving score for every trip")
+            featureRow(icon: "sparkle", title: "All Car Widgets & Live Wallpapers", subtitle: "Every vehicle design, plate, countdown & sticker")
+            featureRow(icon: "speaker.wave.3.fill", title: "Full Sound Library & Shortcuts Triggers", subtitle: "Arrival, connect & disconnect sounds, played automatically")
             featureRow(icon: "checkmark.seal.fill", title: "All Future Updates Included", subtitle: "Never pay another cent for new features")
         }
         .padding()
@@ -217,9 +217,9 @@ public struct LifetimePaywallView: View {
 
     private var legalLinks: some View {
         HStack(spacing: 16) {
-            Link("Privacy Policy", destination: URL(string: "https://dashcast.app/privacy")!)
+            Link("Privacy Policy", destination: LegalLinks.privacyPolicy)
             Text("·").foregroundStyle(Color.dashTextMuted)
-            Link("Terms of Service", destination: URL(string: "https://dashcast.app/terms")!)
+            Link("Terms of Use (EULA)", destination: LegalLinks.termsOfUse)
         }
         .font(.system(size: 12))
         .foregroundStyle(Color.dashTextMuted)

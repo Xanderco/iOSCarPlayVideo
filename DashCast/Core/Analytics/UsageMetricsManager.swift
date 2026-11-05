@@ -8,7 +8,6 @@ public struct LocalUsageMetrics: Codable {
     public var totalVideosWatched: Int
     public var totalSoundsPlayed: Int
     public var widgetCustomizationsCount: Int
-    public var totalHexesClaimed: Int
     public var drivingScoresList: [Int]
     public var firstLaunchDate: Date
     public var lastActiveDate: Date
@@ -20,7 +19,6 @@ public struct LocalUsageMetrics: Codable {
         totalVideosWatched: Int = 0,
         totalSoundsPlayed: Int = 0,
         widgetCustomizationsCount: Int = 0,
-        totalHexesClaimed: Int = 0,
         drivingScoresList: [Int] = [],
         firstLaunchDate: Date = Date(),
         lastActiveDate: Date = Date()
@@ -31,7 +29,6 @@ public struct LocalUsageMetrics: Codable {
         self.totalVideosWatched = totalVideosWatched
         self.totalSoundsPlayed = totalSoundsPlayed
         self.widgetCustomizationsCount = widgetCustomizationsCount
-        self.totalHexesClaimed = totalHexesClaimed
         self.drivingScoresList = drivingScoresList
         self.firstLaunchDate = firstLaunchDate
         self.lastActiveDate = lastActiveDate
@@ -94,12 +91,6 @@ public final class UsageMetricsManager: ObservableObject {
 
     public func recordWidgetCustomization() {
         metrics.widgetCustomizationsCount += 1
-        metrics.lastActiveDate = Date()
-        saveMetrics()
-    }
-
-    public func recordHexClaimed(count: Int = 1) {
-        metrics.totalHexesClaimed += count
         metrics.lastActiveDate = Date()
         saveMetrics()
     }

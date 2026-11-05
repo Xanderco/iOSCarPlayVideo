@@ -87,6 +87,12 @@
 
 ## Log
 
+### 2026-11-05 00:25 (Bogotá) — Integrator: merged #21 (claude/drop-territory-icon-media)
+- Merged [#21](https://github.com/Xanderco/iOSCarPlayVideo/pull/21): Territory removed (D3), new original app icon, App Store media pipeline (`appstore-media.yml`, compositor scripts, `AppStoreMedia/metadata.md`), passenger safety notice, privacy manifest, demo-data seeder, App Review checklist.
+- Conflict in `MeHomeView.swift`: kept #19's Media Servers sheet and dropped the fake "Rate DashCast" alert, as #21 intended (it uses `requestReview`).
+- Integration fix: the first-launch `PassengerSafetyNotice` full-screen cover would have blocked #22's XCUITests. `shouldSkip` now also honours `-UITests`.
+- Follow-ups: privacy/terms/support URLs are placeholders (human); the 18+ vs browser decision is still open (O1).
+
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #22 (claude/qa-ui-tests)
 - Merged [#22](https://github.com/Xanderco/iOSCarPlayVideo/pull/22): XCUITest smoke suite (`DashCastUITests`, 4 tests, screenshots exported as a CI artifact), a CI step that splits unit and UI tests, the `testflight.yml` workflow and `Docs/QA/`.
 - Follow-ups: TestFlight needs App Store Connect API secrets (human); the UI tests assume today's 5-tab layout, so update them when the redesign lands.
