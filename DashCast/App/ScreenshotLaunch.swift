@@ -11,4 +11,6 @@ enum ScreenshotLaunch {
     static var showMediaSources: Bool { args.contains("-showMediaSources") }
     /// Start the first bundled demo video in the Cast player.
     static var playDemoVideo: Bool { args.contains("-playDemoVideo") }
+    /// Open the Drive tab's trip summary for the newest (seeded) trip.
+    static var showLatestTrip: Bool { args.contains("-showLatestTrip") }
 }

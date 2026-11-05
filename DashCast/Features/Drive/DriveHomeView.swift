@@ -128,6 +128,12 @@ public struct DriveHomeView: View {
                 DriveTrackingPermissionsSheet()
             }
             .onAppear {
+                // App Store screenshots: open the most recent seeded trip (route + stats).
+                if ScreenshotLaunch.showLatestTrip, completedTrip == nil,
+                   let latest = PersistenceController.shared.loadTrips().max(by: { $0.startTime < $1.startTime }) {
+                    completedTrip = latest
+                    showingTripSummary = true
+                }
                 // Show the user's own location as soon as Drive opens (the map otherwise falls back
                 // to the whole region). Asks once; afterwards the chip/Settings handle changes.
                 if locationService.authorizationStatus == .notDetermined {

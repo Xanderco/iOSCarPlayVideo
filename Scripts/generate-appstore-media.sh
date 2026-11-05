@@ -55,7 +55,7 @@ SCREENS=(
   "02_paywall|-initialTab cast -showPaywall"
   "03_sources|-initialTab cast -showMediaSources"
   "04_player|-initialTab cast -playDemoVideo"
-  "05_drive|-initialTab drive"
+  "05_drive|-initialTab drive -showLatestTrip"
   "06_widgets|-showWidgetEditor"
   "07_onboarding|-showOnboarding"
 )
