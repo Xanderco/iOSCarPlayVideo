@@ -5,7 +5,7 @@ import PhotosUI
 public enum LibraryRoute: Hashable {
     /// Groups of one playlist.
     case playlist(UUID)
-    /// Groups of the built-in sample streams.
+    /// DashCast's own bundled demo videos.
     case samples
     /// Every group from every source.
     case everything
@@ -26,14 +26,19 @@ public struct LibraryView: View {
     @State private var path: [LibraryRoute]
     @State private var query = ""
     @State private var showingAddSource = false
+    @State private var showingServers = false
     @State private var refreshingID: UUID?
     @State private var pendingRemoval: IPTVPlaylist?
 
     /// Number of channels previewed on the Library root before "Browse everything".
     private let previewLimit = 40
 
-    public init(initialRoute: LibraryRoute? = nil) {
+    /// `showsDoneButton` is false when Library is a tab rather than a sheet.
+    private let showsDoneButton: Bool
+
+    public init(initialRoute: LibraryRoute? = nil, showsDoneButton: Bool = true) {
         _path = State(initialValue: initialRoute.map { [$0] } ?? [])
+        self.showsDoneButton = showsDoneButton
     }
 
     public var body: some View {
@@ -56,9 +61,11 @@ public struct LibraryView: View {
             .navigationTitle("Library")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") { dismiss() }
-                        .tint(Color.dcAccent)
+                if showsDoneButton {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Done") { dismiss() }
+                            .tint(Color.dcAccent)
+                    }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -76,6 +83,9 @@ public struct LibraryView: View {
             }
             .sheet(isPresented: $showingAddSource) {
                 AddSourceSheet()
+            }
+            .sheet(isPresented: $showingServers) {
+                MediaServersHomeView()
             }
             .confirmationDialog(
                 "Remove \(pendingRemoval?.title ?? "source")?",
@@ -121,8 +131,14 @@ public struct LibraryView: View {
                     Button("Remove", systemImage: "trash", role: .destructive) { pendingRemoval = playlist }
                 }
             }
+            Button {
+                showingServers = true
+            } label: {
+                sourceLabel("Jellyfin & Emby", systemImage: "server.rack", tint: .dcWarning, detail: nil)
+            }
+            .accessibilityIdentifier("Library_MediaServers")
             NavigationLink(value: LibraryRoute.samples) {
-                sourceLabel("Sample Streams", systemImage: "sparkles.tv", tint: .dcTextSecondary,
+                sourceLabel("Demo Videos", systemImage: "sparkles.tv", tint: .dcTextSecondary,
                             detail: "\(playlistStore.sampleChannels.count)")
             }
             Button {
@@ -151,7 +167,7 @@ public struct LibraryView: View {
                 }
             }
         } header: {
-            Text(playlistStore.playlists.isEmpty ? "Try a sample" : "Channels")
+            Text(playlistStore.playlists.isEmpty ? "Try a demo video" : "Channels")
         }
         .listRowBackground(Color.dcSurface)
     }
@@ -204,7 +220,7 @@ public struct LibraryView: View {
                 EmptyStateView.error(title: "Source removed", message: "This source is no longer in your library.")
             }
         case .samples:
-            GroupListView(title: "Sample Streams", playlistID: nil, channels: playlistStore.sampleChannels)
+            GroupListView(title: "Demo Videos", playlistID: nil, channels: playlistStore.sampleChannels)
         case .everything:
             GroupListView(title: "All Sources", playlistID: nil, channels: playlistStore.allChannels)
         case .group(let playlistID, let name):
@@ -222,8 +238,8 @@ public struct LibraryView: View {
 
     private func channelButton(_ channel: ChannelModel) -> some View {
         Button {
-            PlayerPresentation.shared.play(channel, expand: false)
-            dismiss()
+            PlayerPresentation.shared.play(channel, expand: !showsDoneButton)
+            if showsDoneButton { dismiss() }
         } label: {
             ChannelRow(
                 channel: channel,
