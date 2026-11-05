@@ -34,4 +34,14 @@ final class CarPlaySceneTests: XCTestCase {
         XCTAssertEqual(items.first?.text, "Open DashCast on your iPhone")
         XCTAssertTrue(items.allSatisfy { !$0.isEnabled })
     }
+
+    func testCastTabOffersShowIPhoneScreenAction() {
+        var tapped = false
+        let template = CarPlaySceneDelegate.mirrorInstructionsTemplate { tapped = true }
+        XCTAssertEqual(template.sections.count, 2)
+        let action = template.sections.last?.items.first as? CPListItem
+        XCTAssertEqual(action?.text, CarPlaySceneDelegate.mirrorActionTitle)
+        action?.handler?(action!) {}
+        XCTAssertTrue(tapped)
+    }
 }

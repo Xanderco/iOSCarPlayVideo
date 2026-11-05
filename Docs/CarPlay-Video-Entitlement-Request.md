@@ -9,9 +9,9 @@ change in the repo after approval.
 > fueling apps", and Apple confirmed for iOS 27.2 that "the CarPlay Audio App and CarPlay Video
 > App entitlements cannot be combined in the same app" (forums thread 851377). With the Video
 > entitlement DashCast **only appears in cars that support video in CarPlay** (guide p. 4: "Video
-> apps are hidden in vehicles that do not support video playback in CarPlay"). The earlier Audio
-> plan (`Docs/CarPlay.md`, journal O4) shows DashCast in every CarPlay car. Request one or the
-> other, not both. This document is for the owner's decision to go with Video.
+> apps are hidden in vehicles that do not support video playback in CarPlay"). The owner chose
+> Video in Session 19 (journal O4). Request Video only, never Audio and Video together.
+> This document replaces the justification that was in `Docs/CarPlay.md` and ADR-002 §7.3.
 
 ## 0. Before you submit
 
@@ -107,8 +107,8 @@ that ships with the entitlement (Apple and App Review can check both).
 | Templates only, used for their purpose (guideline 7); only allowed templates (Audio/video column: action sheet, alert, grid, list, tab bar, now playing, voice control and search on iOS 27) | `CarPlaySceneDelegate.swift` uses `CPTabBarTemplate`, `CPListTemplate`, `CPNowPlayingTemplate`, respects `maximumTabCount`, `maximumItemCount`, `maximumSectionCount` and the template depth limit. No `CPInformationTemplate`. | Done. |
 | Playback state on items (`CPPlaybackConfiguration`: preferred presentation video, elapsed time, duration, play/pause action) and a Videos tab only when `CPSessionConfiguration` says video is supported (WWDC26 212) | Not built yet. Add `CPPlaybackConfiguration` on Library and Favorites rows, keep it in sync with `VideoPlayerService.isPlaying`, check the session configuration. | **To do** (iOS 27 SDK). |
 | Audio fallback: "the car may indicate that video playback is not available. If this happens your video will be played as audio-only" | The system does the switch. DashCast already publishes `MPNowPlayingInfoCenter` and remote play/pause, so the audio-only state has a working Now Playing screen. Verify on the CarPlay Simulator with video turned off. | Done in code; **verify**. |
-| Never tell people to pick up the iPhone (guideline 2); all flows possible without the iPhone (guideline 3) | The current "Cast" tab ("Mirror iPhone": open DashCast on iPhone, start broadcast) breaks both rules. **Remove the Cast tab from the CarPlay scene** in the Video build. Empty states must say what to do later ("Add videos in DashCast") without asking the driver to use the phone now. | **To do.** |
-| Only features related to the primary task (guideline 4); no games or social (guideline 5); no message content (guideline 6) | CarPlay shows only Library, Favorites and Now Playing. No settings, browser, Drive, Widgets or Sounds on the car screen. | Done once the Cast tab is gone. |
+| Never tell people to pick up the iPhone (guideline 2); all flows possible without the iPhone (guideline 3) | Two places break this today in `CarPlaySceneDelegate.swift`: the "Mirror iPhone" Cast tab lists steps to do on the iPhone ("Open DashCast on your iPhone", "starts after Start Broadcast on iPhone"), and the empty states say "Import an M3U playlist on your iPhone" / "Tap the heart ... on your iPhone". Reword empty states to state the condition only (for example "No videos yet" / "No favorites yet"). For the mirror tab the owner must choose: hide it in the Video build, or keep only "Show iPhone screen" without phone instructions and accept the review risk. It is the most likely thing for App Review to flag. | **To do (owner decision for the mirror tab).** |
+| Only features related to the primary task (guideline 4); no games or social (guideline 5); no message content (guideline 6) | CarPlay shows Library, Favorites, Now Playing and the Cast tab. No settings, browser, Drive, Widgets or Sounds on the car screen. | Done (Cast tab: see row above). |
 | No DRM services, no third-party content (App Review 5.2, journal D5) | DRM presets removed from the browser (#15); no bundled channels or logos; users add their own sources. The demo content is the project's own videos. | Done. |
 | Subtitles and audio languages when available (WWDC26 212) | The system player menus show the tracks AVPlayer exposes from HLS. Nothing to build; mention nothing. | Done (system). |
 | A real, working app (common refusal reason) | Classic UI build with playlists, Jellyfin/Emby, AirPlay, CarPlay scene, tests green in CI. | Done. |
@@ -116,9 +116,11 @@ that ships with the entitlement (Apple and App Review can check both).
 ## 4. What not to say
 
 - Do not write "mirror", "screen mirroring", "show any app", "your iPhone screen on the car" or
-  anything about the ReplayKit broadcast. That reads as a way around the parked rule and the
-  templates. The mirror feature stays an iPhone-side, parked-only feature and is not part of the
-  CarPlay request.
+  anything about the ReplayKit broadcast. Showing the whole iPhone screen means showing other
+  apps' content, which reads as a way around the templates, the parked rule and other apps' rights.
+  The entitlement is granted for what the app is primarily for: playing the user's own videos.
+  The mirror (Session 19, HLS through the system player, parked only) is a decision for the build
+  that ships, see §3, not something to sell in the request.
 - Do not name Netflix, YouTube, Disney+, Prime Video, Twitch or any other service, even as
   "not supported". Do not say "IPTV" or "live TV channels"; say "playlists they already have".
 - Do not write "watch while driving", "on the road", "during the trip", "keep the kids busy while
@@ -147,14 +149,15 @@ that ships with the entitlement (Apple and App Review can check both).
    <true/>
    ```
 
-4. In `DashCast/DashCast-Simulator.entitlements` replace `com.apple.developer.carplay-audio` with
-   the same `com.apple.developer.carplay-video` key (the two cannot be combined, so the simulator
-   should test what ships).
-5. In `.github/workflows/ci.yml`, step "Check CarPlay simulator entitlements": change the
-   PlistBuddy line to print `:com.apple.developer.carplay-video` and delete the check that fails
-   when `DashCast/DashCast.entitlements` contains a CarPlay key.
-6. Land the **To do** rows from §3 (remove the Cast tab from CarPlay, `CPPlaybackConfiguration`,
-   video session check). Video apps need the iOS 27 SDK.
+4. `DashCast/DashCast-Simulator.entitlements` already carries `com.apple.developer.carplay-video`
+   (Session 19). Nothing to change there.
+5. In `.github/workflows/ci.yml`, step "Check CarPlay simulator entitlements": delete the
+   `if grep -q 'com.apple.developer.carplay' DashCast/DashCast.entitlements` block (it fails the
+   build when the device file has a CarPlay key), and add
+   `/usr/libexec/PlistBuddy -c 'Print :com.apple.developer.carplay-video' DashCast/DashCast.entitlements`
+   so CI checks the key is there.
+6. Land the **To do** rows from §3 (empty-state wording, the mirror tab decision,
+   `CPPlaybackConfiguration`, video session check). Video apps need the iOS 27 SDK.
 7. Verify: `codesign -d --entitlements - DashCast.app` shows `carplay-video`; CarPlay Simulator
    (Additional Tools for Xcode) with a device, video on and off; then TestFlight in a car with
    video in CarPlay support.
