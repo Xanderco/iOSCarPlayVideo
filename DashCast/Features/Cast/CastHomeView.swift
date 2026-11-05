@@ -122,41 +122,15 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingBroadcastPicker) {
                 NavigationStack {
-                    ZStack {
-                        Color.dashBackground.ignoresSafeArea()
-                        VStack(spacing: 24) {
-                            Text("Mirror iPhone Screen")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(Color.dashTextPrimary)
-
-                            Text("Broadcast your entire iOS screen live to your car's CarPlay display via AirPlay.")
-                                .font(.system(size: 14))
-                                .foregroundStyle(Color.dashTextSecondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-
-                            ScreenBroadcastPickerView()
-                                .frame(width: 80, height: 80)
-                                .padding()
-                                .background(Color.dashSurface)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.dashYellow.opacity(0.4), lineWidth: 2))
-
-                            AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
-                                .frame(width: 50, height: 50)
-
-                            Spacer()
+                    CarOutputPanelView()
+                        .navigationTitle("Car Display")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button("Close") { showingBroadcastPicker = false }
+                                    .foregroundStyle(Color.dashYellow)
+                            }
                         }
-                        .padding(.top, 40)
-                    }
-                    .navigationTitle("Screen Mirroring")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button("Close") { showingBroadcastPicker = false }
-                                .foregroundStyle(Color.dashYellow)
-                        }
-                    }
                 }
             }
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in

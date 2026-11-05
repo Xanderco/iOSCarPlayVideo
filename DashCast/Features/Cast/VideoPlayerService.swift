@@ -21,6 +21,10 @@ public final class VideoPlayerService: ObservableObject {
     public init() {
         configureAudioSession()
         setupTimeObserver()
+        // Route video to AirPlay / car displays and enforce the parked-only guard.
+        CarVideoOutputController.shared.attach(player: player) { [weak self] in
+            self?.pause()
+        }
     }
 
     deinit {
@@ -67,6 +71,11 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func play() {
+        // Parked-only guard: never start video on a car display while moving.
+        guard CarVideoOutputController.shared.canStartVideoOutput() else {
+            isPlaying = false
+            return
+        }
         player.play()
         isPlaying = true
     }

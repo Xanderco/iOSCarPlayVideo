@@ -30,6 +30,47 @@ targets:
         CODE_SIGN_STYLE: Automatic
         INFOPLIST_FILE: DashCast/Info.plist
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_ENTITLEMENTS: DashCast/DashCast.entitlements
+    dependencies:
+      - target: DashCastBroadcast
+      - target: DashCastCastWidget
+
+  # ReplayKit Broadcast Upload Extension: mirrors the screen to a parked car's browser.
+  DashCastBroadcast:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: DashCastBroadcast
+      - path: DashCast/Features/Cast/Shared/CarCastShared.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast.broadcast
+        PRODUCT_NAME: DashCastBroadcast
+        DEVELOPMENT_TEAM: "96YG38576A"
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_FILE: DashCastBroadcast/Info.plist
+        CODE_SIGN_ENTITLEMENTS: DashCastBroadcast/DashCastBroadcast.entitlements
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+
+  # WidgetKit extension: Live Activity while DashCast is casting to a car display.
+  DashCastCastWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: DashCastCastWidget
+      - path: DashCast/Features/Cast/Shared/CarCastActivityAttributes.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast.castwidget
+        PRODUCT_NAME: DashCastCastWidget
+        DEVELOPMENT_TEAM: "96YG38576A"
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_FILE: DashCastCastWidget/Info.plist
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
 
   DashCastTests:
     type: bundle.unit-test
