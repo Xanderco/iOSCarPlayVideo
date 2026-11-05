@@ -176,7 +176,7 @@ public struct DriveHomeView: View {
                         Text("DISTANCE")
                             .font(ThemeFonts.hudCaption(size: 11))
                             .foregroundStyle(Color.dashTextMuted)
-                        Text(formatDistance(locationService.currentDistanceMeters))
+                        Text(formatDistance(locationService.distanceMeters))
                             .font(ThemeFonts.hudStat(size: 24))
                             .foregroundStyle(Color.dashGreen)
                     }
