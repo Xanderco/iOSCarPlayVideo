@@ -49,6 +49,10 @@
 	<string>DashCast uses the camera to scan QR codes that contain IPTV playlist links.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>DashCast accesses your photos so you can import personal videos and widget backgrounds.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>DashCast uses the local network to mirror your screen to your parked car's browser display.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

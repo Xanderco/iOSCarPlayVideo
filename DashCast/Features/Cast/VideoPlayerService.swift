@@ -46,6 +46,10 @@ public final class VideoPlayerService: ObservableObject {
         observeTimeControlStatus()
         observeAppLifecycleAndInterruptions()
         setupRemoteCommands()
+        // Route video to AirPlay / car displays and enforce the parked-only guard.
+        CarVideoOutputController.shared.attach(player: player) { [weak self] in
+            self?.pause()
+        }
     }
 
     deinit {
@@ -162,6 +166,11 @@ public final class VideoPlayerService: ObservableObject {
 
     public func play() {
         guard player.currentItem != nil else { return }
+        // Parked-only guard: never start video on a car display while moving.
+        guard CarVideoOutputController.shared.canStartVideoOutput() else {
+            pause()
+            return
+        }
         // Free users get a daily casting allowance; Pro is unlimited.
         if let gate = entitlementGate, !gate.request(.startCasting) {
             pause()

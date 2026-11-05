@@ -145,54 +145,15 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingBroadcastPicker) {
                 NavigationStack {
-                    ZStack {
-                        Color.dashBackground.ignoresSafeArea()
-                        VStack(spacing: 24) {
-                            Text("Mirror iPhone Screen")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundStyle(Color.dashTextPrimary)
-
-                            // The old RPSystemBroadcastPickerView needs a Broadcast Upload
-                            // extension this app doesn't ship, so it showed an empty list.
-                            // Mirroring is a system feature; the app can only point to it.
-                            Text("Mirror your iPhone to an AirPlay screen (Apple TV, AirPlay-capable car display or TV), or plug in a USB-C/HDMI adapter. DashCast then shows the video full screen there.")
-                                .font(.system(size: 14))
-                                .foregroundStyle(Color.dashTextSecondary)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-
-                            VStack(alignment: .leading, spacing: 8) {
-                                Label("Tap the AirPlay button below to send video, or", systemImage: "1.circle.fill")
-                                Label("Open Control Center → Screen Mirroring", systemImage: "2.circle.fill")
+                    CarOutputPanelView()
+                        .navigationTitle("Car Display")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button("Close") { showingBroadcastPicker = false }
+                                    .foregroundStyle(Color.dashYellow)
                             }
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundStyle(Color.dashTextPrimary)
-                            .padding(.horizontal, 24)
-
-                            AirPlayRoutePickerRepresentable(tintColor: .dashYellow)
-                                .frame(width: 64, height: 64)
-                                .background(Color.dashSurface)
-                                .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.dashYellow.opacity(0.4), lineWidth: 2))
-
-                            Text("CarPlay itself does not allow third-party apps to show video; in a CarPlay car only the audio plays through the car.")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.dashTextMuted)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 24)
-
-                            Spacer()
                         }
-                        .padding(.top, 40)
-                    }
-                    .navigationTitle("Screen Mirroring")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button("Close") { showingBroadcastPicker = false }
-                                .foregroundStyle(Color.dashYellow)
-                        }
-                    }
                 }
             }
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in

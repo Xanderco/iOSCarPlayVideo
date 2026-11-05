@@ -87,6 +87,15 @@
 
 ## Log
 
+### 2026-11-05 00:36 (Bogotá) — Integrator: merged #25 (claude/car-video-output)
+- Merged [#25](https://github.com/Xanderco/iOSCarPlayVideo/pull/25): car-display video output (`Docs/ADR-002-car-video-output.md`). Adds AirPlay video routing through `CarVideoOutputController`, a parked-only guard (pauses when the car moves while external output is active), the `DashCastBroadcast` ReplayKit upload extension, the `DashCastCastWidget` Live Activity extension, an app group `group.com.xanderco.dashcast`, and `CarOutputPanelView`.
+- Conflicts resolved:
+  - `VideoPlayerService` keeps #18's lifecycle/remote-command setup plus `CarVideoOutputController.attach`. `play()` checks, in order: item present → parked-only guard → #24 casting allowance → audio session.
+  - `CastHomeView` mirroring sheet uses #25's `CarOutputPanelView` (supersedes #18's interim instructions sheet).
+  - `project.yml` keeps #21's iPhone-only `TARGETED_DEVICE_FAMILY` plus #25's extension targets and dependencies.
+  - App entitlements take #25's app group.
+- Follow-ups: app group and extension bundle IDs must exist in the developer portal (human). The CarPlay video entitlement is deferred (iOS 27), per ADR-002 and O3/O4.
+
 ### 2026-11-05 00:36 (Bogotá) — Integrator: merged #24 (claude/paywall-storekit)
 - Merged [#24](https://github.com/Xanderco/iOSCarPlayVideo/pull/24): DashCast Pro is a single non-consumable `pro.lifetime` purchase (USD 19.99, Family Sharing), per D1. No subscriptions. StoreKit 2 manager with refund/revocation relock and Restore, `EntitlementGate` free-tier limits (playlist sources, daily casting time), and a rewritten paywall with a "No subscription" pledge.
 - Conflicts resolved:
