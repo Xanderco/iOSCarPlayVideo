@@ -45,8 +45,10 @@ final class PaywallUITests: DashCastUITestCase {
 
         let welcome = app.alerts["Welcome to DashCast Pro!"]
         waitFor(welcome, "purchase success alert")
+        let dismiss = welcome.buttons["Let's Drive!"]
+        waitFor(dismiss, "success alert button")
         snapshot("21-purchase-success")
-        welcome.buttons.firstMatch.tap()
+        dismiss.tap()
 
         waitForDisappearance(app.buttons["Paywall_BuyButton"], "paywall closes after purchase")
         waitForDisappearance(app.buttons["Cast_ProButton"], "PRO badge hidden once unlocked")
@@ -56,13 +58,11 @@ final class PaywallUITests: DashCastUITestCase {
     func testRestoreFindsEarlierPurchase() throws {
         try session.buyProduct(productIdentifier: "com.dashcast.lifetime")
         launch()
-        openPaywallFromCast()
-        tap(app.buttons["Paywall_RestoreButton"])
-
-        let welcome = app.alerts["Welcome to DashCast Pro!"]
-        waitFor(welcome, "restore success alert")
+        // Opening the paywall creates StoreKitManager, which checks current entitlements and
+        // unlocks Pro automatically (closing the paywall) — that is the restore path users hit
+        // after a reinstall. The explicit Restore button is covered by StoreKitPurchaseFlowTests.
+        tap(app.buttons["Cast_ProButton"])
+        waitForDisappearance(app.buttons["Cast_ProButton"], "PRO badge hidden after entitlement restore")
         snapshot("22-restore-success")
-        welcome.buttons.firstMatch.tap()
-        waitForDisappearance(app.buttons["Cast_ProButton"], "PRO badge hidden after restore")
     }
 }

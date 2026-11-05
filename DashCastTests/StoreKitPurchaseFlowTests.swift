@@ -80,7 +80,13 @@ final class StoreKitPurchaseFlowTests: XCTestCase {
         XCTAssertTrue(manager.isPurchased)
 
         try session.refundTransaction(identifier: UInt(transaction.id))
-        await manager.updatePurchasedStatus()
+        // The refund reaches Transaction.currentEntitlements asynchronously; poll (bounded, no sleep).
+        let deadline = Date().addingTimeInterval(10)
+        repeat {
+            await manager.updatePurchasedStatus()
+            if !manager.isPurchased { break }
+            await Task.yield()
+        } while Date() < deadline
 
         XCTAssertFalse(manager.isPurchased)
         XCTAssertFalse(UserDefaults.standard.bool(forKey: cacheKey))
