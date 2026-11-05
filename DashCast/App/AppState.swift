@@ -10,8 +10,6 @@ public final class AppState: ObservableObject {
     @Published public var showPaywall: Bool = false
     /// Settings sub-screen to push next time Settings appears (deep links into Car Extras).
     @Published public var settingsDeepLink: SettingsRoute?
-    @Published public var showCarPlaySimulator: Bool = false
-    @Published public var initialCarPlayMode: String = "App in CarPlay"
     @Published public var useMilesPerHour: Bool = false
 
     /// Root tabs (redesign spec §3). Drive / Widgets / Sounds live under Settings › Car Extras.
@@ -82,22 +80,8 @@ public final class AppState: ObservableObject {
             open(.carScreen)
         }
 
-        if ProcessInfo.processInfo.arguments.contains("-carplaySimulator") {
-            self.showCarPlaySimulator = true
-            self.selectedTab = .home
-        }
 
-        if ProcessInfo.processInfo.arguments.contains("-carplayDashboard") {
-            self.showCarPlaySimulator = true
-            self.initialCarPlayMode = "CarPlay Dashboard"
-            self.selectedTab = .home
-        }
 
-        if ProcessInfo.processInfo.arguments.contains("-carplayHomeMenu") {
-            self.showCarPlaySimulator = true
-            self.initialCarPlayMode = "CarPlay Home Menu"
-            self.selectedTab = .home
-        }
     }
 
     /// Handles `dashcast://cast` and `dashcast://drive` links from Home/Lock Screen widgets.

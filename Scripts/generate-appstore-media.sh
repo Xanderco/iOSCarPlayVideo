@@ -51,7 +51,7 @@ mkdir -p "$RAW"
 # name|launch arguments
 SCREENS=(
   "01_home|-initialTab home"
-  "02_cardisplay|-carplayDashboard"
+  "02_cardisplay|-initialTab cast"
   "03_library|-initialTab library"
   "04_cast|-initialTab cast"
   "05_paywall|-showPaywall"

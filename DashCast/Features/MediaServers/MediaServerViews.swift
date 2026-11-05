@@ -97,7 +97,10 @@ public struct AddMediaServerView: View {
     @State private var isConnecting = false
     @State private var errorMessage: String?
 
-    public init() {}
+    /// `kind` preselects Jellyfin or Emby when opened from Library → Add Source.
+    public init(kind: MediaServerKind = .jellyfin) {
+        _kind = State(initialValue: kind)
+    }
 
     private var canSubmit: Bool {
         !address.trimmingCharacters(in: .whitespaces).isEmpty

@@ -97,70 +97,17 @@ public struct IPTVParser {
         return nil
     }
 
+    /// Demo content: only DashCast's own bundled videos. No third-party streams
+    /// (App Review 5.2 — we must not ship content we don't own the rights to).
     public static var samplePlaylist: [ChannelModel] {
-        var list: [ChannelModel] = []
-
-        // 1. Real Bundled Automotive Test Video #1
-        if let nightDriveURL = Bundle.main.url(forResource: "night_drive", withExtension: "mp4") {
-            list.append(
-                ChannelModel(
-                    name: "Night Highway Drive (Bundled 1080p)",
-                    streamURL: nightDriveURL,
-                    groupTitle: "Movies"
-                )
-            )
-        } else {
-            list.append(
-                ChannelModel(
-                    name: "Night Highway Drive (Sample 1080p)",
-                    streamURL: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4")!,
-                    groupTitle: "Movies"
-                )
-            )
+        let demos: [(resource: String, name: String)] = [
+            ("night_drive", "Night Drive"),
+            ("track_lap", "Track Lap")
+        ]
+        return demos.compactMap { demo in
+            guard let url = Bundle.main.url(forResource: demo.resource, withExtension: "mp4") else { return nil }
+            // Stable id so favorites, recents and SwiftUI identity survive re-reads.
+            return ChannelModel(id: "demo.\(demo.resource)", name: demo.name, streamURL: url, groupTitle: "Demo Videos")
         }
-
-        // 2. Real Bundled Automotive Test Video #2
-        if let trackLapURL = Bundle.main.url(forResource: "track_lap", withExtension: "mp4") {
-            list.append(
-                ChannelModel(
-                    name: "Supercar Track Lap (Bundled 1080p)",
-                    streamURL: trackLapURL,
-                    groupTitle: "Sports"
-                )
-            )
-        } else {
-            list.append(
-                ChannelModel(
-                    name: "Supercar Track Lap (Sample 1080p)",
-                    streamURL: URL(string: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")!,
-                    groupTitle: "Sports"
-                )
-            )
-        }
-
-        // 3. Online HLS Streams
-        list.append(
-            ChannelModel(
-                name: "Tears of Steel (4K Sci-Fi)",
-                streamURL: URL(string: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8")!,
-                groupTitle: "Movies"
-            )
-        )
-        list.append(
-            ChannelModel(
-                name: "NASA TV Live Feed",
-                streamURL: URL(string: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8")!,
-                groupTitle: "Live"
-            )
-        )
-        list.append(
-            ChannelModel(
-                name: "Red Bull Motorsports",
-                streamURL: URL(string: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8")!,
-                groupTitle: "Sports"
-            )
-        )
-
-        return list
     }
 }

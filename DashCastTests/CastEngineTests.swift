@@ -51,4 +51,16 @@ final class CastEngineTests: XCTestCase {
             XCTAssertFalse(channel.streamURL.absoluteString.isEmpty)
         }
     }
+
+    /// App Review 5.2: demo content must be DashCast's own bundled videos, never third-party streams.
+    func testSamplePlaylistIsOnlyBundledDemoVideos() {
+        let playlist = IPTVParser.samplePlaylist
+        XCTAssertEqual(playlist.count, 2)
+        for channel in playlist {
+            XCTAssertTrue(channel.streamURL.isFileURL, "\(channel.name) is not a bundled file")
+            XCTAssertEqual(channel.groupTitle, "Demo Videos")
+        }
+        // Stable ids so favorites/recents survive re-reads.
+        XCTAssertEqual(IPTVParser.samplePlaylist.map(\.id), playlist.map(\.id))
+    }
 }

@@ -13,7 +13,7 @@ public struct MainTabView: View {
 
             ZStack {
                 tabScreen(.home) { CastHomeView() } // pads itself for the tab bar
-                tabScreen(.library) { MediaServersHomeView().safeAreaInset(edge: .bottom) { tabBarClearance } }
+                tabScreen(.library) { LibraryView(showsDoneButton: false).safeAreaInset(edge: .bottom) { tabBarClearance } }
                 tabScreen(.cast) { CastMirrorView().safeAreaInset(edge: .bottom) { tabBarClearance } }
                 tabScreen(.settings) { SettingsView().safeAreaInset(edge: .bottom) { tabBarClearance } }
             }

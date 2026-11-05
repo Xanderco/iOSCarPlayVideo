@@ -25,7 +25,6 @@ public struct CastHomeView: View {
     @State private var showingWebBrowser = false
     @State private var showingGuide = false
     @State private var showingMirror = false
-    @State private var showingCarPlaySimulator = false
     @State private var showingPhotoPicker = false
     @State private var pickedPhotoItem: PhotosPickerItem?
     @State private var localImportError: String?
@@ -94,29 +93,7 @@ public struct CastHomeView: View {
         }
         .sheet(isPresented: $showingMirror) {
             // #25's car-output panel: AirPlay route status, parked-only guard, broadcast + CarPlay mirror (#28).
-            NavigationStack {
-                CarOutputPanelView()
-                    .navigationTitle("Car Display")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                            Button("Close") { showingMirror = false }
-                        }
-                    }
-            }
-        }
-        .sheet(isPresented: Binding(
-            get: { showingCarPlaySimulator || appState.showCarPlaySimulator },
-            set: {
-                showingCarPlaySimulator = $0
-                appState.showCarPlaySimulator = $0
-            }
-        )) {
-            CarPlaySimulatorView()
-                // The tab-level paywall can't present over this sheet, so present it here too (#24).
-                .sheet(isPresented: $appState.showPaywall) {
-                    LifetimePaywallView().environmentObject(appState)
-                }
+            CarDisplaySheet()
         }
         .photosPicker(isPresented: $showingPhotoPicker, selection: $pickedPhotoItem,
                       matching: .videos, preferredItemEncoding: .current)
@@ -207,7 +184,7 @@ public struct CastHomeView: View {
             title: "Bring your own videos",
             message: "Add an M3U playlist, connect a Jellyfin or Emby server, or import videos from Photos. Nothing leaves your iPhone.",
             actionTitle: "Add a Source", action: { showingAddSource = true },
-            secondaryActionTitle: "Browse sample streams", secondaryAction: { library = LibraryLaunch(route: .samples) }
+            secondaryActionTitle: "Play a demo video", secondaryAction: { library = LibraryLaunch(route: .samples) }
         )
         .dsCard()
         .padding(.horizontal, DSSpacing.screenGutter)
@@ -369,8 +346,8 @@ public struct CastHomeView: View {
                 PrimaryButton("How to connect", systemImage: "questionmark.circle", kind: .secondary, size: .compact) {
                     showingGuide = true
                 }
-                PrimaryButton("Preview car screen", systemImage: "rectangle.inset.filled", kind: .tertiary, size: .compact) {
-                    showingCarPlaySimulator = true
+                PrimaryButton("Car display options", systemImage: "rectangle.on.rectangle", kind: .tertiary, size: .compact) {
+                    showingMirror = true
                 }
             }
         }

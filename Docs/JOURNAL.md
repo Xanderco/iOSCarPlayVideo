@@ -90,6 +90,14 @@
 
 ## Log
 
+### 2026-11-05 01:16 (Bogotá) — Integrator: merged #34 (claude/redesign-cast-home follow-up)
+- Merged [#34](https://github.com/Xanderco/iOSCarPlayVideo/pull/34), the redesign 2A owner-feedback follow-up. It addresses owner Mac findings #2–#4:
+  - The in-app **CarPlay emulator is removed** (`CarPlaySimulatorView`, the `-carplay*` launch args and `AppState.showCarPlaySimulator`).
+  - The sample playlist now lists **only the two bundled demo videos**; NASA/Red Bull/Tears of Steel/Google samples are gone (D5, App Review 5.2). Covered by a unit test.
+  - Add Source now offers Link · File · QR · Jellyfin · Emby, and the **Library tab now shows `LibraryView`**. This closes my #32 follow-up and handoff U1's first point.
+  - The browser MSE fallback offers "Mirror Your Screen Instead", and `CarOutputPanelView` gets a no-AirPlay empty state plus v2 tokens.
+- Only the journal conflicted (the branch was rebased onto the integration branch). No references to the removed views remain.
+
 ### 2026-11-05 01:15 (Bogotá) — Integrator: merged carplay-mirror follow-up e7f0f72
 - Merged the `claude/carplay-mirror` follow-up `e7f0f72` (no PR; #28 was already merged). It adds `DashCast/DashCast-Simulator.entitlements` (carplay-audio + app group), selected via `CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]`, so DashCast appears in the Xcode CarPlay simulator. This fixes the owner's Mac finding #6. A CI step keeps CarPlay keys out of the device entitlements. Also adds `CarPlaySceneTests` and rewrites `Docs/CarPlay.md`.
 - **Decision change (O4):** request the CarPlay **Audio** entitlement, not Video. Journal §6/§7 and handoff H1/T4 are updated.
@@ -113,6 +121,13 @@
   5. Drive map not centred on the user, no automatic trips → `claude/drive-auto` (pending, see below).
   6. App not visible in the CarPlay Simulator → carplay-mirror adds a simulator-only entitlement. Note: #28 as merged has no such entitlement in `DashCast.entitlements` (only the app group); if a later carplay-mirror commit adds it, it still needs integrating.
 - **Owner decision O2:** Drive stays a real feature; Widgets/Sounds may move under Extras (§6 updated). `claude/drive-auto` is next in the merge queue.
+
+### 2026-11-05 01:10 (Bogotá) — Redesign 2A follow-up: owner feedback from manual testing
+- **Removed** the in-app "CarPlay emulator" (`CarPlaySimulatorView`), its Home button and the `-carplaySimulator/-carplayDashboard/-carplayHomeMenu` launch args. The App Store "02_cardisplay" shot now uses `-initialTab cast`. Real CarPlay is tested in Xcode's CarPlay simulator.
+- **Demo content** is now only our two bundled videos (Night Drive, Track Lap), grouped as "Demo Videos" with stable ids. Removed Tears of Steel, NASA TV, Red Bull and the Google sample fallbacks (App Review 5.2).
+- **Add Source** (Library and Home): Playlist Link · Playlist File · Scan a QR Code · Jellyfin Server · Emby Server (`AddMediaServerView(kind:)`). Library also has a "Jellyfin & Emby" row, and the Library tab now shows `LibraryView` instead of only the media-server list.
+- **Browser**: the MSE/blob hand-off failure (e.g. YouTube) explains why in plain words and offers "Mirror Your Screen Instead", which opens the car-display panel.
+- **Car Display panel** (#25): shows a "No AirPlay displays found" empty state with what to do when no receivers exist; migrated to v2 tokens. Added a `CarDisplaySheet` wrapper so Home and the browser use the same sheet.
 
 ### 2026-11-05 01:01 (Bogotá) — Integrator: merged #32 follow-up a39798d
 - The #32 session pushed `a39798d` after my merge: the same `canStep` return fix, plus explicit initializers for `ResumeCard` and the internal `LibraryView` subviews (memberwise inits were inaccessible). Merged it. The only conflict was `MirrorScreenSheet`, which stays removed (superseded by #25's `CarOutputPanelView`, see the #32 entry).
