@@ -41,7 +41,9 @@ public struct MainTabView: View {
             get: { !passengerNoticeAccepted && !PassengerSafetyNotice.shouldSkip },
             set: { _ in }
         )) {
-            PassengerSafetyNoticeView { passengerNoticeAccepted = true }
+            // First-run walkthrough; includes the required passenger-only acknowledgement.
+            WelcomeOnboardingView { passengerNoticeAccepted = true }
+                .environmentObject(appState)
         }
     }
 
