@@ -23,29 +23,25 @@ public struct WebVideoBrowserView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var urlString: String = ""
     @State private var isShowingHomeGrid: Bool = true
-    @State private var webView = WKWebView()
+    @StateObject private var extractor = WebVideoExtractor()
     @State private var canGoBack: Bool = false
     @State private var canGoForward: Bool = false
     @State private var currentTitle: String = "Browser"
     @State private var showingSendToCarAlert: Bool = false
+    @State private var sendToCarAlertTitle: String = ""
+    @State private var sendToCarAlertMessage: String = ""
+    @State private var isExtracting: Bool = false
+
+    private var webView: WKWebView { extractor.webView }
 
     public static let preaddedSources: [StreamingSource] = [
         StreamingSource(id: "tiktok", name: "TikTok", url: "https://www.tiktok.com", iconSystemName: "music.note", tileColor: Color.black, badgeLetter: "TT"),
         StreamingSource(id: "youtube", name: "YouTube", url: "https://m.youtube.com", iconSystemName: "play.rectangle.fill", tileColor: Color(red: 0.85, green: 0.1, blue: 0.1), badgeLetter: "YT"),
         StreamingSource(id: "instagram", name: "Instagram", url: "https://www.instagram.com", iconSystemName: "camera.fill", tileColor: Color(red: 0.8, green: 0.15, blue: 0.5), badgeLetter: "IG"),
         StreamingSource(id: "google", name: "Google", url: "https://www.google.com", iconSystemName: "magnifyingglass", tileColor: Color(red: 0.2, green: 0.5, blue: 0.9), badgeLetter: "G"),
-        StreamingSource(id: "netflix", name: "Netflix", url: "https://www.netflix.com", iconSystemName: "tv.fill", tileColor: Color(red: 0.12, green: 0.12, blue: 0.12), badgeLetter: "N"),
-        StreamingSource(id: "prime", name: "Prime Video", url: "https://www.primevideo.com", iconSystemName: "play.tv.fill", tileColor: Color(red: 0.05, green: 0.45, blue: 0.75), badgeLetter: "PV"),
-        StreamingSource(id: "hulu", name: "Hulu", url: "https://www.hulu.com", iconSystemName: "play.circle.fill", tileColor: Color(red: 0.1, green: 0.75, blue: 0.4), badgeLetter: "H"),
-        StreamingSource(id: "disney", name: "Disney+", url: "https://www.disneyplus.com", iconSystemName: "sparkles.tv.fill", tileColor: Color(red: 0.08, green: 0.2, blue: 0.55), badgeLetter: "D+"),
-        StreamingSource(id: "hbomax", name: "HBO Max", url: "https://www.max.com", iconSystemName: "tv.inset.filled", tileColor: Color(red: 0.35, green: 0.15, blue: 0.7), badgeLetter: "MAX"),
-        StreamingSource(id: "appletv", name: "Apple TV", url: "https://tv.apple.com", iconSystemName: "apple.logo", tileColor: Color(red: 0.2, green: 0.2, blue: 0.22), badgeLetter: "TV"),
-        StreamingSource(id: "peacock", name: "Peacock", url: "https://www.peacocktv.com", iconSystemName: "circle.grid.cross.fill", tileColor: Color(red: 0.1, green: 0.6, blue: 0.7), badgeLetter: "P"),
-        StreamingSource(id: "paramount", name: "Paramount+", url: "https://www.paramountplus.com", iconSystemName: "mountain.2.fill", tileColor: Color(red: 0.0, green: 0.35, blue: 0.8), badgeLetter: "P+"),
         StreamingSource(id: "tubi", name: "Tubi", url: "https://tubitv.com", iconSystemName: "play.square.fill", tileColor: Color(red: 0.85, green: 0.35, blue: 0.1), badgeLetter: "Tubi"),
         StreamingSource(id: "plutotv", name: "Pluto TV", url: "https://pluto.tv", iconSystemName: "circle.circle.fill", tileColor: Color(red: 0.95, green: 0.75, blue: 0.0), badgeLetter: "Pluto"),
         StreamingSource(id: "twitch", name: "Twitch", url: "https://m.twitch.tv", iconSystemName: "gamecontroller.fill", tileColor: Color(red: 0.5, green: 0.2, blue: 0.85), badgeLetter: "Twitch"),
-        StreamingSource(id: "crunchyroll", name: "Crunchyroll", url: "https://www.crunchyroll.com", iconSystemName: "circle.fill", tileColor: Color(red: 0.95, green: 0.45, blue: 0.05), badgeLetter: "CR"),
         StreamingSource(id: "plex", name: "Plex", url: "https://app.plex.tv", iconSystemName: "play.square.stack.fill", tileColor: Color(red: 0.85, green: 0.55, blue: 0.0), badgeLetter: "Plex"),
         StreamingSource(id: "roku", name: "Roku", url: "https://therokuchannel.roku.com", iconSystemName: "plus.square.fill", tileColor: Color(red: 0.45, green: 0.1, blue: 0.65), badgeLetter: "Roku"),
         StreamingSource(id: "vimeo", name: "Vimeo", url: "https://vimeo.com", iconSystemName: "v.circle.fill", tileColor: Color(red: 0.1, green: 0.65, blue: 0.85), badgeLetter: "Vimeo"),
@@ -63,7 +59,7 @@ public struct WebVideoBrowserView: View {
                 // Top Search / Address Bar
                 topAddressBar
 
-                // Content Area: Grid of 20 Sources OR Active WebView
+                // Content Area: Grid of Sources OR Active WebView
                 if isShowingHomeGrid {
                     sourcesHomeGridView
                 } else {
@@ -72,7 +68,8 @@ public struct WebVideoBrowserView: View {
                         urlString: $urlString,
                         canGoBack: $canGoBack,
                         canGoForward: $canGoForward,
-                        title: $currentTitle
+                        title: $currentTitle,
+                        onNavigationCommitted: { extractor.resetReports() }
                     )
                     .ignoresSafeArea(edges: .bottom)
                 }
@@ -82,10 +79,10 @@ public struct WebVideoBrowserView: View {
             }
             .background(Color.dashBackground)
             .navigationBarHidden(true)
-            .alert("Sent to Car Screen", isPresented: $showingSendToCarAlert) {
+            .alert(sendToCarAlertTitle, isPresented: $showingSendToCarAlert) {
                 Button("OK", role: .cancel) {}
             } message: {
-                Text("Video stream URL has been routed to your external car display.")
+                Text(sendToCarAlertMessage)
             }
         }
     }
@@ -149,7 +146,7 @@ public struct WebVideoBrowserView: View {
         .background(Color.dashSurface.opacity(0.8))
     }
 
-    // MARK: - 20 Sources Grid View
+    // MARK: - Sources Grid View
 
     private var sourcesHomeGridView: some View {
         ScrollView {
@@ -159,6 +156,7 @@ public struct WebVideoBrowserView: View {
                         Button {
                             urlString = source.url
                             isShowingHomeGrid = false
+                            extractor.resetReports()
                             if let url = URL(string: source.url) {
                                 webView.load(URLRequest(url: url))
                             }
@@ -266,7 +264,7 @@ public struct WebVideoBrowserView: View {
             }
 
             Button {
-                showingSendToCarAlert = true
+                sendCurrentVideoToCar()
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: "car.side.fill")
@@ -277,6 +275,7 @@ public struct WebVideoBrowserView: View {
                 .foregroundStyle(Color.dashYellow)
                 .frame(maxWidth: .infinity)
             }
+            .disabled(isExtracting)
         }
         .padding(.vertical, 12)
         .background(Color.dashSurface)
@@ -286,6 +285,41 @@ public struct WebVideoBrowserView: View {
                 .foregroundStyle(Color.dashBorder),
             alignment: .top
         )
+    }
+
+    // MARK: - Send to car
+
+    private func sendCurrentVideoToCar() {
+        guard !isShowingHomeGrid else {
+            presentSendResult(.noVideo)
+            return
+        }
+        isExtracting = true
+        extractor.requestCurrentVideo { result in
+            isExtracting = false
+            if case let .found(url, title) = result {
+                VideoPlayerService.shared.playWebVideo(url: url, title: title)
+            }
+            presentSendResult(result)
+        }
+    }
+
+    private func presentSendResult(_ result: WebVideoExtractionResult) {
+        switch result {
+        case .found:
+            sendToCarAlertTitle = "Sent to DashCast"
+            sendToCarAlertMessage = "Playing on DashCast player — use AirPlay to send it to your car display."
+        case .drmProtected:
+            sendToCarAlertTitle = "Protected Video"
+            sendToCarAlertMessage = "This video is DRM-protected and can't be sent to the car."
+        case .unsupportedStream:
+            sendToCarAlertTitle = "Can't Hand Off"
+            sendToCarAlertMessage = "This site streams in a way that can't be handed off."
+        case .noVideo:
+            sendToCarAlertTitle = "No Video Found"
+            sendToCarAlertMessage = "Start playing a video on the page, then tap Send to car again."
+        }
+        showingSendToCarAlert = true
     }
 
     private func navigateToInput() {
@@ -300,6 +334,7 @@ public struct WebVideoBrowserView: View {
             }
         }
         isShowingHomeGrid = false
+        extractor.resetReports()
         if let url = URL(string: fullURL) {
             webView.load(URLRequest(url: url))
         }
@@ -312,6 +347,9 @@ public struct WebViewRepresentable: UIViewRepresentable {
     @Binding public var canGoBack: Bool
     @Binding public var canGoForward: Bool
     @Binding public var title: String
+    /// Called when a new main-frame navigation commits (link taps included),
+    /// so stale video reports from the previous page are discarded.
+    public var onNavigationCommitted: (() -> Void)? = nil
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -319,9 +357,9 @@ public struct WebViewRepresentable: UIViewRepresentable {
 
     public func makeUIView(context: Context) -> WKWebView {
         webView.navigationDelegate = context.coordinator
+        // Media configuration (inline playback, AirPlay, autoplay) and the
+        // video-detection user scripts are set up by WebVideoExtractor at init.
         webView.allowsBackForwardNavigationGestures = true
-        webView.configuration.allowsInlineMediaPlayback = true
-        webView.configuration.mediaTypesRequiringUserActionForPlayback = []
         return webView
     }
 
@@ -332,6 +370,10 @@ public struct WebViewRepresentable: UIViewRepresentable {
 
         init(_ parent: WebViewRepresentable) {
             self.parent = parent
+        }
+
+        public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+            parent.onNavigationCommitted?()
         }
 
         public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
