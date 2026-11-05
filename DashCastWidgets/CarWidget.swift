@@ -33,7 +33,6 @@ struct CarWidget: Widget {
         AppIntentConfiguration(kind: "DashCastCarWidget", intent: CarWidgetIntent.self, provider: CarProvider()) { entry in
             CarWidgetView(entry: entry)
                 .containerBackground(WidgetPalette.backdrop, for: .widget)
-                .widgetURL(DashCastLinks.widgets)
         }
         .configurationDisplayName("My Car")
         .description("Your car photo, name and plate.")

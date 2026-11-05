@@ -69,6 +69,13 @@ final class WidgetSharedStoreTests: XCTestCase {
         XCTAssertEqual(loaded.lastTrip?.durationSeconds ?? 0, 600, accuracy: 0.1)
     }
 
+    func testDestinationParsing() {
+        XCTAssertEqual(DashCastLinks.destination(for: DashCastLinks.cast), .cast)
+        XCTAssertEqual(DashCastLinks.destination(for: URL(string: "DASHCAST://Drive")!), .drive)
+        XCTAssertEqual(DashCastLinks.destination(for: URL(string: "dashcast:///cast")!), .cast)
+        XCTAssertNil(DashCastLinks.destination(for: URL(string: "otherapp://cast")!))
+    }
+
     @MainActor
     func testDeepLinkSelectsTab() {
         let state = AppState()
@@ -79,6 +86,7 @@ final class WidgetSharedStoreTests: XCTestCase {
         XCTAssertEqual(state.selectedTab, .drive)
         XCTAssertFalse(state.handleDeepLink(URL(string: "https://example.com/cast")!))
         XCTAssertFalse(state.handleDeepLink(URL(string: "dashcast://nowhere")!))
+        XCTAssertFalse(state.handleDeepLink(URL(string: "dashcast://widgets")!))
         XCTAssertEqual(state.selectedTab, .drive)
     }
 }
