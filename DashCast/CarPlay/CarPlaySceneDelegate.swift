@@ -31,7 +31,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
     ) {
         self.interfaceController = interfaceController
         setupCarPlayRootTemplate(interfaceController: interfaceController)
-        CarPlayMirrorController.shared.attach(to: window)
+        MainActor.assumeIsolated { CarPlayMirrorController.shared.attach(to: window) }
     }
 
     public func templateApplicationScene(
@@ -40,7 +40,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         from window: CPWindow
     ) {
         self.interfaceController = nil
-        CarPlayMirrorController.shared.detach()
+        MainActor.assumeIsolated { CarPlayMirrorController.shared.detach() }
     }
 
     private func setupCarPlayRootTemplate(interfaceController: CPInterfaceController) {
