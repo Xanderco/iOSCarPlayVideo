@@ -22,13 +22,22 @@ final class ReviewFixesTests: XCTestCase {
         }
     }
 
-    func testATSAllowsHTTPMediaAndLocalServersOnly() throws {
-        let ats = try XCTUnwrap(info["NSAppTransportSecurity"] as? [String: Any],
-                                "http IPTV streams and LAN media servers are blocked by ATS without exceptions")
-        XCTAssertEqual(ats["NSAllowsArbitraryLoadsForMedia"] as? Bool, true)
-        XCTAssertEqual(ats["NSAllowsLocalNetworking"] as? Bool, true)
-        // Keep the exception narrow; a blanket opt-out needs an owner decision + review justification.
-        XCTAssertNil(ats["NSAllowsArbitraryLoads"])
+    /// Most IPTV playlists/streams (e.g. iptv-org) and home Jellyfin/Emby servers are plain http.
+    /// Reads the bundled Info.plist file as well as the processed dictionary.
+    func testATSAllowsUserSuppliedHTTPSources() throws {
+        let plistURL = try XCTUnwrap(Bundle.main.url(forResource: "Info", withExtension: "plist"))
+        let raw = try XCTUnwrap(NSDictionary(contentsOf: plistURL) as? [String: Any])
+        for dict in [raw, info] {
+            let ats = try XCTUnwrap(dict["NSAppTransportSecurity"] as? [String: Any],
+                                    "Without ATS exceptions http playlists and streams fail with -1022")
+            XCTAssertEqual(ats["NSAllowsArbitraryLoads"] as? Bool, true)
+            // On iOS 10+ any of these keys makes the system ignore NSAllowsArbitraryLoads.
+            for overriding in ["NSAllowsArbitraryLoadsForMedia",
+                               "NSAllowsArbitraryLoadsInWebContent",
+                               "NSAllowsLocalNetworking"] {
+                XCTAssertNil(ats[overriding], "\(overriding) would disable NSAllowsArbitraryLoads")
+            }
+        }
     }
 
     func testDeclaredSceneDelegatesExist() throws {

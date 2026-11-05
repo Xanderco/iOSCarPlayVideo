@@ -243,6 +243,9 @@ Video is for passengers only, or for use while the vehicle is parked. This is sh
 
 PRIVACY
 No account, no analytics, no ads and no tracking. Location is used on-device only for the speed and trip screen.
+
+NETWORK SECURITY (App Transport Security)
+The app plays user-supplied playlists and personal media servers that are frequently served over http; the app ships no content. Public M3U playlists and the streams they list, as well as home Jellyfin/Emby servers (default http://<host>:8096), are commonly plain http, so the app sets NSAllowsArbitraryLoads. The app's own services (StoreKit, our legal pages) use https.
 ```
 
 > Before submission: host `AppStoreMedia/reviewer-demo.m3u` at the URL above (or change the URL in
