@@ -92,6 +92,19 @@
 
 ## Log
 
+### 2026-11-05 03:30 (Bogotá) — CEO: Static Landing Page & Web Multimedia Engineer Hire (CARAA-29 / DI-28)
+- **Hired Multimedia Engineer:** Submitted agent hire proposal (`Multimedia_Engineer` / Lead Multimedia & Web Systems Engineer) in Paperclip per owner directive on CARAA-29, reporting to CEO, with `opencode_local` runtime, icon `globe`, and static web/multimedia capabilities. Created Board Approval request #5d124eac.
+- **Built Static Landing Page:** Created full-featured responsive static website in `docs/site/` benchmarked on competitor `https://cartv.app/#cast` tailored for DashCast.
+  - Header with glowing DashCast app icon, sticky glass navbar, dark/light mode toggle with localStorage persistence, mobile nav menu, and App Store CTA.
+  - Hero section: "Video on your car display. Pay once.", lead copy, safety callout, and an interactive CSS/SVG in-dash automotive display mockup featuring CarPlay sidebar, live stream status badge, track lap video preview, and iPhone remote controls.
+  - `#cast` section directly mirroring `cartv.app/#cast`: 3-step numbered flow (Cast button, Screen Mirroring, Background Live Activity) + interactive streaming platforms chip matrix (YouTube, Plex, Jellyfin, Emby, Infuse, VLC, Twitch, Bilibili, etc. with expandable list).
+  - `#features` section: 6 automotive cards covering M3U playlists, Jellyfin & Emby, low-latency H.264 mirroring, Metal/AVFoundation hardware decoding, OLED dark car ergonomics, and zero tracking privacy.
+  - `#moments` section: EV Supercharging breaks, campsite sunsets, and commute waits.
+  - `#pro` section: Transparent comparison table proving DashCast Pro $19.99 Lifetime Pass vs predatory $9.99/mo competitor subscriptions.
+  - `#faq` section: Interactive accordion answering video sources, CarPlay requirements, privacy, and driving safety locks.
+  - Preserved and enhanced compatibility with existing `privacy.html`, `support.html`, and `terms.html`.
+- Branch: `feature/DI-28-static-landing-page` pushed to origin. Commit `4df9159`.
+
 ### 2026-11-05 02:30 (Bogotá) — Session 22: Privacy / Support / Terms web pages (`claude/legal-pages`)
 - Added a small static site in `docs/site/` (plain HTML + one `style.css`, dark, mobile friendly, no JS, no trackers, no external fonts): `index.html`, `privacy.html` (no account/tracking/analytics; playlists, server details and trips stay on the iPhone; server tokens in Keychain; location/motion on-device only for Drive and parked-only safety; camera only for QR; photos only when the user picks; StoreKit purchases handled by Apple), `support.html` (FAQ: M3U, Jellyfin/Emby, why streams fail, no DRM services, passengers/parked only, CarPlay depends on Apple entitlement and the car, restore, contact), `terms.html` (Apple Standard EULA + short app terms: no content provided, user responsible for rights). Contact: alexbh987@gmail.com.
 - `.github/workflows/pages.yml` deploys `docs/site` to GitHub Pages on push to `main` (paths `docs/site/**`) and on `workflow_dispatch` (configure-pages + upload-pages-artifact + deploy-pages).
