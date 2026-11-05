@@ -33,6 +33,7 @@
 | D7 | App Store: category **Utilities** (secondary Entertainment), **iPhone only**, original metadata. Honest age rating (in-app web browser ⇒ "Unrestricted Web Access" ⇒ likely 18+; open decision O1). | 2026-11-05 | Mirrors approved competitors. |
 | D8 | CI (GitHub Actions, macOS 15, newest Xcode 26.x, XcodeGen) is the source of truth. `DashCast.xcodeproj` is **generated**, not committed. Nothing is "done" without green CI. | 2026-11-04 | Every run before this failed; agents ran on Windows and couldn't compile. |
 | D9 | Tests are never disabled/skipped to get green; fix code or test with justification. | 2026-11-05 | Owner wants "everything must pass" honestly. |
+| D10 | ATS: `NSAllowsArbitraryLoads = YES` alone (no granular keys: they disable it on iOS 10+). | 2026-11-05 | Users' playlists, streams and Jellyfin/Emby servers are mostly plain http; the app ships no content. Justification is in the review notes. |
 
 ## 3. Originality
 
@@ -90,6 +91,13 @@
 
 ## Log
 
+### 2026-11-05 01:16 (Bogotá) — Integrator: merged #33 (claude/review-fixes follow-up)
+- Merged [#33](https://github.com/Xanderco/iOSCarPlayVideo/pull/33), the review-fixes follow-up for owner Mac finding #1 (http streams blocked).
+  - ATS is now `NSAllowsArbitraryLoads = YES` **alone** (decision **D10**). This replaces #30's narrow media/LAN keys, which on iOS 10+ also *disable* `NSAllowsArbitraryLoads`, so http playlist downloads and remote http servers stayed blocked.
+  - The App Review justification is in `AppStoreMedia/metadata.md` §9 and `Docs/AppReview-checklist.md` #18.
+  - `CarPlaySceneDelegate` gets a `@preconcurrency` conformance.
+- Only the journal conflicted; Info.plist and the delegate auto-merged. The merged ATS dict is verified to contain only `NSAllowsArbitraryLoads`. Still to check on the Mac: play an iptv-org http channel.
+
 ### 2026-11-05 01:16 (Bogotá) — Integrator: merged #34 (claude/redesign-cast-home follow-up)
 - Merged [#34](https://github.com/Xanderco/iOSCarPlayVideo/pull/34), the redesign 2A owner-feedback follow-up. It addresses owner Mac findings #2–#4:
   - The in-app **CarPlay emulator is removed** (`CarPlaySimulatorView`, the `-carplay*` launch args and `AppState.showCarPlaySimulator`).
@@ -128,6 +136,11 @@
 - **Add Source** (Library and Home): Playlist Link · Playlist File · Scan a QR Code · Jellyfin Server · Emby Server (`AddMediaServerView(kind:)`). Library also has a "Jellyfin & Emby" row, and the Library tab now shows `LibraryView` instead of only the media-server list.
 - **Browser**: the MSE/blob hand-off failure (e.g. YouTube) explains why in plain words and offers "Mirror Your Screen Instead", which opens the car-display panel.
 - **Car Display panel** (#25): shows a "No AirPlay displays found" empty state with what to do when no receivers exist; migrated to v2 tokens. Added a `CarDisplaySheet` wrapper so Home and the browser use the same sheet.
+
+### 2026-11-05 01:10 (Bogotá) — Session 17: ATS fix for http IPTV (owner Mac test)
+- **Mac result** (owner, iPhone 17 sim): the build is OK, 118 unit and 4 UI tests pass, and there are no runtime issues. YouTube browsing works. The main playback bug was http-only playlists/streams being blocked by ATS.
+- `Info.plist` now sets `NSAllowsArbitraryLoads = YES` **alone**. On iOS 10+, adding `NSAllowsArbitraryLoadsForMedia`, `…InWebContent` or `NSAllowsLocalNetworking` makes iOS ignore it, so do not add them back. `ReviewFixesTests.testATSAllowsUserSuppliedHTTPSources` guards this.
+- The review justification is in `AppStoreMedia/metadata.md` §9 and `Docs/AppReview-checklist.md` #18. Recorded as **D10** (ATS off for user-supplied sources).
 
 ### 2026-11-05 01:01 (Bogotá) — Integrator: merged #32 follow-up a39798d
 - The #32 session pushed `a39798d` after my merge: the same `canStep` return fix, plus explicit initializers for `ResumeCard` and the internal `LibraryView` subviews (memberwise inits were inaccessible). Merged it. The only conflict was `MirrorScreenSheet`, which stays removed (superseded by #25's `CarOutputPanelView`, see the #32 entry).

@@ -12,8 +12,10 @@ import UIKit
 ///
 /// `UIResponder` is `@MainActor`, so this whole class (and every closure it creates
 /// for CarPlay templates) runs on the main actor.
+/// CarPlay calls the delegate on the main thread but the SDK protocol isn't `@MainActor`;
+/// `@preconcurrency` states that and silences "conformance crosses into main actor-isolated code".
 @MainActor
-public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
+public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplateApplicationSceneDelegate {
     public var interfaceController: CPInterfaceController?
 
     private var libraryTemplate: CPListTemplate?
