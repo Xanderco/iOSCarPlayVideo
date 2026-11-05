@@ -54,6 +54,19 @@
 	<string>Trip Log uses your location to record the route and distance of a trip you start. Trips stay on this iPhone.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Allows Trip Log to keep recording a trip you started while DashCast is in the background. Trips stay on this iPhone.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>DashCast uses motion activity to tell whether the car is parked, so video on a car display pauses while the car is moving.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Narrow exceptions only. Media: user-supplied IPTV/HLS streams played by AVFoundation are often
+		     plain http. Local networking: Jellyfin/Emby on the home LAN defaults to http://host:8096
+		     (MediaServerClient prepends http:// to bare addresses). Remote http playlist downloads via
+		     URLSession stay blocked by ATS: see Docs/Review-2026-11-05.md (owner decision). -->
+		<key>NSAllowsArbitraryLoadsForMedia</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>DashCast uses the camera to scan QR codes that contain IPTV playlist links.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
@@ -61,7 +74,7 @@
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>DashCast uses the local network to mirror your screen to your parked car's browser display.</string>
+	<string>DashCast connects to media servers on your local network, such as a Jellyfin or Emby server at home, and can mirror your screen to your parked car's browser display.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -315,19 +315,13 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         removeRemoteCommands()
         let center = MPRemoteCommandCenter.shared()
 
-        func register(_ command: MPRemoteCommand, _ action: @escaping @MainActor @Sendable () -> Void) {
+        // `VideoPlayerService.shared` already owns the play/pause/toggle targets for the whole
+        // process. Adding a second set here made every toggle (steering wheel, AirPods) run twice
+        // while CarPlay was connected, so it flipped back and nothing happened (Review 2026-11-05).
+        // Only make sure the commands are enabled; Now Playing follows `observePlayer()`.
+        for command in [center.playCommand, center.pauseCommand, center.togglePlayPauseCommand] {
             command.isEnabled = true
-            let token = command.addTarget { _ in
-                Task { @MainActor in action() }
-                return .success
-            }
-            remoteCommandTargets.append((command, token))
         }
-
-        // Now Playing info follows `VideoPlayerService` via `observePlayer()`.
-        register(center.playCommand) { VideoPlayerService.shared.play() }
-        register(center.pauseCommand) { VideoPlayerService.shared.pause() }
-        register(center.togglePlayPauseCommand) { VideoPlayerService.shared.togglePlayPause() }
     }
 
     private func removeRemoteCommands() {

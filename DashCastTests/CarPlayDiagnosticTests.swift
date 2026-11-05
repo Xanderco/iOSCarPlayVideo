@@ -1,20 +1,25 @@
 import XCTest
+import UIKit
 @testable import DashCast
 
+/// Previously this test only printed diagnostics and asserted nothing (Review 2026-11-05).
 final class CarPlayDiagnosticTests: XCTestCase {
+    func testExternalDisplayRoleClassification() {
+        XCTAssertTrue(ExternalDisplayManager.isExternalDisplayRole(.windowExternalDisplayNonInteractive))
+        XCTAssertFalse(ExternalDisplayManager.isExternalDisplayRole(.windowApplication))
+    }
+
     @MainActor
-    func testExternalDisplayDetection() {
-        print("DIAGNOSTIC: UIScreen.screens.count = \(UIScreen.screens.count)")
-        for (i, s) in UIScreen.screens.enumerated() {
-            print("  Screen [\(i)]: bounds=\(s.bounds), scale=\(s.scale)")
+    func testNoExternalDisplayInTestHostAndDetachResetsState() {
+        let manager = ExternalDisplayManager()
+        manager.checkForExistingExternalDisplay()
+        let hasExternalScene = UIApplication.shared.connectedScenes.contains {
+            ExternalDisplayManager.isExternalDisplayRole($0.session.role)
         }
+        XCTAssertEqual(manager.isExternalDisplayConnected, hasExternalScene)
 
-        print("DIAGNOSTIC: UIApplication.shared.connectedScenes.count = \(UIApplication.shared.connectedScenes.count)")
-        for s in UIApplication.shared.connectedScenes {
-            print("  Scene: \(s.session.role), title=\(s.title ?? "none")")
-        }
-
-        ExternalDisplayManager.shared.checkForExistingExternalDisplay()
-        print("DIAGNOSTIC: isExternalDisplayConnected = \(ExternalDisplayManager.shared.isExternalDisplayConnected)")
+        manager.detach(from: nil)
+        XCTAssertFalse(manager.isExternalDisplayConnected)
+        XCTAssertEqual(manager.externalDisplayResolution, .zero)
     }
 }

@@ -6,8 +6,9 @@ import UIKit
 
 @MainActor
 public final class VideoPlayerService: ObservableObject {
+    /// The only instance that owns the lock-screen / CarPlay / headset remote commands.
     public static let shared: VideoPlayerService = {
-        let service = VideoPlayerService()
+        let service = VideoPlayerService(handlesRemoteCommands: true)
         service.entitlementGate = .shared
         return service
     }()
@@ -40,12 +41,19 @@ public final class VideoPlayerService: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var wantsToPlay = false
 
-    public init() {
+    private var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
+    /// Number of MPRemoteCommandCenter targets this instance registered. Exposed for tests.
+    var remoteCommandTargetCount: Int { remoteCommandTargets.count }
+
+    /// - Parameter handlesRemoteCommands: only `shared` passes `true`. Every extra instance (tests,
+    ///   previews) used to add its own play/pause/toggle targets to the process-wide
+    ///   `MPRemoteCommandCenter`, and a toggle delivered to two targets flips twice (= no-op).
+    public init(handlesRemoteCommands: Bool = false) {
         player.allowsExternalPlayback = true
         setupTimeObserver()
         observeTimeControlStatus()
         observeAppLifecycleAndInterruptions()
-        setupRemoteCommands()
+        if handlesRemoteCommands { setupRemoteCommands() }
         // Route video to AirPlay / car displays and enforce the parked-only guard.
         CarVideoOutputController.shared.attach(player: player) { [weak self] in
             self?.pause()
@@ -102,9 +110,20 @@ public final class VideoPlayerService: ObservableObject {
         play()
     }
 
-    private func observe(item: AVPlayerItem) {
+    /// Number of live per-item KVO + NotificationCenter observers. Exposed for tests.
+    var activeItemObserverCount: Int { itemObservers.count + itemNotificationTokens.count }
+
+    /// `stop()` used to invalidate only the KVO observers, leaving the NotificationCenter block
+    /// observers for the released item registered until the next `load`.
+    private func removeItemObservers() {
         itemObservers.forEach { $0.invalidate() }
+        itemObservers = []
         itemNotificationTokens.forEach { NotificationCenter.default.removeObserver($0) }
+        itemNotificationTokens = []
+    }
+
+    private func observe(item: AVPlayerItem) {
+        removeItemObservers()
 
         itemObservers = [
             item.observe(\.status, options: [.new]) { [weak self] item, _ in
@@ -224,8 +243,7 @@ public final class VideoPlayerService: ObservableObject {
         wantsToPlay = false
         player.pause()
         player.replaceCurrentItem(with: nil)
-        itemObservers.forEach { $0.invalidate() }
-        itemObservers = []
+        removeItemObservers()
         currentChannel = nil
         playbackError = nil
         isBuffering = false
@@ -320,18 +338,21 @@ public final class VideoPlayerService: ObservableObject {
 
     private func setupRemoteCommands() {
         let commands = MPRemoteCommandCenter.shared()
-        commands.playCommand.addTarget { [weak self] _ in
+        let play = commands.playCommand.addTarget { [weak self] _ in
             Task { @MainActor in self?.play() }
             return .success
         }
-        commands.pauseCommand.addTarget { [weak self] _ in
+        let pause = commands.pauseCommand.addTarget { [weak self] _ in
             Task { @MainActor in self?.pause() }
             return .success
         }
-        commands.togglePlayPauseCommand.addTarget { [weak self] _ in
+        let toggle = commands.togglePlayPauseCommand.addTarget { [weak self] _ in
             Task { @MainActor in self?.togglePlayPause() }
             return .success
         }
+        remoteCommandTargets = [(commands.playCommand, play),
+                                (commands.pauseCommand, pause),
+                                (commands.togglePlayPauseCommand, toggle)]
     }
 
     private func updateNowPlayingInfo() {

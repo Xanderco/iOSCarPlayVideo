@@ -87,6 +87,15 @@
 
 ## Log
 
+### 2026-11-05 00:56 (Bogotá) — Integrator: merged #30 (claude/review-fixes)
+- Merged [#30](https://github.com/Xanderco/iOSCarPlayVideo/pull/30), the independent review of phase 1 (`Docs/Review-2026-11-05.md`). Adds narrow ATS exceptions (`NSAllowsArbitraryLoadsForMedia`, `NSAllowsLocalNetworking`) so http IPTV and LAN Jellyfin/Emby work on device. Fixes the double remote-command handlers: only `VideoPlayerService.shared` owns the targets, and CarPlay just enables them. Also fixes the observer cleanup in `stop()`, adds real assertions in `CarPlayDiagnosticTests`, and adds `ReviewFixesTests`. The later commit migrates leftover files to v2 tokens and adds a CI warning summary.
+- Conflicts resolved:
+  - `VideoPlayerService`: `shared` is the remote-command owner and also gets #24's `EntitlementGate`. `init` registers commands only when `handlesRemoteCommands`, and always attaches #25's `CarVideoOutputController`.
+  - `SoundCatalogService` and `VehicleCatalogService`: #31 had moved them to `Features/Extras`, so the old paths stay deleted. #30's token-only edits to the old copies were dropped.
+  - `Info.plist`: one combined `NSLocalNetworkUsageDescription` (#25 mirroring plus #30 LAN servers) and #30's ATS dict.
+- Integration fix: added `NSMotionUsageDescription` (parked detection), because #25's `ParkedGuard` uses `CMMotionActivityManager` and the key had been dropped (#31 removed the driving-score motion string). Without it the app is killed on device when the guard starts.
+- Report-only items from the review are tracked in the doc. StoreKit restore-at-launch is addressed by #24 (`StoreKitManager.shared` is created in `DashCastApp.init`), and #31 removed the fake "sent" feedback.
+
 ### 2026-11-05 00:55 (Bogotá) — Integrator: merged #32 (claude/redesign-cast-home)
 - Merged [#32](https://github.com/Xanderco/iOSCarPlayVideo/pull/32), redesign 2A on design system v2. Adds a new Home (`CastHomeView`: search, quick actions, Continue Watching, Favorites, Recents, Sources grid, car-display card), `LibraryView` (Sources → Groups → Channels), `AddSourceSheet`, `PlayerScreen`, a persistent `MiniPlayerHost`, `CarModeView` and `WatchHistoryStore` (with tests).
 - Conflicts resolved:
@@ -146,6 +155,16 @@
 - CarDash / "1:1" references removed from Cast, `AppState` and the browser/simulator comments. Still remaining, in other sessions' areas: `DriveNotificationService`, `DriveSettingsView`, `MeHomeView`, `WidgetEditorView`.
 - UI tests: identifiers unchanged. The Library sheet's title is now "Library" (was "Media Sources"), and the smoke test is updated to match.
 - Follow-ups: gate Car Mode behind Pro once `EntitlementGate` lands (paywall session). The 4-tab restructure (spec §3) still has to be done, and it will retire the 110 pt tab-bar padding the other tabs use (the mini player can overlap their last row). Check Car Mode's forced landscape and resume-seek on a real device.
+
+### 2026-11-05 00:50 (Bogotá) — Session 17: independent review of phase 1
+- Reviewed `claude/ci-and-core-fixes` @ `d64237c` with fresh eyes. There are 21 findings in `Docs/Review-2026-11-05.md`.
+- Fixed on `claude/review-fixes`, with tests in `ReviewFixesTests`:
+  - Added ATS exceptions for media and the local network, plus `NSLocalNetworkUsageDescription`. Without them, http Jellyfin and http streams failed on device.
+  - Fixed duplicate remote-command targets from #16 and #18: a toggle from the steering wheel or AirPods ran twice while CarPlay was connected, so it did nothing.
+  - Fixed the player observer leak in `stop()`.
+  - The diagnostic test now asserts something.
+- Report-only, for the owning sessions: Pro isn't restored at launch and refunds don't re-lock (StoreKit). The feedback screen is a fake "sent" alert (2B). Third-party sample streams are still in `IPTVParser` (D5). "CarPlay" appears in push copy (D6). `SoundPlayerEngine` activates and ducks the audio session on init.
+- Owner decision O-new: remote plain-http playlists/servers. Either stay https-only with a clear error, or use `NSAllowsArbitraryLoads` with a review justification (review #2).
 
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #21 (claude/drop-territory-icon-media)
 - Merged [#21](https://github.com/Xanderco/iOSCarPlayVideo/pull/21): Territory removed (D3), new original app icon, App Store media pipeline (`appstore-media.yml`, compositor scripts, `AppStoreMedia/metadata.md`), passenger safety notice, privacy manifest, demo-data seeder, App Review checklist.

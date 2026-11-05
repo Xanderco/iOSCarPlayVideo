@@ -47,7 +47,7 @@ public struct PlaylistQRImportView: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 340)
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.dashYellow, lineWidth: 2))
+                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).stroke(Color.dcAccent, lineWidth: 2))
 
                 statusView
 
@@ -111,9 +111,9 @@ public struct PlaylistQRImportView: View {
 
     private func placeholder(icon: String, text: String) -> some View {
         ZStack {
-            Color.dashSurface
+            Color.dcSurface
             VStack(spacing: 10) {
-                Image(systemName: icon).font(.system(size: 44)).foregroundStyle(Color.dashTextMuted)
+                Image(systemName: icon).font(.system(size: 44)).foregroundStyle(Color.dcTextTertiary)
                 if !text.isEmpty {
                     Text(text).font(.footnote).multilineTextAlignment(.center).foregroundStyle(.secondary)
                 }

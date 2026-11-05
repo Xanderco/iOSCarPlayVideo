@@ -59,6 +59,21 @@ jobs:
             | tee build.log | grep -E "error:|warning: unre|BUILD (SUCCEEDED|FAILED)|TEST BUILD" || true
           grep -q "TEST BUILD SUCCEEDED\|BUILD SUCCEEDED" build.log
 
+      - name: Warning summary
+        if: always()
+        run: |
+          # Unique Swift warnings (xcodebuild repeats some per arch/target). Informational only.
+          grep -E "\.swift:[0-9]+:[0-9]+: warning:" build.log | sed -E 's#^.*/DashCast/#DashCast/#' | sort -u > warnings.txt || true
+          echo "Unique warnings: $(wc -l < warnings.txt)"
+          echo "--- by category ---"
+          awk '{ if ($0 ~ /is deprecated: renamed to/) c="deprecated design-token alias (dashX -> dcY)";
+                 else if ($0 ~ /ThemeFonts.*deprecated/) c="deprecated ThemeFonts";
+                 else if ($0 ~ /deprecated/) c="other deprecation";
+                 else if ($0 ~ /[Ss]endable|actor|isolat|concurren/) c="concurrency";
+                 else c="other"; n[c]++ } END { for (k in n) printf "%5d  %s\n", n[k], k }' warnings.txt | sort -rn
+          echo "--- non-design-token warnings ---"
+          grep -v "is deprecated: renamed to\|ThemeFonts" warnings.txt || true
+
       - name: Unit tests
         run: |
           set -o pipefail

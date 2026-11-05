@@ -17,8 +17,12 @@ enum DemoDataSeeder {
         seed()
     }
 
-    static func seed(persistence: PersistenceController = .shared,
-                     metrics: UsageMetricsManager = .shared) {
+    /// Defaults are resolved inside the body: default-argument expressions are evaluated in a
+    /// nonisolated context, so `= .shared` on the main-actor `UsageMetricsManager` warned.
+    static func seed(persistence: PersistenceController? = nil,
+                     metrics: UsageMetricsManager? = nil) {
+        let persistence = persistence ?? .shared
+        let metrics = metrics ?? .shared
         guard persistence.loadTrips().isEmpty else { return }
 
         let trips = demoTrips()
