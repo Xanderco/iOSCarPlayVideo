@@ -183,6 +183,7 @@ public struct CastHomeView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_MediaSourceRow")
 
             Divider().background(Color.dashBorder.opacity(0.6))
 
@@ -223,6 +224,7 @@ public struct CastHomeView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_BrowserRow")
         }
         .background(Color.dashSurface)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -506,6 +508,7 @@ public struct CastHomeView: View {
                                 .padding(.horizontal)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("MediaSources_Channel")
                         }
                     }
                     .padding(.bottom, 30)
