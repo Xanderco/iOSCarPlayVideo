@@ -40,6 +40,7 @@ public struct LiquidCapsuleTabBar: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("Tab_\(item.rawValue)")
+                .accessibilityAddTraits(isSelected ? .isSelected : [])
             }
         }
         .padding(.horizontal, 8)

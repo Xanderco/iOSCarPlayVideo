@@ -39,6 +39,8 @@ public struct CastHomeView: View {
                                 .frame(height: 220)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 .padding(.horizontal, 16)
+                                .accessibilityElement(children: .contain)
+                                .accessibilityIdentifier("Cast_MiniPlayer")
                         }
 
                         // Main 4-Row Source Menu Card (Exact 1:1 CarDash layout)
@@ -71,6 +73,7 @@ public struct CastHomeView: View {
                                 .foregroundStyle(Color.black)
                                 .clipShape(Capsule())
                             }
+                            .accessibilityIdentifier("Cast_ProButton")
                         }
 
                         Button {
@@ -84,6 +87,7 @@ public struct CastHomeView: View {
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
                         }
+                        .accessibilityIdentifier("Cast_HelpButton")
 
                         Button {
                             showingFavorites = true
@@ -96,6 +100,7 @@ public struct CastHomeView: View {
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
                         }
+                        .accessibilityIdentifier("Cast_FavoritesButton")
                     }
                 }
             }
@@ -183,6 +188,7 @@ public struct CastHomeView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_MediaSourceRow")
 
             Divider().background(Color.dashBorder.opacity(0.6))
 
@@ -209,6 +215,7 @@ public struct CastHomeView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_MirrorRow")
 
             Divider().background(Color.dashBorder.opacity(0.6))
 
@@ -223,6 +230,7 @@ public struct CastHomeView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_BrowserRow")
         }
         .background(Color.dashSurface)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
@@ -378,6 +386,7 @@ public struct CastHomeView: View {
                     .clipShape(Capsule())
                     .shadow(color: Color.dashYellow.opacity(0.35), radius: 6, y: 3)
                 }
+                .accessibilityIdentifier("Cast_CarPlayModeButton")
 
                 Button {
                     showingCastGuide = true
@@ -430,6 +439,7 @@ public struct CastHomeView: View {
                             }
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(Color.dashYellow)
+                            .accessibilityIdentifier("MediaSources_AddMenu")
                         }
                         .padding(.horizontal)
                         .padding(.top, 12)
@@ -439,6 +449,7 @@ public struct CastHomeView: View {
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(Color.dashYellow)
                                 .padding(.horizontal)
+                                .accessibilityIdentifier("MediaSources_ImportSuccess")
                         }
 
                         ForEach(playlistStore.playlists) { playlist in
@@ -461,51 +472,10 @@ public struct CastHomeView: View {
                         }
 
                         ForEach(playlistStore.allChannels) { channel in
-                            Button {
+                            channelRow(channel) {
                                 playerService.load(channel: channel)
                                 showingPlaylistsSheet = false
-                            } label: {
-                                HStack(spacing: 14) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(Color.dashSurfaceHighlight)
-                                            .frame(width: 44, height: 44)
-
-                                        Image(systemName: "tv.fill")
-                                            .foregroundStyle(Color.dashYellow)
-                                    }
-
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(channel.name)
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundStyle(Color.dashTextPrimary)
-
-                                        Text(channel.groupTitle)
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(Color.dashTextSecondary)
-                                    }
-
-                                    Spacer()
-
-                                    Button {
-                                        playlistStore.toggleFavorite(channel)
-                                    } label: {
-                                        Image(systemName: playlistStore.isFavorite(channel) ? "heart.fill" : "heart")
-                                            .font(.system(size: 18))
-                                            .foregroundStyle(Color.dashYellow)
-                                    }
-                                    .buttonStyle(.plain)
-
-                                    Image(systemName: "play.circle.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundStyle(Color.dashYellow)
-                                }
-                                .padding()
-                                .background(Color.dashSurface)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .padding(.horizontal)
                             }
-                            .buttonStyle(.plain)
                         }
                     }
                     .padding(.bottom, 30)
@@ -551,22 +521,94 @@ public struct CastHomeView: View {
         }
     }
 
+    /// One playable channel row with a separate favorite toggle. The two buttons are siblings
+    /// (not nested) so VoiceOver and UI tests can reach the heart independently.
+    private func channelRow(_ channel: ChannelModel, onPlay: @escaping () -> Void) -> some View {
+        HStack(spacing: 14) {
+            Button(action: onPlay) {
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.dashSurfaceHighlight)
+                            .frame(width: 44, height: 44)
+
+                        Image(systemName: "tv.fill")
+                            .foregroundStyle(Color.dashYellow)
+                    }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(channel.name)
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.dashTextPrimary)
+
+                        Text(channel.groupTitle)
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dashTextSecondary)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "play.circle.fill")
+                        .font(.system(size: 22))
+                        .foregroundStyle(Color.dashYellow)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(channel.name)
+            .accessibilityIdentifier("MediaSources_Channel")
+
+            Button {
+                playlistStore.toggleFavorite(channel)
+            } label: {
+                Image(systemName: playlistStore.isFavorite(channel) ? "heart.fill" : "heart")
+                    .font(.system(size: 18))
+                    .foregroundStyle(Color.dashYellow)
+                    .frame(width: 32, height: 44)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(playlistStore.isFavorite(channel) ? "Remove \(channel.name) from favorites" : "Add \(channel.name) to favorites")
+            .accessibilityValue(playlistStore.isFavorite(channel) ? "favorite" : "not favorite")
+            .accessibilityIdentifier("Channel_FavoriteButton")
+        }
+        .padding()
+        .background(Color.dashSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal)
+    }
+
     private var favoritesSheet: some View {
         NavigationStack {
             ZStack {
                 Color.dashBackground.ignoresSafeArea()
-                VStack(spacing: 16) {
-                    Image(systemName: "heart.slash")
-                        .font(.system(size: 40))
-                        .foregroundStyle(Color.dashTextMuted)
-                    Text("No Favorites Yet")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color.dashTextPrimary)
-                    Text("Save videos and web bookmarks to quickly access them in your car.")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.dashTextSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
+                if playlistStore.favoriteChannels.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "heart.slash")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Color.dashTextMuted)
+                        Text("No Favorites Yet")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.dashTextPrimary)
+                        Text("Tap the heart on any channel in Media Source to keep it here and in CarPlay.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.dashTextSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("Favorites_Empty")
+                } else {
+                    ScrollView {
+                        VStack(spacing: 14) {
+                            ForEach(playlistStore.favoriteChannels) { channel in
+                                channelRow(channel) {
+                                    playerService.load(channel: channel)
+                                    showingFavorites = false
+                                }
+                            }
+                        }
+                        .padding(.vertical, 12)
+                    }
                 }
             }
             .navigationTitle("Favorites")
@@ -596,7 +638,9 @@ public struct CastHomeView: View {
                         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.dashBorder, lineWidth: 1))
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .keyboardType(.URL)
                         .padding(.horizontal)
+                        .accessibilityIdentifier("AddStream_URLField")
 
                     Button {
                         loadM3UFromURL()
@@ -612,6 +656,7 @@ public struct CastHomeView: View {
                     }
 
                     .disabled(isImportingPlaylist || m3uURLInput.isEmpty)
+                    .accessibilityIdentifier("AddStream_ImportButton")
 
                     Text("Paste an M3U / M3U8 playlist link or a single HLS stream URL.")
                         .font(.system(size: 12))

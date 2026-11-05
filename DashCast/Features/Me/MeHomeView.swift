@@ -212,6 +212,7 @@ public struct MeHomeView: View {
                         .background(Color.white)
                         .clipShape(Capsule())
                 }
+                .accessibilityIdentifier("Me_UpgradeButton")
             }
             .padding(16)
         }
@@ -286,6 +287,7 @@ public struct MeHomeView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("Me_\(title.replacingOccurrences(of: " ", with: ""))")
     }
 
     // MARK: - Settings Sheet (Matching SETTINGS.jpeg)
@@ -384,6 +386,7 @@ public struct MeHomeView: View {
                                 .padding(.vertical, 14)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("Settings_RestorePurchase")
                         }
                         .background(Color.dashSurface)
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))

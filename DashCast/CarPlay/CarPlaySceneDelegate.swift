@@ -14,7 +14,8 @@ import UIKit
 /// for CarPlay templates) runs on the main actor.
 @MainActor
 public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegate {
-    public var interfaceController: CPInterfaceController?
+    /// Real `CPInterfaceController` in production, a mock in tests (see `CarPlayInterfaceControlling`).
+    public var interfaceController: CarPlayInterfaceControlling?
 
     private var libraryTemplate: CPListTemplate?
     private var favoritesTemplate: CPListTemplate?
@@ -24,7 +25,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
 
     /// CarPlay audio apps may stack at most five templates (root included); pushing more
     /// raises an exception in CarPlay. Now Playing counts towards the depth.
-    private static let maximumTemplateDepth = 5
+    static let maximumTemplateDepth = 5
 
     // MARK: - Scene lifecycle
 
@@ -32,6 +33,11 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         _ templateApplicationScene: CPTemplateApplicationScene,
         didConnect interfaceController: CPInterfaceController
     ) {
+        connect(interfaceController)
+    }
+
+    /// Builds the template hierarchy on `interfaceController`. Exposed for tests.
+    public func connect(_ interfaceController: CarPlayInterfaceControlling) {
         self.interfaceController = interfaceController
 
         let library = CPListTemplate(title: "Library", sections: [])
@@ -52,7 +58,7 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         let tabBar = CPTabBarTemplate(templates: Array(tabs.prefix(Int(CPTabBarTemplate.maximumTabCount))))
 
         rebuildTemplates()
-        interfaceController.setRootTemplate(tabBar, animated: false, completion: nil)
+        interfaceController.carPlaySetRoot(tabBar, animated: false)
 
         playlistObserver = NotificationCenter.default.addObserver(
             forName: PlaylistStore.didChangeNotification,
@@ -72,6 +78,11 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         _ templateApplicationScene: CPTemplateApplicationScene,
         didDisconnectInterfaceController interfaceController: CPInterfaceController
     ) {
+        disconnect()
+    }
+
+    /// Tears down observers and templates. Exposed for tests.
+    public func disconnect() {
         if let playlistObserver {
             NotificationCenter.default.removeObserver(playlistObserver)
         }
@@ -187,10 +198,10 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         let template = CPListTemplate(title: title, sections: channelSections(channels, showGroup: false))
         template.userInfo = group
         template.emptyViewTitleVariants = ["No channels"]
-        interfaceController.pushTemplate(template, animated: true, completion: nil)
+        interfaceController.carPlayPush(template, animated: true)
     }
 
-    private func canPush(onto interfaceController: CPInterfaceController) -> Bool {
+    private func canPush(onto interfaceController: CarPlayInterfaceControlling) -> Bool {
         interfaceController.templates.count < Self.maximumTemplateDepth
     }
 
@@ -224,13 +235,13 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         let nowPlaying = CPNowPlayingTemplate.shared
         if interfaceController.topTemplate === nowPlaying { return }
         if interfaceController.templates.contains(where: { $0 === nowPlaying }) {
-            interfaceController.pop(to: nowPlaying, animated: true, completion: nil)
+            interfaceController.carPlayPop(to: nowPlaying, animated: true)
         } else if canPush(onto: interfaceController) {
-            interfaceController.pushTemplate(nowPlaying, animated: true, completion: nil)
+            interfaceController.carPlayPush(nowPlaying, animated: true)
         } else {
             // Stack is full: go back to the root and show Now Playing from there.
-            interfaceController.popToRootTemplate(animated: false) { _, _ in
-                interfaceController.pushTemplate(nowPlaying, animated: true, completion: nil)
+            interfaceController.carPlayPopToRoot(animated: false) {
+                interfaceController.carPlayPush(nowPlaying, animated: true)
             }
         }
     }

@@ -99,6 +99,7 @@ public struct WebVideoBrowserView: View {
             }
             .font(.system(size: 15, weight: .semibold))
             .foregroundStyle(Color.dashYellow)
+            .accessibilityIdentifier("Browser_Exit")
 
             HStack {
                 Image(systemName: "magnifyingglass")
@@ -109,6 +110,7 @@ public struct WebVideoBrowserView: View {
                     .font(.system(size: 14))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
+                    .accessibilityIdentifier("Browser_AddressField")
                     .onSubmit {
                         navigateToInput()
                     }
@@ -277,6 +279,7 @@ public struct WebVideoBrowserView: View {
                 .foregroundStyle(Color.dashYellow)
                 .frame(maxWidth: .infinity)
             }
+            .accessibilityIdentifier("Browser_SendToCar")
         }
         .padding(.vertical, 12)
         .background(Color.dashSurface)

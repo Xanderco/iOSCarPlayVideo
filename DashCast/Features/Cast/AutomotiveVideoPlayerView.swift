@@ -62,6 +62,7 @@ public struct AutomotiveVideoPlayerView: View {
                             .font(.system(size: 15, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white)
                             .lineLimit(1)
+                            .accessibilityIdentifier("Player_Title")
 
                         HStack(spacing: 6) {
                             Circle()
@@ -110,6 +111,8 @@ public struct AutomotiveVideoPlayerView: View {
                             .foregroundStyle(Color.dashYellow)
                             .shadow(color: Color.dashYellow.opacity(0.5), radius: 10)
                     }
+                    .accessibilityLabel(playerService.isPlaying ? "Pause" : "Play")
+                    .accessibilityIdentifier("Player_PlayPause")
 
                     Button {
                         playerService.skip(seconds: 10)

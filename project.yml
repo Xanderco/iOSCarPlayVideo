@@ -38,12 +38,33 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: DashCastTests
+      # StoreKitTest's SKTestSession(configurationFileNamed:) loads the config from the test bundle.
+      - path: DashCast/Resources/DashCastStore.storekit
+        buildPhase: resources
     dependencies:
       - target: DashCast
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcastTests
         GENERATE_INFOPLIST_FILE: YES
+        DEVELOPMENT_TEAM: "96YG38576A"
+
+  DashCastUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: DashCastUITests
+      - path: DashCast/Resources/DashCastStore.storekit
+        buildPhase: resources
+    dependencies:
+      - target: DashCast
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcastUITests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: DashCast
+        DEVELOPMENT_TEAM: "96YG38576A"
 
 schemes:
   DashCast:
@@ -51,9 +72,16 @@ schemes:
       targets:
         DashCast: all
         DashCastTests: [test]
+        DashCastUITests: [test]
     test:
       config: Debug
+      gatherCoverageData: true
+      coverageTargets:
+        - DashCast
       targets:
         - DashCastTests
+        - DashCastUITests
     run:
       config: Debug
+      # Local StoreKit testing when running from Xcode (no App Store Connect needed).
+      storeKitConfiguration: DashCast/Resources/DashCastStore.storekit

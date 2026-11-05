@@ -1,10 +1,10 @@
 name: DashCast CI
 
+# CI runs exactly what a developer / Mac agent runs: Scripts/verify-all.sh
 on:
   push:
     branches: [ main, 'claude/**', 'fix/**', 'feature/**', 'feat/**' ]
   pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
@@ -12,10 +12,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  verify:
+    name: verify-all (build, unit, StoreKit, CarPlay, UI, coverage)
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -23,62 +23,32 @@ jobs:
 
       - name: Select newest Xcode (iOS 26 SDK)
         run: |
-          ls -d /Applications/Xcode*.app
           XC=$(ls -d /Applications/Xcode_[0-9]*.app | grep -v -i beta | sort -V | tail -1)
           echo "Using $XC"
           sudo xcode-select -s "$XC/Contents/Developer"
           xcodebuild -version
 
-      - name: Install XcodeGen
-        run: brew install xcodegen
+      - name: Install tools
+        run: brew install xcodegen xcbeautify
 
-      - name: Generate Xcode project
-        run: xcodegen generate
+      - name: Scripts/verify-all.sh
+        env:
+          FORCE_COLOR: "1"
+        run: Scripts/verify-all.sh
 
-      - name: Pick simulator
-        id: sim
-        run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c "
-          import json,sys
-          d=json.load(sys.stdin)['devices']
-          c=[(rt,x) for rt,xs in d.items() if 'iOS' in rt for x in xs if x['name'].startswith('iPhone')]
-          c.sort(key=lambda t:t[0])
-          print(c[-1][1]['udid'])")
-          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
-          xcrun simctl list devices available | grep "$UDID"
-
-      - name: Build
-        run: |
-          set -o pipefail
-          xcodebuild build-for-testing \
-            -project DashCast.xcodeproj \
-            -scheme DashCast \
-            -destination "id=${{ steps.sim.outputs.udid }}" \
-            -derivedDataPath build/DerivedData \
-            CODE_SIGNING_ALLOWED=NO \
-            | tee build.log | grep -E "error:|warning: unre|BUILD (SUCCEEDED|FAILED)|TEST BUILD" || true
-          grep -q "TEST BUILD SUCCEEDED\|BUILD SUCCEEDED" build.log
-
-      - name: Test
-        run: |
-          set -o pipefail
-          xcodebuild test-without-building \
-            -project DashCast.xcodeproj \
-            -scheme DashCast \
-            -destination "id=${{ steps.sim.outputs.udid }}" \
-            -derivedDataPath build/DerivedData \
-            -resultBundlePath build/TestResults.xcresult \
-            CODE_SIGNING_ALLOWED=NO \
-            | tee test.log | grep -E "error:|Test Case .* failed|Executed|TEST (SUCCEEDED|FAILED)" || true
-          grep -q "TEST EXECUTE SUCCEEDED\|TEST SUCCEEDED" test.log
-
-      - name: Upload logs and results
+      - name: Upload reports (junit, coverage, screenshots, logs, xcresult)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ci-results
-          path: |
-            build.log
-            test.log
-            build/TestResults.xcresult
-          if-no-files-found: ignore
+          name: verify-all-reports
+          path: build/reports
+          if-no-files-found: warn
+
+      - name: Publish JUnit results
+        if: always()
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: build/reports/junit/*.xml
+          check_name: DashCast tests
+          fail_on_failure: false
+          require_tests: false

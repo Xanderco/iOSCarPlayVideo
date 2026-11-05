@@ -42,6 +42,8 @@ public struct LifetimePaywallView: View {
                             .font(.system(size: 22))
                             .foregroundStyle(Color.dashTextMuted)
                     }
+                    .accessibilityLabel("Close")
+                    .accessibilityIdentifier("Paywall_Close")
                 }
             }
             .alert("Purchase Error", isPresented: $showingError) {
@@ -118,6 +120,7 @@ public struct LifetimePaywallView: View {
                         Text(storeKit.lifetimeProduct?.displayPrice ?? "$19.99")
                             .font(ThemeFonts.hudStat(size: 22))
                             .foregroundStyle(Color.dashGreen)
+                            .accessibilityIdentifier("Paywall_Price")
                         Text("One single payment")
                             .font(.system(size: 11, weight: .semibold))
                             .foregroundStyle(Color.dashGreen)
@@ -196,6 +199,7 @@ public struct LifetimePaywallView: View {
                 }
             }
             .disabled(storeKit.isLoading)
+            .accessibilityIdentifier("Paywall_BuyButton")
 
             Button {
                 Task {
@@ -212,6 +216,7 @@ public struct LifetimePaywallView: View {
                     .underline()
             }
             .disabled(storeKit.isLoading)
+            .accessibilityIdentifier("Paywall_RestoreButton")
         }
     }
 
