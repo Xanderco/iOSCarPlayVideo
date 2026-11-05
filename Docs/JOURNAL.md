@@ -87,6 +87,16 @@
 
 ## Log
 
+### 2026-11-05 00:50 (Bogotá) — Session 17: independent review of phase 1
+- Reviewed `claude/ci-and-core-fixes` @ `d64237c` with fresh eyes. There are 21 findings in `Docs/Review-2026-11-05.md`.
+- Fixed on `claude/review-fixes`, with tests in `ReviewFixesTests`:
+  - Added ATS exceptions for media and the local network, plus `NSLocalNetworkUsageDescription`. Without them, http Jellyfin and http streams failed on device.
+  - Fixed duplicate remote-command targets from #16 and #18: a toggle from the steering wheel or AirPods ran twice while CarPlay was connected, so it did nothing.
+  - Fixed the player observer leak in `stop()`.
+  - The diagnostic test now asserts something.
+- Report-only, for the owning sessions: Pro isn't restored at launch and refunds don't re-lock (StoreKit). The feedback screen is a fake "sent" alert (2B). Third-party sample streams are still in `IPTVParser` (D5). "CarPlay" appears in push copy (D6). `SoundPlayerEngine` activates and ducks the audio session on init.
+- Owner decision O-new: remote plain-http playlists/servers. Either stay https-only with a clear error, or use `NSAllowsArbitraryLoads` with a review justification (review #2).
+
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #21 (claude/drop-territory-icon-media)
 - Merged [#21](https://github.com/Xanderco/iOSCarPlayVideo/pull/21): Territory removed (D3), new original app icon, App Store media pipeline (`appstore-media.yml`, compositor scripts, `AppStoreMedia/metadata.md`), passenger safety notice, privacy manifest, demo-data seeder, App Review checklist.
 - Conflict in `MeHomeView.swift`: kept #19's Media Servers sheet and dropped the fake "Rate DashCast" alert, as #21 intended (it uses `requestReview`).
