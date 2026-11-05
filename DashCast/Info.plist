@@ -45,6 +45,19 @@
 	<string>DashCast tracks your route and speed while driving to score your trips.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>DashCast analyzes motion sensor data to detect smooth acceleration, braking, and cornering.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Narrow exceptions only. Media: user-supplied IPTV/HLS streams played by AVFoundation are often
+		     plain http. Local networking: Jellyfin/Emby on the home LAN defaults to http://host:8096
+		     (MediaServerClient prepends http:// to bare addresses). Remote http playlist downloads via
+		     URLSession stay blocked by ATS: see Docs/Review-2026-11-05.md (owner decision). -->
+		<key>NSAllowsArbitraryLoadsForMedia</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>DashCast connects to media servers and playlists on your local network, such as a Jellyfin or Emby server at home.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>DashCast uses the camera to scan QR codes that contain IPTV playlist links.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

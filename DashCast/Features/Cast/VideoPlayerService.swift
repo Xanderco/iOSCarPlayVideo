@@ -89,9 +89,20 @@ public final class VideoPlayerService: ObservableObject {
         play()
     }
 
-    private func observe(item: AVPlayerItem) {
+    /// Number of live per-item KVO + NotificationCenter observers. Exposed for tests.
+    var activeItemObserverCount: Int { itemObservers.count + itemNotificationTokens.count }
+
+    /// `stop()` used to invalidate only the KVO observers, leaving the NotificationCenter block
+    /// observers for the released item registered until the next `load`.
+    private func removeItemObservers() {
         itemObservers.forEach { $0.invalidate() }
+        itemObservers = []
         itemNotificationTokens.forEach { NotificationCenter.default.removeObserver($0) }
+        itemNotificationTokens = []
+    }
+
+    private func observe(item: AVPlayerItem) {
+        removeItemObservers()
 
         itemObservers = [
             item.observe(\.status, options: [.new]) { [weak self] item, _ in
@@ -180,8 +191,7 @@ public final class VideoPlayerService: ObservableObject {
         wantsToPlay = false
         player.pause()
         player.replaceCurrentItem(with: nil)
-        itemObservers.forEach { $0.invalidate() }
-        itemObservers = []
+        removeItemObservers()
         currentChannel = nil
         playbackError = nil
         isBuffering = false
