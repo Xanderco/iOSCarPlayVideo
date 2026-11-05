@@ -1,60 +1,88 @@
 import Foundation
 
 public struct IPTVParser {
-    public static func parseM3U(content: String) -> [ChannelModel] {
+    /// Decodes playlist bytes, tolerating a UTF-8 BOM and Latin-1 files.
+    public static func decode(_ data: Data) -> String? {
+        var text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1)
+        if text?.hasPrefix("\u{FEFF}") == true { text?.removeFirst() }
+        return text
+    }
+
+    /// Parses an extended M3U / M3U8 playlist.
+    /// - Parameter baseURL: where the playlist came from; used to resolve relative stream paths.
+    public static func parseM3U(content: String, baseURL: URL? = nil) -> [ChannelModel] {
         var channels: [ChannelModel] = []
-        let lines = content.components(separatedBy: .newlines)
+        var text = content
+        if text.hasPrefix("\u{FEFF}") { text.removeFirst() }
+        let lines = text.components(separatedBy: .newlines)
 
         var currentName: String?
-        var currentGroup = "General"
+        var currentGroup: String?
         var currentLogo: URL?
+        var currentGroupFromTag: String?
 
         for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             if trimmed.isEmpty { continue }
 
-            if trimmed.hasPrefix("#EXTINF:") {
-                // Parse attributes: tvg-name, tvg-logo, group-title, and channel display title
-                currentGroup = extractAttribute(named: "group-title", from: trimmed) ?? "General"
-
-                if let logoStr = extractAttribute(named: "tvg-logo", from: trimmed),
-                   let logoURL = URL(string: logoStr) {
-                    currentLogo = logoURL
+            if trimmed.uppercased().hasPrefix("#EXTINF:") {
+                currentGroup = extractAttribute(named: "group-title", from: trimmed)
+                if let logoStr = extractAttribute(named: "tvg-logo", from: trimmed), !logoStr.isEmpty {
+                    currentLogo = URL(string: logoStr)
                 } else {
                     currentLogo = nil
                 }
-
-                // Extract name after the last comma
-                if let commaIndex = trimmed.lastIndex(of: ",") {
-                    let titlePart = trimmed[trimmed.index(after: commaIndex)...].trimmingCharacters(in: .whitespaces)
-                    if !titlePart.isEmpty {
-                        currentName = titlePart
-                    }
-                }
-
-                if currentName == nil {
-                    currentName = extractAttribute(named: "tvg-name", from: trimmed) ?? "Channel \(channels.count + 1)"
-                }
+                let title = displayTitle(fromExtinf: trimmed)
+                currentName = (title?.isEmpty == false ? title : nil)
+                    ?? extractAttribute(named: "tvg-name", from: trimmed)
+            } else if trimmed.uppercased().hasPrefix("#EXTGRP:") {
+                currentGroupFromTag = String(trimmed.dropFirst("#EXTGRP:".count)).trimmingCharacters(in: .whitespaces)
             } else if !trimmed.hasPrefix("#") {
-                // This is the stream URL line
-                if let streamURL = URL(string: trimmed), let name = currentName {
-                    let channel = ChannelModel(
+                if let streamURL = resolveStreamURL(trimmed, baseURL: baseURL) {
+                    let name = currentName ?? streamURL.deletingPathExtension().lastPathComponent
+                    let group = [currentGroup, currentGroupFromTag]
+                        .compactMap { $0 }
+                        .first { !$0.isEmpty } ?? "General"
+                    channels.append(ChannelModel(
                         id: UUID().uuidString,
-                        name: name,
+                        name: name.isEmpty ? "Channel \(channels.count + 1)" : name,
                         streamURL: streamURL,
-                        groupTitle: currentGroup,
+                        groupTitle: group,
                         logoURL: currentLogo
-                    )
-                    channels.append(channel)
+                    ))
                 }
-                // Reset for next channel
                 currentName = nil
-                currentGroup = "General"
+                currentGroup = nil
+                currentGroupFromTag = nil
                 currentLogo = nil
             }
         }
 
         return channels
+    }
+
+    /// The display title is everything after the first comma that is not inside quotes.
+    static func displayTitle(fromExtinf line: String) -> String? {
+        var inQuotes = false
+        for index in line.indices {
+            let ch = line[index]
+            if ch == "\"" { inQuotes.toggle() }
+            if ch == "," && !inQuotes {
+                return line[line.index(after: index)...].trimmingCharacters(in: .whitespaces)
+            }
+        }
+        return nil
+    }
+
+    static func resolveStreamURL(_ raw: String, baseURL: URL?) -> URL? {
+        let cleaned = raw.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed.union(["#", "%"])) ?? raw
+        if let url = URL(string: raw) ?? URL(string: cleaned), url.scheme != nil {
+            return url
+        }
+        if let baseURL, let relative = URL(string: cleaned, relativeTo: baseURL) {
+            return relative.absoluteURL
+        }
+        return nil
     }
 
     private static func extractAttribute(named name: String, from line: String) -> String? {

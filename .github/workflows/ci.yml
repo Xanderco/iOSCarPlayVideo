@@ -21,9 +21,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16
+      - name: Select newest Xcode (iOS 26 SDK)
         run: |
-          XC=$(ls -d /Applications/Xcode_16*.app | sort -V | tail -1)
+          ls -d /Applications/Xcode*.app
+          XC=$(ls -d /Applications/Xcode_[0-9]*.app | grep -v -i beta | sort -V | tail -1)
           echo "Using $XC"
           sudo xcode-select -s "$XC/Contents/Developer"
           xcodebuild -version
