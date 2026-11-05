@@ -127,11 +127,13 @@ final class CastFlowUITests: DashCastUITestCase {
         waitFor(app.textFields["Browser_AddressField"], "address bar")
         snapshot("11-browser")
 
+        // No page loaded yet → the extractor must report honestly that there is no video.
         tap(app.buttons["Browser_SendToCar"])
-        let alert = app.alerts.firstMatch
+        let alert = app.alerts["No Video Found"]
         waitFor(alert, "send-to-car feedback")
         snapshot("12-send-to-car")
         alert.buttons.firstMatch.tap()
+        waitForDisappearance(alert)
 
         tap(app.buttons["Browser_Exit"])
         waitFor(app.buttons["Cast_BrowserRow"], "back on Cast")
