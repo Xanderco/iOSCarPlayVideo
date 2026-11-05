@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-05 02:22 (Bogotá) — Session 19 close: classic UI + CarPlay video mirror merged
+- **`claude/classic-ui` now holds the classic UI (D10) plus the CarPlay video mirror.** [PR #37](https://github.com/Xanderco/iOSCarPlayVideo/pull/37) merged (merge commit 8395ccf). PR CI was green on cfcc819: build, entitlement check, unit tests and UI tests.
+- **Owner action:** request the CarPlay **VIDEO** entitlement (`com.apple.developer.carplay-video`, category "Video", not Audio) at developer.apple.com/contact/carplay. The steps and ready-to-paste justification are at the top of `Docs/CarPlay.md`.
+- **Paperclip agents continue from `claude/classic-ui`**, then integrate into PR #14. Do not branch from the redesign. Open device checks for the mirror are listed in the Session 19 entry below.
+
 ### 2026-11-05 02:05 (Bogotá) — Session 19: Mirror iPhone → CarPlay screen via low-latency HLS (`claude/carplay-video-mirror` → `claude/classic-ui`)
 - **Built ADR-002 §7.5** (the missing link for the owner's #1 feature). Broadcast extension: `MirrorHLSEncoder` = VideoToolbox H.264 (`VTCompressionSession`, real-time, low-latency rate control, no B-frames, ≤1280×720, 30 fps, 3 Mbit/s, 1 s GOP) → `AVAssetWriter` `.mpeg4AppleHLS` passthrough, 1 s fMP4 segments → `HLSSegmentStore` (last 4, ≈2 MB) → served by the existing `MirrorStreamServer` at `http://127.0.0.1:8088/hls/live.m3u8` (+ `/hls/init.mp4`, `/hls/segN.m4s`). MJPEG browser path unchanged. Only runs when "Mirror to CarPlay screen" is on.
 - App: `CarPlayMirrorPlayback` (parked-only `decide`, waits for the first segment, plays through `VideoPlayerService` = AVPlayer with external playback, 1 s forward buffer). Starts automatically when the broadcast goes live, stops when it ends. CarPlay Cast tab gains **"Show iPhone screen"** (second section; steps unchanged). **No phone UI changes (D10).**
