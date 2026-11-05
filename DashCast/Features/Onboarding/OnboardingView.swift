@@ -367,19 +367,30 @@ private struct CinemaHero: View {
 private struct SourcesHero: View {
     private let symbols = ["link", "doc.fill", "server.rack", "qrcode", "photo.on.rectangle", "globe"]
 
+    private func tileOffset(_ index: Int) -> CGSize {
+        let fraction: Double = Double(index) / Double(symbols.count)
+        let angle: Double = fraction * 2.0 * Double.pi - Double.pi / 2.0
+        let radius: Double = 125
+        return CGSize(width: CGFloat(cos(angle) * radius), height: CGFloat(sin(angle) * radius + 20))
+    }
+
+    private func tile(_ symbol: String, offset: CGSize) -> some View {
+        let shape = RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous)
+        return Image(systemName: symbol)
+            .font(.system(size: 26, weight: .semibold))
+            .foregroundStyle(Color.white)
+            .frame(width: 64, height: 64)
+            .background(Color.white.opacity(0.1), in: shape)
+            .overlay(shape.strokeBorder(Color.white.opacity(0.18), lineWidth: 1))
+            .offset(offset)
+    }
+
     var body: some View {
         ZStack {
             HeroBackdrop(tint: .dcInfo)
 
-            ForEach(Array(symbols.enumerated()), id: \.offset) { index, symbol in
-                let angle = Double(index) / Double(symbols.count) * 2 * .pi - .pi / 2
-                Image(systemName: symbol)
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundStyle(Color.white)
-                    .frame(width: 64, height: 64)
-                    .background(Color.white.opacity(0.1), in: RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous).strokeBorder(Color.white.opacity(0.18), lineWidth: 1))
-                    .offset(x: cos(angle) * 125, y: sin(angle) * 125 + 20)
+            ForEach(0..<symbols.count, id: \.self) { index in
+                tile(symbols[index], offset: tileOffset(index))
             }
 
             Image(systemName: "square.stack.3d.up.fill")

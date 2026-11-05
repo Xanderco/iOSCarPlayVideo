@@ -89,7 +89,7 @@
 
 ### 2026-11-05 01:25 (Bogotá) — Redesign 2B wrap-up (budget end): status for U2 / Paperclip
 PR [#31](https://github.com/Xanderco/iOSCarPlayVideo/pull/31) `claude/redesign-secondary` → `claude/ci-and-core-fixes`.
-**CI:** green on `2699733` (125 unit + 4 UI tests). The final commits (Drive tab restore, onboarding v2, tab bar) were **pushed but their CI was still queued at wrap-up**. Check the PR checks first; if red, read `gh run view <id> --log-failed`. The likely risk spots are listed below.
+**CI:** green on `2699733` (125 unit + 4 UI tests). On `f9c9159` the build failed once: "unable to type-check" in `OnboardingView` `SourcesHero`, fixed in the last commit by splitting the expression. The final commit's CI was **not finished at wrap-up**. Check the PR checks first; if red, read `gh run view <id> --log-failed`. The likely risk spots are listed below.
 
 **Finished (in the PR):**
 - Originality audit `Docs/Originality-audit.md`. Competitor and clone-era media removed from the repo (git-ignored); third-party car renders removed from the bundle; no CarDash/CarTV/1:1 text in Swift code.
