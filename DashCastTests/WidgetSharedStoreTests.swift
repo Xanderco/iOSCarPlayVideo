@@ -113,4 +113,28 @@ final class WidgetSharedStoreTests: XCTestCase {
         XCTAssertEqual(WidgetColorMath.readableAccentHex("nope"), WidgetColorMath.fallbackAccentHex)
         XCTAssertEqual(WidgetColorMath.readableAccentHex(nil), WidgetColorMath.fallbackAccentHex)
     }
+
+    // MARK: - Photo / Doodle
+
+    func testDoodleRoundTripAndLegacyPayloadDecodes() throws {
+        let doodle = SharedDoodle(kind: .doodle, imageData: Data([0x89, 0x50, 0x4E, 0x47]), caption: "Road trip!")
+        let payload = WidgetSharedPayload(doodle: doodle, updatedAt: Date(timeIntervalSince1970: 1_790_000_000))
+        XCTAssertEqual(try WidgetSharedStore.decode(WidgetSharedStore.encode(payload)).doodle, doodle)
+
+        // Payloads written before the doodle field existed must still decode.
+        let legacy = Data(#"{"version":1,"usesMiles":false,"updatedAt":1790000000}"#.utf8)
+        let decoded = try WidgetSharedStore.decode(legacy)
+        XCTAssertNil(decoded.doodle)
+        XCTAssertNil(decoded.car)
+    }
+
+    func testPublishDoodleKeepsOtherFields() {
+        let store = WidgetSharedStore(defaults: defaults)
+        store.update { $0.car = .placeholder }
+        WidgetSharedPublisher.publishDoodle(SharedDoodle(kind: .photo, imageData: Data([1, 2, 3])), store: store)
+        XCTAssertEqual(store.load().car, .placeholder)
+        XCTAssertEqual(store.load().doodle?.kind, .photo)
+        WidgetSharedPublisher.publishDoodle(nil, store: store)
+        XCTAssertNil(store.load().doodle)
+    }
 }

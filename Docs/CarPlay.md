@@ -88,6 +88,7 @@ DashCast's `DashCastWidgets` extension is eligible:
 | My Car (`DashCastCarWidget`) | small, medium | small is eligible |
 | Last Trip (`DashCastTripStatsWidget`) | small, medium | small is eligible |
 | Quick Cast (`DashCastQuickCastWidget`) | small + Lock Screen accessories | small is eligible, opens `dashcast://cast` |
+| Photo / Doodle (`DashCastDoodleWidget`) | small | eligible; set up via Widgets → "Photo / Doodle widget" |
 
 Rules (enforced by code review; see `GlanceContext` in `DashCastWidgets/DashCastWidgetsBundle.swift`):
 - **Never** add `.disfavoredLocations([.carPlay], for: [.systemSmall])`. That modifier is Apple's opt-out: it moves a widget into the "not optimized for CarPlay" group in CarPlay Settings.

@@ -37,6 +37,11 @@ enum WidgetSharedPublisher {
         reload()
     }
 
+    static func publishDoodle(_ doodle: SharedDoodle?, store: WidgetSharedStore = .shared) {
+        store.update { $0.doodle = doodle }
+        reload()
+    }
+
     static func reload() {
         WidgetCenter.shared.reloadAllTimelines()
     }

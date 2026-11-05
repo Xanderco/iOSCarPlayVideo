@@ -113,6 +113,7 @@
 - Owner input: the competitor markets widgets on the car screen. iOS 26 CarPlay shows `.systemSmall` widgets, so all three DashCast widgets are eligible (no `disfavoredLocations`). The small layouts were rebuilt for reading at a glance: 20–44 pt heavy rounded type, one key fact each, plus `GlanceContext` (adapts to `widgetRenderingMode` and `showsWidgetContainerBackground`; `widgetAccentable` glyphs; meaning never conveyed by colour alone).
 - `WidgetColorMath` (shared; WCAG contrast) makes the user's accent fall back to brand teal unless it reaches 4.5:1 on the backdrop. Unit tests added.
 - `Docs/CarPlay.md`: new "Widgets on the car display" section with eligibility rules and how to view them in the Simulator's CarPlay window.
+- Added the **Photo / Doodle** small widget (`DashCastDoodleWidget`, CarPlay-eligible). Users either draw on a paper-style canvas (6 inks, undo/clear) or pick a photo in `DoodleEditorView`, opened from the Widgets screen, with an optional caption. The image is stored downscaled in the app-group payload (`SharedDoodle`, an optional field, so older payloads still decode). Tests cover the round trip and legacy decoding.
 - Follow-up: there's no CarPlay-specific WidgetKit environment, so this is validated by design rules and tests, not by a rendered CarPlay snapshot; capture real screenshots on a device.
 
 ### 2026-11-05 00:40 (Bogotá) — Session 15: real Home Screen widgets (`claude/home-widgets`)
