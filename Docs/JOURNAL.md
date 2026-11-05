@@ -87,6 +87,9 @@
 
 ## Log
 
+### 2026-11-05 01:01 (Bogotá) — Integrator: merged #32 follow-up a39798d
+- The #32 session pushed `a39798d` after my merge: the same `canStep` return fix, plus explicit initializers for `ResumeCard` and the internal `LibraryView` subviews (memberwise inits were inaccessible). Merged it. The only conflict was `MirrorScreenSheet`, which stays removed (superseded by #25's `CarOutputPanelView`, see the #32 entry).
+
 ### 2026-11-05 01:00 (Bogotá) — Integrator: build fixes after phase 2 (#24 API in Settings, #32 missing return)
 - **CI on the phase-2 tip `dc5962c` was red** (build failed). `MeHomeView`'s restore row (from #21) still used the pre-#24 StoreKit API (`isPurchased`, `isLoading`). Phase 3 deletes `MeHomeView` (#31 replaced Me with Settings), but #31's new `SettingsView` had the same problem (`store.isPurchased`, `errorMessage`, a non-throwing `restorePurchases()`). Ported it to #24's API: `store.isPro`, `try await store.restorePurchases() -> Bool`, and errors from the thrown error. `StoreKitManager` mirrors the entitlement into `AppState`.
 - **#32's own head `96a3ece` was red**: `PlayerPresentation.canStep` had two statements and no `return`. Fixed here (one word).
