@@ -38,6 +38,9 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: DashCastTests
+      # Bundled so SKTestSession can load the local StoreKit catalogue in unit tests.
+      - path: DashCast/Resources/DashCastStore.storekit
+        buildPhase: resources
     dependencies:
       - target: DashCast
     settings:
@@ -57,3 +60,4 @@ schemes:
         - DashCastTests
     run:
       config: Debug
+      storeKitConfiguration: DashCast/Resources/DashCastStore.storekit

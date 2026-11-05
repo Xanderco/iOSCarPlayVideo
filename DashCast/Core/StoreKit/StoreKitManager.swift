@@ -1,146 +1,262 @@
 import Foundation
 import StoreKit
 
+// MARK: - Product
+
+/// DashCast sells exactly one product: a one-time, non-consumable "DashCast Pro" unlock.
+/// No subscriptions. The raw value is the App Store Connect product ID and must match
+/// `DashCastStore.storekit`.
+public enum ProProduct: String, CaseIterable, Sendable {
+    case lifetime = "pro.lifetime"
+
+    public static var allIDs: Set<String> { Set(allCases.map(\.rawValue)) }
+}
+
+// MARK: - Entitlement model
+
+public enum ProEntitlement: String, Equatable, Codable, Sendable {
+    case none
+    case lifetime
+
+    public var isPro: Bool { self == .lifetime }
+}
+
+/// StoreKit-independent copy of the `Transaction` fields that matter for the entitlement.
+/// Keeping resolution pure makes refund / revocation logic testable without a StoreKit session.
+public struct EntitlementSnapshot: Equatable, Sendable {
+    public var productID: String
+    public var revocationDate: Date?
+
+    public init(productID: String, revocationDate: Date? = nil) {
+        self.productID = productID
+        self.revocationDate = revocationDate
+    }
+
+    public init(_ transaction: Transaction) {
+        self.init(productID: transaction.productID, revocationDate: transaction.revocationDate)
+    }
+}
+
+public enum EntitlementResolver {
+    /// Pro is active when there is a non-revoked transaction for the lifetime product.
+    /// Refunded / revoked purchases (Family Sharing removal included) unlock nothing.
+    public static func resolve(_ snapshots: [EntitlementSnapshot]) -> ProEntitlement {
+        let owned = snapshots.contains {
+            $0.productID == ProProduct.lifetime.rawValue && $0.revocationDate == nil
+        }
+        return owned ? .lifetime : .none
+    }
+}
+
+// MARK: - Manager
+
+/// StoreKit 2 store: loads the product, purchases, restores, and keeps the Pro entitlement in
+/// sync through `Transaction.currentEntitlements` and the `Transaction.updates` listener.
 @MainActor
 public final class StoreKitManager: ObservableObject {
-    public static let shared = StoreKitManager()
-
-    public static let lifetimeProductID = "com.dashcast.lifetime"
-
-    @Published public private(set) var products: [Product] = []
-    @Published public private(set) var isPurchased: Bool = false
-    @Published public private(set) var isLoading: Bool = false
-    @Published public var errorMessage: String?
-
-    private var transactionListener: Task<Void, Error>?
-    private let entitlementKey = "dashcast_pro_lifetime_entitlement_cached"
-
-    public init() {
-        // Load cached entitlement immediately for instant offline launch
-        self.isPurchased = UserDefaults.standard.bool(forKey: entitlementKey)
-        self.transactionListener = listenForTransactions()
-
-        Task {
-            await fetchProducts()
-            await updatePurchasedStatus()
+    public static let shared = StoreKitManager(onEntitlementChange: { entitlement in
+        // Keep the app-wide flag that other screens read in step with StoreKit, in both
+        // directions, so a refund locks Pro again.
+        if AppState.shared.isProLifetimeUnlocked != entitlement.isPro {
+            AppState.shared.isProLifetimeUnlocked = entitlement.isPro
         }
+    })
+
+    public enum LoadState: Equatable {
+        case idle, loading, loaded, failed(String)
     }
 
-    deinit {
-        transactionListener?.cancel()
+    public enum PurchaseOutcome: Equatable {
+        case purchased
+        /// Awaiting approval (Ask to Buy / SCA). The listener unlocks Pro once approved.
+        case pending
+        case cancelled
     }
 
-    public var lifetimeProduct: Product? {
-        products.first(where: { $0.id == Self.lifetimeProductID })
-    }
-
-    public func fetchProducts() async {
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            let fetched = try await Product.products(for: [Self.lifetimeProductID])
-            self.products = fetched
-        } catch {
-            self.errorMessage = "Failed to load product: \(error.localizedDescription)"
-        }
-    }
-
-    public func purchaseLifetime() async throws -> Bool {
-        guard let product = lifetimeProduct ?? products.first else {
-            throw StoreKitError.productNotFound
-        }
-
-        isLoading = true
-        defer { isLoading = false }
-
-        let result = try await product.purchase()
-
-        switch result {
-        case .success(let verification):
-            let transaction = try checkVerified(verification)
-            await transaction.finish()
-            await updatePurchasedStatus()
-            return true
-
-        case .userCancelled:
-            return false
-
-        case .pending:
-            return false
-
-        @unknown default:
-            return false
-        }
-    }
-
-    public func restorePurchases() async {
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            try await AppStore.sync()
-            await updatePurchasedStatus()
-        } catch {
-            self.errorMessage = "Restore failed: \(error.localizedDescription)"
-        }
-    }
-
-    public func updatePurchasedStatus() async {
-        var purchased = false
-
-        for await result in Transaction.currentEntitlements {
-            do {
-                let transaction = try checkVerified(result)
-                if transaction.productID == Self.lifetimeProductID && transaction.revocationDate == nil {
-                    purchased = true
-                    break
-                }
-            } catch {
-                continue
-            }
-        }
-
-        self.isPurchased = purchased
-        UserDefaults.standard.set(purchased, forKey: entitlementKey)
-
-        if purchased {
-            AppState.shared.unlockProLifetime()
-        }
-    }
-
-    public func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
-        switch result {
-        case .unverified(_, let error):
-            throw error
-        case .verified(let safe):
-            return safe
-        }
-    }
-
-    private func listenForTransactions() -> Task<Void, Error> {
-        return Task.detached {
-            for await result in Transaction.updates {
-                do {
-                    let transaction = try await MainActor.run {
-                        try self.checkVerified(result)
-                    }
-                    await transaction.finish()
-                    await self.updatePurchasedStatus()
-                } catch {
-                    // Ignore unverified or cancelled
-                }
-            }
-        }
-    }
-
-    public enum StoreKitError: LocalizedError {
+    public enum StoreError: LocalizedError, Equatable {
         case productNotFound
+        case failedVerification
 
         public var errorDescription: String? {
             switch self {
             case .productNotFound:
-                return "The lifetime product could not be found."
+                return "DashCast Pro isn't available from the App Store right now. Please try again later."
+            case .failedVerification:
+                return "The App Store couldn't verify this purchase."
+            }
+        }
+    }
+
+    /// Performs the App Store purchase. The paywall injects SwiftUI's `PurchaseAction` so the
+    /// confirmation sheet is anchored to the right scene; tests fall back to `Product.purchase()`.
+    public typealias PurchasePerformer = @MainActor (Product) async throws -> Product.PurchaseResult
+
+    @Published public private(set) var proProduct: Product?
+    @Published public private(set) var loadState: LoadState = .idle
+    @Published public private(set) var entitlement: ProEntitlement = .none
+    @Published public private(set) var isPurchasing: Bool = false
+    @Published public private(set) var isRestoring: Bool = false
+
+    public var isPro: Bool { entitlement.isPro }
+
+    private let defaults: UserDefaults
+    private let onEntitlementChange: (@MainActor (ProEntitlement) -> Void)?
+    private var updatesTask: Task<Void, Never>?
+
+    static let cacheKey = "dashcast_pro_entitlement_cache_v2"
+
+    public init(defaults: UserDefaults = .standard,
+                startImmediately: Bool = true,
+                onEntitlementChange: (@MainActor (ProEntitlement) -> Void)? = nil) {
+        self.defaults = defaults
+        self.onEntitlementChange = onEntitlementChange
+
+        // Instant offline launch; StoreKit is re-checked right after and wins.
+        if let raw = defaults.string(forKey: Self.cacheKey),
+           let cached = ProEntitlement(rawValue: raw) {
+            self.entitlement = cached
+        }
+        onEntitlementChange?(entitlement)
+
+        if startImmediately {
+            start()
+        }
+    }
+
+    deinit {
+        updatesTask?.cancel()
+    }
+
+    /// Starts the transaction listener and refreshes the product and entitlement.
+    public func start() {
+        guard updatesTask == nil else { return }
+        updatesTask = listenForTransactions()
+        Task {
+            await finishUnfinishedTransactions()
+            await loadProducts()
+            await refreshEntitlements()
+        }
+    }
+
+    public func stop() {
+        updatesTask?.cancel()
+        updatesTask = nil
+    }
+
+    // MARK: Product
+
+    public func loadProducts() async {
+        loadState = .loading
+        do {
+            let fetched = try await Product.products(for: ProProduct.allIDs)
+            proProduct = fetched.first { $0.id == ProProduct.lifetime.rawValue }
+            loadState = proProduct == nil
+                ? .failed("DashCast Pro couldn't be loaded from the App Store.")
+                : .loaded
+        } catch {
+            loadState = .failed(error.localizedDescription)
+        }
+    }
+
+    // MARK: Purchase
+
+    @discardableResult
+    public func purchasePro(using performer: PurchasePerformer? = nil) async throws -> PurchaseOutcome {
+        if proProduct == nil { await loadProducts() }
+        guard let product = proProduct else { throw StoreError.productNotFound }
+
+        isPurchasing = true
+        defer { isPurchasing = false }
+
+        let result: Product.PurchaseResult
+        if let performer {
+            result = try await performer(product)
+        } else {
+            result = try await product.purchase()
+        }
+
+        switch result {
+        case .success(let verification):
+            guard case .verified(let transaction) = verification else {
+                throw StoreError.failedVerification
+            }
+            await transaction.finish()
+            await refreshEntitlements()
+            return .purchased
+        case .pending:
+            return .pending
+        case .userCancelled:
+            return .cancelled
+        @unknown default:
+            return .cancelled
+        }
+    }
+
+    // MARK: Restore
+
+    /// Syncs with the App Store and re-reads entitlements. Returns whether Pro is active afterwards.
+    /// `sync` is injectable for tests; production uses `AppStore.sync()`.
+    @discardableResult
+    public func restorePurchases(sync: (() async throws -> Void)? = nil) async throws -> Bool {
+        isRestoring = true
+        defer { isRestoring = false }
+
+        var syncError: Error?
+        do {
+            if let sync {
+                try await sync()
+            } else {
+                try await AppStore.sync()
+            }
+        } catch {
+            syncError = error
+        }
+
+        // Local entitlements may already hold the purchase even if the network sync failed.
+        await refreshEntitlements()
+        if !isPro, let syncError {
+            throw syncError
+        }
+        return isPro
+    }
+
+    // MARK: Entitlements
+
+    public func refreshEntitlements() async {
+        var snapshots: [EntitlementSnapshot] = []
+        for await result in Transaction.currentEntitlements {
+            if case .verified(let transaction) = result {
+                snapshots.append(EntitlementSnapshot(transaction))
+            }
+        }
+        apply(EntitlementResolver.resolve(snapshots))
+    }
+
+    func apply(_ newValue: ProEntitlement) {
+        if entitlement != newValue {
+            entitlement = newValue
+        }
+        defaults.set(newValue.rawValue, forKey: Self.cacheKey)
+        onEntitlementChange?(newValue)
+    }
+
+    private func finishUnfinishedTransactions() async {
+        for await result in Transaction.unfinished {
+            if case .verified(let transaction) = result {
+                await transaction.finish()
+            }
+        }
+    }
+
+    private func listenForTransactions() -> Task<Void, Never> {
+        Task.detached(priority: .background) { [weak self] in
+            // Ask-to-Buy approvals, refunds, Family Sharing changes and purchases made on
+            // other devices all arrive here.
+            for await result in Transaction.updates {
+                if case .verified(let transaction) = result {
+                    await transaction.finish()
+                }
+                await self?.refreshEntitlements()
             }
         }
     }
