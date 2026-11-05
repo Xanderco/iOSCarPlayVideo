@@ -87,6 +87,11 @@
 
 ## Log
 
+### 2026-11-05 00:53 (Bogotá) — Integrator: merged #27 (claude/home-widgets)
+- Merged [#27](https://github.com/Xanderco/iOSCarPlayVideo/pull/27): the `DashCastWidgets` WidgetKit extension, with My Car, Last Trip and Quick Cast plus Lock Screen variants. Data is shared via app group `group.com.xanderco.dashcast` (`WidgetSharedStore`, versioned JSON). The extension uses the `dashcast://` deep-link scheme, handled in `AppState.handleDeepLink`. Adds `WidgetSharedStoreTests`.
+- Conflict in `project.yml`: all three extensions are kept as separate targets, each an app dependency: `DashCastBroadcast` (from #25/#28, now also compiling `MirrorFrameTransport.swift`), `DashCastCastWidget` (the casting Live Activity from #25) and `DashCastWidgets`. All of them use the one app group.
+- Follow-ups: built-in car artwork isn't shared with the extension yet. Register the app group and the `com.xanderco.dashcast.widgets` bundle ID (human, H3).
+
 ### 2026-11-05 00:53 (Bogotá) — Integrator: merged #28 (claude/carplay-mirror)
 - Merged [#28](https://github.com/Xanderco/iOSCarPlayVideo/pull/28), mirroring the iPhone onto the CarPlay screen behind the feature flag `carMirror.enabled` (off by default). Frames go extension → app group (`MirrorFrameTransport`, seqlocked two-slot JPEG, unit-tested). `CarPlayMirrorController` renders them in the `CPWindow` once iOS grants one.
 - Conflict in `CarPlaySceneDelegate.swift`: #28 was written against the pre-#16 delegate (sample playlist). Kept #16's PlaylistStore-backed Library/Favorites/Info tabs and Now Playing. Ported in #28's `CPWindow` connect/disconnect pair, which reuses the normal setup and then attaches or detaches the mirror controller, and its "Mirror iPhone" `CPInformationTemplate` row, now in the Info tab and honouring the template-depth limit.
@@ -133,6 +138,13 @@
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #18 (claude/core-bugfixes)
 - Merged [#18](https://github.com/Xanderco/iOSCarPlayVideo/pull/18), the core bug audit. Fixes the audio session (category options were invalid, so the silent switch muted video and background audio stopped). Player state now comes from `timeControlStatus`, with Retry/Close on errors, Now Playing info and remote commands. Also fixes local videos, external display and Drive tracking. Full list in `Docs/Audit-2026-11.md`.
 - Follow-ups: the items marked *needs-device* in the audit go on the Mac/real-device checklist.
+
+### 2026-11-05 00:40 (Bogotá) — Session 15: real Home Screen widgets (`claude/home-widgets`)
+- Added WidgetKit extension target `DashCastWidgets` (iOS 17, bundle `com.xanderco.dashcast.widgets`) with original designs: **My Car** (small/medium, AppIntentConfiguration with a "show plate" toggle: user photo or SF Symbol, name, brand/model, licence plate badge), **Last Trip** (small/medium, AppIntentConfiguration with units: distance, score ring, relative date, duration), **Quick Cast** (small + Lock Screen circular/rectangular/inline, opens `dashcast://cast`).
+- Shared data: `DashCast/Shared/WidgetSharedStore.swift` (compiled into app and extension) stores a versioned JSON payload in app group `group.com.xanderco.dashcast` (same group as PR #25), falling back to standard defaults when unsigned. `PersistenceController.saveWidgets/saveTrips` now publish to it (photo downscaled to 320px JPEG) and call `WidgetCenter.shared.reloadAllTimelines()`.
+- App: `dashcast://` URL scheme in Info.plist; `DashCastLinks.destination(for:)` parses `cast`/`drive`, and `AppState.handleDeepLink` maps them to tabs. The car widget has no deep link (it just opens the app) so it doesn't depend on where the Widgets editor lives (2B moves it to Settings > Extras). App and extension entitlements carry the app group.
+- Tests: `WidgetSharedStoreTests` (encode/decode round trip, store save/load, corrupt-data fallback, config→snapshot, publish, deep links).
+- Follow-ups: the built-in car artwork (`carImageName`) lives in the app's asset catalog and isn't shared yet, so widgets show the user's photo or a symbol. The app group must be registered in the developer portal before TestFlight signing. When merging with #25, keep both extension targets and app dependencies (the edits are additive).
 
 ### 2026-11-05 00:14 (Bogotá) — Integrator: merged #15 (claude/browser-send-to-car)
 - Merged [#15](https://github.com/Xanderco/iOSCarPlayVideo/pull/15), the real browser "Send to car" that replaces the fake alert. `WebVideoExtractor` detects `<video>`/HLS in all frames and detects EME/DRM. `playWebVideo` hands off to `VideoPlayerService` with external playback. DRM-only presets (Netflix, Disney+, etc.) are removed, per D5. Adds 10 tests.

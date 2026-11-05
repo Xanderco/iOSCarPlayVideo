@@ -77,6 +77,17 @@ public final class AppState: ObservableObject {
         }
     }
 
+    /// Handles `dashcast://cast` and `dashcast://drive` links from Home/Lock Screen widgets.
+    @discardableResult
+    public func handleDeepLink(_ url: URL) -> Bool {
+        guard let destination = DashCastLinks.destination(for: url) else { return false }
+        switch destination {
+        case .cast: selectedTab = .cast
+        case .drive: selectedTab = .drive
+        }
+        return true
+    }
+
     public func unlockProLifetime() {
         isProLifetimeUnlocked = true
         showPaywall = false

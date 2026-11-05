@@ -4,6 +4,17 @@
 <dict>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.xanderco.dashcast</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>dashcast</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>DashCast</string>
 	<key>CFBundleExecutable</key>
