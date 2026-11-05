@@ -70,7 +70,7 @@ Add these as each feature lands on `claude/ci-and-core-fixes`. Each item needs a
 - [ ] **Core bugfixes (#18)**: the local "Your Videos" list, `VideoPlayerService.stop()`, and the external display scene. Unit tests are in `CoreBugfixTests`. Add a UI test for the local videos list using `-seedDemoData`, which could seed a local video copied from the bundle.
 - [ ] **Car video output / broadcast extension**: unit-test whatever logic is added. The broadcast itself is manual (see 7.4).
 - [ ] **Browser Send to car with a real page**: `WKWebView` does not use `URLProtocol`. Add a test that loads a local HTML file (bundle a `video.html` with `<video src=file://…>`), taps Send to car, and expects "Sent to DashCast". `WebVideoExtractorTests` already covers the parsing.
-- [ ] Raise `COVERAGE_MIN` toward 60% as these land.
+- [ ] Raise `COVERAGE_MIN` (now 60%; first measured run 65.67%) as these land.
 
 ## 7. Manual-only checks (cannot run in CI)
 Record the results (pass/fail, device, iOS version, notes) in the journal Log.

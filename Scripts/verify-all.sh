@@ -45,7 +45,7 @@ DERIVED="$BUILD_DIR/DerivedData"
 REPORTS="$BUILD_DIR/reports"
 RESULTS="$REPORTS/results"
 LOGS="$REPORTS/logs"
-COVERAGE_MIN="${COVERAGE_MIN:-35}"
+COVERAGE_MIN="${COVERAGE_MIN:-60}"
 MIN_XCODE_MAJOR="${MIN_XCODE_MAJOR:-26}"
 
 # Test classes per dedicated phase. Classes not listed here run in "unit".
