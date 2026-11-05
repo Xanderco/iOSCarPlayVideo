@@ -340,19 +340,22 @@ public struct MeHomeView: View {
                             // Restore Purchase
                             Button {
                                 Task {
-                                    await storeKit.restorePurchases()
-                                    if storeKit.isPurchased {
-                                        appState.unlockProLifetime()
-                                        restoreMessage = "Your DashCast Pro purchase has been restored."
-                                    } else {
-                                        restoreMessage = storeKit.errorMessage ?? "No previous purchase was found for this Apple ID."
+                                    do {
+                                        // StoreKitManager mirrors the entitlement into AppState itself.
+                                        if try await storeKit.restorePurchases() {
+                                            restoreMessage = "Your DashCast Pro purchase has been restored."
+                                        } else {
+                                            restoreMessage = "No previous DashCast Pro purchase was found for this Apple Account."
+                                        }
+                                    } catch {
+                                        restoreMessage = error.localizedDescription
                                     }
                                 }
                             } label: {
                                 HStack(spacing: 12) {
                                     Image(systemName: "arrow.clockwise")
                                         .foregroundStyle(Color.dashYellow)
-                                    Text(storeKit.isLoading ? "Restoring…" : "Restore Purchases")
+                                    Text(storeKit.isRestoring ? "Restoring…" : "Restore Purchases")
                                         .font(.system(size: 15, weight: .medium))
                                         .foregroundStyle(Color.dashTextPrimary)
                                     Spacer()
