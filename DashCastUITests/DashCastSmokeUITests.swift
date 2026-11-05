@@ -64,8 +64,8 @@ final class DashCastSmokeUITests: XCTestCase {
         tapCenter(of: row)
 
         XCTAssertTrue(
-            app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
-            "Media Sources sheet did not open"
+            app.navigationBars["Library"].waitForExistence(timeout: 10),
+            "Library sheet did not open"
         )
         let firstChannel = app.buttons.matching(identifier: "MediaSources_Channel").firstMatch
         XCTAssertTrue(firstChannel.waitForExistence(timeout: 10), "No channels listed")
@@ -75,7 +75,7 @@ final class DashCastSmokeUITests: XCTestCase {
         )
         snapshot("03-media-sources")
 
-        app.navigationBars["Media Sources"].buttons["Done"].tap()
+        app.navigationBars["Library"].buttons["Done"].tap()
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Home tab")
     }
 

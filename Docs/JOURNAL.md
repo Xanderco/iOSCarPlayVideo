@@ -87,6 +87,13 @@
 
 ## Log
 
+### 2026-11-05 00:55 (Bogotá) — Integrator: merged #32 (claude/redesign-cast-home)
+- Merged [#32](https://github.com/Xanderco/iOSCarPlayVideo/pull/32), redesign 2A on design system v2. Adds a new Home (`CastHomeView`: search, quick actions, Continue Watching, Favorites, Recents, Sources grid, car-display card), `LibraryView` (Sources → Groups → Channels), `AddSourceSheet`, `PlayerScreen`, a persistent `MiniPlayerHost`, `CarModeView` and `WatchHistoryStore` (with tests).
+- Conflicts resolved:
+  - `CastHomeView`: took #32's rewrite, then re-applied phase-2 intent. The "Mirror Screen" quick action opens #25's `CarOutputPanelView`, so route status, the parked-only guard and #28's mirror toggle stay reachable; #32's static `MirrorScreenSheet` was removed. #24's paywall-over-sheet presentation was re-added on the Library, Add Source, Web Video and CarPlay-preview sheets.
+  - `AppState` and `CarPlaySimulatorView` keep #31's wording. The smoke UI test uses #32's "Library" sheet title.
+- Follow-up: the Library *tab* still hosts `MediaServersHomeView` (#31's placeholder "until 2A lands"). Switching it to `LibraryView` needs a tab-friendly variant without the sheet's Done button (UX, issue U1).
+
 ### 2026-11-05 00:54 (Bogotá) — Integrator: merged #31 (claude/redesign-secondary)
 - Merged [#31](https://github.com/Xanderco/iOSCarPlayVideo/pull/31), redesign 2B (de-cloning). Adds `Docs/Originality-audit.md`, removes `MediaToAnalyze/`, `Screenshots/` and the manufacturer-style car renders from the repo or bundle, and leaves no CarDash/CarTV/"1:1" text in code.
   - Tabs are now **Home · Library · Cast · Settings**. Settings replaces Me and has Restore, Privacy, Terms, Appearance and Safety. Car Extras holds Trip Log, Car Screen and Chime (O2 proposal in the audit §3). Adds onboarding with the passenger-only notice.
@@ -133,6 +140,12 @@
 - **O2 proposal implemented (reversible):** Drive/Widgets/Sounds → Settings › **Car Extras** with new UI and copy: **Trip Log** (no scores shown, passenger check), **Car Screen** (car-display text + own photo/plate for the widget; `WidgetConfigModel` untouched), **Car Chime** (13 synthesized chimes with original names + real Shortcuts action `PlayCarChimeIntent`). Me tab → native **Settings** (Pro card, Restore Purchases, Privacy, Terms (Apple EULA), Feedback via Mail, Appearance System/Dark/Light, safety notice).
 - **Onboarding:** Welcome → passenger-only notice (must be acknowledged; shares `PassengerSafetyNotice.acceptedKey`) → add a source.
 - Follow-ups for others: see audit §6 (Porsche defaults in model/Cast fallbacks, score in trip widget, real Library/Home from 2A).
+
+### 2026-11-05 01:30 (Bogotá) — Redesign 2A: Home / Library / Player / Car Mode (claude/redesign-cast-home)
+- Opened [#32](https://github.com/Xanderco/iOSCarPlayVideo/pull/32) into `claude/ci-and-core-fixes`. It rebuilds the Cast tab and playback on design system v2 with original layouts and copy (D2, D4). Home: search, quick actions, Continue Watching, Favorites, Recents, Your Sources, car-display card. Library: sources → groups → channels, with Add Source (Link/File/QR/Server). Full-screen `PlayerScreen` with Up Next. Persistent `MiniPlayerBar` (via `MiniPlayerHost` in `MainTabView`). Landscape `CarModeView` with 72 pt targets. New `WatchHistoryStore` for on-device recents/resume, with unit tests.
+- CarDash / "1:1" references removed from Cast, `AppState` and the browser/simulator comments. Still remaining, in other sessions' areas: `DriveNotificationService`, `DriveSettingsView`, `MeHomeView`, `WidgetEditorView`.
+- UI tests: identifiers unchanged. The Library sheet's title is now "Library" (was "Media Sources"), and the smoke test is updated to match.
+- Follow-ups: gate Car Mode behind Pro once `EntitlementGate` lands (paywall session). The 4-tab restructure (spec §3) still has to be done, and it will retire the 110 pt tab-bar padding the other tabs use (the mini player can overlap their last row). Check Car Mode's forced landscape and resume-seek on a real device.
 
 ### 2026-11-05 00:25 (Bogotá) — Integrator: merged #21 (claude/drop-territory-icon-media)
 - Merged [#21](https://github.com/Xanderco/iOSCarPlayVideo/pull/21): Territory removed (D3), new original app icon, App Store media pipeline (`appstore-media.yml`, compositor scripts, `AppStoreMedia/metadata.md`), passenger safety notice, privacy manifest, demo-data seeder, App Review checklist.

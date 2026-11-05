@@ -1,36 +1,59 @@
 import SwiftUI
 import AVKit
 
+/// The video surface used by the full player, Car Mode and anywhere video is shown inline.
+///
+/// Always dark (video chrome ignores the app appearance). Controls fade in on tap and
+/// hide themselves after a few seconds of playback. Live streams get no scrubber or
+/// skip buttons; on-demand videos get ±10 s and a scrubber.
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     @State private var showControls: Bool = true
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
+    @State private var hideTask: Task<Void, Never>?
     @Binding var isFullscreen: Bool
 
-    public init(isFullscreen: Binding<Bool> = .constant(false)) {
+    private let showsFullscreenToggle: Bool
+    private let onPrevious: (() -> Void)?
+    private let onNext: (() -> Void)?
+
+    public init(
+        isFullscreen: Binding<Bool> = .constant(false),
+        showsFullscreenToggle: Bool = false,
+        onPrevious: (() -> Void)? = nil,
+        onNext: (() -> Void)? = nil
+    ) {
         self._isFullscreen = isFullscreen
+        self.showsFullscreenToggle = showsFullscreenToggle
+        self.onPrevious = onPrevious
+        self.onNext = onNext
     }
+
+    private var isLive: Bool { playerService.duration <= 0 }
 
     public var body: some View {
         ZStack {
-            Color.black
+            Color.dcVideoChrome
 
             if playerService.currentChannel != nil {
                 CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            showControls.toggle()
-                        }
-                    }
+                    .accessibilityHidden(true)
+
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { toggleControls() }
+                    .accessibilityHidden(true)
 
                 if playerService.isBuffering && playerService.playbackError == nil {
                     ProgressView()
+                        .controlSize(.large)
                         .tint(.white)
-                        .scaleEffect(1.4)
                         .allowsHitTesting(false)
+                        .accessibilityLabel(Text("Loading video"))
                 }
 
                 if let error = playerService.playbackError {
@@ -40,195 +63,206 @@ public struct AutomotiveVideoPlayerView: View {
                         .transition(.opacity)
                 }
             } else {
-                placeholderView
+                idleView
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: isFullscreen ? 0 : 16, style: .continuous))
+        .environment(\.colorScheme, .dark)
+        .onAppear { scheduleAutoHide() }
+        .onChange(of: playerService.isPlaying) { _, _ in scheduleAutoHide() }
+        .onDisappear { hideTask?.cancel() }
     }
 
-    private var placeholderView: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "play.tv")
-                .font(.system(size: 44))
-                .foregroundStyle(Color.dashTextMuted)
-            Text("Select a video or stream below to play")
-                .font(ThemeFonts.hudCaption(size: 14))
-                .foregroundStyle(Color.dashTextMuted)
+    // MARK: - States
+
+    private var idleView: some View {
+        VStack(spacing: DSSpacing.sm) {
+            Image(systemName: "play.rectangle.on.rectangle")
+                .font(.system(.largeTitle, weight: .semibold))
+                .foregroundStyle(Color.dcTextTertiary)
+                .accessibilityHidden(true)
+            Text("Pick something to watch")
+                .font(DSTypography.subheadline)
+                .foregroundStyle(Color.dcTextSecondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.dashSurface)
     }
 
     private func errorOverlay(_ message: String) -> some View {
-        VStack(spacing: 12) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 32))
-                .foregroundStyle(Color.dashOrange)
-            Text("Can't play \(playerService.currentChannel?.name ?? "this video")")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.white)
-                .multilineTextAlignment(.center)
-            Text(message)
-                .font(.system(size: 12))
-                .foregroundStyle(Color.dashTextSecondary)
-                .multilineTextAlignment(.center)
-                .lineLimit(3)
-            HStack(spacing: 12) {
-                Button("Retry") {
+        VStack(spacing: DSSpacing.sm) {
+            EmptyStateView.error(
+                title: "This stream won't play",
+                message: message,
+                retry: {
                     if let channel = playerService.currentChannel {
                         playerService.load(channel: channel)
                     }
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.dashYellow)
-                .foregroundStyle(.black)
-
-                Button("Close") { playerService.stop() }
-                    .buttonStyle(.bordered)
-                    .tint(.white)
+            )
+            HStack(spacing: DSSpacing.sm) {
+                if let onNext {
+                    PrimaryButton("Next Channel", systemImage: "forward.end.fill", kind: .tertiary,
+                                  size: .compact, fullWidth: false, action: onNext)
+                }
+                PrimaryButton("Close", kind: .tertiary, size: .compact, fullWidth: false) {
+                    playerService.stop()
+                }
             }
         }
-        .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.black.opacity(0.75))
+        .background(Color.dcVideoChrome.opacity(0.85))
     }
+
+    // MARK: - Controls
 
     private var controlsOverlay: some View {
         ZStack {
-            Color.black.opacity(0.45)
-                .ignoresSafeArea()
+            Color.dcScrim
+                .allowsHitTesting(false)
 
-            VStack {
-                // Top bar: title & fullscreen toggle
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(playerService.currentChannel?.name ?? "Video Player")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
+            VStack(spacing: 0) {
+                topBar
+                Spacer(minLength: DSSpacing.sm)
+                transport
+                Spacer(minLength: DSSpacing.sm)
+                bottomBar
+            }
+            .padding(DSSpacing.md)
+        }
+    }
 
-                        HStack(spacing: 6) {
-                            Circle()
-                                .fill(Color.dashGreen)
-                                .frame(width: 6, height: 6)
-                            Text(externalDisplay.isExternalDisplayConnected ? "Showing on external display" : "Parked Video · AirPlay / CarPlay audio")
-                                .font(.system(size: 11))
-                                .foregroundStyle(Color.dashTextSecondary)
-                        }
-                    }
-
-                    Spacer()
-
-                    AirPlayRoutePickerRepresentable(tintColor: .white)
-                        .frame(width: 34, height: 34)
-
-                    Button {
-                        playerService.stop()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(9)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
-                    }
-                    .accessibilityLabel("Close player")
-
-                    Button {
-                        withAnimation {
-                            isFullscreen.toggle()
-                        }
-                    } label: {
-                        Image(systemName: isFullscreen ? "arrow.down.right.and.arrow.up.left" : "viewfinder")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(8)
-                            .background(Color.white.opacity(0.2))
-                            .clipShape(Circle())
-                    }
+    private var topBar: some View {
+        HStack(spacing: DSSpacing.sm) {
+            if isLive {
+                LiveBadge()
+            }
+            if externalDisplay.isExternalDisplayConnected {
+                Label("On car display", systemImage: "rectangle.on.rectangle")
+                    .font(DSTypography.caption)
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+            Spacer()
+            AirPlayRoutePickerRepresentable(tintColor: .white)
+                .frame(width: DSLayout.minTapTarget, height: DSLayout.minTapTarget)
+                .accessibilityLabel(Text("Play on another screen"))
+            if showsFullscreenToggle {
+                overlayIconButton(isFullscreen ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right",
+                                  label: isFullscreen ? "Exit full screen" : "Full screen") {
+                    isFullscreen.toggle()
                 }
-                .padding()
-
-                Spacer()
-
-                // Center transport controls
-                HStack(spacing: 36) {
-                    Button {
-                        playerService.skip(seconds: -10)
-                    } label: {
-                        Image(systemName: "gobackward.10")
-                            .font(.system(size: 28))
-                            .foregroundStyle(.white)
-                    }
-
-                    Button {
-                        playerService.togglePlayPause()
-                    } label: {
-                        Image(systemName: playerService.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.system(size: 54))
-                            .foregroundStyle(Color.dashYellow)
-                            .shadow(color: Color.dashYellow.opacity(0.5), radius: 10)
-                    }
-
-                    Button {
-                        playerService.skip(seconds: 10)
-                    } label: {
-                        Image(systemName: "goforward.10")
-                            .font(.system(size: 28))
-                            .foregroundStyle(.white)
-                    }
-                }
-
-                Spacer()
-
-                // Bottom scrub bar & timestamps
-                VStack(spacing: 6) {
-                    Slider(
-                        value: Binding(
-                            get: { isSeeking ? seekSliderValue : playerService.currentTime },
-                            set: { newValue in
-                                seekSliderValue = newValue
-                                isSeeking = true
-                            }
-                        ),
-                        in: 0...max(playerService.duration, 1),
-                        onEditingChanged: { editing in
-                            if !editing {
-                                playerService.seek(to: seekSliderValue)
-                                isSeeking = false
-                            }
-                        }
-                    )
-                    .tint(.dashYellow)
-
-                    HStack {
-                        Text(formatTime(playerService.currentTime))
-                            .font(ThemeFonts.monospaceDigits(size: 12))
-                            .foregroundStyle(Color.dashTextSecondary)
-
-                        Spacer()
-
-                        Text(playerService.duration > 0 ? formatTime(playerService.duration) : "LIVE")
-                            .font(ThemeFonts.monospaceDigits(size: 12))
-                            .foregroundStyle(playerService.duration > 0 ? Color.dashTextSecondary : Color.dashRed)
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 12)
             }
         }
     }
 
-    private func formatTime(_ seconds: Double) -> String {
-        guard seconds.isFinite && seconds >= 0 else { return "00:00" }
-        let secs = Int(seconds)
-        let hours = secs / 3600
-        let minutes = (secs % 3600) / 60
-        let remainingSeconds = secs % 60
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, remainingSeconds)
+    private var transport: some View {
+        HStack(spacing: DSSpacing.xl) {
+            if let onPrevious {
+                overlayIconButton("backward.end.fill", label: "Previous channel", action: onPrevious)
+            }
+            if !isLive {
+                overlayIconButton("gobackward.10", label: "Back 10 seconds") { playerService.skip(seconds: -10) }
+            }
+            Button {
+                playerService.togglePlayPause()
+                scheduleAutoHide()
+            } label: {
+                Image(systemName: playerService.isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(.title, weight: .bold))
+                    .foregroundStyle(Color.black)
+                    .frame(width: 64, height: 64)
+                    .background(Color.white, in: Circle())
+                    .contentTransition(.symbolEffect(.replace))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(Text(playerService.isPlaying ? "Pause" : "Play"))
+            if !isLive {
+                overlayIconButton("goforward.10", label: "Forward 10 seconds") { playerService.skip(seconds: 10) }
+            }
+            if let onNext {
+                overlayIconButton("forward.end.fill", label: "Next channel", action: onNext)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var bottomBar: some View {
+        if isLive {
+            HStack {
+                Text(playerService.currentChannel?.name ?? "")
+                    .font(DSTypography.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+                Spacer()
+            }
         } else {
-            return String(format: "%02d:%02d", minutes, remainingSeconds)
+            VStack(spacing: DSSpacing.xxs) {
+                Slider(
+                    value: Binding(
+                        get: { isSeeking ? seekSliderValue : playerService.currentTime },
+                        set: { newValue in
+                            seekSliderValue = newValue
+                            isSeeking = true
+                        }
+                    ),
+                    in: 0...max(playerService.duration, 1),
+                    onEditingChanged: { editing in
+                        if !editing {
+                            playerService.seek(to: seekSliderValue)
+                            isSeeking = false
+                            scheduleAutoHide()
+                        } else {
+                            hideTask?.cancel()
+                        }
+                    }
+                )
+                .tint(Color.dcAccent)
+                .accessibilityLabel(Text("Playback position"))
+                .accessibilityValue(Text("\(TimecodeFormatter.string(playerService.currentTime)) of \(TimecodeFormatter.string(playerService.duration))"))
+
+                HStack {
+                    Text(TimecodeFormatter.string(isSeeking ? seekSliderValue : playerService.currentTime))
+                    Spacer()
+                    Text("-" + TimecodeFormatter.string(max(playerService.duration - playerService.currentTime, 0)))
+                }
+                .font(DSTypography.caption.monospacedDigit())
+                .foregroundStyle(.white.opacity(0.8))
+                .accessibilityHidden(true)
+            }
+        }
+    }
+
+    private func overlayIconButton(_ systemImage: String, label: String, action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+            scheduleAutoHide()
+        } label: {
+            Image(systemName: systemImage)
+                .font(.system(.title3, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: DSLayout.minTapTarget, height: DSLayout.minTapTarget)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(label))
+    }
+
+    // MARK: - Auto-hide
+
+    private func toggleControls() {
+        withAnimation(DSMotion.animation(DSMotion.quick, reduceMotion: reduceMotion)) {
+            showControls.toggle()
+        }
+        scheduleAutoHide()
+    }
+
+    private func scheduleAutoHide() {
+        hideTask?.cancel()
+        guard showControls, playerService.isPlaying, !UIAccessibility.isVoiceOverRunning else { return }
+        hideTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 4_000_000_000)
+            guard !Task.isCancelled, playerService.isPlaying, !isSeeking else { return }
+            withAnimation(DSMotion.animation(DSMotion.standard, reduceMotion: reduceMotion)) {
+                showControls = false
+            }
         }
     }
 }
