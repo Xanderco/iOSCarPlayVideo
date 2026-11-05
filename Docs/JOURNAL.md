@@ -91,6 +91,24 @@
 
 ## Log
 
+### 2026-11-05 01:25 (Bogotá) — Redesign 2A wrap-up (session 12, U1): finished vs remaining
+**Finished (merged into `claude/ci-and-core-fixes` via #32 and #34):**
+- Home (`CastHomeView`): search, quick actions (Library / Web Video / Mirror Screen / Car Mode), Continue Watching, Favorites, Recently Watched, Your Sources grid, car-display card, welcome state.
+- Library (`LibraryView`, also the Library tab): Sources → Groups → Channels, search, sort, Favorites, On This iPhone, Demo Videos, a Jellyfin & Emby row, and refresh/remove. `AddSourceSheet`: Playlist Link / File / QR / Jellyfin / Emby.
+- Player: `AutomotiveVideoPlayerView` rebuilt on v2 tokens; full-screen `PlayerScreen` with Up Next; `MiniPlayerHost` + `MiniPlayerBar` above the tab bar; landscape `CarModeView` (72 pt targets).
+- `WatchHistoryStore` (recents/resume) and `PlaybackQueue`, with unit tests (`WatchHistoryStoreTests`).
+- Owner feedback: CarPlay emulator deleted; demo content is only our bundled videos (unit test added); browser MSE/blob failure offers "Mirror Your Screen Instead"; `CarOutputPanelView` has a "No AirPlay displays found" empty state and uses v2 tokens.
+- CarDash / "1:1" references removed from the Cast area and `AppState`.
+- CI: on `a39798d` the build and all unit tests passed (UI tests were cancelled by a newer push). The #34 run failed only `EntitlementGateTests.testPlayerRefusesToCastWhenFreeAllowanceIsUsedUp`, which asserted the async `isPlaying` and has since been fixed on the integration branch. This branch is now fast-forwarded to phase 4 (`222b645`) for a final run.
+
+**Remaining (U1, for the next agent):**
+1. Gate Car Mode behind Pro (`EntitlementGate`), as spec §4.5 asks: non-Pro users see one preview screen with "Unlock with Pro".
+2. The mini player can cover the last rows of the other tabs. `MainTabView` reserves 72 pt for the tab bar only; also reserve `DSLayout.miniPlayerHeight` while something is playing.
+3. Verify on a device or simulator: forced landscape in Car Mode (`OrientationRequest`), resume-seek right after `load`, pull-down to collapse the player, and that the UI smoke tests pass on the new Home/Library.
+4. Library polish from spec §4.2 not done yet: group chips on source detail, reorderable Favorites, "Rename / Edit URL" for a source, an offline banner on Home.
+5. `WebVideoBrowserView` and `CarCastGuideModalView` still use deprecated `dash*` colors (via aliases); migrate them to `dc*` tokens.
+6. Before App Review, re-check that the two bundled demo videos (`night_drive.mp4`, `track_lap.mp4`) are ours to ship.
+
 ### 2026-11-05 01:16 (Bogotá) — Integrator: merged #35 (claude/drive-auto)
 - Merged [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35) (`claude/drive-auto`), implementing owner decision O2 (Drive stays a real feature) and fixing owner Mac finding #5.
   - Live follow-user map at the top of Trip Log, with a permission-rationale card (When-In-Use → Always).
