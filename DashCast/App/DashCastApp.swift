@@ -9,6 +9,9 @@ struct DashCastApp: App {
             MainTabView()
                 .environmentObject(appState)
                 .preferredColorScheme(.dark)
+                .onOpenURL { url in
+                    appState.handleDeepLink(url)
+                }
                 .onAppear {
                     ExternalDisplayManager.shared.checkForExistingExternalDisplay()
                 }

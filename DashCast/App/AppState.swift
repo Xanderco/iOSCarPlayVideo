@@ -77,6 +77,16 @@ public final class AppState: ObservableObject {
         }
     }
 
+    /// Handles `dashcast://cast|drive|widgets|sounds|me` links from Home/Lock Screen widgets.
+    @discardableResult
+    public func handleDeepLink(_ url: URL) -> Bool {
+        guard url.scheme?.lowercased() == DashCastLinks.scheme else { return false }
+        let target = (url.host ?? url.pathComponents.dropFirst().first ?? "").lowercased()
+        guard let tab = TabItem.allCases.first(where: { $0.rawValue.lowercased() == target }) else { return false }
+        selectedTab = tab
+        return true
+    }
+
     public func unlockProLifetime() {
         isProLifetimeUnlocked = true
         showPaywall = false

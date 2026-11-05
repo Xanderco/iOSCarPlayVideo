@@ -18,6 +18,7 @@ public final class PersistenceController {
         if let data = try? JSONEncoder().encode(trips) {
             userDefaults.set(data, forKey: tripsKey)
         }
+        WidgetSharedPublisher.publishTrips(trips)
     }
 
     public func loadTrips() -> [TripModel] {
@@ -48,6 +49,7 @@ public final class PersistenceController {
         if let data = try? JSONEncoder().encode(widgets) {
             userDefaults.set(data, forKey: widgetsKey)
         }
+        WidgetSharedPublisher.publishWidgets(widgets)
     }
 
     public func loadWidgets() -> [WidgetConfigModel] {

@@ -32,6 +32,28 @@ targets:
         CODE_SIGN_ENTITLEMENTS: DashCast/DashCast.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1"
+    dependencies:
+      - target: DashCastWidgets
+
+  # WidgetKit extension: Home Screen + Lock Screen widgets (car, last trip, quick cast).
+  DashCastWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: DashCastWidgets
+      - path: DashCast/Shared/WidgetSharedStore.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast.widgets
+        PRODUCT_NAME: DashCastWidgets
+        DEVELOPMENT_TEAM: "96YG38576A"
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_FILE: DashCastWidgets/Info.plist
+        CODE_SIGN_ENTITLEMENTS: DashCastWidgets/DashCastWidgets.entitlements
+        TARGETED_DEVICE_FAMILY: "1"
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
 
   DashCastTests:
     type: bundle.unit-test
