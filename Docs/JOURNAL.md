@@ -87,6 +87,11 @@
 
 ## Log
 
+### 2026-11-05 00:53 (Bogotá) — Integrator: merged #28 (claude/carplay-mirror)
+- Merged [#28](https://github.com/Xanderco/iOSCarPlayVideo/pull/28), mirroring the iPhone onto the CarPlay screen behind the feature flag `carMirror.enabled` (off by default). Frames go extension → app group (`MirrorFrameTransport`, seqlocked two-slot JPEG, unit-tested). `CarPlayMirrorController` renders them in the `CPWindow` once iOS grants one.
+- Conflict in `CarPlaySceneDelegate.swift`: #28 was written against the pre-#16 delegate (sample playlist). Kept #16's PlaylistStore-backed Library/Favorites/Info tabs and Now Playing. Ported in #28's `CPWindow` connect/disconnect pair, which reuses the normal setup and then attaches or detaches the mirror controller, and its "Mirror iPhone" `CPInformationTemplate` row, now in the Info tab and honouring the template-depth limit.
+- Session 16 log (from `Docs/JOURNAL-log-session16.md`): request the **CarPlay Video App** entitlement, not Navigation; justification is in ADR-002 §7.3. Not done: a local HLS bridge so the mirror plays through the system video player (ADR-002 §7.5).
+
 ### 2026-11-05 00:36 (Bogotá) — Integrator: merged #25 (claude/car-video-output)
 - Merged [#25](https://github.com/Xanderco/iOSCarPlayVideo/pull/25): car-display video output (`Docs/ADR-002-car-video-output.md`). Adds AirPlay video routing through `CarVideoOutputController`, a parked-only guard (pauses when the car moves while external output is active), the `DashCastBroadcast` ReplayKit upload extension, the `DashCastCastWidget` Live Activity extension, an app group `group.com.xanderco.dashcast`, and `CarOutputPanelView`.
 - Conflicts resolved:

@@ -83,6 +83,29 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         self.interfaceController = nil
     }
 
+    // MARK: - CarPlay window (mirror iPhone to the car screen)
+    // iOS only calls these when the app holds a CarPlay entitlement that grants a
+    // drawable window (see ADR-002 §7). Without it they are never called and the
+    // template UI above is the graceful fallback.
+
+    public func templateApplicationScene(
+        _ templateApplicationScene: CPTemplateApplicationScene,
+        didConnect interfaceController: CPInterfaceController,
+        to window: CPWindow
+    ) {
+        self.templateApplicationScene(templateApplicationScene, didConnect: interfaceController)
+        CarPlayMirrorController.shared.attach(to: window)
+    }
+
+    public func templateApplicationScene(
+        _ templateApplicationScene: CPTemplateApplicationScene,
+        didDisconnect interfaceController: CPInterfaceController,
+        from window: CPWindow
+    ) {
+        CarPlayMirrorController.shared.detach()
+        self.templateApplicationScene(templateApplicationScene, didDisconnectInterfaceController: interfaceController)
+    }
+
     // MARK: - Templates
 
     /// Rebuilds Library and Favorites from the current playlist store.
@@ -204,10 +227,32 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
         for item in items {
             item.handler = { _, completion in completion() }
         }
-        let template = CPListTemplate(title: "DashCast", sections: [CPListSection(items: items)])
+        let template = CPListTemplate(title: "DashCast", sections: [CPListSection(items: items + [mirrorInstructionsItem()])])
         template.tabTitle = "Info"
         template.tabImage = UIImage(systemName: "info.circle.fill")
         return template
+    }
+
+    /// "Mirror iPhone" entry: shows how to start mirroring on the phone.
+    private func mirrorInstructionsItem() -> CPListItem {
+        let item = CPListItem(text: "Mirror iPhone", detailText: "Show your iPhone screen here while parked")
+        item.handler = { [weak self] _, completion in
+            let info = CPInformationTemplate(
+                title: "Mirror iPhone",
+                layout: .leading,
+                items: [
+                    CPInformationItem(title: "1", detail: "On iPhone, open DashCast → Cast → Car Display."),
+                    CPInformationItem(title: "2", detail: "Turn on “Mirror to CarPlay screen”, then Start Broadcast."),
+                    CPInformationItem(title: "Parked only", detail: "Mirroring stops automatically when the vehicle moves.")
+                ],
+                actions: []
+            )
+            if let controller = self?.interfaceController, self?.canPush(onto: controller) == true {
+                controller.pushTemplate(info, animated: true, completion: nil)
+            }
+            completion()
+        }
+        return item
     }
 
     // MARK: - Playback
