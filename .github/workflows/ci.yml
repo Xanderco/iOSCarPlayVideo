@@ -81,7 +81,7 @@ jobs:
             | grep -E '^ *CODE_SIGN_ENTITLEMENTS = DashCast/DashCast-Simulator.entitlements$'
           xcodebuild -project DashCast.xcodeproj -target DashCast -sdk iphoneos -showBuildSettings 2>/dev/null \
             | grep -E '^ *CODE_SIGN_ENTITLEMENTS = DashCast/DashCast.entitlements$'
-          /usr/libexec/PlistBuddy -c 'Print :com.apple.developer.carplay-audio' DashCast/DashCast-Simulator.entitlements
+          /usr/libexec/PlistBuddy -c 'Print :com.apple.developer.carplay-video' DashCast/DashCast-Simulator.entitlements
           # Device/release entitlements must not claim CarPlay before Apple grants it.
           if grep -q 'com.apple.developer.carplay' DashCast/DashCast.entitlements; then
             echo "error: CarPlay key in device entitlements"; exit 1

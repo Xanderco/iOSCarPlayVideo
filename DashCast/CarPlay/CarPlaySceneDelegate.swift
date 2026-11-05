@@ -44,7 +44,9 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
 
         // Only templates allowed for the CarPlay Audio category (tab bar, list, Now Playing).
         // CPInformationTemplate is NOT allowed for audio apps and would throw.
-        let tabs: [CPTemplate] = [library, favorites, makeInfoTemplate(), Self.mirrorInstructionsTemplate()]
+        let tabs: [CPTemplate] = [library, favorites, makeInfoTemplate(), Self.mirrorInstructionsTemplate { [weak self] in
+            self?.startMirror()
+        }]
         let tabBar = CPTabBarTemplate(templates: Array(tabs.prefix(Int(CPTabBarTemplate.maximumTabCount))))
 
         rebuildTemplates()
@@ -251,7 +253,9 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
 
     /// Car-screen instructions for mirroring the iPhone (the "Cast" tab). A list, because
     /// CPInformationTemplate is not allowed for CarPlay Audio apps.
-    static func mirrorInstructionsTemplate() -> CPListTemplate {
+    /// With `onMirror`, a second section adds the "Show iPhone screen" action, which plays the
+    /// broadcast extension's HLS stream through the system player (ADR-002 §7.5).
+    static func mirrorInstructionsTemplate(onMirror: (() -> Void)? = nil) -> CPListTemplate {
         let steps = mirrorInstructionSteps.enumerated().map { index, step -> CPListItem in
             let item = CPListItem(
                 text: step.title,
@@ -261,14 +265,26 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             item.isEnabled = false
             return item
         }
-        let template = CPListTemplate(
-            title: "Mirror iPhone",
-            sections: [CPListSection(items: steps, header: "Show your iPhone on this screen", sectionIndexTitle: nil)]
-        )
+        var sections = [CPListSection(items: steps, header: "Show your iPhone on this screen", sectionIndexTitle: nil)]
+        if let onMirror {
+            let action = CPListItem(
+                text: mirrorActionTitle,
+                detailText: "Parked only · starts after Start Broadcast on iPhone",
+                image: UIImage(systemName: "iphone")
+            )
+            action.handler = { _, completion in
+                onMirror()
+                completion()
+            }
+            sections.append(CPListSection(items: [action], header: "Mirror", sectionIndexTitle: nil))
+        }
+        let template = CPListTemplate(title: "Mirror iPhone", sections: sections)
         template.tabTitle = "Cast"
         template.tabImage = UIImage(systemName: "rectangle.on.rectangle")
         return template
     }
+
+    static let mirrorActionTitle = "Show iPhone screen"
 
     /// Original copy; also used by the unit tests.
     static let mirrorInstructionSteps: [(title: String, detail: String)] = [
@@ -278,6 +294,18 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
     ]
 
     // MARK: - Playback
+
+    /// "Show iPhone screen": parked-only checks live in `CarPlayMirrorPlayback.decide`.
+    private func startMirror() {
+        switch CarPlayMirrorPlayback.start() {
+        case .play:
+            updateNowPlayingInfo(for: CarPlayMirrorPlayback.mirrorChannel, isPlaying: true)
+            showNowPlaying()
+        case .vehicleMoving, .mirrorDisabled, .notBroadcasting:
+            // The instruction rows on this screen already say what to do on the iPhone.
+            break
+        }
+    }
 
     private func play(_ channel: ChannelModel) {
         VideoPlayerService.shared.load(channel: channel)

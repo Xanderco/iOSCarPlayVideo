@@ -154,8 +154,16 @@ final class CarVideoOutputController: ObservableObject {
     func reloadBroadcastStatus() {
         let status = BroadcastStatus.load()
         if status != broadcastStatus {
+            let wasLive = broadcastStatus.isLive
             broadcastStatus = status
             outputDidChange()
+            // Mirror iPhone → car display: play the extension's HLS stream through the
+            // system player route (external playback) as soon as the broadcast goes live.
+            if status.isLive, !wasLive, CarMirrorFeature.isEnabled() {
+                CarPlayMirrorPlayback.start()
+            } else if !status.isLive {
+                CarPlayMirrorPlayback.stopIfMirroring()
+            }
         }
     }
 

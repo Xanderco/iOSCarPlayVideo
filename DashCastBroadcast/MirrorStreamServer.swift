@@ -13,6 +13,9 @@ final class MirrorStreamServer {
 
     var onViewerCountChange: ((Int) -> Void)?
 
+    /// Live HLS segments for the CarPlay video path ("/hls/live.m3u8"); nil = HLS off.
+    var hlsStore: HLSSegmentStore?
+
     private let port: NWEndpoint.Port
     private let queue = DispatchQueue(label: "com.xanderco.dashcast.broadcast.server")
     private var listener: NWListener?
@@ -88,6 +91,10 @@ final class MirrorStreamServer {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 8192) { [weak self] data, _, _, error in
             guard let self, let data, error == nil else {
                 connection.cancel()
+                return
+            }
+            if let store = self.hlsStore, let response = MirrorHLS.response(for: MirrorHLS.route(forRequest: data), store: store) {
+                self.respondAndClose(connection, response)
                 return
             }
             switch MJPEGStream.route(forRequest: data) {

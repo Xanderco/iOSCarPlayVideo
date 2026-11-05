@@ -145,6 +145,8 @@ The owner's own car shows the competitor **CarDash** as a CarPlay app with tabs 
 - **Graceful fallback:** without a window-granting entitlement iOS never calls the window delegate methods, so nothing in the controller runs; the "Cast" tab is the "Mirror iPhone" instructions screen, a `CPListTemplate` (a `CPInformationTemplate` is not allowed for Audio apps).
 - **Phone:** "Mirror to CarPlay screen (beta)" toggle in Car Display → mirroring card sets the flag the extension reads at broadcast start.
 
-### 7.5 Next step once the video entitlement is granted (not built)
+### 7.5 Mirror as a video stream (built in Session 19, branch `claude/carplay-video-mirror`; see Docs/CarPlay.md)
 
 The video entitlement plays through the system player, so the mirror needs to become a *video stream*: in the app, wrap incoming frames with `AVAssetWriter` (H.264, fMP4 segments, ~1 s) into a local HLS playlist served on `127.0.0.1`, and play it with `AVPlayer` (`allowsExternalPlayback`, `usesExternalPlaybackWhileExternalScreenIsActive`) so CarPlay's video-in-car shows it. Expected latency 1–3 s (LL-HLS partial segments can cut it). The transport and parked guard above are reused unchanged.
+
+**As built:** encoding happens in the broadcast extension, not the app (the app may be suspended while the user shows another app): `DashCastBroadcast/MirrorHLSEncoder.swift` (VTCompressionSession H.264 low latency → AVAssetWriter `.mpeg4AppleHLS` 1 s fMP4 segments), `DashCast/Features/Cast/Shared/MirrorHLS.swift` (routes, playlist, segment window, encoder config), served at `http://127.0.0.1:8088/hls/live.m3u8`; `DashCast/CarPlay/CarPlayMirrorPlayback.swift` plays it via AVPlayer external playback (parked only). Simulator entitlement now `com.apple.developer.carplay-video`.

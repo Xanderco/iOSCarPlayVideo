@@ -5,10 +5,10 @@ final class AppStateTests: XCTestCase {
     @MainActor
     func testInitialAppStateDefaults() {
         let state = AppState(isProLifetimeUnlocked: false)
-        XCTAssertEqual(state.selectedTab, .home)
+        XCTAssertEqual(state.selectedTab, .cast)
         XCTAssertFalse(state.isProLifetimeUnlocked)
         XCTAssertFalse(state.showPaywall)
-        XCTAssertNil(state.settingsDeepLink)
+        XCTAssertFalse(state.isDriveActive)
     }
 
     @MainActor
@@ -30,33 +30,15 @@ final class AppStateTests: XCTestCase {
         XCTAssertFalse(state.useMilesPerHour)
     }
 
-    func testTabsMatchRedesignSpec() {
-        XCTAssertEqual(AppState.TabItem.allCases.map(\.rawValue), ["Home", "Library", "Cast", "Settings"])
+    func testTabItemProperties() {
+        XCTAssertEqual(AppState.TabItem.cast.rawValue, "Cast")
+        XCTAssertEqual(AppState.TabItem.drive.rawValue, "Drive")
+        XCTAssertEqual(AppState.TabItem.widgets.rawValue, "Widgets")
+        XCTAssertEqual(AppState.TabItem.sounds.rawValue, "Sounds")
+        XCTAssertEqual(AppState.TabItem.me.rawValue, "Me")
+
         for item in AppState.TabItem.allCases {
             XCTAssertFalse(item.iconName.isEmpty)
         }
-    }
-
-    func testLaunchArgumentMappingIncludingLegacyTabs() {
-        XCTAssertEqual(AppState.TabItem.resolve(launchValue: "home")?.tab, .home)
-        XCTAssertEqual(AppState.TabItem.resolve(launchValue: "Library")?.tab, .library)
-        XCTAssertEqual(AppState.TabItem.resolve(launchValue: "cast")?.tab, .cast)
-        XCTAssertNil(AppState.TabItem.resolve(launchValue: "cast")?.route)
-        XCTAssertEqual(AppState.TabItem.resolve(launchValue: "me")?.tab, .settings)
-
-        let drive = AppState.TabItem.resolve(launchValue: "drive")
-        XCTAssertEqual(drive?.tab, .settings)
-        XCTAssertEqual(drive?.route, .tripLog)
-        XCTAssertEqual(AppState.TabItem.resolve(launchValue: "widgets")?.route, .carScreen)
-        XCTAssertEqual(AppState.TabItem.resolve(launchValue: "sounds")?.route, .chime)
-        XCTAssertNil(AppState.TabItem.resolve(launchValue: "territory"))
-    }
-
-    @MainActor
-    func testOpenExtraSwitchesToSettings() {
-        let state = AppState()
-        state.open(.chime)
-        XCTAssertEqual(state.selectedTab, .settings)
-        XCTAssertEqual(state.settingsDeepLink, .chime)
     }
 }

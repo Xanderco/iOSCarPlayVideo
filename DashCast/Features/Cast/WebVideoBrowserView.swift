@@ -31,9 +31,6 @@ public struct WebVideoBrowserView: View {
     @State private var sendToCarAlertTitle: String = ""
     @State private var sendToCarAlertMessage: String = ""
     @State private var isExtracting: Bool = false
-    /// The last hand-off failed because the site streams in a way we can't pick up (MSE / blob).
-    @State private var offerMirroring: Bool = false
-    @State private var showingCarDisplay: Bool = false
 
     private var webView: WKWebView { extractor.webView }
 
@@ -77,23 +74,15 @@ public struct WebVideoBrowserView: View {
                     .ignoresSafeArea(edges: .bottom)
                 }
 
-                // Bottom browser bar: back, forward, home, bookmarks, send to car
+                // Bottom Browser Bar matching CarDash 1:1 (<, >, ⌂, 🔖, 🚗 Send to car)
                 bottomBrowserToolbar
             }
             .background(Color.dashBackground)
             .navigationBarHidden(true)
             .alert(sendToCarAlertTitle, isPresented: $showingSendToCarAlert) {
-                if offerMirroring {
-                    Button("Mirror Your Screen Instead") { showingCarDisplay = true }
-                    Button("Not Now", role: .cancel) {}
-                } else {
-                    Button("OK", role: .cancel) {}
-                }
+                Button("OK", role: .cancel) {}
             } message: {
                 Text(sendToCarAlertMessage)
-            }
-            .sheet(isPresented: $showingCarDisplay) {
-                CarDisplaySheet()
             }
         }
     }
@@ -316,7 +305,6 @@ public struct WebVideoBrowserView: View {
     }
 
     private func presentSendResult(_ result: WebVideoExtractionResult) {
-        offerMirroring = false
         switch result {
         case .found:
             sendToCarAlertTitle = "Sent to DashCast"
@@ -325,9 +313,8 @@ public struct WebVideoBrowserView: View {
             sendToCarAlertTitle = "Protected Video"
             sendToCarAlertMessage = "This video is DRM-protected and can't be sent to the car."
         case .unsupportedStream:
-            sendToCarAlertTitle = "This site can't send its video"
-            sendToCarAlertMessage = "Sites like YouTube stream video in small pieces that only their own page can play, so DashCast can't pick up the video itself. You can still show it in the car by mirroring your iPhone screen."
-            offerMirroring = true
+            sendToCarAlertTitle = "Can't Hand Off"
+            sendToCarAlertMessage = "This site streams in a way that can't be handed off."
         case .noVideo:
             sendToCarAlertTitle = "No Video Found"
             sendToCarAlertMessage = "Start playing a video on the page, then tap Send to car again."
