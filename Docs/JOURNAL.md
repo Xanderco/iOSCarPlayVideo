@@ -92,6 +92,13 @@
 
 ## Log
 
+### 2026-11-05 06:45 (Bogotá) — R3: Add Jellyfin / QR entry inside Media Sources [CARAA-34] [DI-44]
+- **Implemented Jellyfin/Emby server connection and QR code entry directly inside Media Sources** (`DashCast/Features/Cast/CastHomeView.swift`).
+  - **Media Sources sheet**: Added dedicated "Media Servers (Jellyfin & Emby)" section surfacing connected servers with 1-tap navigation to `MediaLibrariesView`, direct server connection sheet via `AddMediaServerView()`, and server management via `MediaServersHomeView()`.
+  - **QR Code Entry**: Added dedicated "Scan QR" button and "+ Add Source" menu item invoking `PlaylistQRImportView()`, plus quick-scan empty state card for immediate camera scanning of M3U/M3U8 QR links.
+  - **Cast Tab Card**: Updated Row 1 title to "Media Sources" and subtitle to "Playlists, Jellyfin, Emby & QR" for clear discoverability from the home screen.
+  - **Tests**: Added `DashCastTests/MediaSourcesEntryTests.swift` covering `MediaServerKind`, `PlaylistQRPayload` parsing, server models, and store lifecycle. Updated `DashCastUITests/DashCastSmokeUITests.swift` with `testMediaSourcesJellyfinAndQREntry()` driving Add Server and QR Scan sheets with snapshot captures.
+
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
 - **Codebase state**: All classic UI components, 5-page onboarding walkthrough, native tab bar (LiquidCapsuleTabBar for iOS 17, native tab bar for iOS 26), Drive live map with automated trip tracking, StoreKit 2 lifetime ($19.99) restore purchases API, and the low-latency H.264 CarPlay video mirror pipeline (PR #37) are now fully integrated into the PR #14 integration branch.
