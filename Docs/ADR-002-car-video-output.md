@@ -112,3 +112,39 @@ Apple added "video in the car" to iOS 26 (AirPlay video to the CarPlay display w
 - MacDailyNews, CarPlay video feature in iOS 26.4, https://macdailynews.com/2026/02/19/check-out-apples-new-carplay-video-feature-in-ios-26-4/amp/
 - heise, "Videos in CarPlay: Apple cracks down on third-party app", https://heise.de/-10358638
 - ReplayKit broadcast extension memory limit (50 MB): https://www.forasoft.com/blog/article/how-to-implement-screen-sharing-in-ios-1193
+
+---
+
+## 7. Mirror iPhone onto the CarPlay screen (Session 16, branch `claude/carplay-mirror`)
+
+### 7.1 Evidence
+
+The owner's own car shows the competitor **CarDash** as a CarPlay app with tabs (Library, Favorites, Cast, Browser), a full-screen car view that tells the user to open the app on iPhone and start a Screen Broadcast, and a ReplayKit extension "CarDash Mirror" on the phone. So the pipeline is: **broadcast extension captures frames → shared to the app → app shows them on the car screen**.
+
+### 7.2 Which CarPlay entitlement gives a surface for video
+
+| Entitlement (request form category) | What iOS gives the app on the car screen | Fit for mirroring |
+|---|---|---|
+| `com.apple.developer.carplay-maps` (Navigation) | `CPTemplateApplicationSceneDelegate.templateApplicationScene(_:didConnect:to:)` hands the app a **`CPWindow`** (a `UIWindow`) to draw its base view in, under `CPMapTemplate`. This is the **only** CarPlay API that gives a third-party app an arbitrary drawable window. | Technically perfect, but Apple grants it only to turn-by-turn navigation apps. **Do not request it for mirroring** — it will be refused and a misused grant is an App Review risk. |
+| CarPlay **video app** entitlement (iOS 27, WWDC26 session 212; request category "Video") | List/grid browsing templates on the car screen; playback is the **system video player** fed by AirPlay video (parked-only, car must support "video in car"). No arbitrary window. As of iOS 27.2 it cannot be combined with the audio entitlement (Apple DTS, forums thread 851377). | **This is what CarDash's tabbed CarPlay app matches.** Mirrored frames reach the car through the system player by playing them as a video stream (see 7.4). |
+| Audio / communication / EV / parking / quick-food / driving-task | Templates only, no window, no video. | No. |
+| AirPlay video in the car (iOS 26) | Not an entitlement: any `AVPlayer` with external playback works when the car firmware allows it. | Yes for playback; no CarPlay app icon by itself. |
+
+**Exact entitlement to request:** the **CarPlay Video App** entitlement at <https://developer.apple.com/contact/carplay/> (category "Video"). Once granted, Xcode adds it to the provisioning profile; copy the exact key from the profile into `DashCast/DashCast.entitlements` (Apple has not published the key string in public docs as of this writing; the pattern of the other keys suggests `com.apple.developer.carplay-video`, but **use what the profile shows**). Do not also request Audio (they can no longer be combined; the video entitlement covers audio playback of video content).
+
+### 7.3 Ready-to-paste justification (CarPlay entitlement request form)
+
+> DashCast is a parked-use video companion for CarPlay. It lets drivers and passengers browse their own video library (local files, their own Jellyfin/Emby servers and playlists they add) on the CarPlay display and play it through AirPlay video in the car **only while the vehicle is parked**. DashCast already ships AirPlay video support (AVPlayer external playback, AVRoutePickerView with video devices prioritised) and a ReplayKit broadcast extension so a parked user can show their own iPhone screen on the car display.
+>
+> We request the CarPlay video app entitlement to provide the browsing experience required for video apps: a tab bar with Library, Favorites and Cast list/grid templates, using CPPlaybackConfiguration and the system video player. Safety: DashCast enforces parked-only use on its own in addition to the system — it watches GPS speed and Core Motion automotive activity and pauses playback and ends screen broadcasts as soon as the vehicle moves; the car screen then shows a "paused while moving" message and no video. When the car reports that video is unavailable, playback falls back to audio-only as required. DashCast does not provide DRM streaming services, does not ship third-party channels, and does not show any interactive UI on the car display beyond the CarPlay templates.
+
+### 7.4 What is built (feature flag `carMirror.enabled`, off by default)
+
+- **Transport** `DashCast/Features/Cast/Shared/MirrorFrameTransport.swift` (app + extension): the extension writes each downscaled JPEG (≤1280 px, q 0.6, ≤12 fps) into a two-slot, fixed-size file in the app group (`carplay-mirror-frames.bin`, 2 × 1.5 MB). Each slot has a seqlock (`seqBegin` written first, `seqEnd` last); the reader accepts a slot only when both match after reading the payload, so torn frames are dropped. Frames are written in place, never queued: extension memory stays at one frame plus the encoder, far under 50 MB. Latency ≈ one poll (1/15 s) + encode.
+- **Renderer** `DashCast/CarPlay/CarPlayMirrorController.swift`: `AVSampleBufferDisplayLayer` (`sampleBufferRenderer`, display-immediately) in a view installed in the `CPWindow` when iOS delivers one; instructions overlay when no fresh frame (2 s), "paused while moving" when `CarCastShared.isVehicleMoving()` (written by `ParkedGuard`) is true.
+- **Graceful fallback:** without a window-granting entitlement iOS never calls the window delegate methods, so nothing in the controller runs; the Cast tab gets a "Mirror iPhone" item that pushes a `CPInformationTemplate` with the steps.
+- **Phone:** "Mirror to CarPlay screen (beta)" toggle in Car Display → mirroring card sets the flag the extension reads at broadcast start.
+
+### 7.5 Next step once the video entitlement is granted (not built)
+
+The video entitlement plays through the system player, so the mirror needs to become a *video stream*: in the app, wrap incoming frames with `AVAssetWriter` (H.264, fMP4 segments, ~1 s) into a local HLS playlist served on `127.0.0.1`, and play it with `AVPlayer` (`allowsExternalPlayback`, `usesExternalPlaybackWhileExternalScreenIsActive`) so CarPlay's video-in-car shows it. Expected latency 1–3 s (LL-HLS partial segments can cut it). The transport and parked guard above are reused unchanged.
