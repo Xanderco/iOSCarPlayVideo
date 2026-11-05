@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
+- **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
+- **Codebase state**: All classic UI components, 5-page onboarding walkthrough, native tab bar (LiquidCapsuleTabBar for iOS 17, native tab bar for iOS 26), Drive live map with automated trip tracking, StoreKit 2 lifetime ($19.99) restore purchases API, and the low-latency H.264 CarPlay video mirror pipeline (PR #37) are now fully integrated into the PR #14 integration branch.
+- **Next step**: Verify CI green on PR #14 and submit deliverables report for human owner review gate before final merge into `main`.
+
 ### 2026-11-05 02:22 (Bogotá) — Session 19 close: classic UI + CarPlay video mirror merged
 - **`claude/classic-ui` now holds the classic UI (D10) plus the CarPlay video mirror.** [PR #37](https://github.com/Xanderco/iOSCarPlayVideo/pull/37) merged (merge commit 8395ccf). PR CI was green on cfcc819: build, entitlement check, unit tests and UI tests.
 - **Owner action:** request the CarPlay **VIDEO** entitlement (`com.apple.developer.carplay-video`, category "Video", not Audio) at developer.apple.com/contact/carplay. The steps and ready-to-paste justification are at the top of `Docs/CarPlay.md`.
