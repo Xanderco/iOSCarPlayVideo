@@ -273,15 +273,15 @@ Committed final PNGs (classic UI, captured on the iOS Simulator by the workflow 
 | 01 | `01_cast.png` | Cast home (`-initialTab cast`) | Your videos. On the car screen. / Playlists, your files and photos. For passengers and parked breaks. |
 | 02 | `02_paywall.png` | Paywall, USD 19.99 one-time (`-showPaywall`) | Pay once. Keep it forever. / No subscriptions. One USD 19.99 purchase unlocks DashCast Pro. |
 | 03 | `03_sources.png` | Media sources with the bundled demo videos only (`-showMediaSources`) | Bring your own sources / M3U playlists, Jellyfin and Emby servers. Shown here with built-in demo videos. |
-| 04 | `04_player.png` ⚠️ **not committed**: first capture was a black screen; regenerate | Player playing the bundled `night_drive.mp4` (`-playDemoVideo`) | A big, simple player / AirPlay, a cable or screen mirroring to the car display. |
-| 05 | `05_drive.png` | Drive (`-initialTab drive`; next run adds `-showLatestTrip` to open the seeded trip's route) | Every drive, mapped / Automatic trips with route, speed and a driving score. |
+| 04 | `04_player.png` | Player playing the bundled `night_drive.mp4` (`-playDemoVideo`) | A big, simple player / AirPlay, a cable or screen mirroring to the car display. |
+| 05 | `05_drive.png` | Drive trip summary for the seeded trip, with route map (`-initialTab drive -showLatestTrip`) | Every drive, mapped / Automatic trips with route, speed and a driving score. |
 | 06 | `06_widgets.png` | Widget editor (`-showWidgetEditor`) | Design your dashboard / Pick a car, add widgets and stickers. |
 | 07 | `07_onboarding.png` | Onboarding page 1 (`-showOnboarding`) | Set up in seconds / No account. Everything stays on your iPhone. |
 
-Sizes: `6.9-inch_1320x2868/` (1320 × 2868) and `6.5-inch_1284x2778/` (1284 × 2778). Six images each are committed today (04 missing).
+Sizes: `6.9-inch_1320x2868/` (1320 × 2868) and `6.5-inch_1284x2778/` (1284 × 2778). Seven images each, from App Store Media run 41987342797.
 
 Known issues in the current captures (classic UI is frozen under D10, so the owner must approve any fix):
-- 01 Cast shows the in-app label **"CarPlay Screen"** in the connection illustration. Before upload, either change that label or don't use 01.
+- 01 Cast and 04 Player show the in-app labels **"CarPlay Screen"** and "AirPlay / CarPlay audio" in the connection illustration. Before upload, either change those labels or leave out 01 and 04.
 - 06 Widgets shows a bundled car image with a faint manufacturer name behind the plate. Check that it isn't a third-party brand.
 - 02 Paywall says "Shared with your family through Family Sharing". Keep it only if Family Sharing is turned on in App Store Connect.
 Every frame has the footer *"For passengers & parked use only. Never watch while driving."*

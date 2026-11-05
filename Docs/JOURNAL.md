@@ -95,8 +95,8 @@
 ### 2026-11-05 02:35 (Bogotá) — Session 23: App Store screenshots of the classic UI (claude/classic-screenshots, #40)
 - Media pipeline now captures the classic UI: 01 Cast · 02 Paywall (USD 19.99 one-time) · 03 Media sources (bundled demo videos only) · 04 Player · 05 Drive · 06 Widget editor · 07 Onboarding. Headlines contain no "CarPlay" wording and no third-party brands.
 - Screenshot-only launch args: `-showOnboarding`, `-showMediaSources`, `-playDemoVideo`, `-showLatestTrip`. The paywall shows $19.99 under `-seedDemoData` when StoreKit products can't load (simctl). No layout changes (D10).
-- App Store Media run 41986084314 succeeded and produced the `appstore-screenshots-framed` and `appstore-screenshots-plain` artifacts. 24 PNGs committed to `AppStoreMedia/screenshots/` (6 screens × 2 sizes × framed + plain).
-- Open: 04 Player came out black (cause unknown, needs a sim log), and 05 Drive showed an empty live HUD, so `-showLatestTrip` was added. Owner review: "CarPlay Screen" label on Cast home, car image brand on Widgets, and the Family Sharing line on the paywall.
+- Final set from App Store Media run 41987342797 (artifacts `appstore-screenshots-framed`, `appstore-screenshots-plain`): 28 PNGs in `AppStoreMedia/screenshots/` (7 screens × 2 sizes × framed + plain). On the first run (41986084314) 04 Player came out black and 05 Drive showed an empty HUD. `-showLatestTrip` fixed Drive, and the player capture worked on the re-run.
+- Owner review: the "CarPlay Screen" / "AirPlay / CarPlay audio" labels on Cast and Player, car image brand on Widgets, and the Family Sharing line on the paywall.
 
 ### 2026-11-05 01:45 (Bogotá) — Owner reverted the redesign UI (branch claude/classic-ui)
 - Owner tested the integrated build on his Mac and found the redesign (#31 2B, #32/#34 2A: Home/Library/Cast/Settings tabs, onboarding, Extras) **confusing**; he wants the **previous UI** (Cast / Drive / Widgets / Sounds / Me) with the new functionality.
