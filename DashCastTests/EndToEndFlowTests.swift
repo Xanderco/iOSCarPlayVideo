@@ -62,13 +62,7 @@ final class EndToEndFlowTests: XCTestCase {
         XCTAssertEqual(completedTrip.drivingScore, 96)
         XCTAssertEqual(completedTrip.points.count, 4)
 
-        // Step 4: Claim Territory Hexes from Drive
-        let territory = TerritoryManager.shared
-        let initialHexCount = territory.totalHexesCount
-        territory.claimPoints(from: completedTrip.points)
-        XCTAssertGreaterThanOrEqual(territory.totalHexesCount, initialHexCount)
-
-        // Step 5: Configure Custom CarPlay Widget
+        // Step 4: Configure Custom CarPlay Widget
         let customWidget = WidgetConfigModel(
             carBrand: "Ford",
             carModelName: "Mustang Dark Horse",
@@ -81,7 +75,7 @@ final class EndToEndFlowTests: XCTestCase {
         XCTAssertEqual(loadedWidgets.count, 1)
         XCTAssertEqual(loadedWidgets.first?.driverGreeting, "Track Mode")
 
-        // Step 6: Configure Siri Shortcuts Automotive Sound Trigger
+        // Step 5: Configure Siri Shortcuts Automotive Sound Trigger
         let prefs = UserPreferences(
             useMilesPerHour: true,
             isProLifetimeUnlocked: true,

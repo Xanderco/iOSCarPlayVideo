@@ -75,3 +75,9 @@ Derived from `@dashcast-scout` competitor analysis (`Docs/Marketing/Competitor-A
 
 
 
+
+## Session 6: Territory removed, new icon, App Store media
+- Removed the hexagon **Territory** feature (`Features/Territory`, `TerritoryEngineTests`, claimed-hex persistence/metrics, paywall row, README/Info.plist copy). Drive telemetry is unchanged.
+- New original app icon (`Design/AppIcon.svg` → `Scripts/render-app-icon.sh`), with light, dark and tinted variants.
+- App Store media pipeline: `-seedDemoData` launch flag (`DemoDataSeeder`), `Scripts/generate-appstore-media.sh` and `Scripts/compose-appstore-frames.py`. The CI workflow `appstore-media.yml` uploads the screenshots as artifacts.
+- App Review prep: `AppStoreMedia/metadata.md`, `Docs/AppReview-checklist.md`, `PrivacyInfo.xcprivacy`, a passenger-safety first-launch notice and Legal links in Settings. Removed placeholder buttons and fake alerts from Me/Settings/About.

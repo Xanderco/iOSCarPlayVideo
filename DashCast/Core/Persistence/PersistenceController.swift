@@ -6,7 +6,6 @@ public final class PersistenceController {
     private let tripsKey = "dashcast_saved_trips"
     private let playlistsKey = "dashcast_saved_playlists"
     private let widgetsKey = "dashcast_saved_widgets"
-    private let claimedHexesKey = "dashcast_claimed_hexes"
 
     private let userDefaults: UserDefaults
 
@@ -57,17 +56,6 @@ public final class PersistenceController {
             return []
         }
         return widgets
-    }
-
-    // Claimed Hexagons Persistence
-    public func saveClaimedHexes(_ hexes: Set<String>) {
-        let array = Array(hexes)
-        userDefaults.set(array, forKey: claimedHexesKey)
-    }
-
-    public func loadClaimedHexes() -> Set<String> {
-        let array = userDefaults.stringArray(forKey: claimedHexesKey) ?? []
-        return Set(array)
     }
 
     private let userPreferencesKey = "dashcast_user_preferences"

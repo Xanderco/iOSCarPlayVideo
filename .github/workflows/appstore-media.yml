@@ -1,0 +1,99 @@
+name: App Store Media
+
+on:
+  push:
+    branches: [ main, 'claude/**' ]
+    paths:
+      - 'DashCast/**'
+      - 'Design/**'
+      - 'Scripts/generate-appstore-media.sh'
+      - 'Scripts/compose-appstore-frames.py'
+      - '.github/workflows/appstore-media.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: media-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    name: Capture & compose screenshots
+    runs-on: macos-15
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select newest Xcode (iOS 26 SDK)
+        run: |
+          XC=$(ls -d /Applications/Xcode_[0-9]*.app | grep -v -i beta | sort -V | tail -1)
+          echo "Using $XC"
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+
+      - name: Install tools
+        run: |
+          brew install xcodegen
+          python3 -m pip install --quiet --break-system-packages pillow || python3 -m pip install --quiet pillow
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Pick 6.9-inch simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)['devices']
+          c=[(rt,x) for rt,xs in d.items() if 'iOS' in rt for x in xs if 'Pro Max' in x['name']]
+          c.sort(key=lambda t:(t[0],t[1]['name']))
+          print(c[-1][1]['udid'])")
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available | grep "$UDID"
+
+      - name: Build app for simulator
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project DashCast.xcodeproj \
+            -scheme DashCast \
+            -configuration Debug \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            | tee build.log | grep -E "error:|BUILD (SUCCEEDED|FAILED)" || true
+          grep -q "BUILD SUCCEEDED" build.log
+
+      - name: Capture screenshots and compose frames
+        run: |
+          APP=$(ls -d build/DerivedData/Build/Products/Debug-iphonesimulator/DashCast.app)
+          Scripts/generate-appstore-media.sh "$APP" "${{ steps.sim.outputs.udid }}"
+          cp DashCast/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png AppStoreMedia/AppIcon-1024.png
+
+      - name: Upload framed screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: appstore-screenshots-framed
+          path: |
+            AppStoreMedia/6.9-inch_1320x2868/
+            AppStoreMedia/6.5-inch_1284x2778/
+            AppStoreMedia/AppIcon-1024.png
+            AppStoreMedia/metadata.md
+
+      - name: Upload plain screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: appstore-screenshots-plain
+          path: |
+            AppStoreMedia/6.9-inch_1320x2868_plain/
+            AppStoreMedia/6.5-inch_1284x2778_plain/
+            AppStoreMedia/raw/
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appstore-media-build-log
+          path: build.log
+          if-no-files-found: ignore

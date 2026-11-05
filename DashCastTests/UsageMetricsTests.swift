@@ -52,8 +52,5 @@ final class UsageMetricsTests: XCTestCase {
 
         metrics.recordWidgetCustomization()
         XCTAssertEqual(metrics.metrics.widgetCustomizationsCount, 1)
-
-        metrics.recordHexClaimed(count: 5)
-        XCTAssertEqual(metrics.metrics.totalHexesClaimed, 5)
     }
 }

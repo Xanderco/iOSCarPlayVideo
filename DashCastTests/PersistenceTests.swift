@@ -32,12 +32,4 @@ final class PersistenceTests: XCTestCase {
         XCTAssertEqual(loaded.first?.id, trip.id)
         XCTAssertEqual(loaded.first?.distanceMeters, 4200)
     }
-
-    func testSaveAndLoadClaimedHexes() {
-        let hexes: Set<String> = ["882a1072b7fffff", "882a1072b5fffff"]
-        persistence.saveClaimedHexes(hexes)
-
-        let loaded = persistence.loadClaimedHexes()
-        XCTAssertEqual(loaded, hexes)
-    }
 }

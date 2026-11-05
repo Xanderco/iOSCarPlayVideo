@@ -4,13 +4,14 @@ import StoreKit
 public struct MeHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var metricsManager = UsageMetricsManager.shared
-    @StateObject private var territoryManager = TerritoryManager.shared
+    @StateObject private var storeKit = StoreKitManager.shared
+    @Environment(\.requestReview) private var requestReview
+    @AppStorage(PassengerSafetyNotice.acceptedKey) private var passengerNoticeAccepted = false
 
     @State private var showingSettings: Bool = false
     @State private var showingAbout: Bool = false
     @State private var showingFeedback: Bool = false
-    @State private var showingRateAlert: Bool = false
-    @State private var showingShareSheet: Bool = false
+    @State private var restoreMessage: String?
     @State private var showingDriveDetails: Bool = false
     @State private var selectedVehicleIndex: Int = 0
 
@@ -67,12 +68,6 @@ public struct MeHomeView: View {
             }
             .sheet(isPresented: $showingDriveDetails) {
                 DriveSettingsView()
-            }
-            .alert("Rate DashCast", isPresented: $showingRateAlert) {
-                Button("5 Stars ⭐⭐⭐⭐⭐") {}
-                Button("Remind Me Later", role: .cancel) {}
-            } message: {
-                Text("Enjoying DashCast? Your positive review helps us keep the app 100% subscription-free.")
             }
         }
     }
@@ -246,14 +241,17 @@ public struct MeHomeView: View {
             Divider().background(Color.dashBorder.opacity(0.5))
 
             menuItemRow(icon: "star.fill", title: "Rate Us") {
-                showingRateAlert = true
+                requestReview()
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
-            menuItemRow(icon: "arrow.up.right.circle.fill", title: "Share DashCast") {
-                // Share action
+            ShareLink(item: LegalLinks.support,
+                      subject: Text("DashCast"),
+                      message: Text("DashCast – play your own videos on the car display (passengers & parked only).")) {
+                menuItemLabel(icon: "arrow.up.right.circle.fill", title: "Share DashCast")
             }
+            .buttonStyle(.plain)
         }
         .background(Color.dashSurface)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -265,6 +263,12 @@ public struct MeHomeView: View {
 
     private func menuItemRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
+            menuItemLabel(icon: icon, title: title)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func menuItemLabel(icon: String, title: String) -> some View {
             HStack(spacing: 14) {
                 Image(systemName: icon)
                     .font(.system(size: 16))
@@ -284,8 +288,6 @@ public struct MeHomeView: View {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Settings Sheet (Matching SETTINGS.jpeg)
@@ -298,21 +300,6 @@ public struct MeHomeView: View {
                 ScrollView {
                     VStack(spacing: 18) {
                         VStack(spacing: 1) {
-                            // Show on Lock Screen
-                            Toggle(isOn: .constant(true)) {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "rectangle.on.rectangle")
-                                        .foregroundStyle(Color.dashYellow)
-                                    Text("Show on Lock Screen")
-                                        .font(.system(size: 15, weight: .medium))
-                                        .foregroundStyle(Color.dashTextPrimary)
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 14)
-
-                            Divider().background(Color.dashBorder.opacity(0.5))
-
                             // Speed Units MPH / KMH
                             HStack {
                                 HStack(spacing: 12) {
@@ -340,39 +327,22 @@ public struct MeHomeView: View {
 
                             Divider().background(Color.dashBorder.opacity(0.5))
 
-                            // Language
-                            HStack {
-                                HStack(spacing: 12) {
-                                    Image(systemName: "globe")
-                                        .foregroundStyle(Color.dashYellow)
-                                    Text("Language")
-                                        .font(.system(size: 15, weight: .medium))
-                                        .foregroundStyle(Color.dashTextPrimary)
-                                }
-
-                                Spacer()
-
-                                Text("English")
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(Color.dashTextSecondary)
-
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(Color.dashTextMuted)
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 14)
-
-                            Divider().background(Color.dashBorder.opacity(0.5))
-
                             // Restore Purchase
                             Button {
-                                appState.showPaywall = true
+                                Task {
+                                    await storeKit.restorePurchases()
+                                    if storeKit.isPurchased {
+                                        appState.unlockProLifetime()
+                                        restoreMessage = "Your DashCast Pro purchase has been restored."
+                                    } else {
+                                        restoreMessage = storeKit.errorMessage ?? "No previous purchase was found for this Apple ID."
+                                    }
+                                }
                             } label: {
                                 HStack(spacing: 12) {
                                     Image(systemName: "arrow.clockwise")
                                         .foregroundStyle(Color.dashYellow)
-                                    Text("Restore Purchase")
+                                    Text(storeKit.isLoading ? "Restoring…" : "Restore Purchases")
                                         .font(.system(size: 15, weight: .medium))
                                         .foregroundStyle(Color.dashTextPrimary)
                                     Spacer()
@@ -388,6 +358,8 @@ public struct MeHomeView: View {
                         .background(Color.dashSurface)
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.dashBorder, lineWidth: 1))
+
+                        legalSection
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 14)
@@ -395,6 +367,14 @@ public struct MeHomeView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .alert("Restore Purchases", isPresented: Binding(
+                get: { restoreMessage != nil },
+                set: { if !$0 { restoreMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(restoreMessage ?? "")
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Done") { showingSettings = false }
@@ -416,19 +396,14 @@ public struct MeHomeView: View {
                     // App Icon Artwork
                     ZStack {
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color.dashYellow, Color.dashAmber],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
+                            .fill(Color(hex: "#0A0D0F"))
                             .frame(width: 90, height: 90)
-                            .shadow(color: Color.dashYellow.opacity(0.4), radius: 14, y: 6)
+                            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.dashGreen.opacity(0.5), lineWidth: 1))
+                            .shadow(color: Color.dashGreen.opacity(0.4), radius: 14, y: 6)
 
-                        Image(systemName: "car.fill")
-                            .font(.system(size: 44))
-                            .foregroundStyle(Color.black)
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Color.dashGreen)
                     }
                     .padding(.top, 20)
 
@@ -436,18 +411,18 @@ public struct MeHomeView: View {
                         Text("DashCast")
                             .font(.system(size: 22, weight: .bold))
                             .foregroundStyle(Color.dashTextPrimary)
-                        Text("Version 1.2.0")
+                        Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")")
                             .font(.system(size: 12))
                             .foregroundStyle(Color.dashTextSecondary)
                     }
 
                     // Links Card
                     VStack(spacing: 1) {
-                        aboutLinkRow(icon: "lock.shield.fill", title: "Privacy Policy")
+                        aboutLinkRow(icon: "lock.shield.fill", title: "Privacy Policy", url: LegalLinks.privacyPolicy)
                         Divider().background(Color.dashBorder.opacity(0.5))
-                        aboutLinkRow(icon: "doc.text.fill", title: "Terms of Use")
+                        aboutLinkRow(icon: "doc.text.fill", title: "Terms of Use (EULA)", url: LegalLinks.termsOfUse)
                         Divider().background(Color.dashBorder.opacity(0.5))
-                        aboutLinkRow(icon: "creditcard.fill", title: "Payment Agreement")
+                        aboutLinkRow(icon: "questionmark.circle.fill", title: "Support", url: LegalLinks.support)
                     }
                     .background(Color.dashSurface)
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -469,7 +444,37 @@ public struct MeHomeView: View {
         }
     }
 
-    private func aboutLinkRow(icon: String, title: String) -> some View {
+    private func aboutLinkRow(icon: String, title: String, url: URL) -> some View {
+        Link(destination: url) {
+            aboutLinkLabel(icon: icon, title: title)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Legal & Safety (Settings)
+
+    private var legalSection: some View {
+        VStack(spacing: 1) {
+            aboutLinkRow(icon: "lock.shield.fill", title: "Privacy Policy", url: LegalLinks.privacyPolicy)
+            Divider().background(Color.dashBorder.opacity(0.5))
+            aboutLinkRow(icon: "doc.text.fill", title: "Terms of Use (EULA)", url: LegalLinks.termsOfUse)
+            Divider().background(Color.dashBorder.opacity(0.5))
+            aboutLinkRow(icon: "questionmark.circle.fill", title: "Support", url: LegalLinks.support)
+            Divider().background(Color.dashBorder.opacity(0.5))
+            Button {
+                showingSettings = false
+                passengerNoticeAccepted = false
+            } label: {
+                aboutLinkLabel(icon: "car.side.and.exclamationmark", title: "Passenger Safety Notice")
+            }
+            .buttonStyle(.plain)
+        }
+        .background(Color.dashSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.dashBorder, lineWidth: 1))
+    }
+
+    private func aboutLinkLabel(icon: String, title: String) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 15))
@@ -487,5 +492,6 @@ public struct MeHomeView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 }

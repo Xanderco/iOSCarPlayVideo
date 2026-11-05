@@ -47,6 +47,9 @@ public final class AppState: ObservableObject {
             }
         }
 
+        // App Store media pipeline: populate trips/metrics with demo content.
+        DemoDataSeeder.seedIfRequested()
+
         if ProcessInfo.processInfo.arguments.contains("-showPaywall") {
             self.showPaywall = true
         }

@@ -1,0 +1,10 @@
+#EXTM3U
+# DashCast App Review demo playlist.
+# Host this file at https://dashcast.app/demo/reviewer.m3u (see AppStoreMedia/metadata.md).
+# Content: Blender Foundation open movies, licensed CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/).
+# (c) copyright Blender Foundation | www.bigbuckbunny.org / durian.blender.org
+# Replace the stream URLs with copies hosted on the owner's own server/CDN before submission.
+#EXTINF:-1 tvg-id="bbb" group-title="Open Movies (CC BY)",Big Buck Bunny (Blender Foundation, CC BY 3.0)
+https://dashcast.app/demo/media/big_buck_bunny_1080p.mp4
+#EXTINF:-1 tvg-id="sintel" group-title="Open Movies (CC BY)",Sintel (Blender Foundation, CC BY 3.0)
+https://dashcast.app/demo/media/sintel_1080p.mp4
