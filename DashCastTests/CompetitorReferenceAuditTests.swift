@@ -30,7 +30,7 @@ final class CompetitorReferenceAuditTests: XCTestCase {
     }
 
     func testVehicleCatalogHasNoCompetitorReferences() {
-        for model in VehicleCatalogService.shared.models {
+        for model in VehicleCatalogService.shared.vehicles {
             let id = model.id.lowercased()
             let name = model.name.lowercased()
             for term in forbiddenCompetitorTerms {
