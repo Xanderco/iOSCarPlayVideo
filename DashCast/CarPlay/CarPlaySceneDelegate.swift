@@ -44,10 +44,24 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
     }
 
     private func setupCarPlayRootTemplate(interfaceController: CPInterfaceController) {
-        // Tab 1: Library (Channels & Videos)
-        let libraryItems: [CPListItem] = IPTVParser.samplePlaylist.map { channel in
+        // Templates used here are all allowed for the CarPlay Audio category
+        // (tab bar, list, Now Playing). CPInformationTemplate is NOT allowed for
+        // audio apps and would throw, so the mirroring instructions are a list.
+        let tabBar = CPTabBarTemplate(templates: [
+            Self.libraryTemplate(),
+            Self.favoritesTemplate(),
+            Self.nowPlayingTabTemplate(interfaceController: interfaceController),
+            Self.mirrorInstructionsTemplate()
+        ])
+        interfaceController.setRootTemplate(tabBar, animated: false, completion: nil)
+    }
+
+    // MARK: Tabs
+
+    static func libraryTemplate() -> CPListTemplate {
+        let items: [CPListItem] = IPTVParser.samplePlaylist.map { channel in
             let item = CPListItem(text: channel.name, detailText: channel.groupTitle)
-            item.handler = { [weak self] _, completion in
+            item.handler = { _, completion in
                 Task { @MainActor in
                     VideoPlayerService.shared.load(channel: channel)
                     completion()
@@ -55,61 +69,63 @@ public final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationScene
             }
             return item
         }
-        let libraryList = CPListTemplate(title: "Library", sections: [CPListSection(items: libraryItems)])
-        libraryList.tabTitle = "Library"
-        libraryList.tabImage = UIImage(systemName: "tv.fill")
+        let template = CPListTemplate(title: "Library", sections: [CPListSection(items: items)])
+        template.tabTitle = "Library"
+        template.tabImage = UIImage(systemName: "tv.fill")
+        return template
+    }
 
-        // Tab 2: Favorites
-        let favoritesList = CPListTemplate(title: "Favorites", sections: [
+    static func favoritesTemplate() -> CPListTemplate {
+        let template = CPListTemplate(title: "Favorites", sections: [
             CPListSection(items: [
                 CPListItem(text: "No Favorites Yet", detailText: "Add favorites from your iPhone")
             ])
         ])
-        favoritesList.tabTitle = "Favorites"
-        favoritesList.tabImage = UIImage(systemName: "heart.fill")
-
-        // Tab 3: Cast (Status & Guidance - Matches "Your channels, on the big screen")
-        let castItems: [CPListItem] = [
-            CPListItem(text: "Your channels, on the big screen", detailText: "Cast IPTV, YouTube or local videos from iPhone"),
-            CPListItem(text: "Parked Video Mode", detailText: "Videos stream in full 1080p when parked"),
-            mirrorInstructionsItem(interfaceController: interfaceController)
-        ]
-        let castList = CPListTemplate(title: "Cast", sections: [CPListSection(items: castItems)])
-        castList.tabTitle = "Cast"
-        castList.tabImage = UIImage(systemName: "rectangle.on.rectangle.fill")
-
-        // Tab 4: Browser
-        let browserItems: [CPListItem] = [
-            CPListItem(text: "YouTube", detailText: "Stream online videos"),
-            CPListItem(text: "Twitch", detailText: "Live streams"),
-            CPListItem(text: "Vimeo", detailText: "High definition clips")
-        ]
-        let browserList = CPListTemplate(title: "Browser", sections: [CPListSection(items: browserItems)])
-        browserList.tabTitle = "Browser"
-        browserList.tabImage = UIImage(systemName: "globe")
-
-        // Tab Bar Template hosting the 4 CarPlay tabs
-        let tabBar = CPTabBarTemplate(templates: [castList, libraryList, favoritesList, browserList])
-        interfaceController.setRootTemplate(tabBar, animated: false, completion: nil)
+        template.tabTitle = "Favorites"
+        template.tabImage = UIImage(systemName: "heart.fill")
+        return template
     }
 
-    /// "Mirror iPhone" entry: shows how to start mirroring on the phone.
-    private func mirrorInstructionsItem(interfaceController: CPInterfaceController) -> CPListItem {
-        let item = CPListItem(text: "Mirror iPhone", detailText: "Show your iPhone screen here while parked")
-        item.handler = { _, completion in
-            let info = CPInformationTemplate(
-                title: "Mirror iPhone",
-                layout: .leading,
-                items: [
-                    CPInformationItem(title: "1", detail: "On iPhone, open DashCast → Cast → Car Display."),
-                    CPInformationItem(title: "2", detail: "Turn on “Mirror to CarPlay screen”, then Start Broadcast."),
-                    CPInformationItem(title: "Parked only", detail: "Mirroring stops automatically when the vehicle moves.")
-                ],
-                actions: []
-            )
-            interfaceController.pushTemplate(info, animated: true, completion: nil)
+    static func nowPlayingTabTemplate(interfaceController: CPInterfaceController) -> CPListTemplate {
+        let open = CPListItem(
+            text: "Now Playing",
+            detailText: "Audio plays through the car while driving",
+            image: UIImage(systemName: "play.circle.fill")
+        )
+        open.handler = { _, completion in
+            interfaceController.pushTemplate(CPNowPlayingTemplate.shared, animated: true, completion: nil)
             completion()
         }
-        return item
+        let template = CPListTemplate(title: "Now Playing", sections: [CPListSection(items: [open])])
+        template.tabTitle = "Now Playing"
+        template.tabImage = UIImage(systemName: "waveform")
+        return template
     }
+
+    /// Car-screen instructions for mirroring the iPhone (shown as the "Cast" tab).
+    static func mirrorInstructionsTemplate() -> CPListTemplate {
+        let steps = mirrorInstructionSteps.enumerated().map { index, step -> CPListItem in
+            let item = CPListItem(
+                text: step.title,
+                detailText: step.detail,
+                image: UIImage(systemName: "\(index + 1).circle.fill")
+            )
+            item.isEnabled = false
+            return item
+        }
+        let template = CPListTemplate(
+            title: "Mirror iPhone",
+            sections: [CPListSection(items: steps, header: "Show your iPhone on this screen", sectionIndexTitle: nil)]
+        )
+        template.tabTitle = "Cast"
+        template.tabImage = UIImage(systemName: "rectangle.on.rectangle")
+        return template
+    }
+
+    /// Original copy; also used by the unit tests.
+    static let mirrorInstructionSteps: [(title: String, detail: String)] = [
+        ("Open DashCast on your iPhone", "Go to Cast → Car Display."),
+        ("Turn on “Mirror to CarPlay screen”", "Then tap the broadcast button and choose Start Broadcast."),
+        ("Parked only", "Mirroring stops automatically as soon as the vehicle moves.")
+    ]
 }
