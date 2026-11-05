@@ -107,4 +107,53 @@ final class EntitlementGateTests: XCTestCase {
         XCTAssertFalse(gate.isPro)
         XCTAssertEqual(gate.check(.addPlaylistSource(existingCount: 1)), .playlistLimitReached(limit: 1))
     }
+
+    // MARK: - Enforcement in real features
+
+    private static let m3u = Data("#EXTM3U\n#EXTINF:-1 group-title=\"News\",One\nhttps://stream.example.com/one.m3u8\n".utf8)
+
+    func testPlaylistStoreAllowsOneSourceForFreeUsers() throws {
+        let gate = makeGate()
+        let store = PlaylistStore(persistence: PersistenceController(userDefaults: defaults), defaults: defaults)
+        store.canAddSource = { gate.request(.addPlaylistSource(existingCount: $0)) }
+        let first = URL(string: "https://example.com/a.m3u")!
+
+        try store.addPlaylist(data: Self.m3u, sourceURL: first, title: "A")
+        // Re-importing the same source is a refresh, not a new source.
+        try store.addPlaylist(data: Self.m3u, sourceURL: first, title: "A")
+        XCTAssertThrowsError(try store.addPlaylist(data: Self.m3u, sourceURL: URL(string: "https://example.com/b.m3u")!, title: "B")) {
+            XCTAssertEqual($0 as? PlaylistStore.ImportError, .proRequired)
+        }
+        XCTAssertEqual(store.playlists.count, 1)
+        XCTAssertEqual(blocked, [.playlistLimitReached(limit: 1)])
+
+        // Buying Pro unlocks unlimited sources.
+        pro.send(true)
+        try store.addPlaylist(data: Self.m3u, sourceURL: URL(string: "https://example.com/b.m3u")!, title: "B")
+        try store.addPlaylist(data: Self.m3u, sourceURL: nil, title: "C")
+        XCTAssertEqual(store.playlists.count, 3)
+    }
+
+    func testPlayerRefusesToCastWhenFreeAllowanceIsUsedUp() {
+        let gate = makeGate()
+        let player = VideoPlayerService()
+        player.entitlementGate = gate
+        let channel = ChannelModel(name: "One", streamURL: URL(string: "https://stream.example.com/one.m3u8")!, groupTitle: "News")
+
+        player.load(channel: channel)
+        XCTAssertTrue(player.isPlaying, "Free users can cast while allowance remains")
+        player.pause()
+
+        gate.recordCasting(seconds: 15 * 60)
+        blocked = []
+        player.load(channel: channel)
+        XCTAssertFalse(player.isPlaying)
+        XCTAssertEqual(blocked, [.dailyCastingLimitReached(minutes: 15)])
+
+        // Buying Pro unlocks unlimited casting.
+        pro.send(true)
+        player.play()
+        XCTAssertTrue(player.isPlaying)
+        player.pause()
+    }
 }

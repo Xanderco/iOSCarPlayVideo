@@ -5,7 +5,15 @@ import Combine
 /// Shared by the iPhone UI and the CarPlay scene so both always show the same channels.
 @MainActor
 public final class PlaylistStore: ObservableObject {
-    public static let shared = PlaylistStore()
+    public static let shared: PlaylistStore = {
+        let store = PlaylistStore()
+        store.canAddSource = { EntitlementGate.shared.request(.addPlaylistSource(existingCount: $0)) }
+        return store
+    }()
+
+    /// Free-tier gate for adding a *new* playlist source (re-importing an existing one is always allowed).
+    /// Receives the current number of sources. `nil` (tests, previews) means unrestricted.
+    public var canAddSource: (@MainActor (Int) -> Bool)?
 
     /// Posted whenever playlists or favorites change (CarPlay listens to rebuild its templates).
     public static let didChangeNotification = Notification.Name("PlaylistStoreDidChange")
@@ -15,6 +23,7 @@ public final class PlaylistStore: ObservableObject {
         case httpStatus(Int)
         case unreadable
         case noChannels
+        case proRequired
 
         public var errorDescription: String? {
             switch self {
@@ -22,6 +31,7 @@ public final class PlaylistStore: ObservableObject {
             case .httpStatus(let code): return "The server answered with HTTP \(code)."
             case .unreadable: return "The playlist file couldn't be read as text."
             case .noChannels: return "No playable channels were found in this playlist."
+            case .proRequired: return "The free plan includes 1 playlist source. Unlock DashCast Pro for unlimited sources."
             }
         }
     }
@@ -119,6 +129,10 @@ public final class PlaylistStore: ObservableObject {
             playlists[index].title = name
             save()
             return playlists[index]
+        }
+
+        if let canAddSource, !canAddSource(playlists.count) {
+            throw ImportError.proRequired
         }
 
         let playlist = IPTVPlaylist(title: name, url: sourceURL, channels: channels)

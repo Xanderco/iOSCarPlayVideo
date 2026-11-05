@@ -4,7 +4,16 @@ import Combine
 
 @MainActor
 public final class VideoPlayerService: ObservableObject {
-    public static let shared = VideoPlayerService()
+    public static let shared: VideoPlayerService = {
+        let service = VideoPlayerService()
+        service.entitlementGate = .shared
+        return service
+    }()
+
+    /// Free-tier casting allowance. `nil` (tests, previews) means unrestricted.
+    public var entitlementGate: EntitlementGate?
+    private var lastCastingTick: Date?
+    private var pendingCastingSeconds: TimeInterval = 0
 
     @Published public private(set) var currentChannel: ChannelModel?
     @Published public private(set) var isPlaying: Bool = false
@@ -67,8 +76,34 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func play() {
+        // Free users get a daily casting allowance; Pro is unlimited.
+        if let gate = entitlementGate, !gate.request(.startCasting) {
+            pause()
+            return
+        }
         player.play()
         isPlaying = true
+        lastCastingTick = Date()
+    }
+
+    /// Charges elapsed playback time to the free-tier allowance and stops playback when it runs out.
+    private func trackCastingTime() {
+        guard let gate = entitlementGate, isPlaying, player.rate > 0 else {
+            lastCastingTick = nil
+            return
+        }
+        let now = Date()
+        defer { lastCastingTick = now }
+        guard let last = lastCastingTick else { return }
+        pendingCastingSeconds += min(max(now.timeIntervalSince(last), 0), 5)
+        let remaining = gate.remainingCastingSeconds
+        // Flush every few seconds, or immediately when the allowance is about to run out.
+        guard pendingCastingSeconds >= 5 || pendingCastingSeconds >= remaining else { return }
+        let seconds = pendingCastingSeconds
+        pendingCastingSeconds = 0
+        if !gate.recordCasting(seconds: seconds) {
+            pause()
+        }
     }
 
     public func pause() {
@@ -101,6 +136,7 @@ public final class VideoPlayerService: ObservableObject {
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
                 self.currentTime = time.seconds
+                self.trackCastingTime()
                 if let item = self.player.currentItem, item.duration.seconds.isFinite {
                     self.duration = item.duration.seconds
                 }
