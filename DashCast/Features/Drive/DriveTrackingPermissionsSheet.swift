@@ -1,13 +1,13 @@
 import SwiftUI
 import CoreLocation
+import UserNotifications
 
 public struct DriveTrackingPermissionsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var locationService = DriveLocationService.shared
 
-    @State private var locationStatus: CLAuthorizationStatus = .authorizedWhenInUse
-    @State private var motionAuthorized: Bool = true
-    @State private var notificationsAuthorized: Bool = true
+    // These used to be hardcoded to "granted" (green checkmarks) and nothing was ever requested.
+    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
 
     public init() {}
 
@@ -44,46 +44,64 @@ public struct DriveTrackingPermissionsSheet: View {
                     // Permission Card 1: Location Always
                     permissionCard(
                         icon: "location.fill",
-                        title: "Location — Always Allow",
-                        subtitle: "Lets us detect drives even when the app is closed."
+                        title: "Location",
+                        subtitle: locationSubtitle
                     ) {
-                        Button {
-                            locationService.requestAlwaysAuthorization()
-                        } label: {
-                            Text("Continue")
+                        if locationService.authorizationStatus == .authorizedAlways ||
+                            locationService.authorizationStatus == .authorizedWhenInUse {
+                            grantedCheckmark
+                        } else {
+                            Button {
+                                switch locationService.authorizationStatus {
+                                case .notDetermined:
+                                    locationService.requestPermissions()
+                                default:
+                                    openSettings()
+                                }
+                            } label: {
+                                Text(locationService.authorizationStatus == .notDetermined ? "Allow" : "Settings")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(Color.black)
                                 .padding(.horizontal, 18)
                                 .padding(.vertical, 8)
                                 .background(Color.dashGreen)
                                 .clipShape(Capsule())
+                            }
                         }
                     }
 
-                    // Permission Card 2: Motion & Fitness
-                    permissionCard(
-                        icon: "car.side.fill",
-                        title: "Motion & Fitness",
-                        subtitle: "How we sense that you've started driving."
-                    ) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 26))
-                            .foregroundStyle(Color.dashGreen)
-                    }
-
-                    // Permission Card 3: Notifications
+                    // Permission Card 2: Notifications
                     permissionCard(
                         icon: "bell.fill",
                         title: "Notifications",
                         subtitle: "So we can send your trip report when a drive ends."
                     ) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 26))
-                            .foregroundStyle(Color.dashGreen)
+                        if notificationStatus == .authorized || notificationStatus == .provisional {
+                            grantedCheckmark
+                        } else {
+                            Button {
+                                if notificationStatus == .notDetermined {
+                                    Task {
+                                        _ = await DriveNotificationService.shared.requestAuthorization()
+                                        await refreshNotificationStatus()
+                                    }
+                                } else {
+                                    openSettings()
+                                }
+                            } label: {
+                                Text(notificationStatus == .notDetermined ? "Allow" : "Settings")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(Color.black)
+                                    .padding(.horizontal, 18)
+                                    .padding(.vertical, 8)
+                                    .background(Color.dashGreen)
+                                    .clipShape(Capsule())
+                            }
+                        }
                     }
 
                     // On-device privacy note
-                    Text("All of these are needed for automatic drive tracking. Your trips stay on this device.")
+                    Text("Trips are recorded while you press Start Drive (also with the screen locked). Your trips stay on this device.")
                         .font(.system(size: 13, weight: .medium))
                         .foregroundStyle(Color.dashTextSecondary)
                         .padding(.horizontal, 20)
@@ -93,6 +111,7 @@ public struct DriveTrackingPermissionsSheet: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .task { await refreshNotificationStatus() }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Done") {
@@ -103,6 +122,32 @@ public struct DriveTrackingPermissionsSheet: View {
                 }
             }
         }
+    }
+
+    private var grantedCheckmark: some View {
+        Image(systemName: "checkmark.circle.fill")
+            .font(.system(size: 26))
+            .foregroundStyle(Color.dashGreen)
+    }
+
+    private var locationSubtitle: String {
+        switch locationService.authorizationStatus {
+        case .authorizedAlways: return "Always allowed."
+        case .authorizedWhenInUse: return "Allowed while using DashCast; trips keep recording when the screen locks."
+        case .denied, .restricted: return "Off. Turn it on in Settings to record trips."
+        default: return "Needed to measure speed, distance and your route."
+        }
+    }
+
+    private func openSettings() {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
+            UIApplication.shared.open(url)
+        }
+    }
+
+    @MainActor
+    private func refreshNotificationStatus() async {
+        notificationStatus = await DriveNotificationService.shared.checkAuthorizationStatus()
     }
 
     private func permissionCard<Trailing: View>(

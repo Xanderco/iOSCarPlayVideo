@@ -24,6 +24,13 @@ public struct DriveHomeView: View {
         }
     }
 
+    private var trackingChipTitle: String {
+        if !locationService.isAuthorized {
+            return locationService.authorizationStatus == .notDetermined ? "Enable Location" : "Location Off"
+        }
+        return locationService.isTracking ? (locationService.isPaused ? "Paused" : "Tracking") : "Ready"
+    }
+
     private var speedUnit: String {
         appState.useMilesPerHour ? "MPH" : "KM/H"
     }
@@ -44,13 +51,14 @@ public struct DriveHomeView: View {
                             Button {
                                 showingPermissions = true
                             } label: {
+                                // Was always a green "Tracking" chip regardless of permission state.
                                 HStack(spacing: 4) {
-                                    Image(systemName: "location.fill")
+                                    Image(systemName: locationService.isAuthorized ? "location.fill" : "location.slash.fill")
                                         .font(.system(size: 11))
-                                    Text("Tracking")
+                                    Text(trackingChipTitle)
                                         .font(.system(size: 11, weight: .bold))
                                 }
-                                .foregroundStyle(Color.dashGreen)
+                                .foregroundStyle(locationService.isAuthorized ? Color.dashGreen : Color.dashOrange)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
                                 .background(Color.dashSurface.opacity(0.85))
@@ -120,6 +128,19 @@ public struct DriveHomeView: View {
             }
             .sheet(isPresented: $showingDriveSettings) {
                 DriveSettingsView()
+            }
+            .alert("Location needed", isPresented: Binding(
+                get: { locationService.lastErrorMessage != nil },
+                set: { if !$0 { locationService.clearError() } }
+            )) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(locationService.lastErrorMessage ?? "")
             }
         }
     }
@@ -193,7 +214,7 @@ public struct DriveHomeView: View {
                 if !locationService.isTracking {
                     GlowButton(title: "Start Drive", iconName: "play.fill", gradient: .dashAccentGradient) {
                         locationService.startTrip()
-                        DriveNotificationService.shared.sendDriveRecordingNotification(distanceKm: 0.1)
+                        DriveNotificationService.shared.sendDriveRecordingNotification(distanceKm: 0)
                     }
                 } else {
                     Button {
