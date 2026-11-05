@@ -91,6 +91,12 @@
 
 ## Log
 
+### 2026-11-05 01:30 (Bogotá) — Test automation wrap-up (PR #26): docs + verify-all.sh landed, suites parked on `claude/test-automation`
+- **Changed:** PR #26 now adds only `AGENTS.md`, `CLAUDE.md`, `Docs/MAC_AGENT_HANDOFF.md`, `Scripts/verify-all.sh` and `Makefile`. CI keeps its previous working steps. The full test-automation work (app test hooks, `StubNetwork`, CarPlay mock seam, Favorites-sheet fix, accessibility identifiers, StoreKit/CarPlay/network/playback unit suites, 20 XCUITests, `project.yml` UI target + coverage, CI calling `verify-all.sh`) is preserved on branch `claude/test-automation` (`076f5b4`).
+- **Why:** Credit ran out. That work predates phases 2–4 (redesign, paywall `pro.lifetime`, CarPlay emulator removal), and rebasing it with conflicts could not be validated by a ~25 min CI run before the deadline. A broken CI on the integration branch is worse than an unported suite.
+- **Results:** On the pre-redesign base, the last `verify-all.sh` CI run ([41975988514](https://github.com/Xanderco/iOSCarPlayVideo/actions/runs/41975988514)) had generate/build PASS; unit 39, network 58, StoreKit 9, CarPlay 9 all PASS; UI 19 passed and 1 failed (`PaywallUITests.testPurchaseUnlocksPro`: alert button query by label "Let's Drive!"). Coverage was 65.67% against a 60% gate.
+- **Follow-ups (Mac agent): handoff T1.** Port `claude/test-automation` onto this branch, fix the alert query, switch CI to `verify-all.sh`, and get it green. Then do the TODO tests (handoff §6: onboarding notice, Jellyfin/QR stubs, `pro.lifetime`, redesign identifiers, browser local page) and the manual checklists (§7).
+
 ### 2026-11-05 01:16 (Bogotá) — Integrator: merged #35 (claude/drive-auto)
 - Merged [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35) (`claude/drive-auto`), implementing owner decision O2 (Drive stays a real feature) and fixing owner Mac finding #5.
   - Live follow-user map at the top of Trip Log, with a permission-rationale card (When-In-Use → Always).
