@@ -85,6 +85,46 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testMediaSourcesJellyfinAndQREntry() throws {
+        let row = app.buttons["Cast_MediaSourceRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
+        tapCenter(of: row)
+
+        XCTAssertTrue(
+            app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
+            "Media Sources sheet did not open"
+        )
+
+        // Verify Jellyfin/Emby connect button or section exists
+        let connectServer = app.buttons["MediaSources_ConnectServer"]
+        let addServerButton = app.buttons["MediaSources_AddServerButton"]
+        XCTAssertTrue(connectServer.exists || addServerButton.exists, "Media server entry missing")
+
+        // Verify QR Scan buttons exist
+        let scanQRHeader = app.buttons["MediaSources_ScanQRHeaderButton"]
+        let scanQRCard = app.buttons["MediaSources_ScanQRCard"]
+        XCTAssertTrue(scanQRHeader.exists || scanQRCard.exists, "QR Scan entry missing")
+
+        // Open Add Server sheet and verify form
+        if addServerButton.exists {
+            addServerButton.tap()
+            XCTAssertTrue(app.navigationBars["Add Server"].waitForExistence(timeout: 5), "Add Server sheet failed to open")
+            snapshot("03b-add-media-server")
+            app.navigationBars["Add Server"].buttons["Cancel"].tap()
+        }
+
+        // Open QR scanner sheet and verify scanner view
+        if scanQRHeader.exists {
+            scanQRHeader.tap()
+            XCTAssertTrue(app.navigationBars["Scan Playlist QR"].waitForExistence(timeout: 5), "Scan Playlist QR sheet failed to open")
+            snapshot("03c-scan-playlist-qr")
+            app.navigationBars["Scan Playlist QR"].buttons["Close"].tap()
+        }
+
+        app.navigationBars["Media Sources"].buttons["Done"].tap()
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
+    }
+
     func testBrowserSheetOpens() throws {
         let row = app.buttons["Cast_BrowserRow"]
         XCTAssertTrue(row.waitForExistence(timeout: 15), "Browser row missing")

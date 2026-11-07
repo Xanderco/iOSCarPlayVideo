@@ -18,8 +18,11 @@ public struct CastHomeView: View {
     @State private var isFullscreenPlayer: Bool = false
     @State private var m3uURLInput: String = ""
     @StateObject private var playlistStore = PlaylistStore.shared
+    @StateObject private var mediaServerStore = MediaServerStore.shared
     @State private var isImportingPlaylist: Bool = false
     @State private var showingPlaylistFileImporter: Bool = false
+    @State private var showingQRScanner: Bool = false
+    @State private var showingAddServer: Bool = false
     @State private var importErrorMessage: String?
     @State private var importSuccessMessage: String?
     @State private var localImportError: String?
@@ -174,14 +177,14 @@ public struct CastHomeView: View {
 
     private var mainSourceMenuCard: some View {
         VStack(spacing: 1) {
-            // Row 1: Media Source
+            // Row 1: Media Sources
             Button {
                 showingPlaylistsSheet = true
             } label: {
                 menuRow(
                     icon: "play.tv.fill",
-                    title: "Media Source",
-                    subtitle: "Your M3U / M3U8 playlists"
+                    title: "Media Sources",
+                    subtitle: "Playlists, Jellyfin, Emby & QR"
                 )
             }
             .buttonStyle(.plain)
@@ -458,31 +461,230 @@ public struct CastHomeView: View {
 
                 ScrollView {
                     VStack(spacing: 14) {
+                        // MARK: Section 1 - Media Servers (Jellyfin & Emby)
+                        VStack(spacing: 10) {
+                            HStack {
+                                Text("Media Servers (Jellyfin & Emby)")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundStyle(Color.dashYellow)
+                                Spacer()
+                                Button {
+                                    showingAddServer = true
+                                } label: {
+                                    Label("Add Server", systemImage: "plus")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(Color.dashYellow)
+                                }
+                                .accessibilityIdentifier("MediaSources_AddServerButton")
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 12)
+
+                            if mediaServerStore.accounts.isEmpty {
+                                Button {
+                                    showingAddServer = true
+                                } label: {
+                                    HStack(spacing: 14) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(Color.dashSurfaceHighlight)
+                                                .frame(width: 44, height: 44)
+
+                                            Image(systemName: "server.rack")
+                                                .font(.system(size: 20))
+                                                .foregroundStyle(Color.dashYellow)
+                                        }
+
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text("Connect Jellyfin / Emby")
+                                                .font(.system(size: 15, weight: .semibold))
+                                                .foregroundStyle(Color.dashTextPrimary)
+
+                                            Text("Stream movies & shows from your home media server")
+                                                .font(.system(size: 12))
+                                                .foregroundStyle(Color.dashTextSecondary)
+                                                .lineLimit(2)
+                                        }
+
+                                        Spacer()
+
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.system(size: 20))
+                                            .foregroundStyle(Color.dashYellow)
+                                    }
+                                    .padding()
+                                    .background(Color.dashSurface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                                    .padding(.horizontal)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityIdentifier("MediaSources_ConnectServer")
+                            } else {
+                                ForEach(mediaServerStore.accounts) { account in
+                                    NavigationLink {
+                                        MediaLibrariesView(account: account)
+                                    } label: {
+                                        HStack(spacing: 14) {
+                                            ZStack {
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .fill(Color.dashSurfaceHighlight)
+                                                    .frame(width: 44, height: 44)
+
+                                                Image(systemName: "server.rack")
+                                                    .font(.system(size: 20))
+                                                    .foregroundStyle(Color.dashYellow)
+                                            }
+
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                Text(account.serverName)
+                                                    .font(.system(size: 15, weight: .semibold))
+                                                    .foregroundStyle(Color.dashTextPrimary)
+
+                                                Text("\(account.kind.displayName) · \(account.username)")
+                                                    .font(.system(size: 12))
+                                                    .foregroundStyle(Color.dashTextSecondary)
+                                            }
+
+                                            Spacer()
+
+                                            Image(systemName: "chevron.right")
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundStyle(Color.dashTextMuted)
+                                        }
+                                        .padding()
+                                        .background(Color.dashSurface)
+                                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                                        .padding(.horizontal)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityIdentifier("MediaSources_ServerRow_\(account.serverName)")
+                                }
+
+                                NavigationLink {
+                                    MediaServersHomeView()
+                                } label: {
+                                    HStack {
+                                        Spacer()
+                                        Text("Manage All Servers")
+                                            .font(.system(size: 12, weight: .semibold))
+                                            .foregroundStyle(Color.dashTextSecondary)
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 11))
+                                            .foregroundStyle(Color.dashTextMuted)
+                                    }
+                                    .padding(.horizontal)
+                                }
+                                .accessibilityIdentifier("MediaSources_ManageServers")
+                            }
+                        }
+
+                        // MARK: Section 2 - Playlists & Channels (with QR Entry)
                         HStack {
                             Text(playlistStore.playlists.isEmpty ? "Sample Streams" : "Your Channels")
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(Color.dashYellow)
                             Spacer()
-                            Menu("+ Add Playlist") {
-                                Button("From URL", systemImage: "link") { showingAddM3UDialog = true }
-                                Button("From Files", systemImage: "folder") { showingPlaylistFileImporter = true }
+
+                            Button {
+                                showingQRScanner = true
+                            } label: {
+                                Label("Scan QR", systemImage: "qrcode.viewfinder")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(Color.dashYellow)
+                            }
+                            .accessibilityIdentifier("MediaSources_ScanQRHeaderButton")
+
+                            Menu {
+                                Button {
+                                    showingQRScanner = true
+                                } label: {
+                                    Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                                }
+                                .accessibilityIdentifier("MediaSources_ScanQRMenu")
+
+                                Button {
+                                    showingAddM3UDialog = true
+                                } label: {
+                                    Label("From URL", systemImage: "link")
+                                }
+                                .accessibilityIdentifier("MediaSources_FromURLMenu")
+
+                                Button {
+                                    showingPlaylistFileImporter = true
+                                } label: {
+                                    Label("From Files", systemImage: "folder")
+                                }
+                                .accessibilityIdentifier("MediaSources_FromFilesMenu")
+
+                                Button {
+                                    showingAddServer = true
+                                } label: {
+                                    Label("Connect Jellyfin / Emby", systemImage: "server.rack")
+                                }
+                                .accessibilityIdentifier("MediaSources_AddServerMenu")
+
                                 if !playlistStore.playlists.isEmpty {
-                                    Button("Refresh All", systemImage: "arrow.clockwise") {
+                                    Button {
                                         Task { await playlistStore.refreshAll() }
+                                    } label: {
+                                        Label("Refresh All", systemImage: "arrow.clockwise")
                                     }
                                 }
+                            } label: {
+                                Text("+ Add Source")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundStyle(Color.dashYellow)
                             }
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(Color.dashYellow)
+                            .accessibilityIdentifier("MediaSources_AddSourceMenu")
                         }
                         .padding(.horizontal)
-                        .padding(.top, 12)
+                        .padding(.top, 8)
 
                         if let importSuccessMessage {
                             Text(importSuccessMessage)
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundStyle(Color.dashYellow)
                                 .padding(.horizontal)
+                        }
+
+                        if playlistStore.playlists.isEmpty {
+                            Button {
+                                showingQRScanner = true
+                            } label: {
+                                HStack(spacing: 14) {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 10)
+                                            .fill(Color.dashSurfaceHighlight)
+                                            .frame(width: 44, height: 44)
+
+                                        Image(systemName: "qrcode.viewfinder")
+                                            .font(.system(size: 20))
+                                            .foregroundStyle(Color.dashYellow)
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text("Scan Playlist QR Code")
+                                            .font(.system(size: 15, weight: .semibold))
+                                            .foregroundStyle(Color.dashTextPrimary)
+
+                                        Text("Point camera at an M3U / M3U8 QR code")
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(Color.dashTextSecondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "camera.fill")
+                                        .font(.system(size: 16))
+                                        .foregroundStyle(Color.dashYellow)
+                                }
+                                .padding()
+                                .background(Color.dashSurface)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                .padding(.horizontal)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("MediaSources_ScanQRCard")
                         }
 
                         ForEach(playlistStore.playlists) { playlist in
@@ -558,6 +760,12 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingAddM3UDialog) {
                 addM3UDialogSheet
+            }
+            .sheet(isPresented: $showingAddServer) {
+                AddMediaServerView()
+            }
+            .sheet(isPresented: $showingQRScanner) {
+                PlaylistQRImportView()
             }
             .fileImporter(
                 isPresented: $showingPlaylistFileImporter,
