@@ -42,13 +42,13 @@ public struct MeHomeView: View {
 
                 ScrollView {
                     VStack(spacing: 18) {
-                        // Top Profile & Selected Vehicle Card (Exact 1:1 match)
+                        // Top Profile & Selected Vehicle Card
                         topVehicleProfileCard
 
-                        // PRO Upgrade Banner (Exact 1:1 match)
+                        // PRO Upgrade Banner
                         proUpgradeBanner
 
-                        // Navigation Menu Rows (Exact 1:1 match)
+                        // Navigation Menu Rows
                         navigationMenuSection
                     }
                     .padding(.horizontal, 16)

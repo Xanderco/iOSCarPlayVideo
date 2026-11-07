@@ -101,6 +101,10 @@
   - Item 17 marked ✅ reflecting real `EntitlementGate.swift` enforcement across Cast, Widgets, Sounds, and Drive tabs.
   - Item 13 updated with background location justification for Core Motion / automatic trip detection.
 - **Base branch**: `claude/classic-ui`.
+### 2026-11-05 05:25 (Bogotá) — T3: Competitor references audit and verification [CARAA-32] [DI-42]
+- **Audited codebase for competitor references**: Verified and removed all legacy "CarDash", "CarTV", and "1:1" comments across `DashCast/App/AppState.swift`, `DashCast/Features/Cast/WebVideoBrowserView.swift`, `DashCast/Features/Drive/DriveSettingsView.swift`, `DashCast/Features/Me/MeHomeView.swift`, and `DashCast/Features/Widgets/WidgetEditorView.swift`.
+- **Added regression unit tests**: Created `DashCastTests/CompetitorReferenceAuditTests.swift` ensuring AppState tab items, SoundCatalogService entries, VehicleCatalogService models/brands, and UserPreferences defaults remain free of competitor names.
+- **Verification**: Verified `git grep -I -n -i -E "cardash|cartv|1:1" -- DashCast DashCastTests DashCastUITests DashCastWidgets DashCastBroadcast DashCastCastWidget` returns 0 hits in code, assets, and strings.
 
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
