@@ -149,6 +149,12 @@ public final class EntitlementGate: ObservableObject {
         return max(0, limits.dailyCastingSeconds - storedUsageForToday())
     }
 
+    /// Minutes of casting left today for a free user; `.max` for Pro.
+    public var remainingCastingMinutes: Int {
+        if isPro { return .max }
+        return Int(ceil(remainingCastingSeconds / 60))
+    }
+
     /// Adds casting time to today's tally. Returns `false` once a free user has run out,
     /// so the player knows to stop; the paywall is presented at that point.
     @discardableResult

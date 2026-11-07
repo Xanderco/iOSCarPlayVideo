@@ -105,6 +105,16 @@
 - **Audited codebase for competitor references**: Verified and removed all legacy "CarDash", "CarTV", and "1:1" comments across `DashCast/App/AppState.swift`, `DashCast/Features/Cast/WebVideoBrowserView.swift`, `DashCast/Features/Drive/DriveSettingsView.swift`, `DashCast/Features/Me/MeHomeView.swift`, and `DashCast/Features/Widgets/WidgetEditorView.swift`.
 - **Added regression unit tests**: Created `DashCastTests/CompetitorReferenceAuditTests.swift` ensuring AppState tab items, SoundCatalogService entries, VehicleCatalogService models/brands, and UserPreferences defaults remain free of competitor names.
 - **Verification**: Verified `git grep -I -n -i -E "cardash|cartv|1:1" -- DashCast DashCastTests DashCastUITests DashCastWidgets DashCastBroadcast DashCastCastWidget` returns 0 hits in code, assets, and strings.
+### 2026-11-05 04:30 (Bogotá) — T2: Pro feature unlock & EntitlementGate enforcement [CARAA-31] [DI-34]
+- **Verified and hardened `EntitlementGate` enforcement across all real flows**:
+  - Free tier limits strictly enforced: exactly 1 playlist source allowed (`.playlistLimitReached(limit: 1)`), 15 minutes daily casting allowance (`.dailyCastingLimitReached(minutes: 15)`).
+  - Pro tier (`pro.lifetime`) grants unlimited playlist sources and unlimited daily casting.
+  - Re-importing / refreshing an existing playlist source URL does not consume a new source slot on free tier.
+  - `CarPlayMirrorController` wired to `entitlementGate` allowance, preventing unentitled mirroring when casting allowance expires.
+  - `CastHomeView` updated with paywall sheet presentation on `showingBroadcastPicker` for clean modal presentation over "Car Display".
+  - Added helper `remainingCastingMinutes` on `EntitlementGate`.
+- **Unit test suite expanded in `DashCastTests/EntitlementGateTests.swift`**:
+  - Full coverage for both Free and Pro states: limits, ceiling minute conversion, incremental time tracking, file & URL import gating, Pro unlock unblocking, refund/revocation re-locking, singleton wiring, and CarPlay mirror gate enforcement.
 
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
