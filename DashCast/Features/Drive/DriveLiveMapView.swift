@@ -3,7 +3,7 @@ import MapKit
 import CoreLocation
 import UIKit
 
-/// Live map for Trip Log: centred on the user (not the whole region), follows heading while a
+/// Live map for Drive: centred on the user (not the whole region), follows heading while a
 /// trip records, and draws the route recorded so far.
 struct DriveLiveMapView: View {
     @ObservedObject private var location = DriveLocationService.shared

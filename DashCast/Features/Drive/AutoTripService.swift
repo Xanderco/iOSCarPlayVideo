@@ -3,7 +3,7 @@ import CoreLocation
 import CoreMotion
 import Combine
 
-/// Starts and stops Trip Log recordings automatically.
+/// Starts and stops Drive recordings automatically.
 ///
 /// Signals: Core Motion activity (automotive + confidence) and GPS speed. Significant-location
 /// monitoring wakes (or relaunches) the app in the background; standard updates only run while
@@ -15,7 +15,7 @@ final class AutoTripService: NSObject, ObservableObject, CLLocationManagerDelega
 
     @Published private(set) var isMonitoring = false
     @Published private(set) var authorizationStatus: CLAuthorizationStatus = .notDetermined
-    /// Short, human-readable status for the Trip Log screen.
+    /// Short, human-readable status for the Drive tab.
     @Published private(set) var statusText = "Off"
 
     private let manager = CLLocationManager()
@@ -24,7 +24,7 @@ final class AutoTripService: NSObject, ObservableObject, CLLocationManagerDelega
     private var tick: Timer?
     private var standardUpdatesRunning = false
     private var lastAutomotiveAt: Date?
-    /// True while the current Trip Log recording was started by this service.
+    /// True while the current Drive recording was started by this service.
     private(set) var currentTripIsAutomatic = false
 
     private let recorder: DriveLocationService
@@ -129,7 +129,7 @@ final class AutoTripService: NSObject, ObservableObject, CLLocationManagerDelega
         setStandardUpdates(false)
         manager.allowsBackgroundLocationUpdates = false
         machine.reset(driving: false, at: Date())
-        // A trip this service started keeps recording; the user can stop it in Trip Log.
+        // A trip this service started keeps recording; the user can stop it in the Drive tab.
     }
 
     private func setStandardUpdates(_ on: Bool) {

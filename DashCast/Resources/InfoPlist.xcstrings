@@ -7,13 +7,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Trip Log uses your location to centre the map on you and record the route and distance of your trips. Trips stay on this iPhone."
+            "value": "Drive uses your location to centre the map on you and record the route and distance of your trips. Trips stay on this iPhone."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Registro de viajes usa tu ubicación para centrar el mapa en ti y registrar la ruta y distancia de tus viajes. Los viajes permanecen en este iPhone."
+            "value": "Conducir usa tu ubicación para centrar el mapa en ti y registrar la ruta y distancia de tus viajes. Los viajes permanecen en este iPhone."
           }
         }
       }
@@ -24,13 +24,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Allows Trip Log to notice when you've started driving and log your trips in the background. Your location never leaves this iPhone."
+            "value": "Lets Drive notice when you've started driving and log your trips in the background. Your location never leaves this iPhone."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Permite a Registro de viajes detectar cuándo has empezado a conducir y registrar tus viajes en segundo plano. Tu ubicación nunca sale de este iPhone."
+            "value": "Permite que Conducir detecte cuándo has empezado a conducir y registrar tus viajes en segundo plano. Tu ubicación nunca sale de este iPhone."
           }
         }
       }

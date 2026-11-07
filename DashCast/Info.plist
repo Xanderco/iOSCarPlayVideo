@@ -51,9 +51,9 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Trip Log uses your location to centre the map on you and record the route and distance of your trips. Trips stay on this iPhone.</string>
+	<string>Drive uses your location to centre the map on you and record the route and distance of your trips. Trips stay on this iPhone.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Allows Trip Log to notice when you start driving and record the trip automatically, even when DashCast is closed. Trips stay on this iPhone.</string>
+	<string>Lets Drive notice when you start driving and record the trip automatically, even when DashCast is closed. Trips stay on this iPhone.</string>
 	<key>NSMotionUsageDescription</key>
 	<string>DashCast uses motion activity to tell when you are driving, so it can record trips automatically and pause video on a car display while the car is moving.</string>
 	<key>NSAppTransportSecurity</key>
