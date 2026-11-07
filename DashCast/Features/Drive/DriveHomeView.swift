@@ -12,7 +12,6 @@ public struct DriveHomeView: View {
     @State private var showingPermissions: Bool = false
     @State private var showingDriveSettings: Bool = false
     @State private var showingLiveActivityPreview: Bool = false
-    @State private var pastTrips: [TripModel] = []
 
     public init() {}
 
@@ -45,27 +44,26 @@ public struct DriveHomeView: View {
                     ZStack(alignment: .topTrailing) {
                         // Live map centred on the user (follows heading while recording, draws the route).
                         DriveLiveMapView()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                        // Top Left Permissions / Tracking Status Toggle
-                        VStack {
-                            Button {
-                                showingPermissions = true
-                            } label: {
-                                // Was always a green "Tracking" chip regardless of permission state.
-                                HStack(spacing: 4) {
-                                    Image(systemName: locationService.isAuthorized ? "location.fill" : "location.slash.fill")
-                                        .font(.system(size: 11))
-                                    Text(trackingChipTitle)
-                                        .font(.system(size: 11, weight: .bold))
-                                }
-                                .foregroundStyle(locationService.isAuthorized ? Color.dashGreen : Color.dashOrange)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(Color.dashSurface.opacity(0.85))
-                                .clipShape(Capsule())
+                        // Status chip over the map
+                        Button {
+                            showingPermissions = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Circle()
+                                    .fill(locationService.isTracking ? Color.dashGreen : (locationService.isAuthorized ? Color.dashYellow : Color.dashRed))
+                                    .frame(width: 8, height: 8)
+                                Text(trackingChipTitle)
+                                    .font(ThemeFonts.hudCaption(size: 11))
+                                    .foregroundStyle(Color.dashTextPrimary)
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 9, weight: .bold))
+                                    .foregroundStyle(Color.dashTextMuted)
                             }
-                            Spacer()
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.dashSurface.opacity(0.85))
+                            .clipShape(Capsule())
                         }
                         .frame(maxWidth: .infinity, alignment: .topLeading)
                         .padding()
@@ -85,7 +83,6 @@ public struct DriveHomeView: View {
                             }
 
                             Button {
-                                pastTrips = PersistenceController.shared.loadTrips()
                                 showingHistory = true
                             } label: {
                                 Image(systemName: "clock.arrow.circlepath")
@@ -95,6 +92,7 @@ public struct DriveHomeView: View {
                                     .background(Color.dashSurface.opacity(0.85))
                                     .clipShape(Circle())
                             }
+                            .accessibilityLabel("Trip History")
 
                             Button {
                                 showingDriveSettings = true
@@ -114,15 +112,13 @@ public struct DriveHomeView: View {
                     bottomHUDConsole
                 }
             }
-            .navigationTitle("Drive")
-            .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showingTripSummary) {
                 if let completedTrip {
                     TripSummaryView(trip: completedTrip)
                 }
             }
             .sheet(isPresented: $showingHistory) {
-                pastTripsListView
+                TripHistoryView()
             }
             .sheet(isPresented: $showingPermissions) {
                 DriveTrackingPermissionsSheet()
@@ -164,19 +160,29 @@ public struct DriveHomeView: View {
                     unit: speedUnit,
                     accentColor: .dashYellow
                 )
+                .frame(width: 140, height: 140)
 
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 10) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Distance")
+                        Text("MAX SPEED")
+                            .font(ThemeFonts.hudCaption(size: 11))
+                            .foregroundStyle(Color.dashTextMuted)
+                        Text(String(format: "%.0f %@", appState.useMilesPerHour ? locationService.topSpeedKmh * 0.621371 : locationService.topSpeedKmh, speedUnit))
+                            .font(ThemeFonts.hudStat(size: 24))
+                            .foregroundStyle(Color.dashYellow)
+                    }
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("DISTANCE")
                             .font(ThemeFonts.hudCaption(size: 11))
                             .foregroundStyle(Color.dashTextMuted)
                         Text(formatDistance(locationService.distanceMeters))
                             .font(ThemeFonts.hudStat(size: 24))
-                            .foregroundStyle(Color.dashTextPrimary)
+                            .foregroundStyle(Color.dashGreen)
                     }
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Duration")
+                        Text("ELAPSED")
                             .font(ThemeFonts.hudCaption(size: 11))
                             .foregroundStyle(Color.dashTextMuted)
                         Text(formatDuration(locationService.elapsedTime))
@@ -223,6 +229,21 @@ public struct DriveHomeView: View {
                     GlowButton(title: "Start Drive", iconName: "play.fill", gradient: .dashAccentGradient) {
                         locationService.startTrip()
                         DriveNotificationService.shared.sendDriveRecordingNotification(distanceKm: 0)
+                    }
+
+                    Button {
+                        showingHistory = true
+                    } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "clock.arrow.circlepath")
+                            Text("Trips")
+                        }
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Color.dashTextPrimary)
+                        .frame(height: 50)
+                        .padding(.horizontal, 16)
+                        .background(Color.dashSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                 } else {
                     Button {
@@ -295,56 +316,5 @@ public struct DriveHomeView: View {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%02dm %02ds", mins, secs)
-    }
-
-    private var pastTripsListView: some View {
-        NavigationStack {
-            ZStack {
-                Color.dashBackground.ignoresSafeArea()
-
-                if pastTrips.isEmpty {
-                    Text("No past trips recorded yet")
-                        .font(ThemeFonts.hudCaption(size: 16))
-                        .foregroundStyle(Color.dashTextMuted)
-                } else {
-                    List {
-                        ForEach(pastTrips) { trip in
-                            Button {
-                                self.completedTrip = trip
-                                self.showingTripSummary = true
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(trip.startTime.formatted(date: .abbreviated, time: .shortened))
-                                            .font(.system(size: 14, weight: .bold))
-                                            .foregroundStyle(Color.dashTextPrimary)
-                                        Text(String(format: "%.2f km · %dm duration", trip.distanceKilometers, Int(trip.durationSeconds / 60)))
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(Color.dashTextSecondary)
-                                    }
-
-                                    Spacer()
-
-                                    Text("\(trip.drivingScore)")
-                                        .font(ThemeFonts.hudStat(size: 18))
-                                        .foregroundStyle(trip.drivingScore >= 80 ? Color.dashGreen : Color.dashOrange)
-                                }
-                            }
-                            .listRowBackground(Color.dashSurface)
-                        }
-                    }
-                    .scrollContentBackground(.hidden)
-                }
-            }
-            .navigationTitle("Trip History")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") {
-                        showingHistory = false
-                    }
-                }
-            }
-        }
     }
 }

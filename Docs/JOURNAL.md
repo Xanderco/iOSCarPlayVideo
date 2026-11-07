@@ -121,6 +121,14 @@
   - **QR Code Entry**: Added dedicated "Scan QR" button and "+ Add Source" menu item invoking `PlaylistQRImportView()`, plus quick-scan empty state card for immediate camera scanning of M3U/M3U8 QR links.
   - **Cast Tab Card**: Updated Row 1 title to "Media Sources" and subtitle to "Playlists, Jellyfin, Emby & QR" for clear discoverability from the home screen.
   - **Tests**: Added `DashCastTests/MediaSourcesEntryTests.swift` covering `MediaServerKind`, `PlaylistQRPayload` parsing, server models, and store lifecycle. Updated `DashCastUITests/DashCastSmokeUITests.swift` with `testMediaSourcesJellyfinAndQREntry()` driving Add Server and QR Scan sheets with snapshot captures.
+### 2026-11-05 07:15 (Bogotá) — R2: Port trip history and route replay into classic Drive tab [CARAA-33] [DI-43]
+- **Ported trip history + route replay into the classic Drive tab** (`DriveHomeView`, `TripHistoryView`, `TripDetailView`, `TripSummaryView`, `TripReplayMapView`).
+- **Features added**:
+  1. `TripReplayMapView`: interactive route replay with Play/Pause controls, 0...1 progress slider scrubber, dynamic dual-color polyline (muted route + neon accent traveled), and animated car marker Annotation. Hardened with empty coordinates guards.
+  2. `TripSummaryView` & `TripDetailView`: integrated a segmented mode switcher allowing drivers to toggle between interactive Route Replay and Speed Gradient Heatmap. Added unit-aware distance/speed conversions (`appState.useMilesPerHour`).
+  3. `TripHistoryView`: dedicated automotive trip log sheet featuring overall drive stats (Total Drives, Total Distance, Avg Score), trip list with score badges, swipe-to-delete with persistence sync, clear-all alert, and `NavigationLink` drill-down into `TripDetailView`.
+  4. `DriveHomeView`: wired quick "Trips" access button alongside Start Drive in the HUD console, plus the top-right map history button.
+  5. `DashCastTests/TripHistoryAndReplayTests.swift`: added comprehensive test suite covering index boundary clamping, coordinate mapping, unit conversion, map mode enumeration, and persistence round-trips.
 
 ### 2026-11-05 03:55 (Bogotá) — R1: Merge `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14) [CARAA-30] [DI-29]
 - **Merged `claude/classic-ui` into `claude/ci-and-core-fixes` (PR #14)** keeping the classic UI (D10) intact across all 5 tabs (Cast, Drive, Widgets, Sounds, Me) and CarPlay.
