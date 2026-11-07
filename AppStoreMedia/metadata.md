@@ -51,18 +51,15 @@ This is our main point of difference: comparable car-video and IPTV player apps 
 
 Don't use any wording about trials, renewal or billing periods anywhere: in the app, the listing, the IAP or the screenshots.
 
-> ⚠️ **Free tier vs Pro must be implemented before submission.** Today `isProLifetimeUnlocked` only hides
-> the "PRO" toolbar buttons and changes banner text. No feature is actually limited for free users, so
-> the purchase unlocks nothing. Reviewers test this (Guidelines 2.1 and 3.1.1), and the listing must not
-> describe limits that don't exist (2.3.1). Pick the split and implement it in the Cast, Widgets and Sounds tabs. A suggested split that the
-> current features can support:
+> ✅ **Free tier vs Pro is implemented in code (`EntitlementGate.swift`).**
+> The app enforces a clear free tier:
 >
-> | Free | DashCast Pro |
+> | Free | DashCast Pro (USD 19.99 lifetime, pay once) |
 > |---|---|
-> | 1 playlist, local videos, iPhone playback | Unlimited playlists and car/external-display output |
-> | 2 widget designs | All car models, stickers and live wallpapers |
-> | A few sounds | Full sound library and arrival/connection trigger sounds |
-> | Drive stats and trip history | (same, drive stats stay free) |
+> | 1 playlist, local videos, on-device iPhone playback | Unlimited playlists, external car display video output (AirPlay, HDMI, adapter) |
+> | 1 dashboard widget | All car models, stickers and live wallpapers |
+> | 1 custom arrival chime | Full sound library and arrival/connection trigger sounds |
+> | Live drive speed & basic trip stats | Complete trip history with interactive speed-colored route replay |
 >
 > Once it is implemented, replace the bracketed list in §4 "FREE VS PRO" and in the reviewer notes with the real split.
 
@@ -111,7 +108,8 @@ MORE THAN A PLAYER
 • A sound board with arrival and connection sounds, plus a step-by-step Shortcuts guide to play them automatically
 
 FREE VS PRO
-[Fill in after the free tier is implemented, e.g. "Free: 1 playlist, iPhone playback, drive stats. DashCast Pro: unlimited playlists, car-display output, every widget and sound."]
+• Free: 1 playlist, local iPhone video playback, live drive stats, 1 custom car widget, 1 custom arrival chime.
+• DashCast Pro ($19.99 lifetime, pay once, keep forever): Unlimited playlists, external car display mirroring (AirPlay, HDMI, adapter), full interactive dashboard widgets & live wallpapers, all custom arrival/engine sounds, and complete trip history with speed-colored route replay and driving smoothness score. No subscriptions, no ads, ever.
 
 PRIVACY
 No account. No ads. No tracking. No analytics. Your playlists, history and trips stay on your iPhone. Location is used on the device to show speed and trip stats and is never uploaded.
@@ -226,8 +224,10 @@ Thank you for reviewing DashCast.
 WHAT THE APP IS
 DashCast is a video player. It ships with NO channels, playlists or third-party content and does not provide, host or sell any streams. Users add their own M3U/M3U8 playlists, media-server links or video files from Photos/Files.
 
-PRICING
-Free download with a limited free tier. A single non-consumable in-app purchase, "DashCast Pro" (USD 19.99), unlocks everything permanently. There are no subscriptions. Pro unlocks: [list the Pro-only features once implemented].
+PRICING & FREE VS PRO
+Free download with a functional free tier. A single non-consumable in-app purchase, "DashCast Pro" (USD 19.99 lifetime, pay once), unlocks everything permanently with no subscriptions.
+- Free tier: 1 playlist, local video playback on iPhone, live drive speed and basic drive stats, 1 customizable dashboard widget, and 1 custom arrival chime.
+- DashCast Pro unlocks: Unlimited playlists, external car-display video output (AirPlay, HDMI, adapter), full interactive dashboard widgets & live wallpapers, all custom arrival/engine sounds, and complete trip history with speed-colored route replay and smoothness score.
 
 HOW TO TEST (about 2 minutes)
 1. Launch the app and read the passenger-safety notice, then tap "I Understand".
@@ -245,8 +245,9 @@ DashCast uses the standard iOS external-display APIs (UIScreen / scene sessions 
 SAFETY
 Video is for passengers only, or for use while the vehicle is parked. This is shown on first launch, in Settings and in car mode. While driving, only audio is intended.
 
-PRIVACY
-No account, no analytics, no ads and no tracking. Location is used on-device only for the speed and trip screen.
+PRIVACY & BACKGROUND LOCATION (UIBackgroundModes = location)
+No account, no analytics, no ads, and no tracking. All user data stays on device.
+Background location justification: The app includes an automatic drive-detection and trip logging feature in the Drive tab. When enabled by the user with 'Always' location permission, Core Motion and significant-change location updates record vehicle trip distance, duration, and route geometry in the background, logging trips locally to the device so the user can review their driving efficiency. Location data is stored strictly on-device, never shared or transmitted off the device, and auto-tracking can be disabled at any time in Drive settings.
 
 NETWORK SECURITY (App Transport Security)
 The app plays user-supplied playlists and personal media servers that are frequently served over http; the app ships no content. Public M3U playlists and the streams they list, as well as home Jellyfin/Emby servers (default http://<host>:8096), are commonly plain http, so the app sets NSAllowsArbitraryLoads. The app's own services (StoreKit, our legal pages) use https.
@@ -282,4 +283,86 @@ The Cast and Car-display screens show whatever sample channels the Cast module b
 
 ```
 Welcome to DashCast: your own playlists and videos on the car display, for passengers and parked breaks. Pay once, keep it forever, with no subscriptions.
+```
+
+---
+
+## 12. Spanish Metadata (Español / es-419 & es-ES)
+
+Metadatos listos para copiar y pegar en App Store Connect para las localizaciones en español (España y Latinoamérica). Todo el contenido es original, sin marcas comerciales de terceros ni nombres de competidores, enfocado en el diferenciador principal: **paga una vez, consérvalo para siempre — sin suscripciones**.
+
+### 12.1 Identidad y textos breves
+
+| Campo | Valor | Límite |
+|---|---|---|
+| **Nombre de la app** | `DashCast - Reproductor M3U` | 27 / 30 |
+| Alternativa | `DashCast: IPTV y Pantalla Auto` | 30 / 30 |
+| **Subtítulo** | `Video en auto. Pago único.` | 27 / 30 |
+| Alternativa subtítulo | `Paga una vez. Sin cuotas.` | 27 / 30 |
+| **Texto promocional** | `Paga una sola vez, consérvalo para siempre: sin suscripciones. Reproduce tus listas M3U y videos en la pantalla del auto para pasajeros o paradas de descanso.` | 165 / 170 |
+
+### 12.2 Descripción en español
+
+```
+PAGA UNA VEZ, CONSÉRVALO PARA SIEMPRE: SIN SUSCRIPCIONES.
+DashCast se descarga gratis. Una única compra dentro de la app, DashCast Pro, desbloquea todas las funciones de forma permanente. Pagas una sola vez; no hay pagos semanales ni cuotas anuales recurrentes.
+
+DashCast reproduce los videos que ya tienes y las listas de reproducción o transmisiones que ya posees, tanto en tu iPhone como en una pantalla de auto conectada. Está diseñado pensando en los pasajeros y en paradas con el vehículo estacionado (como descansos en carretera o recargas de vehículos eléctricos).
+
+DashCast no incluye canales ni contenido precargado. Tú agregas tu propio contenido.
+
+FUNCIONES PRINCIPALES
+• Reproduce listas M3U y M3U8 añadidas mediante enlace URL o desde la app Archivos
+• Reproduce transmisiones HLS y archivos de video importados desde Fotos o Archivos
+• Envía video a una pantalla externa conectada: la pantalla de tu auto mediante adaptador compatible, AirPlay o HDMI. Tu iPhone funciona como control remoto
+• Duplica la pantalla de tu iPhone con el selector de transmisión del sistema
+
+FORMATOS COMPATIBLES
+• Listas de reproducción: .m3u, .m3u8 (títulos EXTINF, atributos group-title y tvg-logo)
+• Transmisiones: video HLS (.m3u8) y HTTP(S)
+• Archivos: formatos compatibles con iOS, como MP4, MOV y M4V (H.264 / HEVC)
+
+TU PROPIO SERVIDOR MULTIMEDIA
+Agrega el enlace que publica tu servidor doméstico (Jellyfin, Emby o NAS) y disfruta de tu biblioteca personal mientras viajas. DashCast no proporciona, aloja, vende ni recomienda ninguna transmisión.
+
+MODO AUTO
+Interfaz optimizada con controles grandes y legibles para la pantalla del vehículo. El video está destinado exclusivamente a pasajeros o para su uso con el vehículo estacionado. Durante la conducción, utiliza únicamente el modo de audio.
+
+LISTAS DE REPRODUCCIÓN
+Agrega listas desde un enlace o archivo, actualízalas con un toque, organiza tus canales preferidos y guarda favoritos. Toda la información permanece en tu iPhone.
+
+MÁS QUE UN REPRODUCTOR
+• Estadísticas de viaje: velocidad en tiempo real, distancia, duración, puntuación de conducción suave y mapa con trazado de velocidad para cada trayecto con historial completo
+• Widgets para el tablero y fondos interactivos con el modelo de tu auto, saludo personalizado, matrícula, cuentas regresivas y stickers
+• Tablero de sonidos de llegada y conexión con guía paso a paso para automatizaciones en la app Atajos
+
+GRATIS VS PRO
+• Gratis: 1 lista de reproducción, reproducción local de video en iPhone, telemetría e historial de viajes básico, 1 widget de tablero y 1 sonido de llegada.
+• DashCast Pro (USD 19.99 pago único): listas ilimitadas, salida de video hacia la pantalla del auto (AirPlay/HDMI/adaptador), duplicación de pantalla, personalización completa de widgets con todos los modelos de auto, biblioteca completa de sonidos y cero límites. Sin suscripciones, jamás.
+
+PRIVACIDAD
+Sin cuentas de usuario. Sin publicidad. Sin rastreo. Sin analíticas externas. Tus listas, historial y viajes permanecen exclusivamente en tu iPhone. La ubicación se procesa localmente en el dispositivo para mostrar la velocidad y estadísticas de ruta, y nunca se sube a ningún servidor externo.
+
+Política de Privacidad: https://dashcast.app/privacy
+Términos de Uso (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Soporte: https://dashcast.app/support
+
+AVISO LEGAL
+DashCast es un reproductor multimedia. No incluye ni suministra ningún canal de televisión, lista de reproducción ni contenido de video. Eres responsable de contar con los derechos sobre el contenido que agregues. DashCast no está afiliado con ninguna emisora, servicio de streaming ni fabricante de automóviles.
+
+SEGURIDAD
+Uso exclusivo para pasajeros o cuando el vehículo se encuentre estacionado. Nunca mires videos mientras conduces. Cumple con las leyes locales sobre pantallas visibles para el conductor.
+```
+
+### 12.3 Palabras clave en español (100 caracteres)
+
+```
+m3u,m3u8,iptv,reproductor,video,transmision,lista,hls,pantalla,coche,pasajero,estacionado,multimedia
+```
+[100 caracteres exactos. Sin marcas comerciales ni nombres de competidores.]
+
+### 12.4 Novedades de esta versión (Español)
+
+```
+¡Te damos la bienvenida a DashCast! Disfruta de tus listas M3U y videos en la pantalla del auto para pasajeros y paradas de descanso. Paga una sola vez, consérvalo para siempre y olvídate de las suscripciones.
 ```
