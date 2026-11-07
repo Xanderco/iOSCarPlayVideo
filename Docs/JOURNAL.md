@@ -144,6 +144,17 @@
 - `claude/classic-ui` restores all app/test/UI-test code to `integration complete: phase 2` (dc5962c: old UI + widgets #27 + CarPlay mirror #28 + paywall #24 + car video #25) and re-applies only functional work from later merges: Info.plist ATS (http IPTV), simulator-only CarPlay entitlements + CarPlay scene delegates, IPTVParser (own demo videos only), VideoPlayerService + MediaServerStore + DemoDataSeeder review fixes, Drive live map (`DriveLiveMapView` replaces the static route map in the old DriveHomeView) and automatic trips (`AutoTripService`, `TripDetectionStateMachine`) wired to the existing "Auto-detect drives" toggle, plus their tests (TripDetection, ReviewFixes, CarPlayScene, CastEngine, EntitlementGate).
 - The full redesign is preserved on branch **`claude/redesign-snapshot`** (do not delete). **Decision D10: keep the classic UI; any future visual change is incremental and approved by the owner screen by screen.** Supersedes the "4 tabs / Extras" plan in Docs/Design/redesign-spec.md and handoff U1/U2.
 - Not carried over (available in the snapshot if wanted later): onboarding, Settings screen with Terms/Privacy/Restore (App Review needs Terms/Privacy links + Restore somewhere — paywall has Restore), Add Source sheet (Jellyfin/QR entry still in Me tab), mini player, car mode, trip log/replay screens, removal of the in-app CarPlay emulator.
+### 2026-11-05 01:25 (Bogotá) — Session 17 wrap-up (independent reviewer)
+- Delivered through #30 and #33 (merged):
+  - http playback fix (D10, `NSAllowsArbitraryLoads` alone).
+  - CarPlay double-toggle fix.
+  - Player observer cleanup.
+  - Concurrency warning fixes: `DemoDataSeeder`, `MediaServerPlaybackCoordinator`, both CarPlay delegates.
+  - 59 token migrations in unowned files.
+  - CI "Warning summary" step.
+  - Review doc with 21 findings.
+- Last CI on my head `5d5f770` was still running at hand-off ([run 41978943733](https://github.com/Xanderco/iOSCarPlayVideo/actions/runs/41978943733)). The earlier head `9e93fb2` built and passed 125 unit tests. Its UI tests were cancelled by a later push, not failed.
+- Open items are a checklist for the Paperclip agents: `Docs/Review-2026-11-05.md` § "To-do for the Paperclip agents" (P1: MediaServerClient data race, Chime audio session, device QA).
 
 ### 2026-11-05 01:16 (Bogotá) — Integrator: merged #35 (claude/drive-auto)
 - Merged [#35](https://github.com/Xanderco/iOSCarPlayVideo/pull/35) (`claude/drive-auto`), implementing owner decision O2 (Drive stays a real feature) and fixing owner Mac finding #5.
