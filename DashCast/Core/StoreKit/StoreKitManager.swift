@@ -229,7 +229,8 @@ public final class StoreKitManager: ObservableObject {
                 snapshots.append(EntitlementSnapshot(transaction))
             }
         }
-        apply(EntitlementResolver.resolve(snapshots))
+        // Debug device builds from Xcode count as Pro (see DeveloperProUnlock); Release never does.
+        apply(DeveloperProUnlock.isActive ? .lifetime : EntitlementResolver.resolve(snapshots))
     }
 
     func apply(_ newValue: ProEntitlement) {

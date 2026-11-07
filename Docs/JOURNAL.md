@@ -99,7 +99,8 @@
 - **Text fixes:** location permission prompts (en/es) and Drive comments said "Trip Log" (the reverted redesign's name); now "Drive"/"Conducir".
 - **Abandoned:** #38 (red CI; its Legal rows, paywall links and cleanup are already delivered by #42/#49, and Settings already has "Passenger Safety Notice" to replay the welcome); #26 (only AGENTS.md/CLAUDE.md taken, its verify-all.sh is superseded by #46); #11, #12, #13, #14, #43 superseded (all content is in `main`); #45 included in #44.
 - **`main` is now the single branch to use.** Old `claude/ci-and-core-fixes` and `claude/classic-ui` are history.
-- **Known limits for the road test:** CarPlay on a real car needs Apple's CarPlay Video entitlement (not granted yet), so DashCast will not appear on the car screen; use AirPlay/Screen Mirroring to an AirPlay-capable display instead. Free tier limits apply (EntitlementGate): buy Pro with the local StoreKit configuration when running from Xcode (no real charge).
+- **Road-test unlock:** `DeveloperProUnlock` treats **Debug builds on a physical device** as Pro, because Xcode's local StoreKit purchase is lost when the app is opened from the Home Screen (free tier = 1 playlist, 15 min casting/day would cut the drive test). Inactive in Release/TestFlight/App Store, on the simulator, and under unit/UI tests and screenshot runs.
+- **Known limits for the road test:** CarPlay on a real car needs Apple's CarPlay Video entitlement (not granted yet), so DashCast will not appear on the car screen; use AirPlay/Screen Mirroring to an AirPlay-capable display instead. Free-tier limits only apply on the simulator and in Release builds.
 
 ### 2026-11-05 13:30 (Bogotá) — G1: App Store Listing Polish & Spanish Metadata [CARAA-38] [DI-45]
 - **AppStoreMedia/metadata.md updated**:
