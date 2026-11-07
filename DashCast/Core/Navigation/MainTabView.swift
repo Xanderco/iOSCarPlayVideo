@@ -12,19 +12,19 @@ public struct MainTabView: View {
                 // Native system tab bar: on iOS 26 it is rendered by the system in Liquid Glass
                 // (translucency, morphing selection, minimise-on-scroll) at no CPU cost to us.
                 TabView(selection: $appState.selectedTab) {
-                    Tab(AppState.TabItem.cast.rawValue, systemImage: AppState.TabItem.cast.iconName, value: AppState.TabItem.cast) {
+                    Tab(AppState.TabItem.cast.localizedTitle, systemImage: AppState.TabItem.cast.iconName, value: AppState.TabItem.cast) {
                         screen(.cast)
                     }
-                    Tab(AppState.TabItem.drive.rawValue, systemImage: AppState.TabItem.drive.iconName, value: AppState.TabItem.drive) {
+                    Tab(AppState.TabItem.drive.localizedTitle, systemImage: AppState.TabItem.drive.iconName, value: AppState.TabItem.drive) {
                         screen(.drive)
                     }
-                    Tab(AppState.TabItem.widgets.rawValue, systemImage: AppState.TabItem.widgets.iconName, value: AppState.TabItem.widgets) {
+                    Tab(AppState.TabItem.widgets.localizedTitle, systemImage: AppState.TabItem.widgets.iconName, value: AppState.TabItem.widgets) {
                         screen(.widgets)
                     }
-                    Tab(AppState.TabItem.sounds.rawValue, systemImage: AppState.TabItem.sounds.iconName, value: AppState.TabItem.sounds) {
+                    Tab(AppState.TabItem.sounds.localizedTitle, systemImage: AppState.TabItem.sounds.iconName, value: AppState.TabItem.sounds) {
                         screen(.sounds)
                     }
-                    Tab(AppState.TabItem.me.rawValue, systemImage: AppState.TabItem.me.iconName, value: AppState.TabItem.me) {
+                    Tab(AppState.TabItem.me.localizedTitle, systemImage: AppState.TabItem.me.iconName, value: AppState.TabItem.me) {
                         screen(.me)
                     }
                 }

@@ -127,7 +127,7 @@ public struct LifetimePaywallView: View {
         }
     }
 
-    private func pledgeRow(_ icon: String, _ text: String) -> some View {
+    private func pledgeRow(_ icon: String, _ text: LocalizedStringKey) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
@@ -157,7 +157,7 @@ public struct LifetimePaywallView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
-    private func comparisonRow(_ title: String, free: String, pro: String, isHeader: Bool = false) -> some View {
+    private func comparisonRow(_ title: LocalizedStringKey, free: LocalizedStringKey, pro: LocalizedStringKey, isHeader: Bool = false) -> some View {
         HStack {
             Text(title)
                 .frame(maxWidth: .infinity, alignment: .leading)

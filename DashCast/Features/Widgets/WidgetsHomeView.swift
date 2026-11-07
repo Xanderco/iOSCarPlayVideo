@@ -549,7 +549,7 @@ public struct WidgetsHomeView: View {
         }
     }
 
-    private func sectionHeader(title: String) -> some View {
+    private func sectionHeader(title: LocalizedStringKey) -> some View {
         HStack {
             Text(title)
                 .font(ThemeFonts.hudTitle(size: 18))

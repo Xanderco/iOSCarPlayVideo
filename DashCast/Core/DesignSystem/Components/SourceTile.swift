@@ -87,7 +87,7 @@ public struct SourceTile: View {
                     .foregroundStyle(Color.dcAccent)
                     .frame(width: iconBox, height: iconBox)
                     .background(Color.dcAccentSoft, in: Circle())
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(DSTypography.headline)
                     .foregroundStyle(Color.dcTextPrimary)
                     .multilineTextAlignment(.center)
@@ -109,18 +109,18 @@ public struct SourceTile: View {
                     statusAccessory
                 }
                 Spacer(minLength: DSSpacing.md)
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(DSTypography.title3)
                     .foregroundStyle(Color.dcTextPrimary)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 if case .error(let message) = status {
-                    Text(message)
+                    Text(LocalizedStringKey(message))
                         .font(DSTypography.footnote)
                         .foregroundStyle(Color.dcWarning)
                         .lineLimit(2)
                 } else if let subtitle {
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(DSTypography.subheadline)
                         .foregroundStyle(Color.dcTextSecondary)
                         .lineLimit(1)

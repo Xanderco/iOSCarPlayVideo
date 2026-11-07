@@ -1,0 +1,91 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "NSLocationWhenInUseUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trip Log uses your location to centre the map on you and record the route and distance of your trips. Trips stay on this iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registro de viajes usa tu ubicación para centrar el mapa en ti y registrar la ruta y distancia de tus viajes. Los viajes permanecen en este iPhone."
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysAndWhenInUseUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allows Trip Log to notice when you've started driving and log your trips in the background. Your location never leaves this iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permite a Registro de viajes detectar cuándo has empezado a conducir y registrar tus viajes en segundo plano. Tu ubicación nunca sale de este iPhone."
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast uses motion data to automatically detect when a drive begins and pauses video on the car display while moving for safety."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast usa datos de movimiento para detectar automáticamente cuándo empieza un viaje y pausa el vídeo en la pantalla del coche durante la marcha por seguridad."
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allows you to select and play your own saved videos on the car display while parked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Te permite seleccionar y reproducir tus propios vídeos guardados en la pantalla del coche mientras estás aparcado."
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used to scan QR codes for quickly importing playlist links."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se usa para escanear códigos QR e importar rápidamente enlaces de listas de reproducción."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -26,7 +26,7 @@ public struct LiquidCapsuleTabBar: View {
                             .foregroundStyle(isSelected ? Color.dcAccent : Color.dcTextTertiary)
                             .frame(height: 22)
 
-                        Text(item.rawValue)
+                        Text(item.localizedTitle)
                             .font(.system(size: 10, weight: isSelected ? .bold : .medium))
                             .foregroundStyle(isSelected ? Color.dcAccent : Color.dcTextTertiary)
                     }

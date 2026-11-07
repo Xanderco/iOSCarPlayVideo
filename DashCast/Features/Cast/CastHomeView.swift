@@ -296,7 +296,7 @@ public struct CastHomeView: View {
         }
     }
 
-    private func menuRow(icon: String, title: String, subtitle: String) -> some View {
+    private func menuRow(icon: String, title: LocalizedStringKey, subtitle: LocalizedStringKey) -> some View {
         HStack(spacing: 16) {
             ZStack {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)

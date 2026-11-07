@@ -13,6 +13,20 @@ public final class AppState: ObservableObject {
     @Published public var initialCarPlayMode: String = "App in CarPlay"
     @Published public var isDriveActive: Bool = false
     @Published public var useMilesPerHour: Bool = false
+    @Published public var appLanguage: String = UserDefaults.standard.string(forKey: "appLanguage") ?? "system"
+
+    public func setLanguage(_ lang: String) {
+        appLanguage = lang
+        UserDefaults.standard.set(lang, forKey: "appLanguage")
+    }
+
+    public var effectiveLocale: Locale? {
+        switch appLanguage {
+        case "es": return Locale(identifier: "es")
+        case "en": return Locale(identifier: "en")
+        default: return nil
+        }
+    }
 
     // Primary 5 native tabs
     public enum TabItem: String, CaseIterable, Identifiable {
@@ -23,6 +37,16 @@ public final class AppState: ObservableObject {
         case me = "Me"
 
         public var id: String { rawValue }
+
+        public var localizedTitle: LocalizedStringKey {
+            switch self {
+            case .cast: return "Cast"
+            case .drive: return "Drive"
+            case .widgets: return "Widgets"
+            case .sounds: return "Sounds"
+            case .me: return "Me"
+            }
+        }
 
         public var iconName: String {
             switch self {

@@ -3,7 +3,7 @@ import SwiftUI
 /// Legacy v1 button. Prefer `PrimaryButton` for new UI.
 
 public struct GlowButton: View {
-    public let title: String
+    public let title: LocalizedStringKey
     public let iconName: String?
     public var gradient: LinearGradient
     public var textColor: Color
@@ -11,7 +11,7 @@ public struct GlowButton: View {
     public let action: () -> Void
 
     public init(
-        title: String,
+        title: LocalizedStringKey,
         iconName: String? = nil,
         gradient: LinearGradient = .dcAccentGradient,
         textColor: Color = .dcOnAccent,
@@ -24,6 +24,24 @@ public struct GlowButton: View {
         self.textColor = textColor
         self.height = height
         self.action = action
+    }
+
+    public init(
+        titleString: String,
+        iconName: String? = nil,
+        gradient: LinearGradient = .dcAccentGradient,
+        textColor: Color = .dcOnAccent,
+        height: CGFloat = 52,
+        action: @escaping () -> Void
+    ) {
+        self.init(
+            title: LocalizedStringKey(titleString),
+            iconName: iconName,
+            gradient: gradient,
+            textColor: textColor,
+            height: height,
+            action: action
+        )
     }
 
     public var body: some View {

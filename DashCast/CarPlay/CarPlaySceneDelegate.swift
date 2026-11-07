@@ -148,13 +148,13 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             let group = entry.group
             let channels = entry.channels
             let item = CPListItem(
-                text: group.isEmpty ? "Other" : group,
-                detailText: channels.count == 1 ? "1 channel" : "\(channels.count) channels",
+                text: group.isEmpty ? String(localized: "Other") : group,
+                detailText: channels.count == 1 ? String(localized: "1 channel") : String(localized: "\(channels.count) channels"),
                 image: UIImage(systemName: "folder.fill")
             )
             item.accessoryType = .disclosureIndicator
             item.handler = { [weak self] _, completion in
-                self?.pushGroup(group, title: group.isEmpty ? "Other" : group, channels: channels)
+                self?.pushGroup(group, title: group.isEmpty ? String(localized: "Other") : group, channels: channels)
                 completion()
             }
             return item
@@ -226,7 +226,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             item.handler = { _, completion in completion() }
         }
         let template = CPListTemplate(title: "DashCast", sections: [CPListSection(items: items)])
-        template.tabTitle = "Info"
+        template.tabTitle = String(localized: "Info")
         template.tabImage = UIImage(systemName: "info.circle.fill")
         return template
     }
@@ -234,20 +234,20 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
     // MARK: - Tab templates (static so unit tests can build them without a car)
 
     static func libraryTemplate() -> CPListTemplate {
-        let library = CPListTemplate(title: "Library", sections: [])
-        library.tabTitle = "Library"
+        let library = CPListTemplate(title: String(localized: "Library"), sections: [])
+        library.tabTitle = String(localized: "Library")
         library.tabImage = UIImage(systemName: "tv.fill")
-        library.emptyViewTitleVariants = ["No channels"]
-        library.emptyViewSubtitleVariants = ["Import an M3U playlist on your iPhone"]
+        library.emptyViewTitleVariants = [String(localized: "No channels")]
+        library.emptyViewSubtitleVariants = [String(localized: "Import an M3U playlist on your iPhone")]
         return library
     }
 
     static func favoritesTemplate() -> CPListTemplate {
-        let favorites = CPListTemplate(title: "Favorites", sections: [])
-        favorites.tabTitle = "Favorites"
+        let favorites = CPListTemplate(title: String(localized: "Favorites"), sections: [])
+        favorites.tabTitle = String(localized: "Favorites")
         favorites.tabImage = UIImage(systemName: "heart.fill")
-        favorites.emptyViewTitleVariants = ["No Favorites Yet"]
-        favorites.emptyViewSubtitleVariants = ["Tap the heart on a channel on your iPhone"]
+        favorites.emptyViewTitleVariants = [String(localized: "No Favorites Yet")]
+        favorites.emptyViewSubtitleVariants = [String(localized: "Tap the heart on a channel on your iPhone")]
         return favorites
     }
 

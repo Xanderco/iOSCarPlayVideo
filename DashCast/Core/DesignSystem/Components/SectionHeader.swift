@@ -27,7 +27,7 @@ public struct SectionHeader: View {
         HStack(alignment: .firstTextBaseline, spacing: DSSpacing.sm) {
             VStack(alignment: .leading, spacing: DSSpacing.xxs) {
                 HStack(alignment: .firstTextBaseline, spacing: DSSpacing.sm) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(DSTypography.title2)
                         .foregroundStyle(Color.dcTextPrimary)
                         .accessibilityAddTraits(.isHeader)
@@ -39,7 +39,7 @@ public struct SectionHeader: View {
                     }
                 }
                 if let subtitle {
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(DSTypography.subheadline)
                         .foregroundStyle(Color.dcTextSecondary)
                 }
@@ -48,7 +48,7 @@ public struct SectionHeader: View {
             if let action {
                 Button(action: action) {
                     HStack(spacing: DSSpacing.xxs) {
-                        Text(actionTitle)
+                        Text(LocalizedStringKey(actionTitle))
                         Image(systemName: "chevron.right")
                             .imageScale(.small)
                             .accessibilityHidden(true)

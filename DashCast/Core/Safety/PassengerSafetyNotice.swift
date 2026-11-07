@@ -71,7 +71,7 @@ public struct PassengerSafetyNoticeView: View {
         .interactiveDismissDisabled()
     }
 
-    private func row(_ icon: String, _ text: String) -> some View {
+    private func row(_ icon: String, _ text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 17))

@@ -53,9 +53,13 @@ public final class EntitlementGate: ObservableObject {
             case .allowed:
                 return nil
             case .playlistLimitReached(let limit):
-                return "The free plan includes \(limit) playlist source\(limit == 1 ? "" : "s")."
+                if limit == 1 {
+                    return String(localized: "The free plan includes 1 playlist source.")
+                } else {
+                    return String(localized: "The free plan includes \(limit) playlist sources.")
+                }
             case .dailyCastingLimitReached(let minutes):
-                return "You've used today's \(minutes) free casting minutes. They reset at midnight."
+                return String(localized: "You've used today's \(minutes) free casting minutes. They reset at midnight.")
             }
         }
     }

@@ -16,6 +16,7 @@ struct DashCastApp: App {
         WindowGroup {
             MainTabView()
                 .environmentObject(appState)
+                .environment(\.locale, appState.effectiveLocale ?? Locale.autoupdatingCurrent)
                 .preferredColorScheme(.dark)
                 .onOpenURL { url in
                     appState.handleDeepLink(url)

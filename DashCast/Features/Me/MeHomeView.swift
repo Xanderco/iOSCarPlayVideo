@@ -157,7 +157,7 @@ public struct MeHomeView: View {
         )
     }
 
-    private func statColumn(value: String, label: String) -> some View {
+    private func statColumn(value: String, label: LocalizedStringKey) -> some View {
         VStack(spacing: 2) {
             Text(value)
                 .font(.system(size: 16, weight: .bold, design: .rounded))
@@ -271,14 +271,14 @@ public struct MeHomeView: View {
         )
     }
 
-    private func menuItemRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+    private func menuItemRow(icon: String, title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             menuItemLabel(icon: icon, title: title)
         }
         .buttonStyle(.plain)
     }
 
-    private func menuItemLabel(icon: String, title: String) -> some View {
+    private func menuItemLabel(icon: String, title: LocalizedStringKey) -> some View {
             HStack(spacing: 14) {
                 Image(systemName: icon)
                     .font(.system(size: 16))
@@ -310,6 +310,34 @@ public struct MeHomeView: View {
                 ScrollView {
                     VStack(spacing: 18) {
                         VStack(spacing: 1) {
+                            // Language
+                            HStack {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "globe")
+                                        .foregroundStyle(Color.dashYellow)
+                                    Text("Language")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundStyle(Color.dashTextPrimary)
+                                }
+
+                                Spacer()
+
+                                Picker("Language", selection: Binding(
+                                    get: { appState.appLanguage },
+                                    set: { appState.setLanguage($0) }
+                                )) {
+                                    Text("System").tag("system")
+                                    Text("English").tag("en")
+                                    Text("Español").tag("es")
+                                }
+                                .pickerStyle(.menu)
+                                .tint(Color.dashYellow)
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+
+                            Divider().background(Color.dashBorder.opacity(0.5))
+
                             // Speed Units MPH / KMH
                             HStack {
                                 HStack(spacing: 12) {
@@ -457,7 +485,7 @@ public struct MeHomeView: View {
         }
     }
 
-    private func aboutLinkRow(icon: String, title: String, url: URL) -> some View {
+    private func aboutLinkRow(icon: String, title: LocalizedStringKey, url: URL) -> some View {
         Link(destination: url) {
             aboutLinkLabel(icon: icon, title: title)
         }
@@ -487,7 +515,7 @@ public struct MeHomeView: View {
         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.dashBorder, lineWidth: 1))
     }
 
-    private func aboutLinkLabel(icon: String, title: String) -> some View {
+    private func aboutLinkLabel(icon: String, title: LocalizedStringKey) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 15))
