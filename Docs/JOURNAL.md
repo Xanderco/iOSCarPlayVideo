@@ -92,6 +92,15 @@
 
 ## Log
 
+### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
+- Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
+- **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
+- **Conflict fixed:** `TripSummaryView.scoreMessage` (#51 vs #52) kept #52's wording as `LocalizedStringKey`, added "Smooth & Efficient"/"Good Driving" to the catalog with Spanish, catalog format preserved.
+- **Text fixes:** location permission prompts (en/es) and Drive comments said "Trip Log" (the reverted redesign's name); now "Drive"/"Conducir".
+- **Abandoned:** #38 (red CI; its Legal rows, paywall links and cleanup are already delivered by #42/#49, and Settings already has "Passenger Safety Notice" to replay the welcome); #26 (only AGENTS.md/CLAUDE.md taken, its verify-all.sh is superseded by #46); #11, #12, #13, #14, #43 superseded (all content is in `main`); #45 included in #44.
+- **`main` is now the single branch to use.** Old `claude/ci-and-core-fixes` and `claude/classic-ui` are history.
+- **Known limits for the road test:** CarPlay on a real car needs Apple's CarPlay Video entitlement (not granted yet), so DashCast will not appear on the car screen; use AirPlay/Screen Mirroring to an AirPlay-capable display instead. Free tier limits apply (EntitlementGate): buy Pro with the local StoreKit configuration when running from Xcode (no real charge).
+
 ### 2026-11-05 13:30 (Bogotá) — G1: App Store Listing Polish & Spanish Metadata [CARAA-38] [DI-45]
 - **AppStoreMedia/metadata.md updated**:
   - Replaced provisional free tier notes with concrete, implemented `EntitlementGate` enforcement details: 1 playlist limit, local playback, basic drive stats, 1 widget, 1 arrival chime on the free tier; unlimited playlists, external car display mirroring (AirPlay/HDMI/adapter), all widgets, all sounds, and route replay unlocked with lifetime DashCast Pro ($19.99 USD, pay once).
