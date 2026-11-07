@@ -159,6 +159,13 @@
 - Screenshot-only launch args: `-showOnboarding`, `-showMediaSources`, `-playDemoVideo`, `-showLatestTrip`. The paywall shows $19.99 under `-seedDemoData` when StoreKit products can't load (simctl). No layout changes (D10).
 - Final set from App Store Media run 41987342797 (artifacts `appstore-screenshots-framed`, `appstore-screenshots-plain`): 28 PNGs in `AppStoreMedia/screenshots/` (7 screens × 2 sizes × framed + plain). On the first run (41986084314) 04 Player came out black and 05 Drive showed an empty HUD. `-showLatestTrip` fixed Drive, and the player capture worked on the re-run.
 - Owner review: the "CarPlay Screen" / "AirPlay / CarPlay audio" labels on Cast and Player, car image brand on Widgets, and the Family Sharing line on the paywall.
+### 2026-11-05 03:55 (Bogotá) — QA_Deploy: Landed Mac verification checklist & TestFlight smoke test (CARAA-36 / DI-30)
+- **Ported & aligned verification harness on `claude/classic-ui`:**
+  - Added `Scripts/verify-all.sh` with 9 automated verification phases (prerequisites, xcodegen generation, build-for-testing, unit, network, storekit, carplay, ui, coverage threshold gate). Added `MirrorHLSTests`, `MirrorFrameTransportTests`, `MediaServerStoreTests`, `EntitlementGateTests`, and `CarPlaySceneTests` to target phase mappings.
+  - Added `Makefile` with convenience targets (`verify`, `verify-fast`, `test-unit`, `test-ui`, `generate`, `clean`).
+  - Added `Docs/MAC_AGENT_HANDOFF.md` updated for `claude/classic-ui` base, detailing the 5 classic tabs, low-latency H.264 CarPlay Video mirror pipeline, StoreKit 2 lifetime pass, and step-by-step debug/triage rules for Mac agents.
+  - Updated `Docs/QA/smoke-test.md` to reflect the classic 5-tab UI (`Cast`, `Drive`, `Widgets`, `Sounds`, `Me`), low-latency HLS video mirror test steps, Drive automatic trip detection, and removal of the legacy in-app CarPlay emulator (D10).
+- **PR:** Branch `feature/DI-30-mac-verification-checklist` targeting `claude/classic-ui`.
 
 ### 2026-11-05 02:22 (Bogotá) — Session 19 close: classic UI + CarPlay video mirror merged
 - **`claude/classic-ui` now holds the classic UI (D10) plus the CarPlay video mirror.** [PR #37](https://github.com/Xanderco/iOSCarPlayVideo/pull/37) merged (merge commit 8395ccf). PR CI was green on cfcc819: build, entitlement check, unit tests and UI tests.
