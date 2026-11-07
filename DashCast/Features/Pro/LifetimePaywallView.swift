@@ -182,9 +182,9 @@ public struct LifetimePaywallView: View {
                     .foregroundStyle(Color.dashGreen)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-            } else if let product = store.proProduct {
+            } else if let price = displayPrice {
                 VStack(spacing: 2) {
-                    Text(product.displayPrice)
+                    Text(price)
                         .font(ThemeFonts.hudStat(size: 34))
                         .foregroundStyle(Color.dashTextPrimary)
                     Text("one-time purchase")
@@ -194,7 +194,7 @@ public struct LifetimePaywallView: View {
                 .accessibilityElement(children: .combine)
 
                 GlowButton(
-                    title: store.isPurchasing ? "Contacting the App Store…" : "Unlock Pro for \(product.displayPrice)",
+                    title: store.isPurchasing ? "Contacting the App Store…" : "Unlock Pro for \(price)",
                     iconName: "lock.open.fill",
                     gradient: .dashProGoldGradient
                 ) {
@@ -234,10 +234,16 @@ public struct LifetimePaywallView: View {
         }
     }
 
+    /// Store price. Screenshot runs (`-seedDemoData`, launched by simctl without a StoreKit
+    /// configuration) can't load products, so they show the configured USD 19.99 price instead.
+    private var displayPrice: String? {
+        store.proProduct?.displayPrice ?? (DemoDataSeeder.isRequested ? "$19.99" : nil)
+    }
+
     private var finePrint: some View {
         VStack(spacing: 10) {
-            if let product = store.proProduct, !store.isPro {
-                Text("\(product.displayPrice) is charged once to your Apple Account when you confirm the purchase. This is not a subscription and will never renew.")
+            if let price = displayPrice, !store.isPro {
+                Text("\(price) is charged once to your Apple Account when you confirm the purchase. This is not a subscription and will never renew.")
                     .multilineTextAlignment(.center)
             }
             HStack(spacing: 14) {

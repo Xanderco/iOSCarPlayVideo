@@ -61,6 +61,14 @@ public struct CastHomeView: View {
                 }
             }
             .navigationTitle("Cast")
+            .task {
+                // App Store screenshot launch arguments (no effect on normal launches).
+                if ScreenshotLaunch.playDemoVideo, playerService.currentChannel == nil,
+                   let demo = playlistStore.sampleChannels.first {
+                    playerService.load(channel: demo)
+                }
+                if ScreenshotLaunch.showMediaSources { showingPlaylistsSheet = true }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {

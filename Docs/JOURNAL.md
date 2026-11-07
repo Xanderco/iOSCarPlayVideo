@@ -154,6 +154,12 @@
 - Free vs Pro copy now matches `EntitlementGate`: free = 1 playlist source + 15 min of playback a day; Pro removes both.
 - **Blockers found (code sessions):** B1 GitHub Pages `support.html`/`privacy.html` return 404; B2 `LegalLinks.swift` and `LifetimePaywallView.swift` still link to `dashcast.app`; B3 Me → Feedback is fake (shows "Feedback Sent", sends nothing; "Add" screenshot button is a no-op). Details in the guide §0. (A draft B4 about the local network string was dropped after merging Session 19: `MirrorStreamServer` now makes it true; review notes say CarPlay **Video** was requested.)
 - `AppStoreMedia/metadata.md` is partly stale (product id `com.dashcast.lifetime`, dashcast.app URLs, free tier "not implemented"); a pointer to the new guide was added at its top.
+### 2026-11-05 02:35 (Bogotá) — Session 23: App Store screenshots of the classic UI (claude/classic-screenshots, #40)
+- Media pipeline now captures the classic UI: 01 Cast · 02 Paywall (USD 19.99 one-time) · 03 Media sources (bundled demo videos only) · 04 Player · 05 Drive · 06 Widget editor · 07 Onboarding. Headlines contain no "CarPlay" wording and no third-party brands.
+- Screenshot-only launch args: `-showOnboarding`, `-showMediaSources`, `-playDemoVideo`, `-showLatestTrip`. The paywall shows $19.99 under `-seedDemoData` when StoreKit products can't load (simctl). No layout changes (D10).
+- Final set from App Store Media run 41987342797 (artifacts `appstore-screenshots-framed`, `appstore-screenshots-plain`): 28 PNGs in `AppStoreMedia/screenshots/` (7 screens × 2 sizes × framed + plain). On the first run (41986084314) 04 Player came out black and 05 Drive showed an empty HUD. `-showLatestTrip` fixed Drive, and the player capture worked on the re-run.
+- Owner review: the "CarPlay Screen" / "AirPlay / CarPlay audio" labels on Cast and Player, car image brand on Widgets, and the Family Sharing line on the paywall.
+
 ### 2026-11-05 02:22 (Bogotá) — Session 19 close: classic UI + CarPlay video mirror merged
 - **`claude/classic-ui` now holds the classic UI (D10) plus the CarPlay video mirror.** [PR #37](https://github.com/Xanderco/iOSCarPlayVideo/pull/37) merged (merge commit 8395ccf). PR CI was green on cfcc819: build, entitlement check, unit tests and UI tests.
 - **Owner action:** request the CarPlay **VIDEO** entitlement (`com.apple.developer.carplay-video`, category "Video", not Audio) at developer.apple.com/contact/carplay. The steps and ready-to-paste justification are at the top of `Docs/CarPlay.md`.

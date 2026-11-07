@@ -46,7 +46,7 @@ This is our main point of difference: comparable car-video and IPTV player apps 
 | Description (≤ 55) | `Unlock every DashCast feature for good. Pay once.` [49] |
 | Price | **USD 19.99** (pick the 19.99 price point; App Store Connect sets other storefronts) |
 | Family Sharing | Optional. The local StoreKit config has `familyShareable: true`. Turn it on in App Store Connect only if you want it, and only then mention it in the copy. |
-| Review screenshot | `AppStoreMedia/6.9-inch_1320x2868_plain/02_paywall.png` |
+| Review screenshot | `AppStoreMedia/screenshots/6.9-inch_1320x2868_plain/02_paywall.png` |
 | Review note | *"Single non-consumable purchase. It unlocks DashCast Pro permanently on this Apple ID. There is no subscription. Restore Purchases is on the paywall and in Me → Settings."* |
 
 Don't use any wording about trials, renewal or billing periods anywhere: in the app, the listing, the IAP or the screenshots.
@@ -270,7 +270,25 @@ Generated in CI by `.github/workflows/appstore-media.yml` → `Scripts/generate-
 | 6.5" framed | 1284 × 2778 | `appstore-screenshots-framed` → `6.5-inch_1284x2778/` |
 | Plain (unframed) at exact sizes, plus raw captures | both | `appstore-screenshots-plain` |
 
-Order: 01 Cast · **02 Paywall ("Pay once. Keep it forever." + "No subscriptions")** · 03 Car display · 04 Drive · 05 Widgets · 06 Sounds · 07 Me.
+Committed final PNGs (classic UI, captured on the iOS Simulator by the workflow with `-seedDemoData`):
+`AppStoreMedia/screenshots/<size>/` (framed, upload these) and `AppStoreMedia/screenshots/<size>_plain/` (unframed).
+
+| # | File | Screen (launch args) | Headline / subline |
+|---|---|---|---|
+| 01 | `01_cast.png` | Cast home (`-initialTab cast`) | Your videos. On the car screen. / Playlists, your files and photos. For passengers and parked breaks. |
+| 02 | `02_paywall.png` | Paywall, USD 19.99 one-time (`-showPaywall`) | Pay once. Keep it forever. / No subscriptions. One USD 19.99 purchase unlocks DashCast Pro. |
+| 03 | `03_sources.png` | Media sources with the bundled demo videos only (`-showMediaSources`) | Bring your own sources / M3U playlists, Jellyfin and Emby servers. Shown here with built-in demo videos. |
+| 04 | `04_player.png` | Player playing the bundled `night_drive.mp4` (`-playDemoVideo`) | A big, simple player / AirPlay, a cable or screen mirroring to the car display. |
+| 05 | `05_drive.png` | Drive trip summary for the seeded trip, with route map (`-initialTab drive -showLatestTrip`) | Every drive, mapped / Automatic trips with route, speed and a driving score. |
+| 06 | `06_widgets.png` | Widget editor (`-showWidgetEditor`) | Design your dashboard / Pick a car, add widgets and stickers. |
+| 07 | `07_onboarding.png` | Onboarding page 1 (`-showOnboarding`) | Set up in seconds / No account. Everything stays on your iPhone. |
+
+Sizes: `6.9-inch_1320x2868/` (1320 × 2868) and `6.5-inch_1284x2778/` (1284 × 2778). Seven images each, from App Store Media run 41987342797.
+
+Known issues in the current captures (classic UI is frozen under D10, so the owner must approve any fix):
+- 01 Cast and 04 Player show the in-app labels **"CarPlay Screen"** and "AirPlay / CarPlay audio" in the connection illustration. Before upload, either change those labels or leave out 01 and 04.
+- 06 Widgets shows a bundled car image with a faint manufacturer name behind the plate. Check that it isn't a third-party brand.
+- 02 Paywall says "Shared with your family through Family Sharing". Keep it only if Family Sharing is turned on in App Store Connect.
 Every frame has the footer *"For passengers & parked use only. Never watch while driving."*
 
 **Before uploading, check each screenshot** (Guidelines 2.3.3, 2.3.7, 5.2): no third-party logos (Netflix,

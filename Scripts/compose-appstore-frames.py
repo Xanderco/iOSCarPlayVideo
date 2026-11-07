@@ -20,12 +20,14 @@ SIZES = {
 }
 
 HEADLINES = {
-    "home": ("Your videos.\nYour car screen.", "Playlists, IPTV and local files, ready when you park."),
-    "cardisplay": ("Made for the\ncar display", "A big, beautiful player for passengers and parked breaks."),
-    "library": ("Bring your\nown library", "Jellyfin and Emby servers, QR playlist import."),
-    "cast": ("Cast it\nyour way", "AirPlay, a cable or screen mirroring."),
-    "paywall": ("Pay once.\nKeep it forever.", "No subscriptions. One purchase unlocks DashCast Pro."),
-    "settings": ("Private by\ndesign", "No account. Everything stays on your iPhone."),
+    # Classic UI (Cast, Drive, Widgets, Sounds, Me). Honest copy: no "CarPlay", no third-party brands.
+    "cast": ("Your videos.\nOn the car screen.", "Playlists, your files and photos. For passengers and parked breaks."),
+    "paywall": ("Pay once.\nKeep it forever.", "No subscriptions. One USD 19.99 purchase unlocks DashCast Pro."),
+    "sources": ("Bring your\nown sources", "M3U playlists, Jellyfin and Emby servers. Shown here with built-in demo videos."),
+    "player": ("A big, simple\nplayer", "AirPlay, a cable or screen mirroring to the car display."),
+    "drive": ("Every drive,\nmapped", "Automatic trips with route, speed and a driving score."),
+    "widgets": ("Design your\ndashboard", "Pick a car, add widgets and stickers."),
+    "onboarding": ("Set up in\nseconds", "No account. Everything stays on your iPhone."),
 }
 FOOTNOTE = "For passengers & parked use only. Never watch while driving."
 
