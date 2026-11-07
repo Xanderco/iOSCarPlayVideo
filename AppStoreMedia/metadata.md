@@ -116,9 +116,9 @@ FREE VS PRO
 PRIVACY
 No account. No ads. No tracking. No analytics. Your playlists, history and trips stay on your iPhone. Location is used on the device to show speed and trip stats and is never uploaded.
 
-Privacy Policy: https://dashcast.app/privacy
+Privacy Policy: https://xanderco.github.io/iOSCarPlayVideo/privacy.html
 Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Support: https://dashcast.app/support
+Support: https://xanderco.github.io/iOSCarPlayVideo/support.html
 
 DISCLAIMER
 DashCast is a media player only. It does not include or provide any TV channels, playlists or video content. You are responsible for having the rights to the content you add. DashCast is not affiliated with any broadcaster, streaming service or car maker.
@@ -153,14 +153,16 @@ m3u,m3u8,iptv,player,video,stream,playlist,hls,car,screen,display,passenger,park
 
 ---
 
-## 6. URLs (placeholders, must be live before submission)
+## 6. URLs (GitHub Pages, deployed from `docs/site/` by `.github/workflows/pages.yml`)
 
 | Field | URL |
 |---|---|
-| Support URL | `https://dashcast.app/support` *(placeholder: needs a contact email or form)* |
-| Marketing URL | `https://dashcast.app` *(optional)* |
-| Privacy Policy URL | `https://dashcast.app/privacy` *(placeholder: needs a hosted page saying no data is collected)* |
-| Terms of Use / EULA | Apple Standard EULA: `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`. Keep the App Store Connect "License Agreement" set to Apple's standard EULA, or upload a custom one and update `LegalLinks.termsOfUse`. |
+| Support URL | `https://xanderco.github.io/iOSCarPlayVideo/support.html` (FAQ + contact alexbh987@gmail.com) |
+| Marketing URL | `https://xanderco.github.io/iOSCarPlayVideo/` *(optional)* |
+| Privacy Policy URL | `https://xanderco.github.io/iOSCarPlayVideo/privacy.html` (no data collected; matches §8) |
+| Terms of Use / EULA | Apple Standard EULA: `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`. Keep the App Store Connect "License Agreement" set to Apple's standard EULA, or upload a custom one and update `LegalLinks.termsOfUse`. App-specific terms that reference the Standard EULA: `https://xanderco.github.io/iOSCarPlayVideo/terms.html` (`LegalLinks.appTerms`).
+
+> Live only after the owner enables Pages (Settings → Pages → Source: **GitHub Actions**) and `docs/site` reaches `main` (or run the workflow manually). Pages on a private repo needs a paid GitHub plan. |
 
 The same URLs are in the app (`DashCast/Core/Legal/LegalLinks.swift`): Me → Settings → Legal, Me → About and the paywall footer.
 
