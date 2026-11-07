@@ -6,6 +6,7 @@ public struct WidgetsHomeView: View {
     @State private var showingEditor: Bool = false
     @State private var editingWidget: WidgetConfigModel?
     @State private var showingCarPlayGuide: Bool = false
+    @State private var showingDoodleEditor: Bool = false
 
     private let catalog = VehicleCatalogService.shared
 
@@ -35,6 +36,16 @@ public struct WidgetsHomeView: View {
                                     .foregroundStyle(Color.dashYellow)
                             }
                         }
+
+                        // Home Screen / CarPlay "Photo / Doodle" widget
+                        Button {
+                            showingDoodleEditor = true
+                        } label: {
+                            Label("Photo / Doodle widget", systemImage: "scribble.variable")
+                                .font(ThemeFonts.hudCaption(size: 14))
+                                .foregroundStyle(Color.dashYellow)
+                        }
+                        .accessibilityIdentifier("doodleWidgetButton")
 
                         // Plate Widgets Section
                         plateWidgetsSection
@@ -120,6 +131,9 @@ public struct WidgetsHomeView: View {
                     savedWidgets.insert(saved, at: 0)
                     PersistenceController.shared.saveWidgets(savedWidgets)
                 }
+            }
+            .sheet(isPresented: $showingDoodleEditor) {
+                DoodleEditorView()
             }
             .alert("Add Widgets to CarPlay", isPresented: $showingCarPlayGuide) {
                 Button("Got it", role: .cancel) {}
