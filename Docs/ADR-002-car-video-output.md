@@ -132,7 +132,9 @@ The owner's own car shows the competitor **CarDash** as a CarPlay app with tabs 
 
 **Exact entitlement to request (owner priority: appear on the car dashboard):** **CarPlay Audio, `com.apple.developer.carplay-audio`**, at <https://developer.apple.com/contact/carplay/> (category "Audio"). It makes DashCast appear on the home screen of every CarPlay car; video still reaches the car screen through AirPlay video while parked. The **Video App** entitlement (key not published; expected `com.apple.developer.carplay-video`, take it from the granted profile) is the later option once cars ship "video in the car" — it cannot be combined with Audio, so it would replace it. Neither gives a drawable window; the `CPWindow` renderer stays dormant unless Apple ever grants a window. Simulator builds already carry the Audio key (`DashCast/DashCast-Simulator.entitlements`).
 
-### 7.3 Ready-to-paste justification — Video App entitlement (later; for the Audio request use the text in `Docs/CarPlay.md`)
+### 7.3 Ready-to-paste justification — Video App entitlement (superseded)
+
+**Superseded 2026-11-05 (Session 20):** paste the text in `Docs/CarPlay-Video-Entitlement-Request.md` §2 instead. The text below is kept for history; do not submit it (it mentions showing the iPhone screen and says "drivers").
 
 > DashCast is a parked-use video companion for CarPlay. It lets drivers and passengers browse their own video library (local files, their own Jellyfin/Emby servers and playlists they add) on the CarPlay display and play it through AirPlay video in the car **only while the vehicle is parked**. DashCast already ships AirPlay video support (AVPlayer external playback, AVRoutePickerView with video devices prioritised) and a ReplayKit broadcast extension so a parked user can show their own iPhone screen on the car display.
 >

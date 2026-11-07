@@ -1,5 +1,11 @@
 # DashCast on CarPlay
 
+> **Video entitlement request (Session 20):** the full form walkthrough, ready-to-paste answers,
+> Apple's checklist and the after-approval steps for the CarPlay **Video** category
+> (`com.apple.developer.carplay-video`) are in
+> [`Docs/CarPlay-Video-Entitlement-Request.md`](CarPlay-Video-Entitlement-Request.md).
+> Video and Audio cannot be combined (CarPlay Developer Guide, October 2026).
+
 ## What the owner must request from Apple (to appear on a REAL car dashboard)
 
 **Request the CarPlay _Video_ app entitlement: `com.apple.developer.carplay-video` (category "Video").**
@@ -22,23 +28,11 @@ a Video app only appears in cars whose head unit advertises video playback ("vid
 playback is **parked only**, through the **system video player** fed by AirPlay/AVPlayer video.
 No CarPlay category gives a free drawing window except Navigation (`carplay-maps`) — do not request it.
 
-Ready-to-paste justification (Video):
-
-> DashCast is a parked-use video companion for CarPlay. It lets drivers and passengers browse their own
-> video library (local files, their own Jellyfin/Emby servers and playlists they add) on the CarPlay
-> display and play it through AirPlay video in the car **only while the vehicle is parked**. DashCast
-> already ships AirPlay video support (AVPlayer external playback, AVRoutePickerView with video devices
-> prioritised) and a ReplayKit broadcast extension so a parked user can show their own iPhone screen on
-> the car display.
->
-> We request the CarPlay video app entitlement to provide the browsing experience required for video
-> apps: a tab bar with Library, Favorites and Cast list/grid templates, using CPPlaybackConfiguration
-> and the system video player. Safety: DashCast enforces parked-only use on its own in addition to the
-> system — it watches GPS speed and Core Motion automotive activity and pauses playback and ends screen
-> broadcasts as soon as the vehicle moves; the car screen then shows a "paused while moving" message
-> and no video. When the car reports that video is unavailable, playback falls back to audio-only as
-> required. DashCast does not provide DRM streaming services, does not ship third-party channels, and
-> does not show any interactive UI on the car display beyond the CarPlay templates.
+Ready-to-paste justification (Video): **use `Docs/CarPlay-Video-Entitlement-Request.md` §1 and §2**
+(Session 20). It replaces the earlier text that was here: that text said "drivers", described
+showing the iPhone screen on the car display and used marketing phrasing, which are the things most
+likely to get a CarPlay request refused. The new doc also lists every form field, Apple's checklist
+and the after-approval steps.
 
 ## Mirror iPhone → CarPlay screen: how it works (ADR-002 §7.5, built)
 
