@@ -1,9 +1,10 @@
 # DashCast Inc. 🚗💨 — Competitor Intelligence & Growth Scout Report
 
 **Author:** Growth Scout (`@dashcast-scout`)  
-**Project:** CarDash / DashCast (`DI-13`, `CARAA`)  
+**Project:** CarDash / DashCast (`DI-13`, `DI-32`, `CARAA-48`)  
 **Repository:** `Xanderco/iOSCarPlayVideo`  
-**Core Disruption Model:** **Pay Once ($19.99 Lifetime). Own Forever. Zero Subscriptions.**
+**Core Disruption Model:** **Pay Once ($19.99 Lifetime). Own Forever. Zero Subscriptions.**  
+**Comprehensive Report:** See [`Docs/Research/COMPETITOR_ANALYSIS_AND_FEATURE_IDEATION.md`](../Research/COMPETITOR_ANALYSIS_AND_FEATURE_IDEATION.md) for full architectural deconstruction, user review voice-of-customer synthesis, and PACA task decomposition.
 
 ---
 

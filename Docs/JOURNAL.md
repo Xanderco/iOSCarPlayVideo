@@ -92,6 +92,25 @@
 
 ## Log
 
+### 2026-11-23 11:15 (Bogotá) — Research: Competitor Analysis & Strategic Feature Ideation [CARAA-48] [DI-32]
+- **Delivered comprehensive competitive intelligence and feature ideation report** (`Docs/Research/COMPETITOR_ANALYSIS_AND_FEATURE_IDEATION.md`).
+- **Surveillance Scope**: Deconstructed CarDash (Laigang Wang), CarTV (Lyntra / @cartv_cast2car), PlayCar/CarTube, and Apple CarPlay entitlement ecosystem.
+- **Key Findings**:
+  - Subscription fatigue is severe in the car streaming segment ($9.99/mo or $49.99/yr for screen mirroring utilities). DashCast's **$19.99 Lifetime (`pro.lifetime`)** model is our primary commercial moat.
+  - Wireless CarPlay Wi-Fi channel contention causes frequent 1080p frame drops and audio sync drift; requires adaptive bitrate scaling.
+  - FairPlay DRM confusion leads to user 1-star reviews on competitors; DashCast clearly communicates passenger stream scopes (M3U, Jellyfin, Web, Camera).
+- **Keep, Kill, Disrupt Strategy**:
+  - *Keep*: Classic 5-tab architecture (D10), IPTV engine, automated drive tracking, low-latency H.264 CarPlay video server.
+  - *Kill*: Competitor 1:1 copies (D2), subscriptions (D1), hexagon territory conquest (D3), DRM bypass attempts (D5).
+  - *Disrupt*: $19.99 Lifetime pass, GhostCast adaptive bitrate engine, community startup soundboard, 9:16 social score card export, and offline deadzone preloading.
+- **Decomposed into 5 high-priority engineering/design follow-ups**:
+  - `DI-46`: GhostCast Adaptive Bitrate & Wi-Fi Buffer Tuning
+  - `DI-47`: Custom Audio Importer & CarPlay Connection Chime Trigger
+  - `DI-48`: 9:16 Social Story Score Card Image Renderer & ShareSheet
+  - `DI-49`: Offline Stream Cache & Rolling Highway Buffer Window
+  - `DI-50`: Passenger Video Split-Screen & Head-Unit Status Bar Overlay
+- **Base branch**: `feature/DI-32-competitor-analysis-feature-ideation` based on `origin/main`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
