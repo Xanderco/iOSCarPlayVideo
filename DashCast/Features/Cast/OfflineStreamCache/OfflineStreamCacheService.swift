@@ -49,8 +49,9 @@ public final class OfflineStreamCacheService: ObservableObject {
             self.cacheDirectory = caches.appendingPathComponent("DashCastStreamCache", isDirectory: true)
         }
 
-        self.quotaSizeBytes = min(Self.absoluteMaxCacheBytes, max(Self.minimumCacheBytes, initialQuotaBytes))
-        self.metrics = StreamCacheStorageMetrics(maxQuotaBytes: self.quotaSizeBytes)
+        let effectiveQuota = min(Self.absoluteMaxCacheBytes, max(Self.minimumCacheBytes, initialQuotaBytes))
+        self.quotaSizeBytes = effectiveQuota
+        self.metrics = StreamCacheStorageMetrics(maxQuotaBytes: effectiveQuota)
 
         createCacheDirectoryIfNeeded()
         loadManifest()
