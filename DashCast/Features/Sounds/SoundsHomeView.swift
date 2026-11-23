@@ -1,8 +1,10 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 public struct SoundsHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var soundPlayer = SoundPlayerEngine.shared
+    @ObservedObject private var catalog = SoundCatalogService.shared
 
     @State private var connectionSoundId: String = "sport_startup"
     @State private var disconnectionSoundId: String = "airline_dingy"
@@ -11,8 +13,10 @@ public struct SoundsHomeView: View {
     @State private var showingSoundPickerForSlot: String? = nil
     @State private var soundSearchText: String = ""
     @State private var pickerCategory: String = "Recommend"
-
-    private let catalog = SoundCatalogService.shared
+    @State private var showingFileImporter: Bool = false
+    @State private var importErrorMessage: String? = nil
+    @State private var showingErrorAlert: Bool = false
+    @State private var isImporting: Bool = false
 
     public init() {}
 
@@ -22,11 +26,14 @@ public struct SoundsHomeView: View {
                 Color.dashBackground.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 20) {
-                        // Top Sound Triggers (Disconnection, Home Arrival)
+                    VStack(spacing: 24) {
+                        // Top Sound Triggers (CarPlay Connection, Disconnection, Home Arrival)
                         topTriggerCards
 
-                        // Section: Top trending
+                        // Section: Custom Audio Clips (WAV/MP3/M4A)
+                        customClipsSection
+
+                        // Section: Top trending presets
                         topTrendingSection
 
                         // Spacer for bottom sticky button and capsule bar
@@ -83,6 +90,18 @@ public struct SoundsHomeView: View {
             )) { slot in
                 soundPickerSheet(for: slot.id)
             }
+            .fileImporter(
+                isPresented: $showingFileImporter,
+                allowedContentTypes: [.audio, .wav, .mp3, .mpeg4Audio],
+                allowsMultipleSelection: false
+            ) { result in
+                handleFileImportResult(result)
+            }
+            .alert("Import Failed", isPresented: $showingErrorAlert) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(importErrorMessage ?? "An unknown error occurred while importing audio.")
+            }
             .onAppear {
                 loadPreferences()
             }
@@ -93,6 +112,16 @@ public struct SoundsHomeView: View {
 
     private var topTriggerCards: some View {
         VStack(spacing: 12) {
+            // Primary: CarPlay Connection Chime
+            triggerCard(
+                icon: "bolt.car.fill",
+                iconColor: Color.dashYellow,
+                title: "CarPlay Connection Chime",
+                subtitle: "Plays when CarPlay or Bluetooth connects",
+                currentSoundId: connectionSoundId,
+                slotKey: "connection"
+            )
+
             // Disconnection Sound Card
             triggerCard(
                 icon: "stop.circle.fill",
@@ -127,50 +156,77 @@ public struct SoundsHomeView: View {
         let sound = catalog.sounds.first(where: { $0.id == currentSoundId })
         let isPlaying = soundPlayer.currentlyPlayingId == currentSoundId
 
-        return HStack(spacing: 14) {
-            Button {
-                if let sound {
-                    soundPlayer.play(sound: sound)
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 14) {
+                Button {
+                    if let sound {
+                        soundPlayer.play(sound: sound)
+                    }
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(iconColor.opacity(0.22))
+                            .frame(width: 46, height: 46)
+
+                        Image(systemName: isPlaying ? "stop.fill" : (slotKey == "arrival" ? "house.fill" : "play.fill"))
+                            .font(.system(size: 20))
+                            .foregroundStyle(iconColor)
+                    }
                 }
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(iconColor.opacity(0.25))
-                        .frame(width: 46, height: 46)
 
-                    Image(systemName: isPlaying ? "stop.fill" : (slotKey == "arrival" ? "house.fill" : "play.fill"))
-                        .font(.system(size: 20))
-                        .foregroundStyle(iconColor)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Color.dashTextPrimary)
+
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.dashTextSecondary)
+
+                    if let sound {
+                        HStack(spacing: 6) {
+                            Text("Selected: \(sound.title)")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(Color.dashYellow)
+
+                            if sound.isCustom {
+                                Text("CUSTOM")
+                                    .font(.system(size: 8, weight: .bold))
+                                    .padding(.horizontal, 5)
+                                    .padding(.vertical, 2)
+                                    .background(Color.dashYellow.opacity(0.2))
+                                    .foregroundStyle(Color.dashYellow)
+                                    .clipShape(Capsule())
+                            }
+                        }
+                    }
                 }
-            }
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundStyle(Color.dashTextPrimary)
+                Spacer()
 
-                Text(subtitle)
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.dashTextSecondary)
-
-                if let sound {
-                    Text("Selected: \(sound.title)")
-                        .font(.system(size: 10, weight: .semibold))
+                Button {
+                    showingSoundPickerForSlot = slotKey
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 14, weight: .bold))
                         .foregroundStyle(Color.dashYellow)
+                        .frame(width: 32, height: 32)
+                        .background(Color.dashSurfaceHighlight)
+                        .clipShape(Circle())
                 }
             }
 
-            Spacer()
-
-            Button {
-                showingSoundPickerForSlot = slotKey
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Color.dashYellow)
-                    .frame(width: 32, height: 32)
-                    .background(Color.dashSurfaceHighlight)
-                    .clipShape(Circle())
+            // Waveform visualizer strip for the selected sound
+            if let sound {
+                AudioWaveformView(
+                    samples: sound.waveformSamples,
+                    isPlaying: isPlaying,
+                    tintColor: iconColor,
+                    barSpacing: 2.0,
+                    barCornerRadius: 1.5
+                )
+                .frame(height: 20)
+                .padding(.top, 2)
             }
         }
         .padding(14)
@@ -178,7 +234,185 @@ public struct SoundsHomeView: View {
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(Color.dashBorder, lineWidth: 1)
+                .stroke(slotKey == "connection" ? Color.dashYellow.opacity(0.4) : Color.dashBorder, lineWidth: 1)
+        )
+    }
+
+    // MARK: - Custom Audio Clips Section
+
+    private var customClipsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Custom Audio Clips")
+                    .font(ThemeFonts.hudTitle(size: 18))
+                    .foregroundStyle(Color.dashTextPrimary)
+
+                Spacer()
+
+                Button {
+                    showingFileImporter = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 11, weight: .bold))
+                        Text("Import Audio")
+                            .font(.system(size: 12, weight: .bold))
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Color.dashYellow)
+                    .foregroundStyle(Color.black)
+                    .clipShape(Capsule())
+                }
+            }
+            .padding(.horizontal, 16)
+
+            if catalog.customSounds.isEmpty {
+                // Empty state card encouraging driver customization
+                Button {
+                    showingFileImporter = true
+                } label: {
+                    VStack(spacing: 8) {
+                        Image(systemName: "waveform.badge.plus")
+                            .font(.system(size: 28))
+                            .foregroundStyle(Color.dashYellow)
+
+                        Text("Import Custom Exhaust or Chime")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(Color.dashTextPrimary)
+
+                        Text("Upload your favorite WAV, MP3, or M4A clip (V8 rev, turbo blow-off, or custom chime) to play on CarPlay connection.")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.dashTextSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 12)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                    .background(Color.dashSurface.opacity(0.6))
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.dashBorder, style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
+                    )
+                    .padding(.horizontal, 16)
+                }
+                .buttonStyle(.plain)
+            } else {
+                VStack(spacing: 10) {
+                    ForEach(catalog.customSounds) { sound in
+                        customSoundRow(sound: sound)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+    }
+
+    private func customSoundRow(sound: SoundEffectItem) -> some View {
+        let isPlaying = soundPlayer.currentlyPlayingId == sound.id
+        let isConnection = connectionSoundId == sound.id
+
+        return HStack(spacing: 12) {
+            Button {
+                soundPlayer.play(sound: sound)
+            } label: {
+                Image(systemName: isPlaying ? "stop.circle.fill" : "play.circle.fill")
+                    .font(.system(size: 30))
+                    .foregroundStyle(Color.dashYellow)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(sound.title)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Color.dashTextPrimary)
+                        .lineLimit(1)
+
+                    if isConnection {
+                        Text("ACTIVE CHIME")
+                            .font(.system(size: 8, weight: .heavy))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.dashYellow)
+                            .foregroundStyle(Color.black)
+                            .clipShape(Capsule())
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    Text("\(sound.durationString)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(Color.dashTextSecondary)
+
+                    Text("•")
+                        .font(.system(size: 8))
+                        .foregroundStyle(Color.dashTextMuted)
+
+                    Text("Auto-Normalized")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Color.dashGreen)
+                }
+
+                AudioWaveformView(
+                    samples: sound.waveformSamples,
+                    isPlaying: isPlaying,
+                    tintColor: Color.dashYellow,
+                    barSpacing: 2.0,
+                    barCornerRadius: 1.0
+                )
+                .frame(height: 18)
+                .padding(.top, 2)
+            }
+
+            Spacer()
+
+            Menu {
+                Button {
+                    connectionSoundId = sound.id
+                    savePreferences()
+                } label: {
+                    Label("Set as Connection Chime", systemImage: "bolt.car")
+                }
+
+                Button {
+                    disconnectionSoundId = sound.id
+                    savePreferences()
+                } label: {
+                    Label("Set as Disconnection Sound", systemImage: "stop.circle")
+                }
+
+                Button {
+                    homeArrivalSoundId = sound.id
+                    savePreferences()
+                } label: {
+                    Label("Set as Arrival Sound", systemImage: "house")
+                }
+
+                Divider()
+
+                Button(role: .destructive) {
+                    try? catalog.deleteCustomSound(id: sound.id)
+                    if connectionSoundId == sound.id {
+                        connectionSoundId = "jet_startup"
+                        savePreferences()
+                    }
+                } label: {
+                    Label("Delete Clip", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle.fill")
+                    .font(.system(size: 22))
+                    .foregroundStyle(Color.dashTextSecondary)
+                    .padding(6)
+            }
+        }
+        .padding(12)
+        .background(Color.dashSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isConnection ? Color.dashYellow.opacity(0.5) : Color.dashBorder, lineWidth: 1)
         )
     }
 
@@ -192,7 +426,7 @@ public struct SoundsHomeView: View {
                 .padding(.horizontal, 16)
 
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                ForEach(catalog.sounds) { sound in
+                ForEach(catalog.presetSounds) { sound in
                     trendingSoundTile(sound: sound)
                 }
             }
@@ -216,7 +450,7 @@ public struct SoundsHomeView: View {
                 .offset(x: -8, y: 12)
 
             // Content
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Button {
                         soundPlayer.play(sound: sound)
@@ -229,7 +463,7 @@ public struct SoundsHomeView: View {
                     Spacer()
 
                     Menu {
-                        Button("Set as Connection Sound") {
+                        Button("Set as Connection Chime") {
                             connectionSoundId = sound.id
                             savePreferences()
                         }
@@ -260,8 +494,18 @@ public struct SoundsHomeView: View {
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(Color.white.opacity(0.75))
                 }
+
+                // Mini Waveform preview on tile
+                AudioWaveformView(
+                    samples: sound.waveformSamples,
+                    isPlaying: isPlaying,
+                    tintColor: Color.white.opacity(0.85),
+                    barSpacing: 1.5,
+                    barCornerRadius: 1.0
+                )
+                .frame(height: 14)
             }
-            .padding(12)
+            .padding(10)
         }
     }
 
@@ -291,11 +535,18 @@ public struct SoundsHomeView: View {
         }
     }
 
-    // MARK: - Sound Picker Sheet (Matching Select CarPlay Connection Sound.jpeg)
+    // MARK: - Sound Picker Sheet
 
     private func soundPickerSheet(for slot: String) -> some View {
-        let title = slot == "disconnection" ? "Select Disconnection Sound" : "Select Connection Sound"
-        let categories = ["Recommend", "All", "Brands", "Voices", "Engine", "Futuristic"]
+        let title: LocalizedStringKey = {
+            switch slot {
+            case "connection": return "Select Connection Chime"
+            case "disconnection": return "Select Disconnection Sound"
+            default: return "Select Arrival Sound"
+            }
+        }()
+
+        let categories = ["Recommend", "All", "Custom", "Engine", "Voices", "Futuristic", "Chimes", "Cinematic"]
 
         return NavigationStack {
             ZStack(alignment: .bottom) {
@@ -352,14 +603,24 @@ public struct SoundsHomeView: View {
                     ScrollView {
                         VStack(spacing: 10) {
                             let list = catalog.sounds.filter { sound in
-                                let matchesCategory = (pickerCategory == "All" || pickerCategory == "Recommend") || sound.category.rawValue.lowercased().contains(pickerCategory.lowercased())
+                                let matchesCategory: Bool = {
+                                    if pickerCategory == "All" || pickerCategory == "Recommend" {
+                                        return true
+                                    }
+                                    if pickerCategory == "Custom" {
+                                        return sound.isCustom
+                                    }
+                                    return sound.category.rawValue.lowercased().contains(pickerCategory.lowercased())
+                                }()
                                 let matchesSearch = soundSearchText.isEmpty || sound.title.localizedCaseInsensitiveContains(soundSearchText)
                                 return matchesCategory && matchesSearch
                             }
 
                             ForEach(list) { sound in
                                 Button {
-                                    if slot == "disconnection" {
+                                    if slot == "connection" {
+                                        connectionSoundId = sound.id
+                                    } else if slot == "disconnection" {
                                         disconnectionSoundId = sound.id
                                     } else {
                                         homeArrivalSoundId = sound.id
@@ -377,18 +638,48 @@ public struct SoundsHomeView: View {
                                         }
 
                                         VStack(alignment: .leading, spacing: 3) {
-                                            Text(sound.title)
-                                                .font(.system(size: 15, weight: .semibold))
-                                                .foregroundStyle(Color.dashTextPrimary)
+                                            HStack(spacing: 6) {
+                                                Text(sound.title)
+                                                    .font(.system(size: 15, weight: .semibold))
+                                                    .foregroundStyle(Color.dashTextPrimary)
+
+                                                if sound.isCustom {
+                                                    Text("CUSTOM")
+                                                        .font(.system(size: 8, weight: .bold))
+                                                        .padding(.horizontal, 4)
+                                                        .padding(.vertical, 1)
+                                                        .background(Color.dashYellow.opacity(0.2))
+                                                        .foregroundStyle(Color.dashYellow)
+                                                        .clipShape(Capsule())
+                                                }
+                                            }
 
                                             Text("\(sound.category.rawValue) · \(sound.durationString)")
                                                 .font(.system(size: 11))
                                                 .foregroundStyle(Color.dashTextSecondary)
+
+                                            AudioWaveformView(
+                                                samples: sound.waveformSamples,
+                                                isPlaying: soundPlayer.currentlyPlayingId == sound.id,
+                                                tintColor: Color.dashYellow.opacity(0.8),
+                                                barSpacing: 1.5,
+                                                barCornerRadius: 1.0
+                                            )
+                                            .frame(height: 12)
+                                            .padding(.top, 1)
                                         }
 
                                         Spacer()
 
-                                        let isSelected = (slot == "disconnection" ? disconnectionSoundId : homeArrivalSoundId) == sound.id
+                                        let currentSelectedId: String = {
+                                            switch slot {
+                                            case "connection": return connectionSoundId
+                                            case "disconnection": return disconnectionSoundId
+                                            default: return homeArrivalSoundId
+                                            }
+                                        }()
+                                        let isSelected = currentSelectedId == sound.id
+
                                         Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                                             .font(.system(size: 18))
                                             .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextMuted)
@@ -415,7 +706,7 @@ public struct SoundsHomeView: View {
                 Button {
                     showingSoundPickerForSlot = nil
                 } label: {
-                    Text("Select a sound")
+                    Text("Close")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Color.black)
                         .frame(maxWidth: .infinity)
@@ -439,7 +730,44 @@ public struct SoundsHomeView: View {
                             .foregroundStyle(Color.dashYellow)
                     }
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingFileImporter = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.down")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(Color.dashYellow)
+                    }
+                }
             }
+        }
+    }
+
+    // MARK: - File Import Handler
+
+    private func handleFileImportResult(_ result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+            Task {
+                do {
+                    let imported = try await catalog.importCustomAudio(from: url)
+                    await MainActor.run {
+                        // Automatically set newly imported custom sound as the CarPlay connection chime
+                        self.connectionSoundId = imported.id
+                        self.savePreferences()
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.importErrorMessage = error.localizedDescription
+                        self.showingErrorAlert = true
+                    }
+                }
+            }
+        case .failure(let error):
+            importErrorMessage = error.localizedDescription
+            showingErrorAlert = true
         }
     }
 
@@ -457,6 +785,8 @@ public struct SoundsHomeView: View {
             return LinearGradient(colors: [Color(red: 0.15, green: 0.35, blue: 0.6), Color(red: 0.04, green: 0.1, blue: 0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
         case .cinematic:
             return LinearGradient(colors: [Color(red: 0.35, green: 0.15, blue: 0.5), Color(red: 0.1, green: 0.04, blue: 0.15)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        case .custom:
+            return LinearGradient(colors: [Color(red: 0.65, green: 0.55, blue: 0.05), Color(red: 0.18, green: 0.15, blue: 0.02)], startPoint: .topLeading, endPoint: .bottomTrailing)
         default:
             return LinearGradient(colors: [Color.dashSurfaceHighlight, Color.dashSurface], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
@@ -469,6 +799,7 @@ public struct SoundsHomeView: View {
         case .futuristic: return "airplane"
         case .chimes: return "bell.fill"
         case .cinematic: return "film.fill"
+        case .custom: return "waveform.badge.plus"
         default: return "speaker.wave.3.fill"
         }
     }

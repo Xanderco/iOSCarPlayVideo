@@ -64,12 +64,14 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
 
         configureRemoteCommands()
         observePlayer()
+        CarPlayConnectionChimeService.shared.handleCarPlayConnected()
     }
 
     public func templateApplicationScene(
         _ templateApplicationScene: CPTemplateApplicationScene,
         didDisconnectInterfaceController interfaceController: CPInterfaceController
     ) {
+        CarPlayConnectionChimeService.shared.handleCarPlayDisconnected()
         if let playlistObserver {
             NotificationCenter.default.removeObserver(playlistObserver)
         }

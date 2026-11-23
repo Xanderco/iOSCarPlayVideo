@@ -92,6 +92,18 @@
 
 ## Log
 
+### 2026-11-23 14:45 (Bogotá) — [Sounds] Custom Audio Importer & CarPlay Connection Chime Trigger [CARAA-51] [DI-47]
+- **Delivered Custom Audio Import & Management**:
+  - Implemented `AudioWaveformService` with fast PCM bucket downsampling, peak/RMS amplitude calculation, and volume normalization gain targeting -1.4 dBFS (0.85).
+  - Implemented `AudioWaveformView` SwiftUI component rendering glowing neon waveform bars matching DashCast Electric Racing Yellow theme.
+  - Expanded `SoundCatalogService` with `.custom` category, document file importer support for `.wav`, `.mp3`, `.m4a`, sandbox storage in `CustomSounds/`, JSON manifest persistence (`custom_sounds_manifest.json`), and custom audio deletion.
+  - Upgraded `SoundPlayerEngine` to play imported audio files with `AVAudioPlayer` and normalized gain scaling alongside synthetic tones, with automatic audio session activation under `.playback` and `.duckOthers`.
+  - Added `CarPlayConnectionChimeService` monitoring `AVAudioSession.routeChangeNotification` for `.carAudio`, `.bluetoothA2DP`, `.bluetoothHFP`, and hooking `CarPlaySceneDelegate` `didConnect`/`didDisconnect` with 4s debounce protection.
+  - Enhanced `SoundsHomeView` with dedicated "CarPlay Connection Chime" primary trigger card, "Custom Audio Clips" section, file picker, and category filtering in sound selection sheet.
+  - Localized 12 new strings across English and Spanish in `Localizable.xcstrings`.
+  - Added comprehensive test suite `CustomAudioImporterTests.swift` covering audio analysis, volume normalization, import lifecycle, rejection of invalid files, and CarPlay trigger events.
+- **Base branch**: `claude/classic-ui`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
