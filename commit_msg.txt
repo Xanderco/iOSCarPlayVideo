@@ -1,0 +1,6 @@
+fix(sounds): correct AVAudioFile read argument label and WAV settings in tests [CARAA-51] [DI-47]
+
+- Fix read argument label to frameCount in AudioWaveformService
+- Configure 16-bit linear PCM settings with Float32 buffer format for synthetic WAV generation in unit tests
+
+Co-Authored-By: Paperclip <noreply@paperclip.ing>

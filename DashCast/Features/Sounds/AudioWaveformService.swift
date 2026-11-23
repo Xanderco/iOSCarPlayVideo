@@ -67,7 +67,7 @@ public final class AudioWaveformService {
         }
 
         do {
-            try audioFile.read(into: pcmBuffer, frames: maxFramesToRead)
+            try audioFile.read(into: pcmBuffer, frameCount: maxFramesToRead)
         } catch {
             throw AudioAnalysisError.invalidAudioFile
         }

@@ -24,18 +24,27 @@ final class CustomAudioImporterTests: XCTestCase {
         let url = tempDir.appendingPathComponent("test_audio_\(UUID().uuidString).wav")
 
         let sampleRate = 44100.0
-        guard let format = AVAudioFormat(
-            commonFormat: .pcmFormatFloat32,
-            sampleRate: sampleRate,
-            channels: 1,
-            interleaved: false
-        ) else {
+        let settings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVSampleRateKey: sampleRate,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsFloatKey: false,
+            AVLinearPCMIsBigEndianKey: false
+        ]
+
+        guard let bufferFormat = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1) else {
             throw NSError(domain: "CustomAudioImporterTests", code: -1, userInfo: nil)
         }
 
-        let audioFile = try AVAudioFile(forWriting: url, settings: format.settings)
+        let audioFile = try AVAudioFile(
+            forWriting: url,
+            settings: settings,
+            commonFormat: .pcmFormatFloat32,
+            interleaved: false
+        )
         let frameCount = UInt32(sampleRate * duration)
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: bufferFormat, frameCapacity: frameCount) else {
             throw NSError(domain: "CustomAudioImporterTests", code: -2, userInfo: nil)
         }
         buffer.frameLength = frameCount
