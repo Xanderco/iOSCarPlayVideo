@@ -92,6 +92,22 @@
 
 ## Log
 
+### 2026-11-23 15:45 (Bogotá) — [Drive] 9:16 Social Story Score Card Image Renderer & ShareSheet [CARAA-52] [DI-48]
+- **Implemented 9:16 Social Story Score Card**: Designed and implemented aesthetic 1080x1920 Instagram Story & TikTok graphic card (`DriveSummaryStoryCardView.swift`) featuring:
+  - Electric Racing Yellow accent (#FFE600) on OLED Deep Black (#0C0D10) canvas with atmospheric lighting glows and subtle structural grid lines.
+  - Circular smoothness score dial (0-100) and Smoothness Badge Tier pill (`PRO PILOT`, `SMOOTH OPERATOR`, `URBAN CRUISER`, `SPIRITED DRIVER`, `TRACK DEMON`).
+  - 2x2 Telemetry metrics grid: Top Speed, Average Speed, Trip Distance, and Duration.
+  - G-force dynamics section: Peak combined G, lateral G, longitudinal G, and harsh events counter pill.
+  - Vector route gradient mapping canvas (`VectorRouteCanvas`) visualizing normalized GPS breadcrumbs with speed-tiered coloring (green/yellow/red) and fallback loop for simulated trips.
+  - DashCast watermark branding (`#DashCastDriver`, `dashcast.app // $19.99 Lifetime`, `APPLE CARPLAY TELEMETRY ENGINE // ZERO SUBSCRIPTIONS`).
+- **Off-Screen Image Renderer Service**: Created `DriveSummaryCardRendererService.swift` using SwiftUI `ImageRenderer` (iOS 16+) with deterministic `UIGraphicsImageRenderer` CoreGraphics fallback for headless test runners and background contexts. Exports high-res PNG or compressed JPEG data with an in-memory LRU cache (`NSCache`).
+- **Smoothness Scoring & G-Force Analysis**: Added `SmoothnessScorer.swift` with `SmoothnessBadgeTier` and `SmoothnessMetrics`, evaluating trip metrics and harsh event penalties.
+- **Native ShareSheet Presentation**: Created `ShareSheetView.swift` wrapping `UIActivityViewController` and `DriveSummaryActivityItemSource` with rich `LPLinkMetadata` for seamless Instagram Stories, TikTok, AirDrop, and Camera Roll sharing.
+- **Interactive Share Modal**: Added `DriveStoryShareModalView.swift` integrated into both `TripSummaryView` and `TripDetailView` with live 9:16 aspect-ratio preview, 1-tap "Share to Stories & Apps" button, and "Save Photo" button with toast notification.
+- **Permissions & Localization**: Added `NSPhotoLibraryAddUsageDescription` to `DashCast/Info.plist` and localized all user-facing strings in `Localizable.xcstrings` for English and Spanish.
+- **Testing**: Added `DashCastTests/DriveSummaryCardTests.swift` covering SmoothnessScorer penalties/floors, badge tiers, G-force tracking, trip evaluation, card data formatting (metric and imperial), JSON roundtrip serialization, off-screen 1080x1920 bitmap rendering, empty route safety, PNG/JPEG compression, caching, and activity item metadata.
+
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
