@@ -73,6 +73,8 @@
 	<string>DashCast uses the camera to scan QR codes that contain IPTV playlist links.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>DashCast accesses your photos so you can pick videos and photos to play or show on the car screen.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>DashCast saves rendered 9:16 trip score cards directly to your photo library for Instagram and TikTok sharing.</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>NSLocalNetworkUsageDescription</key>

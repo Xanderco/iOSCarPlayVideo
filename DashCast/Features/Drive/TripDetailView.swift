@@ -7,6 +7,7 @@ public struct TripDetailView: View {
     public let trip: TripModel
 
     @State private var mapMode: TripMapMode = .replay
+    @State private var showShareModal: Bool = false
 
     public init(trip: TripModel) {
         self.trip = trip
@@ -151,12 +152,72 @@ public struct TripDetailView: View {
                         }
                     }
                     .padding(.horizontal)
+
+                    // 9:16 Social Story Score Card Share CTA
+                    Button {
+                        showShareModal = true
+                    } label: {
+                        HStack(spacing: 14) {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.black.opacity(0.15))
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: "sparkles.rectangle.stack.fill")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundStyle(Color.black)
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Share 9:16 Story Card")
+                                    .font(ThemeFonts.hudStat(size: 16))
+                                    .foregroundStyle(Color.black)
+                                Text("1080x1920 Instagram Story & TikTok Score Card")
+                                    .font(ThemeFonts.hudCaption(size: 11))
+                                    .foregroundStyle(Color.black.opacity(0.75))
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(Color.black.opacity(0.85))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 14)
+                        .background(
+                            LinearGradient(
+                                colors: [Color.dashYellow, Color.dashGold],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
+                        .shadow(color: Color.dashYellow.opacity(0.3), radius: 6, y: 3)
+                    }
+                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }
         }
         .navigationTitle(trip.startTime.formatted(date: .abbreviated, time: .shortened))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showShareModal = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "square.and.arrow.up")
+                        Text("Share")
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.dashYellow)
+                }
+            }
+        }
+        .sheet(isPresented: $showShareModal) {
+            DriveStoryShareModalView(trip: trip)
+        }
     }
 
     private var scoreColor: Color {
