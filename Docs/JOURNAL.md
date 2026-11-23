@@ -92,6 +92,27 @@
 
 ## Log
 
+### 2026-11-23 16:35 (Bogotá) — [CastEngine] Offline Stream Cache & Rolling Highway Buffer Window [CARAA-53] [DI-49]
+- **Implemented Offline Stream Cache Engine (`OfflineStreamCacheService.swift`, `OfflineStreamCacheModel.swift`)**:
+  - Manages cached video streams and segmented chunk downloads in `Library/Caches/DashCastStreamCache/`.
+  - Supports HLS segmented chunk caching (.m3u8 playlist rewriting with local relative chunks) and local MP4 stream resolution.
+  - Implemented LRU (Least Recently Used) cache eviction policy enforcing user-configured storage quota (2 GB to 50 GB, default 5 GB) while strictly preserving user-pinned favorites.
+  - Provides 1-tap cache clear (`clearUnpinnedCache`) and full cache reset (`clearAllCache`).
+  - Storage metrics calculation (`StreamCacheStorageMetrics`) reporting live disk usage, quota percentage, item counts, and highway buffer status.
+- **Rolling Highway Buffer Window (`RollingHighwayBuffer.swift`)**:
+  - Introduced `BufferMode` (`.liveMirror` at 1.0s, `.standard` at 15.0s, `.highwayDeadzone` at 60.0s).
+  - Configures `playerItem.preferredForwardBufferDuration = 60.0` during highway driving, pre-buffering 60 seconds ahead to prevent stream freezing through cellular dead zones (tunnels, mountain roads, rural highways).
+  - Real-time buffer monitoring calculating forward buffer duration in seconds from `playerItem.loadedTimeRanges` and classifying `BufferHealth` (`.empty`, `.critical`, `.adequate`, `.highwayProtected`).
+  - Automatic seamless failover to local offline stream cache if network stalls or drops.
+- **Player & Settings Integration (`VideoPlayerService.swift`, `StorageQuotaManagementView.swift`, `MeHomeView.swift`)**:
+  - `VideoPlayerService` dynamically applies buffer modes, monitors forward buffer seconds periodically, and automatically falls back to offline cache upon stream failure.
+  - Built `StorageQuotaManagementView` in DashCast dark automotive styling (#0A0D0F canvas, #FFE600 accents) with neon progress bar, quota limit selector buttons (2, 5, 10, 25, 50 GB), rolling highway buffer toggle, 1-tap clear button with confirmation alerts, and interactive cached streams list with pin/delete controls.
+  - Added "Storage & Highway Cache" navigation entry with live usage badge in `MeHomeView.settingsSheet`.
+  - Expanded `UserPreferences.swift` with `highwayBufferEnabled` and `streamCacheQuotaGigabytes`.
+  - Added English and Spanish localizations in `Localizable.xcstrings`.
+- **Unit Testing (`DashCastTests/OfflineStreamCacheTests.swift`)**:
+  - Added 10 comprehensive unit tests covering cached item creation, ChannelModel resolution, storage metrics formatting/percentage calculations, LRU eviction respecting quota, pinned item protection, 1-tap unpinned cache clearing, rolling buffer durations, forward buffer calculation from loaded time ranges, buffer health states, stall fallback trigger, and UserPreferences persistence.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

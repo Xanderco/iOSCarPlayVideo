@@ -14,6 +14,7 @@ public struct MeHomeView: View {
     @State private var restoreMessage: String?
     @State private var showingDriveDetails: Bool = false
     @State private var showingMediaServers: Bool = false
+    @State private var showingStorageCache: Bool = false
     @State private var selectedVehicleIndex: Int = 0
 
     private let vehicles = VehicleCatalogService.shared.vehicles
@@ -72,6 +73,9 @@ public struct MeHomeView: View {
             }
             .sheet(isPresented: $showingMediaServers) {
                 MediaServersHomeView()
+            }
+            .sheet(isPresented: $showingStorageCache) {
+                StorageQuotaManagementView()
             }
         }
     }
@@ -362,6 +366,31 @@ public struct MeHomeView: View {
                             }
                             .padding(.horizontal, 16)
                             .padding(.vertical, 12)
+
+                            Divider().background(Color.dashBorder.opacity(0.5))
+
+                            // Storage & Highway Cache
+                            Button {
+                                showingStorageCache = true
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "internaldrive.fill")
+                                        .foregroundStyle(Color.dashYellow)
+                                    Text("Storage & Highway Cache")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundStyle(Color.dashTextPrimary)
+                                    Spacer()
+                                    Text(OfflineStreamCacheService.shared.metrics.formattedUsage)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(Color.dashTextSecondary)
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Color.dashTextMuted)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                            }
+                            .buttonStyle(.plain)
 
                             Divider().background(Color.dashBorder.opacity(0.5))
 

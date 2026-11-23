@@ -33,6 +33,11 @@ public final class VideoPlayerService: ObservableObject {
         didSet { player.isMuted = isMuted }
     }
 
+    /// Forward playback buffer mode (default 60s highway buffer to survive cellular dead zones).
+    @Published public var bufferMode: BufferMode = .highwayDeadzone
+    @Published public private(set) var forwardBufferSeconds: Double = 0.0
+    @Published public private(set) var bufferHealth: BufferHealth = .empty
+
     public let player: AVPlayer = AVPlayer()
     private var timeObserverToken: Any?
     private var itemObservers: [NSKeyValueObservation] = []
@@ -105,10 +110,22 @@ public final class VideoPlayerService: ObservableObject {
         duration = 0
         isBuffering = true
 
-        let playerItem = AVPlayerItem(asset: AVURLAsset(url: channel.streamURL))
+        // If offline cached version is ready, prefer local file playback
+        let resolvedChannel: ChannelModel
+        if !channel.streamURL.isFileURL,
+           let offlineChannel = OfflineStreamCacheService.shared.cachedChannel(for: channel.streamURL) {
+            resolvedChannel = offlineChannel
+        } else {
+            resolvedChannel = channel
+        }
+
+        let playerItem = AVPlayerItem(asset: AVURLAsset(url: resolvedChannel.streamURL))
         if channel.id == CarPlayMirrorPlayback.channelID {
             // Live iPhone mirror: keep the buffer (and so the delay) short.
-            playerItem.preferredForwardBufferDuration = 1
+            playerItem.preferredForwardBufferDuration = BufferMode.liveMirror.preferredDuration
+        } else {
+            // Apply rolling highway buffer (60s forward buffer for deadzones)
+            playerItem.preferredForwardBufferDuration = bufferMode.preferredDuration
         }
         observe(item: playerItem)
 
@@ -170,6 +187,14 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     private func handleFailure(_ message: String) {
+        // Automatic deadzone failover: if remote stream fails, check offline stream cache
+        if let channel = currentChannel, !channel.streamURL.isFileURL,
+           let cached = OfflineStreamCacheService.shared.cachedChannel(for: channel.streamURL) {
+            print("Highway Deadzone fallback: Switching to offline cached stream for \(channel.name)")
+            load(channel: cached)
+            return
+        }
+
         wantsToPlay = false
         isBuffering = false
         isPlaying = false
@@ -302,8 +327,16 @@ public final class VideoPlayerService: ObservableObject {
                 guard let self else { return }
                 if time.seconds.isFinite { self.currentTime = time.seconds }
                 self.trackCastingTime()
-                if let item = self.player.currentItem, item.duration.seconds.isFinite {
-                    self.duration = item.duration.seconds
+                if let item = self.player.currentItem {
+                    if item.duration.seconds.isFinite {
+                        self.duration = item.duration.seconds
+                    }
+                    let forward = RollingHighwayBufferController.calculateForwardBufferSeconds(
+                        loadedTimeRanges: item.loadedTimeRanges,
+                        currentTimeSeconds: self.currentTime
+                    )
+                    self.forwardBufferSeconds = forward
+                    self.bufferHealth = RollingHighwayBufferController.evaluateBufferHealth(forwardSeconds: forward)
                 }
             }
         }
