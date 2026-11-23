@@ -8177,6 +8177,210 @@
           }
         }
       }
+    },
+    "CarPlay Connection Chime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CarPlay Connection Chime"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tono de Conexión CarPlay"
+          }
+        }
+      }
+    },
+    "Plays when CarPlay or Bluetooth connects": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays when CarPlay or Bluetooth connects"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suena al conectar CarPlay o Bluetooth"
+          }
+        }
+      }
+    },
+    "Custom Audio Clips": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom Audio Clips"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clips de Audio Personalizados"
+          }
+        }
+      }
+    },
+    "Import Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Audio"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar Audio"
+          }
+        }
+      }
+    },
+    "Import Custom Exhaust or Chime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import Custom Exhaust or Chime"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar Escape o Tono Personalizado"
+          }
+        }
+      }
+    },
+    "Upload your favorite WAV, MP3, or M4A clip (V8 rev, turbo blow-off, or custom chime) to play on CarPlay connection.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upload your favorite WAV, MP3, or M4A clip (V8 rev, turbo blow-off, or custom chime) to play on CarPlay connection."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sube tu clip WAV, MP3 o M4A favorito (aceleración V8, turbo o tono personalizado) para sonar al conectar CarPlay."
+          }
+        }
+      }
+    },
+    "ACTIVE CHIME": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ACTIVE CHIME"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TONO ACTIVO"
+          }
+        }
+      }
+    },
+    "Auto-Normalized": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-Normalized"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-Normalizado"
+          }
+        }
+      }
+    },
+    "Set as Connection Chime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set as Connection Chime"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fijar como Tono de Conexión"
+          }
+        }
+      }
+    },
+    "Delete Clip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Clip"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar Clip"
+          }
+        }
+      }
+    },
+    "Select Connection Chime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select Connection Chime"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionar Tono de Conexión"
+          }
+        }
+      }
+    },
+    "Custom": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Custom"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personalizado"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
