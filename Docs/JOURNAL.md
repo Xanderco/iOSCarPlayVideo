@@ -443,3 +443,25 @@
 
 ### 2026-11-04 — Paperclip diagnosis
 - CARAA-13/14/15/17 were waiting in *In Review* for the Human Gate; agents idle on 1-hour heartbeats. Created CARAA-18…26 (CI, consolidation, entitlement, feasibility ADR, CarPlay playlists, M3U, browser, broadcast, QA). Then paused all Paperclip agents in favour of cloud sessions.
+
+
+### 2026-11-23 13:30 (EST) — GhostCast Adaptive Bitrate & Dynamic Wi-Fi Buffer Tuning [CARAA-50] [DI-46]
+- **Implemented GhostCast Smart ABR (`GhostCastAdaptiveBitrate.swift`):**
+  - High profile: `1080p@60fps` (6 Mbps) for clean Wi-Fi and head-unit links.
+  - Medium profile: `720p@30fps` (2.5 Mbps) dynamically engaged when TCP write queue depth > 3 frames or RTT jitter > 150ms.
+  - Low profile: `540p@24fps` (1.2 Mbps) fallback for severe network deadzones.
+  - Stabilization hysteresis: requires 3 consecutive healthy samples before upgrading back to higher resolution.
+- **CarPlayVideoServer (`CarPlayVideoServer.swift`):**
+  - Monitors socket frame delivery latency and round-trip time (RTT).
+  - Tracks client socket write queue depth across wireless CarPlay streaming clients.
+  - Feeds delivery metrics directly to `GhostCastAdaptiveBitrateController`.
+- **VideoPlayerService Integration (`VideoPlayerService.swift`):**
+  - Dynamic buffer tuning: expands `preferredForwardBufferDuration` from 2.0s up to 12.0s rolling highway buffer during wireless CarPlay congestion/jitter.
+  - Dynamically sets `preferredPeakBitRate` to match active GhostCast profile.
+  - Exposes `@Published` metrics: `activeGhostCastProfile`, `ghostCastRTT`, `ghostCastQueueDepth`, and `isGhostCastCongested`.
+- **Broadcast & Encoder Update (`SampleHandler.swift`, `MirrorHLSEncoder.swift`, `MirrorHLS.swift`):**
+  - Added `.ghostCast1080p60` and `.ghostCast720p30` presets to `MirrorEncoderConfig`.
+  - Added `updateConfig(_:)` on `MirrorHLSEncoder` for dynamic resolution and bitrate switching.
+  - Wired `CarPlayVideoServer` into `SampleHandler` for CarPlay broadcast delivery.
+- **Unit Tests (`DashCastTests/GhostCastAdaptiveBitrateTests.swift`):**
+  - 8 unit tests covering initial profile, queue depth downscale (> 3 frames), RTT jitter adaptation, severe congestion drop, multi-sample stabilization window, server RTT tracking, VideoPlayerService dynamic buffer tuning, and encoder config presets.

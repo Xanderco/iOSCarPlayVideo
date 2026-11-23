@@ -12,7 +12,7 @@ import VideoToolbox
 /// well inside the ~50 MB broadcast extension limit.
 final class MirrorHLSEncoder: NSObject, AVAssetWriterDelegate {
     let store: HLSSegmentStore
-    private let config: MirrorEncoderConfig
+    private(set) var config: MirrorEncoderConfig
     private let queue = DispatchQueue(label: "com.xanderco.dashcast.broadcast.hls")
 
     // Touched only on the ReplayKit sample queue.
@@ -29,6 +29,38 @@ final class MirrorHLSEncoder: NSObject, AVAssetWriterDelegate {
         self.config = config
         self.store = HLSSegmentStore(window: config.playlistWindow, targetDuration: config.segmentDurationSeconds)
         super.init()
+    }
+
+    /// Dynamically updates the encoder configuration (bitrate, fps, resolution) for GhostCast ABR.
+    func updateConfig(_ newConfig: MirrorEncoderConfig) {
+        let oldConfig = config
+        self.config = newConfig
+        guard let session else { return }
+
+        if oldConfig.averageBitRate != newConfig.averageBitRate {
+            _ = VTSessionSetProperty(
+                session,
+                key: kVTCompressionPropertyKey_AverageBitRate as CFString,
+                value: newConfig.averageBitRate as CFTypeRef
+            )
+            _ = VTSessionSetProperty(
+                session,
+                key: kVTCompressionPropertyKey_DataRateLimits as CFString,
+                value: [newConfig.dataRateLimitBytesPerSecond, 1] as CFTypeRef
+            )
+        }
+        if oldConfig.framesPerSecond != newConfig.framesPerSecond {
+            _ = VTSessionSetProperty(
+                session,
+                key: kVTCompressionPropertyKey_ExpectedFrameRate as CFString,
+                value: newConfig.framesPerSecond as CFTypeRef
+            )
+        }
+        if oldConfig.maxLongSide != newConfig.maxLongSide || oldConfig.maxShortSide != newConfig.maxShortSide {
+            VTCompressionSessionCompleteFrames(session, untilPresentationTimeStamp: .invalid)
+            VTCompressionSessionInvalidate(session)
+            self.session = nil
+        }
     }
 
     /// Call from `processSampleBuffer` for video samples. Throttled to the configured fps.

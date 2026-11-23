@@ -50,6 +50,8 @@ targets:
       - path: DashCast/Features/Cast/Shared/CarCastShared.swift
       - path: DashCast/Features/Cast/Shared/MirrorFrameTransport.swift
       - path: DashCast/Features/Cast/Shared/MirrorHLS.swift
+      - path: DashCast/Features/Cast/Shared/GhostCastAdaptiveBitrate.swift
+      - path: DashCast/Features/Cast/Shared/CarPlayVideoServer.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast.broadcast

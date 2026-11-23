@@ -33,6 +33,13 @@ public final class VideoPlayerService: ObservableObject {
         didSet { player.isMuted = isMuted }
     }
 
+    // MARK: - GhostCast Adaptive Bitrate & Buffer Tuning
+    public let ghostCastController = GhostCastAdaptiveBitrateController()
+    @Published public private(set) var activeGhostCastProfile: GhostCastProfile = .high1080p60
+    @Published public private(set) var ghostCastRTT: TimeInterval = 0
+    @Published public private(set) var ghostCastQueueDepth: Int = 0
+    @Published public private(set) var isGhostCastCongested: Bool = false
+
     public let player: AVPlayer = AVPlayer()
     private var timeObserverToken: Any?
     private var itemObservers: [NSKeyValueObservation] = []
@@ -58,6 +65,7 @@ public final class VideoPlayerService: ObservableObject {
         observeTimeControlStatus()
         observeAppLifecycleAndInterruptions()
         if handlesRemoteCommands { setupRemoteCommands() }
+        setupGhostCastABR()
         // Route video to AirPlay / car displays and enforce the parked-only guard.
         CarVideoOutputController.shared.attach(player: player) { [weak self] in
             self?.pause()
@@ -113,6 +121,7 @@ public final class VideoPlayerService: ObservableObject {
         observe(item: playerItem)
 
         player.replaceCurrentItem(with: playerItem)
+        applyGhostCastProfile(ghostCastController.activeProfile)
         updateNowPlayingInfo()
         UsageMetricsManager.shared.recordVideoPlayed()
         play()
@@ -376,5 +385,47 @@ public final class VideoPlayerService: ObservableObject {
             info[MPMediaItemPropertyPlaybackDuration] = duration
         }
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+    }
+
+    // MARK: - GhostCast Adaptive Bitrate & Buffer Tuning
+
+    private func setupGhostCastABR() {
+        ghostCastController.onProfileChanged = { [weak self] profile in
+            Task { @MainActor [weak self] in
+                self?.applyGhostCastProfile(profile)
+            }
+        }
+    }
+
+    /// Dynamically tunes the active AVPlayerItem forward buffer window and peak bitrate.
+    public func applyGhostCastProfile(_ profile: GhostCastProfile) {
+        activeGhostCastProfile = profile
+        ghostCastRTT = ghostCastController.currentRTT
+        ghostCastQueueDepth = ghostCastController.currentQueueDepth
+        isGhostCastCongested = ghostCastController.isCongestionDetected
+
+        guard let item = player.currentItem else { return }
+
+        // Align player peak bitrate with active GhostCast encode profile
+        item.preferredPeakBitRate = Double(profile.bitRate)
+
+        // Dynamic Wi-Fi buffer tuning:
+        // Under wireless CarPlay congestion/jitter (medium or low profile), expand forward buffer
+        // duration to 12s (highway rolling buffer) to eliminate frame stuttering.
+        // When healthy (1080p60), reduce buffer duration to 2.0s for responsive low-latency.
+        switch profile {
+        case .high1080p60:
+            item.preferredForwardBufferDuration = 2.0
+        case .medium720p30:
+            item.preferredForwardBufferDuration = 8.0
+        case .low540p24:
+            item.preferredForwardBufferDuration = 12.0
+        }
+    }
+
+    /// Allows external streaming components (such as CarPlayVideoServer) to report network conditions.
+    public func updateGhostCastMetrics(queueDepth: Int, rtt: TimeInterval) {
+        let newProfile = ghostCastController.recordSample(queueDepth: queueDepth, rtt: rtt)
+        applyGhostCastProfile(newProfile)
     }
 }

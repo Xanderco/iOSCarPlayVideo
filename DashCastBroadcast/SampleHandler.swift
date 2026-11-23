@@ -39,11 +39,16 @@ final class SampleHandler: RPBroadcastSampleHandler {
             self?.updateStatus { $0.viewerCount = count }
         }
         if CarMirrorFeature.isEnabled() {
-            let encoder = MirrorHLSEncoder()
+            let encoder = MirrorHLSEncoder(config: GhostCastProfile.high1080p60.encoderConfig)
             hlsEncoder = encoder
             server.hlsStore = encoder.store
+            CarPlayVideoServer.shared.hlsStore = encoder.store
+            CarPlayVideoServer.shared.onProfileChange = { [weak self] profile in
+                self?.hlsEncoder?.updateConfig(profile.encoderConfig)
+            }
         }
         server.start()
+        CarPlayVideoServer.shared.start()
 
         if CarMirrorFeature.isEnabled(), let url = CarMirrorFeature.framesURL {
             frameWriter = MirrorFrameWriter(url: url)
@@ -67,6 +72,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
 
     override func broadcastFinished() {
         server.stop()
+        CarPlayVideoServer.shared.stop()
         frameWriter = nil
         hlsEncoder?.stop()
         hlsEncoder = nil
@@ -94,7 +100,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
         hlsEncoder?.encode(sampleBuffer)
 
         let writer = frameWriter
-        let wantsLAN = server.hasViewers
+        let wantsLAN = server.hasViewers || CarPlayVideoServer.shared.hasViewers
         guard wantsLAN || writer != nil, now - lastFrameTime >= frameInterval else { return }
         lastFrameTime = now
 
@@ -103,6 +109,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
             let size = encoded.1
             if wantsLAN {
                 server.broadcast(frame: jpeg)
+                CarPlayVideoServer.shared.broadcast(frame: jpeg)
             }
             if let writer {
                 // One frame at a time, written in place: no frame queue builds up.

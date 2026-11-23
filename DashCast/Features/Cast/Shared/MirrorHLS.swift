@@ -89,33 +89,55 @@ enum MirrorHLS {
 
 /// H.264 encoder settings for the car mirror stream. ~720p, 30 fps, 1 s GOP so every 1 s
 /// segment starts with a keyframe; no B-frames and real-time rate control for low latency.
-struct MirrorEncoderConfig: Equatable {
-    var maxLongSide: Int = 1280
-    var maxShortSide: Int = 720
-    var framesPerSecond: Int = 30
-    var averageBitRate: Int = 3_000_000
-    var keyFrameIntervalSeconds: Double = 1
-    var segmentDurationSeconds: Double = 1
+public struct MirrorEncoderConfig: Equatable {
+    public var maxLongSide: Int = 1280
+    public var maxShortSide: Int = 720
+    public var framesPerSecond: Int = 30
+    public var averageBitRate: Int = 3_000_000
+    public var keyFrameIntervalSeconds: Double = 1
+    public var segmentDurationSeconds: Double = 1
     /// Segments kept in memory and listed in the playlist. Small: the extension has ~50 MB.
-    var playlistWindow: Int = 4
+    public var playlistWindow: Int = 4
 
-    static let carPlay = MirrorEncoderConfig()
+    public static let carPlay = MirrorEncoderConfig()
 
-    var maxKeyFrameInterval: Int { max(1, Int((Double(framesPerSecond) * keyFrameIntervalSeconds).rounded())) }
+    /// GhostCast 1080p @ 60 fps (6 Mbps) high-quality profile.
+    public static let ghostCast1080p60 = MirrorEncoderConfig(
+        maxLongSide: 1920,
+        maxShortSide: 1080,
+        framesPerSecond: 60,
+        averageBitRate: 6_000_000,
+        keyFrameIntervalSeconds: 1,
+        segmentDurationSeconds: 1,
+        playlistWindow: 4
+    )
 
-    var minFrameInterval: Double { 1.0 / Double(max(1, framesPerSecond)) }
+    /// GhostCast 720p @ 30 fps (2.5 Mbps) low-congestion fallback profile.
+    public static let ghostCast720p30 = MirrorEncoderConfig(
+        maxLongSide: 1280,
+        maxShortSide: 720,
+        framesPerSecond: 30,
+        averageBitRate: 2_500_000,
+        keyFrameIntervalSeconds: 1,
+        segmentDurationSeconds: 1,
+        playlistWindow: 4
+    )
+
+    public var maxKeyFrameInterval: Int { max(1, Int((Double(framesPerSecond) * keyFrameIntervalSeconds).rounded())) }
+
+    public var minFrameInterval: Double { 1.0 / Double(max(1, framesPerSecond)) }
 
     /// Hard cap at 1.5× the average bit rate, in bytes per second.
-    var dataRateLimitBytesPerSecond: Int { averageBitRate * 3 / 2 / 8 }
+    public var dataRateLimitBytesPerSecond: Int { averageBitRate * 3 / 2 / 8 }
 
     /// Upper bound of what the segment window holds in memory.
-    var estimatedWindowBytes: Int {
+    public var estimatedWindowBytes: Int {
         Int(Double(dataRateLimitBytesPerSecond) * segmentDurationSeconds) * playlistWindow
     }
 
     /// Output size for a source frame: aspect ratio kept, never upscaled, even dimensions
     /// (H.264 4:2:0), long side ≤ `maxLongSide` and short side ≤ `maxShortSide`.
-    func outputSize(sourceWidth: Int, sourceHeight: Int) -> (width: Int, height: Int) {
+    public func outputSize(sourceWidth: Int, sourceHeight: Int) -> (width: Int, height: Int) {
         guard sourceWidth > 0, sourceHeight > 0 else { return (0, 0) }
         let long = Double(max(sourceWidth, sourceHeight))
         let short = Double(min(sourceWidth, sourceHeight))
@@ -125,7 +147,7 @@ struct MirrorEncoderConfig: Equatable {
     }
 
     /// VTCompressionSession properties (`VTSessionSetProperty` key → value).
-    var compressionProperties: [String: Any] {
+    public var compressionProperties: [String: Any] {
         [
             kVTCompressionPropertyKey_RealTime as String: true,
             kVTCompressionPropertyKey_AllowFrameReordering as String: false,
