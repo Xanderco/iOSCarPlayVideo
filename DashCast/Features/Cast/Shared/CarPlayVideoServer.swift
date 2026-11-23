@@ -7,23 +7,23 @@ import QuartzCore
 /// Handles TCP socket transmission of video stream data to CarPlay head units and local
 /// browser clients, continuously monitoring frame delivery round-trip time (RTT) and socket
 /// write queue depth to drive GhostCast Adaptive Bitrate scaling.
-public final class CarPlayVideoServer: @unchecked Sendable {
-    public static let shared = CarPlayVideoServer(port: CarCastShared.mirrorPort)
+final class CarPlayVideoServer: @unchecked Sendable {
+    static let shared = CarPlayVideoServer(port: CarCastShared.mirrorPort)
 
-    public final class Client {
-        public let id = UUID()
-        public let connection: NWConnection?
-        public var pendingSends: Int = 0
-        public var lastSendTime: CFTimeInterval = 0
-        public var measuredRTT: TimeInterval = 0
+    final class Client {
+        let id = UUID()
+        let connection: NWConnection?
+        var pendingSends: Int = 0
+        var lastSendTime: CFTimeInterval = 0
+        var measuredRTT: TimeInterval = 0
 
-        public init(connection: NWConnection?) {
+        init(connection: NWConnection?) {
             self.connection = connection
         }
     }
 
-    public let port: UInt16
-    public let ghostCastController: GhostCastAdaptiveBitrateController
+    let port: UInt16
+    let ghostCastController: GhostCastAdaptiveBitrateController
     private let queue = DispatchQueue(label: "com.xanderco.dashcast.carplay.videoserver", qos: .userInteractive)
 
     private let stateLock = NSLock()
@@ -36,44 +36,44 @@ public final class CarPlayVideoServer: @unchecked Sendable {
     private var _rttSampleCount: Int = 0
     private var _currentQueueDepth: Int = 0
 
-    public var hlsStore: HLSSegmentStore?
-    public var onViewerCountChange: ((Int) -> Void)?
-    public var onProfileChange: ((GhostCastProfile) -> Void)? {
+    var hlsStore: HLSSegmentStore?
+    var onViewerCountChange: ((Int) -> Void)?
+    var onProfileChange: ((GhostCastProfile) -> Void)? {
         didSet {
             ghostCastController.onProfileChanged = onProfileChange
         }
     }
 
-    public var lastMeasuredRTT: TimeInterval {
+    var lastMeasuredRTT: TimeInterval {
         stateLock.lock(); defer { stateLock.unlock() }
         return _lastMeasuredRTT
     }
 
-    public var averageRTT: TimeInterval {
+    var averageRTT: TimeInterval {
         stateLock.lock(); defer { stateLock.unlock() }
         return _averageRTT
     }
 
-    public var currentQueueDepth: Int {
+    var currentQueueDepth: Int {
         stateLock.lock(); defer { stateLock.unlock() }
         return _currentQueueDepth
     }
 
-    public var connectedClientCount: Int {
+    var connectedClientCount: Int {
         stateLock.lock(); defer { stateLock.unlock() }
         return clients.count
     }
 
-    public var hasViewers: Bool {
+    var hasViewers: Bool {
         stateLock.lock(); defer { stateLock.unlock() }
         return !clients.isEmpty
     }
 
-    public var activeProfile: GhostCastProfile {
+    var activeProfile: GhostCastProfile {
         ghostCastController.activeProfile
     }
 
-    public init(
+    init(
         port: UInt16 = CarCastShared.mirrorPort,
         controller: GhostCastAdaptiveBitrateController = GhostCastAdaptiveBitrateController()
     ) {
@@ -83,7 +83,7 @@ public final class CarPlayVideoServer: @unchecked Sendable {
 
     // MARK: - Lifecycle
 
-    public func start() {
+    func start() {
         let parameters = NWParameters.tcp
         parameters.allowLocalEndpointReuse = true
         guard let nwPort = NWEndpoint.Port(rawValue: port),
@@ -98,7 +98,7 @@ public final class CarPlayVideoServer: @unchecked Sendable {
         self.listener = listener
     }
 
-    public func stop() {
+    func stop() {
         queue.async { [weak self] in
             guard let self else { return }
             self.listener?.cancel()
@@ -118,7 +118,7 @@ public final class CarPlayVideoServer: @unchecked Sendable {
 
     /// Broadcasts a video frame to all connected clients, tracking socket write latency
     /// and evaluating GhostCast adaptive bitrate rules.
-    public func broadcast(frame data: Data) {
+    func broadcast(frame data: Data) {
         let now = CACurrentMediaTime()
         let part = MJPEGStream.framePart(jpeg: data)
 
@@ -260,7 +260,7 @@ public final class CarPlayVideoServer: @unchecked Sendable {
     // MARK: - Simulation Support for Testing
 
     /// Simulates a connected client delivery event to verify RTT tracking and ABR transitions under test.
-    public func simulateDelivery(queueDepth: Int, latency: TimeInterval) {
+    func simulateDelivery(queueDepth: Int, latency: TimeInterval) {
         stateLock.lock()
         _currentQueueDepth = queueDepth
         _lastMeasuredRTT = latency
@@ -276,7 +276,7 @@ public final class CarPlayVideoServer: @unchecked Sendable {
 
     /// Registers a mock client for queue depth simulation in unit tests.
     @discardableResult
-    public func registerMockClient() -> Client {
+    func registerMockClient() -> Client {
         let client = Client(connection: nil)
         stateLock.lock()
         clients[client.id] = client

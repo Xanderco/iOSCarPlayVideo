@@ -8,12 +8,12 @@ import CoreMedia
 /// bitrates cause severe frame stuttering and buffer under-runs. GhostCast dynamically switches
 /// encoding profiles between 1080p@60fps (6 Mbps) and 720p@30fps (2.5 Mbps) based on socket
 /// write queue depth and network RTT.
-public enum GhostCastProfile: String, CaseIterable, Equatable, Sendable {
+enum GhostCastProfile: String, CaseIterable, Equatable, Sendable {
     case high1080p60 = "1080p@60fps (6 Mbps)"
     case medium720p30 = "720p@30fps (2.5 Mbps)"
     case low540p24 = "540p@24fps (1.2 Mbps)"
 
-    public var resolution: (width: Int, height: Int) {
+    var resolution: (width: Int, height: Int) {
         switch self {
         case .high1080p60: return (1920, 1080)
         case .medium720p30: return (1280, 720)
@@ -21,7 +21,7 @@ public enum GhostCastProfile: String, CaseIterable, Equatable, Sendable {
         }
     }
 
-    public var framesPerSecond: Int {
+    var framesPerSecond: Int {
         switch self {
         case .high1080p60: return 60
         case .medium720p30: return 30
@@ -29,7 +29,7 @@ public enum GhostCastProfile: String, CaseIterable, Equatable, Sendable {
         }
     }
 
-    public var bitRate: Int {
+    var bitRate: Int {
         switch self {
         case .high1080p60: return 6_000_000
         case .medium720p30: return 2_500_000
@@ -37,7 +37,7 @@ public enum GhostCastProfile: String, CaseIterable, Equatable, Sendable {
         }
     }
 
-    public var encoderConfig: MirrorEncoderConfig {
+    var encoderConfig: MirrorEncoderConfig {
         switch self {
         case .high1080p60:
             return .ghostCast1080p60
@@ -58,21 +58,21 @@ public enum GhostCastProfile: String, CaseIterable, Equatable, Sendable {
 }
 
 /// Operational thresholds governing GhostCast ABR scaling decisions.
-public struct GhostCastThresholds: Equatable, Sendable {
+struct GhostCastThresholds: Equatable, Sendable {
     /// When write queue depth exceeds this number of frames, downgrade immediately to prevent buffer bloat.
-    public var queueDepthDowngradeLimit: Int
+    var queueDepthDowngradeLimit: Int
     /// When write queue depth is at or below this limit, stream is eligible for upgrade.
-    public var queueDepthUpgradeLimit: Int
+    var queueDepthUpgradeLimit: Int
     /// Round-trip time (in seconds) exceeding this threshold indicates Wi-Fi congestion / packet jitter.
-    public var rttDowngradeThreshold: TimeInterval
+    var rttDowngradeThreshold: TimeInterval
     /// Round-trip time (in seconds) at or below this threshold is considered healthy low latency.
-    public var rttUpgradeThreshold: TimeInterval
+    var rttUpgradeThreshold: TimeInterval
     /// Consecutive healthy samples required before upgrading to the next higher profile.
-    public var consecutiveStableSamplesRequired: Int
+    var consecutiveStableSamplesRequired: Int
     /// Severe queue depth indicating critical packet loss requiring emergency drop to lowest tier.
-    public var severeQueueDepthLimit: Int
+    var severeQueueDepthLimit: Int
 
-    public static let `default` = GhostCastThresholds(
+    static let `default` = GhostCastThresholds(
         queueDepthDowngradeLimit: 3,
         queueDepthUpgradeLimit: 1,
         rttDowngradeThreshold: 0.150, // 150 ms
@@ -81,7 +81,7 @@ public struct GhostCastThresholds: Equatable, Sendable {
         severeQueueDepthLimit: 6
     )
 
-    public init(
+    init(
         queueDepthDowngradeLimit: Int = 3,
         queueDepthUpgradeLimit: Int = 1,
         rttDowngradeThreshold: TimeInterval = 0.150,
@@ -100,8 +100,8 @@ public struct GhostCastThresholds: Equatable, Sendable {
 
 /// Controller managing dynamic bitrate and resolution adaptation for GhostCast.
 /// Thread-safe for invocation from network callback queues and sample handlers.
-public final class GhostCastAdaptiveBitrateController: @unchecked Sendable {
-    public let thresholds: GhostCastThresholds
+final class GhostCastAdaptiveBitrateController: @unchecked Sendable {
+    let thresholds: GhostCastThresholds
     private let lock = NSLock()
 
     private var _activeProfile: GhostCastProfile = .high1080p60
@@ -111,34 +111,34 @@ public final class GhostCastAdaptiveBitrateController: @unchecked Sendable {
     private var _stableSampleCount: Int = 0
     private var _totalAdaptationEvents: Int = 0
 
-    public var onProfileChanged: ((GhostCastProfile) -> Void)?
+    var onProfileChanged: ((GhostCastProfile) -> Void)?
 
-    public var activeProfile: GhostCastProfile {
+    var activeProfile: GhostCastProfile {
         lock.lock(); defer { lock.unlock() }
         return _activeProfile
     }
 
-    public var currentRTT: TimeInterval {
+    var currentRTT: TimeInterval {
         lock.lock(); defer { lock.unlock() }
         return _currentRTT
     }
 
-    public var currentQueueDepth: Int {
+    var currentQueueDepth: Int {
         lock.lock(); defer { lock.unlock() }
         return _currentQueueDepth
     }
 
-    public var isCongestionDetected: Bool {
+    var isCongestionDetected: Bool {
         lock.lock(); defer { lock.unlock() }
         return _isCongestionDetected
     }
 
-    public var totalAdaptationEvents: Int {
+    var totalAdaptationEvents: Int {
         lock.lock(); defer { lock.unlock() }
         return _totalAdaptationEvents
     }
 
-    public init(
+    init(
         initialProfile: GhostCastProfile = .high1080p60,
         thresholds: GhostCastThresholds = .default
     ) {
@@ -149,7 +149,7 @@ public final class GhostCastAdaptiveBitrateController: @unchecked Sendable {
     /// Evaluates current socket write queue depth and frame delivery RTT,
     /// triggering downscaling or upgrading as appropriate.
     @discardableResult
-    public func recordSample(queueDepth: Int, rtt: TimeInterval) -> GhostCastProfile {
+    func recordSample(queueDepth: Int, rtt: TimeInterval) -> GhostCastProfile {
         lock.lock()
         _currentQueueDepth = max(0, queueDepth)
         _currentRTT = max(0, rtt)
@@ -208,7 +208,7 @@ public final class GhostCastAdaptiveBitrateController: @unchecked Sendable {
     }
 
     /// Resets the controller state to initial configuration.
-    public func reset(to profile: GhostCastProfile = .high1080p60) {
+    func reset(to profile: GhostCastProfile = .high1080p60) {
         lock.lock()
         _activeProfile = profile
         _currentRTT = 0

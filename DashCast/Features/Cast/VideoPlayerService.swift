@@ -34,11 +34,11 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     // MARK: - GhostCast Adaptive Bitrate & Buffer Tuning
-    public let ghostCastController = GhostCastAdaptiveBitrateController()
-    @Published public private(set) var activeGhostCastProfile: GhostCastProfile = .high1080p60
-    @Published public private(set) var ghostCastRTT: TimeInterval = 0
-    @Published public private(set) var ghostCastQueueDepth: Int = 0
-    @Published public private(set) var isGhostCastCongested: Bool = false
+    let ghostCastController = GhostCastAdaptiveBitrateController()
+    @Published private(set) var activeGhostCastProfile: GhostCastProfile = .high1080p60
+    @Published private(set) var ghostCastRTT: TimeInterval = 0
+    @Published private(set) var ghostCastQueueDepth: Int = 0
+    @Published private(set) var isGhostCastCongested: Bool = false
 
     public let player: AVPlayer = AVPlayer()
     private var timeObserverToken: Any?
@@ -398,7 +398,7 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     /// Dynamically tunes the active AVPlayerItem forward buffer window and peak bitrate.
-    public func applyGhostCastProfile(_ profile: GhostCastProfile) {
+    func applyGhostCastProfile(_ profile: GhostCastProfile) {
         activeGhostCastProfile = profile
         ghostCastRTT = ghostCastController.currentRTT
         ghostCastQueueDepth = ghostCastController.currentQueueDepth
@@ -424,7 +424,7 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     /// Allows external streaming components (such as CarPlayVideoServer) to report network conditions.
-    public func updateGhostCastMetrics(queueDepth: Int, rtt: TimeInterval) {
+    func updateGhostCastMetrics(queueDepth: Int, rtt: TimeInterval) {
         let newProfile = ghostCastController.recordSample(queueDepth: queueDepth, rtt: rtt)
         applyGhostCastProfile(newProfile)
     }
