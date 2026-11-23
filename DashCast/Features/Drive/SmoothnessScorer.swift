@@ -97,9 +97,9 @@ public final class SmoothnessScorer: ObservableObject {
     @Published public private(set) var peakCombinedG: Double = 0.0
 
     // Calibrated G-force thresholds
-    public static let harshBrakingDecelThreshold: Double = -3.5  // m/s^2 (~0.36g)
-    public static let harshAccelThreshold: Double = 3.0          // m/s^2 (~0.31g)
-    public static let sharpCorneringGThreshold: Double = 0.52     // calibrated lateral G
+    nonisolated public static let harshBrakingDecelThreshold: Double = -3.5  // m/s^2 (~0.36g)
+    nonisolated public static let harshAccelThreshold: Double = 3.0          // m/s^2 (~0.31g)
+    nonisolated public static let sharpCorneringGThreshold: Double = 0.52     // calibrated lateral G
 
     private let motionManager = CMMotionManager()
     private var lastSpeedKmh: Double?
@@ -210,7 +210,7 @@ public final class SmoothnessScorer: ObservableObject {
     }
 
     /// Pure function evaluator for completed trips.
-    public static func evaluate(trip: TripModel) -> SmoothnessMetrics {
+    nonisolated public static func evaluate(trip: TripModel) -> SmoothnessMetrics {
         let score = trip.drivingScore
         let badge = SmoothnessBadgeTier.tier(for: score)
 
