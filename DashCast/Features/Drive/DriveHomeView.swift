@@ -11,6 +11,7 @@ public struct DriveHomeView: View {
     @State private var showingHistory: Bool = false
     @State private var showingPermissions: Bool = false
     @State private var showingDriveSettings: Bool = false
+    @State private var showingNightHUD: Bool = false
     @State private var showingLiveActivityPreview: Bool = false
 
     public init() {}
@@ -83,6 +84,18 @@ public struct DriveHomeView: View {
                             }
 
                             Button {
+                                showingNightHUD = true
+                            } label: {
+                                Image(systemName: "moon.stars.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(Color.dashYellow)
+                                    .padding(8)
+                                    .background(Color.dashSurface.opacity(0.85))
+                                    .clipShape(Circle())
+                            }
+                            .accessibilityLabel("Night Vision HUD")
+
+                            Button {
                                 showingHistory = true
                             } label: {
                                 Image(systemName: "clock.arrow.circlepath")
@@ -138,6 +151,9 @@ public struct DriveHomeView: View {
             }
             .sheet(isPresented: $showingDriveSettings) {
                 DriveSettingsView()
+            }
+            .fullScreenCover(isPresented: $showingNightHUD) {
+                OLEDNightVisionHUDView()
             }
             .alert("Location needed", isPresented: Binding(
                 get: { locationService.lastErrorMessage != nil },

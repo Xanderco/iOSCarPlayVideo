@@ -8,6 +8,7 @@ public struct DriveSettingsView: View {
     @State private var preferences: UserPreferences = PersistenceController.shared.loadUserPreferences()
     @State private var showingPermissionsSheet: Bool = false
     @State private var showingVehiclePicker: Bool = false
+    @State private var showingNightHUD: Bool = false
 
     private let minimumDriveOptions: [Double] = [50, 100, 250, 500, 1000]
 
@@ -61,6 +62,9 @@ public struct DriveSettingsView: View {
             }
             .sheet(isPresented: $showingVehiclePicker) {
                 vehiclePickerSheet
+            }
+            .fullScreenCover(isPresented: $showingNightHUD) {
+                OLEDNightVisionHUDView()
             }
         }
     }
