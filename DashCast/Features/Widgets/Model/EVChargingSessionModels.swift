@@ -167,6 +167,10 @@ public final class EVChargingSessionManager: ObservableObject {
     }
 
     public func recalculateCompletion() {
+        guard isSessionActive else {
+            estimatedCompletionTime = nil
+            return
+        }
         let now = sessionStartTime ?? Date()
         if activePreset.isRestArea {
             estimatedCompletionTime = now.addingTimeInterval(Double(restStopDurationMinutes * 60))
