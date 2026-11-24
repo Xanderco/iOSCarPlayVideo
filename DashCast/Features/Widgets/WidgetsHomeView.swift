@@ -7,6 +7,8 @@ public struct WidgetsHomeView: View {
     @State private var editingWidget: WidgetConfigModel?
     @State private var showingCarPlayGuide: Bool = false
     @State private var showingDoodleEditor: Bool = false
+    @State private var showingEVMonitor: Bool = false
+    @ObservedObject private var evManager = EVChargingSessionManager.shared
 
     private let catalog = VehicleCatalogService.shared
 
@@ -46,6 +48,9 @@ public struct WidgetsHomeView: View {
                                 .foregroundStyle(Color.dashYellow)
                         }
                         .accessibilityIdentifier("doodleWidgetButton")
+
+                        // EV Supercharger & Rest Stop Section
+                        evSuperchargerSection
 
                         // Plate Widgets Section
                         plateWidgetsSection
@@ -135,6 +140,9 @@ public struct WidgetsHomeView: View {
             .sheet(isPresented: $showingDoodleEditor) {
                 DoodleEditorView()
             }
+            .sheet(isPresented: $showingEVMonitor) {
+                EVSuperchargerMonitorView()
+            }
             .alert("Add Widgets to CarPlay", isPresented: $showingCarPlayGuide) {
                 Button("Got it", role: .cancel) {}
             } message: {
@@ -158,6 +166,78 @@ public struct WidgetsHomeView: View {
 
     private var defaultWidget: WidgetConfigModel {
         WidgetConfigModel(carBrand: "Porsche", carModelName: "911 GT3 RS", carImageName: "car_porsche_911", driverGreeting: "Welcome, Driver")
+    }
+
+
+    // MARK: - EV Supercharger & Rest Stop Section
+
+    private var evSuperchargerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                sectionHeader(title: "EV Supercharger & Rest Stop")
+                Spacer()
+                Button {
+                    showingEVMonitor = true
+                } label: {
+                    Text(evManager.isSessionActive ? "Active Session" : "Configure")
+                        .font(.system(size: 12, weight: .bold, design: .rounded))
+                        .foregroundStyle(evManager.isSessionActive ? evManager.activePreset.brandColor : Color.dashYellow)
+                }
+            }
+
+            Button {
+                showingEVMonitor = true
+            } label: {
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(evManager.activePreset.brandColor.opacity(0.18))
+                            .frame(width: 52, height: 52)
+                        Image(systemName: evManager.activePreset.systemImage)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(evManager.activePreset.brandColor)
+                    }
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 6) {
+                            Text(evManager.activePreset.name)
+                                .font(.system(size: 15, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                            if evManager.isSessionActive {
+                                Circle()
+                                    .fill(evManager.activePreset.brandColor)
+                                    .frame(width: 8, height: 8)
+                            }
+                        }
+
+                        if evManager.activePreset.isRestArea {
+                            Text(evManager.isSessionActive ? "Break in progress · \(evManager.restStopDurationMinutes) min" : "Road trip rest break & fatigue countdown")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Color.dashTextSecondary)
+                        } else {
+                            Text(evManager.isSessionActive ? "Charging \(Int(round(evManager.currentBatteryPercentage)))% → \(Int(round(evManager.targetBatteryPercentage)))%" : "Fast charging stopwatch & parked video companion")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Color.dashTextSecondary)
+                        }
+                    }
+
+                    Spacer(minLength: 0)
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.dashTextSecondary)
+                }
+                .padding(14)
+                .background(Color.dashCard)
+                .clipShape(RoundedRectangle(cornerRadius: 18))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(evManager.isSessionActive ? evManager.activePreset.brandColor.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1)
+                )
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal)
     }
 
     // MARK: - Plate Widgets Section

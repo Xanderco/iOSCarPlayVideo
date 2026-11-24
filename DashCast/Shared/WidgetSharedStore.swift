@@ -60,21 +60,80 @@ public struct SharedDoodle: Codable, Equatable {
     }
 }
 
+
+/// Snapshot of an active or recent EV fast-charging or rest stop session.
+public struct SharedEVChargingSnapshot: Codable, Equatable {
+    public var stationName: String
+    public var stationPresetRaw: String
+    public var currentBattery: Int
+    public var targetBattery: Int
+    public var powerKw: Double
+    public var isCharging: Bool
+    public var isRestArea: Bool
+    public var startTime: Date?
+    public var targetCompletionTime: Date?
+    public var restStopDurationMinutes: Int
+    public var notes: String
+
+    public init(
+        stationName: String,
+        stationPresetRaw: String,
+        currentBattery: Int,
+        targetBattery: Int,
+        powerKw: Double,
+        isCharging: Bool,
+        isRestArea: Bool,
+        startTime: Date? = nil,
+        targetCompletionTime: Date? = nil,
+        restStopDurationMinutes: Int = 20,
+        notes: String = ""
+    ) {
+        self.stationName = stationName
+        self.stationPresetRaw = stationPresetRaw
+        self.currentBattery = currentBattery
+        self.targetBattery = targetBattery
+        self.powerKw = powerKw
+        self.isCharging = isCharging
+        self.isRestArea = isRestArea
+        self.startTime = startTime
+        self.targetCompletionTime = targetCompletionTime
+        self.restStopDurationMinutes = restStopDurationMinutes
+        self.notes = notes
+    }
+
+    public static let placeholder = SharedEVChargingSnapshot(
+        stationName: "Tesla Supercharger",
+        stationPresetRaw: "teslaSupercharger",
+        currentBattery: 42,
+        targetBattery: 80,
+        powerKw: 250.0,
+        isCharging: true,
+        isRestArea: false,
+        startTime: Date(timeIntervalSince1970: 1_793_000_000),
+        targetCompletionTime: Date(timeIntervalSince1970: 1_793_001_200),
+        restStopDurationMinutes: 20,
+        notes: "Fast Charging"
+    )
+}
+
 public struct WidgetSharedPayload: Codable, Equatable {
     public static let currentVersion = 1
     public var version: Int
     public var car: SharedCarSnapshot?
     public var lastTrip: SharedTripSnapshot?
     public var doodle: SharedDoodle?
+    public var evSession: SharedEVChargingSnapshot?
     public var usesMiles: Bool
     public var updatedAt: Date
 
     public init(car: SharedCarSnapshot? = nil, lastTrip: SharedTripSnapshot? = nil,
-                doodle: SharedDoodle? = nil, usesMiles: Bool = false, updatedAt: Date = Date()) {
+                doodle: SharedDoodle? = nil, evSession: SharedEVChargingSnapshot? = nil,
+                usesMiles: Bool = false, updatedAt: Date = Date()) {
         self.version = Self.currentVersion
         self.car = car
         self.lastTrip = lastTrip
         self.doodle = doodle
+        self.evSession = evSession
         self.usesMiles = usesMiles
         self.updatedAt = updatedAt
     }
@@ -84,11 +143,12 @@ public enum DashCastLinks {
     public static let scheme = "dashcast"
     public static let cast = URL(string: "dashcast://cast")!
     public static let drive = URL(string: "dashcast://drive")!
+    public static let supercharger = URL(string: "dashcast://supercharger")!
 
     /// Destinations a widget may deep-link to. Deliberately not tied to tab layout,
     /// so navigation redesigns only need to update `AppState.handleDeepLink`.
     public enum Destination: String, CaseIterable {
-        case cast, drive
+        case cast, drive, supercharger
     }
 
     public static func destination(for url: URL) -> Destination? {

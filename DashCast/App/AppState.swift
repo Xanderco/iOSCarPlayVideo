@@ -92,6 +92,7 @@ public final class AppState: ObservableObject {
         switch destination {
         case .cast: selectedTab = .cast
         case .drive: selectedTab = .drive
+        case .supercharger: selectedTab = .widgets
         }
         return true
     }
