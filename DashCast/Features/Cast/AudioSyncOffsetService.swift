@@ -86,8 +86,8 @@ public final class AudioSyncOffsetService: ObservableObject {
                 offsetMilliseconds = clamped
                 return
             }
-            savePreferences()
             updateActivePreset()
+            savePreferences()
         }
     }
 
@@ -105,6 +105,7 @@ public final class AudioSyncOffsetService: ObservableObject {
     @Published public private(set) var detectedHardwareLatencyMs: Double = 0.0
     @Published public private(set) var recommendedPreset: AudioSyncPreset = .wired
 
+    private let defaults: UserDefaults
     private var routeObserver: NSObjectProtocol?
     private var audioEngine: AVAudioEngine?
     private var tonePlayer: AVAudioPlayerNode?
@@ -132,6 +133,7 @@ public final class AudioSyncOffsetService: ObservableObject {
     }
 
     public init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
         let storedOffset = defaults.object(forKey: Self.kOffsetKey) as? Double ?? 0.0
         let storedPresetStr = defaults.string(forKey: Self.kPresetKey) ?? AudioSyncPreset.wired.rawValue
         let storedAutoRoute = defaults.object(forKey: Self.kAutoRouteKey) as? Bool ?? true
@@ -155,7 +157,6 @@ public final class AudioSyncOffsetService: ObservableObject {
     }
 
     private func savePreferences() {
-        let defaults = UserDefaults.standard
         defaults.set(offsetMilliseconds, forKey: Self.kOffsetKey)
         defaults.set(selectedPreset.rawValue, forKey: Self.kPresetKey)
         defaults.set(autoRouteSyncEnabled, forKey: Self.kAutoRouteKey)
@@ -181,6 +182,8 @@ public final class AudioSyncOffsetService: ObservableObject {
         selectedPreset = preset
         if preset != .custom {
             offsetMilliseconds = preset.defaultOffsetMs
+        } else {
+            savePreferences()
         }
     }
 
