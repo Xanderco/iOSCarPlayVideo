@@ -51,7 +51,7 @@ public struct AudioSyncCalibrationSheet: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(syncService.isOffsetActive ? Color.dashYellow.opacity(0.3) : Color.dashCardStroke, lineWidth: 1)
+                                .stroke(syncService.isOffsetActive ? Color.dashYellow.opacity(0.3) : Color.dashBorder, lineWidth: 1)
                         )
 
                         // Quick Presets
@@ -98,7 +98,7 @@ public struct AudioSyncCalibrationSheet: View {
                                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                                .stroke(syncService.selectedPreset == preset ? Color.dashYellow.opacity(0.4) : Color.dashCardStroke, lineWidth: 1)
+                                                .stroke(syncService.selectedPreset == preset ? Color.dashYellow.opacity(0.4) : Color.dashBorder, lineWidth: 1)
                                         )
                                     }
                                     .buttonStyle(.plain)
@@ -136,7 +136,7 @@ public struct AudioSyncCalibrationSheet: View {
                                             .font(.system(size: 13, weight: .semibold))
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 10)
-                                            .background(Color.dashSurfaceRaised)
+                                            .background(Color.dashSurfaceHighlight)
                                             .foregroundStyle(Color.dashTextPrimary)
                                             .clipShape(RoundedRectangle(cornerRadius: 8))
                                     }
@@ -148,7 +148,7 @@ public struct AudioSyncCalibrationSheet: View {
                                             .font(.system(size: 13, weight: .semibold))
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 10)
-                                            .background(Color.dashSurfaceRaised)
+                                            .background(Color.dashSurfaceHighlight)
                                             .foregroundStyle(Color.dashTextPrimary)
                                             .clipShape(RoundedRectangle(cornerRadius: 8))
                                     }
@@ -160,7 +160,7 @@ public struct AudioSyncCalibrationSheet: View {
                                             .font(.system(size: 13, weight: .semibold))
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 10)
-                                            .background(Color.dashSurfaceRaised)
+                                            .background(Color.dashSurfaceHighlight)
                                             .foregroundStyle(Color.dashTextPrimary)
                                             .clipShape(RoundedRectangle(cornerRadius: 8))
                                     }
@@ -172,7 +172,7 @@ public struct AudioSyncCalibrationSheet: View {
                                             .font(.system(size: 13, weight: .semibold))
                                             .frame(maxWidth: .infinity)
                                             .padding(.vertical, 10)
-                                            .background(Color.dashSurfaceRaised)
+                                            .background(Color.dashSurfaceHighlight)
                                             .foregroundStyle(Color.dashTextPrimary)
                                             .clipShape(RoundedRectangle(cornerRadius: 8))
                                     }
@@ -183,7 +183,7 @@ public struct AudioSyncCalibrationSheet: View {
                             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                             .overlay(
                                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                                    .stroke(Color.dashCardStroke, lineWidth: 1)
+                                    .stroke(Color.dashBorder, lineWidth: 1)
                             )
                         }
 
@@ -244,7 +244,7 @@ public struct AudioSyncCalibrationSheet: View {
                                         .foregroundStyle(Color.dashTextSecondary)
                                         .frame(maxWidth: .infinity)
                                         .padding(.vertical, 12)
-                                        .background(Color.dashSurfaceRaised)
+                                        .background(Color.dashSurfaceHighlight)
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                 }
                             }

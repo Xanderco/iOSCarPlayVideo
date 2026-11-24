@@ -230,7 +230,7 @@ public final class AudioSyncOffsetService: ObservableObject {
 
     private func setupRouteObserver() {
         routeObserver = NotificationCenter.default.addObserver(
-            forName: AVAudioSession.routeConfigurationChangeNotification,
+            forName: AVAudioSession.routeChangeNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
