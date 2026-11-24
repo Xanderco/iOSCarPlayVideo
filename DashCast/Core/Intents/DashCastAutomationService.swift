@@ -72,7 +72,7 @@ public final class DashCastAutomationService: ObservableObject {
     /// Triggers welcome chime playback automation
     public func triggerPlayChime() {
         let catalog = SoundCatalogService.shared
-        let sound = catalog.trendingSounds.first ?? catalog.allSounds.first
+        let sound = catalog.sounds.first
         if let sound = sound {
             SoundPlayerEngine.shared.play(sound: sound)
             recordExecution(intentName: "PlayCarChimeIntent", summary: "Chime '\(sound.title)' played")

@@ -62,6 +62,9 @@ public final class SoundCatalogService {
         SoundEffectItem(id: "orchestral_fanfare", title: "Orchestral Fanfare", category: .cinematic, durationString: "0:03", frequencyHz: 600, color: .dashGreen)
     ]
 
+    public var allSounds: [SoundEffectItem] { sounds }
+    public var trendingSounds: [SoundEffectItem] { sounds }
+
     public func sounds(for category: SoundCategory) -> [SoundEffectItem] {
         if category == .all {
             return sounds

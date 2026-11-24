@@ -77,7 +77,7 @@ public struct PlayCarChimeIntent: AppIntent {
     @MainActor
     public func perform() async throws -> some IntentResult & ProvidesDialog {
         let catalog = SoundCatalogService.shared
-        let sound = catalog.trendingSounds.first ?? catalog.allSounds.first
+        let sound = catalog.sounds.first
         if let sound = sound {
             SoundPlayerEngine.shared.play(sound: sound)
             return .result(dialog: "Playing \(sound.title) chime in DashCast.")
