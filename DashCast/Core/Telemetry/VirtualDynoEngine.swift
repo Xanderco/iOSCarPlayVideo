@@ -205,7 +205,13 @@ public final class VirtualDynoEngine: ObservableObject {
             let isGForceTriggered = longitudinalG >= Self.launchAccelerationThresholdG && cleanSpeedMps > Self.stationarySpeedThresholdMps
 
             if isSpeedExceeded || isGForceTriggered {
-                startSprint(at: timestamp, initialSpeedMph: speedMph, initialSpeedKmh: speedKmh)
+                startSprint(
+                    at: timestamp,
+                    initialSpeedMph: speedMph,
+                    initialSpeedKmh: speedKmh,
+                    initialLongitudinalG: longitudinalG,
+                    initialLateralG: lateralG
+                )
             } else if cleanSpeedMps > Self.launchSpeedThresholdMps * 1.5 {
                 // Not a clean launch, re-evaluate
                 transition(to: .idle)
@@ -317,15 +323,21 @@ public final class VirtualDynoEngine: ObservableObject {
         state = newState
     }
 
-    private func startSprint(at timestamp: Date, initialSpeedMph: Double, initialSpeedKmh: Double) {
+    private func startSprint(
+        at timestamp: Date,
+        initialSpeedMph: Double,
+        initialSpeedKmh: Double,
+        initialLongitudinalG: Double = 0.0,
+        initialLateralG: Double = 0.0
+    ) {
         activeTelemetry = ActiveSprintTelemetry(
             startTime: timestamp,
             currentElapsedTime: 0.0,
             currentSpeedMph: initialSpeedMph,
             currentSpeedKmh: initialSpeedKmh,
             currentDistanceMeters: 0.0,
-            peakLongitudinalG: 0.0,
-            peakLateralG: 0.0
+            peakLongitudinalG: max(0.0, initialLongitudinalG),
+            peakLateralG: abs(initialLateralG)
         )
         transition(to: .sprinting)
     }
