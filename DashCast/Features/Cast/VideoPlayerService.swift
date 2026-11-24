@@ -363,6 +363,42 @@ public final class VideoPlayerService: ObservableObject {
                                 (commands.togglePlayPauseCommand, toggle)]
     }
 
+    // MARK: - Channel Navigation (Steering Wheel & Rotary Knob)
+
+    /// Switches to and plays the next channel from the provided playlist store.
+    /// Returns `true` if a channel was found and loaded, `false` otherwise.
+    @discardableResult
+    public func playNextChannel(from store: PlaylistStore = .shared) -> Bool {
+        let channels = store.allChannels
+        guard !channels.isEmpty else { return false }
+
+        if let current = currentChannel, let currentIndex = channels.firstIndex(where: { $0.id == current.id }) {
+            let nextIndex = (currentIndex + 1) % channels.count
+            load(channel: channels[nextIndex])
+            return true
+        } else {
+            load(channel: channels[0])
+            return true
+        }
+    }
+
+    /// Switches to and plays the previous channel from the provided playlist store.
+    /// Returns `true` if a channel was found and loaded, `false` otherwise.
+    @discardableResult
+    public func playPreviousChannel(from store: PlaylistStore = .shared) -> Bool {
+        let channels = store.allChannels
+        guard !channels.isEmpty else { return false }
+
+        if let current = currentChannel, let currentIndex = channels.firstIndex(where: { $0.id == current.id }) {
+            let prevIndex = (currentIndex - 1 + channels.count) % channels.count
+            load(channel: channels[prevIndex])
+            return true
+        } else {
+            load(channel: channels[channels.count - 1])
+            return true
+        }
+    }
+
     private func updateNowPlayingInfo() {
         guard let channel = currentChannel else { return }
         var info: [String: Any] = [

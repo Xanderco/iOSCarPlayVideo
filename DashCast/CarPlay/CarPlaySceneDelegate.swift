@@ -64,6 +64,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
 
         configureRemoteCommands()
         observePlayer()
+        CarPlayRotaryNavigationService.shared.attach()
     }
 
     public func templateApplicationScene(
@@ -74,6 +75,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             NotificationCenter.default.removeObserver(playlistObserver)
         }
         playlistObserver = nil
+        CarPlayRotaryNavigationService.shared.detach()
         removeRemoteCommands()
         playerCancellable = nil
         libraryTemplate = nil

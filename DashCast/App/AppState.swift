@@ -8,6 +8,9 @@ public final class AppState: ObservableObject {
     @Published public var selectedTab: TabItem = .cast
     @Published public var isProLifetimeUnlocked: Bool = false
     @Published public var showPaywall: Bool = false
+    @Published public var showThermalSheet: Bool = false
+    @Published public var showDarkShieldSheet: Bool = false
+    @Published public var showRotarySheet: Bool = false
     @Published public var showWidgetEditor: Bool = false
     @Published public var showCarPlaySimulator: Bool = false
     @Published public var initialCarPlayMode: String = "App in CarPlay"
@@ -92,6 +95,9 @@ public final class AppState: ObservableObject {
         switch destination {
         case .cast: selectedTab = .cast
         case .drive: selectedTab = .drive
+        case .thermal: showThermalSheet = true
+        case .vision: showDarkShieldSheet = true
+        case .rotary: showRotarySheet = true
         }
         return true
     }
