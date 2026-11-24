@@ -8177,6 +8177,278 @@
           }
         }
       }
+    },
+    "NIGHT VISION HUD & SPEED AURA": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NIGHT VISION HUD & SPEED AURA"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HUD VISIÓN NOCTURNA Y AURA DE VELOCIDAD"
+          }
+        }
+      }
+    },
+    "Launch Night Vision HUD": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch Night Vision HUD"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar HUD Visión Nocturna"
+          }
+        }
+      }
+    },
+    "OLED pure black reflection & speed aura": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OLED pure black reflection & speed aura"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reflejo negro puro OLED y aura de velocidad"
+          }
+        }
+      }
+    },
+    "Ambient Speed Limit Aura": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ambient Speed Limit Aura"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aura Ambiental de Límite de Velocidad"
+          }
+        }
+      }
+    },
+    "Pulsating glowing bezel warning when exceeding speed threshold": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pulsating glowing bezel warning when exceeding speed threshold"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bisel luminoso pulsante de advertencia al superar el umbral de velocidad"
+          }
+        }
+      }
+    },
+    "Speed Limit Warning": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed Limit Warning"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviso de Límite de Velocidad"
+          }
+        }
+      }
+    },
+    "Warning aura activates above this speed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warning aura activates above this speed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El aura de advertencia se activa sobre esta velocidad"
+          }
+        }
+      }
+    },
+    "Windshield Reflection Mode": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windshield Reflection Mode"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Reflejo de Parabrisas"
+          }
+        }
+      }
+    },
+    "Mirrors HUD horizontally for dashboard glass reflection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirrors HUD horizontally for dashboard glass reflection"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invierte el HUD horizontalmente para reflejo en el parabrisas"
+          }
+        }
+      }
+    },
+    "HUD Color Theme": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HUD Color Theme"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tema de Color del HUD"
+          }
+        }
+      }
+    },
+    "WINDSHIELD": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WINDSHIELD"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PARABRISAS"
+          }
+        }
+      }
+    },
+    "MIRRORED": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MIRRORED"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ESPEJO"
+          }
+        }
+      }
+    },
+    "THEME": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "THEME"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TEMA"
+          }
+        }
+      }
+    },
+    "LIMIT": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LIMIT"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LÍMITE"
+          }
+        }
+      }
+    },
+    "Tap anywhere to toggle HUD controls for windshield projection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap anywhere to toggle HUD controls for windshield projection"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca en cualquier lugar para alternar los controles del HUD para proyección en parabrisas"
+          }
+        }
+      }
+    },
+    "Night Vision HUD": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night Vision HUD"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HUD Visión Nocturna"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

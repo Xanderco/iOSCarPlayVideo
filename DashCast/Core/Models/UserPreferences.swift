@@ -14,6 +14,10 @@ public struct UserPreferences: Codable {
     public var driveVehicleImage: String
     /// Automatic trip detection (AutoTripService). nil = not chosen yet => ON once Always location is granted.
     public var autoTripDetectionEnabled: Bool?
+    public var nightHUDWindshieldMirrored: Bool
+    public var nightHUDAmbientAuraEnabled: Bool
+    public var nightHUDSpeedLimitKmh: Double
+    public var nightHUDThemeRawValue: String
 
     public init(
         useMilesPerHour: Bool = false,
@@ -27,7 +31,11 @@ public struct UserPreferences: Codable {
         driveCountry: String = "Colombia",
         driveVehicleName: String = "Chevrolet Trax",
         driveVehicleImage: String = "car_chevrolet_corvette",
-        autoTripDetectionEnabled: Bool? = nil
+        autoTripDetectionEnabled: Bool? = nil,
+        nightHUDWindshieldMirrored: Bool = false,
+        nightHUDAmbientAuraEnabled: Bool = true,
+        nightHUDSpeedLimitKmh: Double = 100.0,
+        nightHUDThemeRawValue: String = "pureOLED"
     ) {
         self.useMilesPerHour = useMilesPerHour
         self.isProLifetimeUnlocked = isProLifetimeUnlocked
@@ -41,6 +49,10 @@ public struct UserPreferences: Codable {
         self.driveVehicleName = driveVehicleName
         self.driveVehicleImage = driveVehicleImage
         self.autoTripDetectionEnabled = autoTripDetectionEnabled
+        self.nightHUDWindshieldMirrored = nightHUDWindshieldMirrored
+        self.nightHUDAmbientAuraEnabled = nightHUDAmbientAuraEnabled
+        self.nightHUDSpeedLimitKmh = nightHUDSpeedLimitKmh
+        self.nightHUDThemeRawValue = nightHUDThemeRawValue
     }
 
     enum CodingKeys: String, CodingKey {
@@ -56,6 +68,10 @@ public struct UserPreferences: Codable {
         case driveVehicleName
         case driveVehicleImage
         case autoTripDetectionEnabled
+        case nightHUDWindshieldMirrored
+        case nightHUDAmbientAuraEnabled
+        case nightHUDSpeedLimitKmh
+        case nightHUDThemeRawValue
     }
 
     public init(from decoder: Decoder) throws {
@@ -72,5 +88,9 @@ public struct UserPreferences: Codable {
         driveVehicleName = try container.decodeIfPresent(String.self, forKey: .driveVehicleName) ?? "Chevrolet Trax"
         driveVehicleImage = try container.decodeIfPresent(String.self, forKey: .driveVehicleImage) ?? "car_chevrolet_corvette"
         autoTripDetectionEnabled = try container.decodeIfPresent(Bool.self, forKey: .autoTripDetectionEnabled)
+        nightHUDWindshieldMirrored = try container.decodeIfPresent(Bool.self, forKey: .nightHUDWindshieldMirrored) ?? false
+        nightHUDAmbientAuraEnabled = try container.decodeIfPresent(Bool.self, forKey: .nightHUDAmbientAuraEnabled) ?? true
+        nightHUDSpeedLimitKmh = try container.decodeIfPresent(Double.self, forKey: .nightHUDSpeedLimitKmh) ?? 100.0
+        nightHUDThemeRawValue = try container.decodeIfPresent(String.self, forKey: .nightHUDThemeRawValue) ?? "pureOLED"
     }
 }
