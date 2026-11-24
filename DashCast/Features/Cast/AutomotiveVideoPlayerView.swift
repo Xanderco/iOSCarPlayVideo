@@ -4,6 +4,7 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
+    @ObservedObject var attestationGate = PassengerAttestationGate.shared
     @State private var showControls: Bool = true
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
@@ -18,13 +19,29 @@ public struct AutomotiveVideoPlayerView: View {
             Color.black
 
             if playerService.currentChannel != nil {
-                CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            showControls.toggle()
+                ZStack {
+                    CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
+                        .ignoresSafeArea()
+                    DarkShieldFilterOverlay()
+                        .ignoresSafeArea()
+                    PassengerAttestationBlockerOverlay()
+                        .ignoresSafeArea()
+
+                    // Unobtrusive Passenger Watermark
+                    VStack {
+                        HStack {
+                            HUDPassengerWatermarkOverlay()
+                            Spacer()
                         }
+                        .padding(12)
+                        Spacer()
                     }
+                }
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        showControls.toggle()
+                    }
+                }
 
                 if playerService.isBuffering && playerService.playbackError == nil {
                     ProgressView()
@@ -118,6 +135,18 @@ public struct AutomotiveVideoPlayerView: View {
                     }
 
                     Spacer()
+
+                    Button {
+                        AppState.shared.showDarkShieldSheet = true
+                    } label: {
+                        Image(systemName: DarkShieldVisionService.shared.statusIconName)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(DarkShieldVisionService.shared.isActive ? DarkShieldVisionService.shared.statusColor : Color.white)
+                            .padding(9)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
+                    }
+                    .accessibilityLabel("DarkShield Vision Glare Guard")
 
                     AirPlayRoutePickerRepresentable(tintColor: .white)
                         .frame(width: 34, height: 34)

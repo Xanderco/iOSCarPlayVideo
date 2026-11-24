@@ -70,6 +70,8 @@ public struct DriveHomeView: View {
 
                         // Top right quick toggles
                         VStack(spacing: 8) {
+                            DarkShieldBadgeView(isCompact: true)
+                            CockpitThermalBadgeView(isCompact: true)
                             Button {
                                 appState.setSpeedUnit(milesPerHour: !appState.useMilesPerHour)
                             } label: {
@@ -110,6 +112,20 @@ public struct DriveHomeView: View {
 
                     // Bottom Automotive HUD Console
                     bottomHUDConsole
+                }
+            }
+            .sheet(isPresented: $appState.showDarkShieldSheet) {
+                DarkShieldVisionSheet()
+            }
+            .sheet(isPresented: $appState.showThermalSheet) {
+                ThermalProtectionSheet()
+            }
+            .sheet(isPresented: $appState.showDynoSheet) {
+                VirtualDynoSheet(useMilesPerHour: appState.useMilesPerHour)
+            }
+            .overlay {
+                if CockpitThermalService.shared.isScreenDimmed {
+                    CockpitThermalDimmerOverlay()
                 }
             }
             .sheet(isPresented: $showingTripSummary) {
@@ -227,6 +243,12 @@ public struct DriveHomeView: View {
             .padding(.vertical, 8)
             .background(Color.dashSurface)
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal)
+
+            // Virtual Dyno 0-60 Sprint Gauge
+            VirtualDynoGaugeView(useMilesPerHour: appState.useMilesPerHour) {
+                appState.showDynoSheet = true
+            }
             .padding(.horizontal)
 
             // Controls: Start / Pause / Resume / End
