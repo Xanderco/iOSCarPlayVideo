@@ -149,6 +149,8 @@ public extension Color {
     static var dashBackground: Color { .dcBackground }
     @available(*, deprecated, renamed: "dcSurface")
     static var dashSurface: Color { .dcSurface }
+    @available(*, deprecated, renamed: "dcSurface")
+    static var dashCard: Color { .dcSurface }
     @available(*, deprecated, renamed: "dcSurfaceRaised")
     static var dashSurfaceHighlight: Color { .dcSurfaceRaised }
     @available(*, deprecated, renamed: "dcStroke")
