@@ -205,7 +205,7 @@ public final class CabinAcousticDSPService: ObservableObject {
         let v = speed ?? effectiveSpeedMph
         let baseGains = selectedProfile == .custom ? customBandGains : selectedProfile.defaultBandGains
         let base = baseGains.indices.contains(band.rawValue) ? baseGains[band.rawValue] : 0.0
-        let offset = speedOffset(for band, atSpeedMph: v)
+        let offset = speedOffset(for: band, atSpeedMph: v)
         let total = base + offset
         // Clamp to safe digital audio limits (-12 dB to +12 dB)
         return max(-12.0, min(total, 12.0))
