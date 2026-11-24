@@ -57,7 +57,7 @@ public struct DarkShieldVisionSheet: View {
             RoundedRectangle(cornerRadius: 18)
                 .fill(
                     LinearGradient(
-                        colors: [Color.dcSurfaceHighlight, Color.dcSurface],
+                        colors: [Color.dcSurfaceRaised, Color.dcSurface],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -185,7 +185,7 @@ public struct DarkShieldVisionSheet: View {
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? Color.dcSurfaceHighlight : Color.dcSurface)
+                    .fill(isSelected ? Color.dcSurfaceRaised : Color.dcSurface)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
