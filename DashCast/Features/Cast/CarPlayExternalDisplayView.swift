@@ -7,6 +7,7 @@ public struct CarPlayExternalDisplayView: View {
     @ObservedObject var appState = AppState.shared
     @ObservedObject var thermalService = CockpitThermalService.shared
     @ObservedObject var visionService = DarkShieldVisionService.shared
+    @ObservedObject var rotaryService = CarPlayRotaryNavigationService.shared
 
     public init() {}
 
@@ -57,6 +58,10 @@ public struct CarPlayExternalDisplayView: View {
                             .padding(.vertical, 6)
                             .background(Color.black.opacity(0.6))
                             .clipShape(Capsule())
+                        }
+
+                        if rotaryService.isRotaryNavigationActive {
+                            CarPlayRotaryFocusBadgeView(isCompact: true)
                         }
 
                         Spacer()
