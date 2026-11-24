@@ -13,7 +13,7 @@ public struct AcousticDSPSheet: View {
     public var body: some View {
         NavigationStack {
             ZStack {
-                Color.dashBackground.ignoresSafeArea()
+                Color.dcBackground.ignoresSafeArea()
 
                 ScrollView {
                     VStack(spacing: 20) {
@@ -48,7 +48,7 @@ public struct AcousticDSPSheet: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
-                    .foregroundStyle(Color.electricYellow)
+                    .foregroundStyle(Color.dcAccent)
                 }
             }
         }
@@ -60,11 +60,11 @@ public struct AcousticDSPSheet: View {
         HStack(spacing: 16) {
             ZStack {
                 Circle()
-                    .fill(dspService.isEnabled ? Color.electricYellow.opacity(0.15) : Color.white.opacity(0.05))
+                    .fill(dspService.isEnabled ? Color.dcAccent.opacity(0.15) : Color.white.opacity(0.05))
                     .frame(width: 50, height: 50)
                 Image(systemName: dspService.isEnabled ? "speaker.wave.3.fill" : "speaker.slash.fill")
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundStyle(dspService.isEnabled ? Color.electricYellow : Color.white.opacity(0.4))
+                    .foregroundStyle(dspService.isEnabled ? Color.dcAccent : Color.white.opacity(0.4))
             }
 
             VStack(alignment: .leading, spacing: 4) {
@@ -80,10 +80,10 @@ public struct AcousticDSPSheet: View {
 
             Toggle("", isOn: $dspService.isEnabled)
                 .labelsHidden()
-                .tint(Color.electricYellow)
+                .tint(Color.dcAccent)
         }
         .padding(16)
-        .background(Color.dashCard)
+        .background(Color.dcSurface)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -108,8 +108,8 @@ public struct AcousticDSPSheet: View {
                         .font(.system(size: 12, weight: .semibold))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
-                        .background(isSimulatingSpeed ? Color.electricYellow.opacity(0.2) : Color.white.opacity(0.08))
-                        .foregroundStyle(isSimulatingSpeed ? Color.electricYellow : .white.opacity(0.7))
+                        .background(isSimulatingSpeed ? Color.dcAccent.opacity(0.2) : Color.white.opacity(0.08))
+                        .foregroundStyle(isSimulatingSpeed ? Color.dcAccent : .white.opacity(0.7))
                         .clipShape(Capsule())
                 }
             }
@@ -120,7 +120,7 @@ public struct AcousticDSPSheet: View {
                     title: "Vehicle Speed",
                     value: String(format: "%.0f mph", dspService.effectiveSpeedMph),
                     icon: "car.circle.fill",
-                    color: Color.electricYellow
+                    color: Color.dcAccent
                 )
 
                 metricCell(
@@ -134,7 +134,7 @@ public struct AcousticDSPSheet: View {
                     title: "Vocal Lift",
                     value: String(format: "+%.1f dB", dspService.speedOffset(for: .vocalClarity, atSpeedMph: dspService.effectiveSpeedMph)),
                     icon: "arrow.up.circle.fill",
-                    color: Color.electricYellow
+                    color: Color.dcAccent
                 )
             }
 
@@ -147,12 +147,12 @@ public struct AcousticDSPSheet: View {
                         Spacer()
                         Text(String(format: "%.0f mph", simulationSpeedSlider))
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(Color.electricYellow)
+                            .foregroundStyle(Color.dcAccent)
                     }
                     Slider(value: $simulationSpeedSlider, in: 0...90, step: 1) {
                         Text("Speed")
                     }
-                    .tint(Color.electricYellow)
+                    .tint(Color.dcAccent)
                     .onChange(of: simulationSpeedSlider) { _, newVal in
                         dspService.simulatedSpeedMph = newVal
                     }
@@ -161,7 +161,7 @@ public struct AcousticDSPSheet: View {
             }
         }
         .padding(16)
-        .background(Color.dashCard)
+        .background(Color.dcSurface)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -185,7 +185,7 @@ public struct AcousticDSPSheet: View {
 
     private func noiseLevelColor(_ dba: Double) -> Color {
         if dba < 58 { return Color.green }
-        if dba < 68 { return Color.electricYellow }
+        if dba < 68 { return Color.dcAccent }
         return Color.orange
     }
 
@@ -199,6 +199,7 @@ public struct AcousticDSPSheet: View {
 
             HStack(spacing: 8) {
                 ForEach(CabinAcousticDSPService.CabinProfile.allCases) { profile in
+                    let isSelected = dspService.selectedProfile == profile
                     Button {
                         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
                             dspService.selectedProfile = profile
@@ -214,11 +215,11 @@ public struct AcousticDSPSheet: View {
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 10)
-                        .background(dspService.selectedProfile == profile ? Color.electricYellow.opacity(0.2) : Color.dashCard)
-                        .foregroundStyle(dspService.selectedProfile == profile ? Color.electricYellow : Color.white.opacity(0.7))
+                        .background(isSelected ? Color.dcAccent.opacity(0.2) : Color.dcSurface)
+                        .foregroundStyle(isSelected ? Color.dcAccent : Color.white.opacity(0.7))
                         .overlay(
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(dspService.selectedProfile == profile ? Color.electricYellow : Color.white.opacity(0.08), lineWidth: 1.5)
+                                .stroke(isSelected ? Color.dcAccent : Color.white.opacity(0.08), lineWidth: 1.5)
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
@@ -241,7 +242,7 @@ public struct AcousticDSPSheet: View {
                         dspService.resetToProfileDefaults()
                     }
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.electricYellow)
+                    .foregroundStyle(Color.dcAccent)
                 }
             }
 
@@ -254,47 +255,36 @@ public struct AcousticDSPSheet: View {
             .padding(.vertical, 8)
         }
         .padding(16)
-        .background(Color.dashCard)
+        .background(Color.dcSurface)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func eqBandColumn(band: CabinAcousticDSPService.EQBand) -> some View {
         let gain = dspService.computedGain(for: band)
-        let normalizedHeight = max(0.05, min(1.0, (gain + 12.0) / 24.0)) // maps -12dB...+12dB to 0...1
+        let normalized = max(0.05, min(1.0, (gain + 12.0) / 24.0))
+        let barHeight: CGFloat = CGFloat(max(10.0, 110.0 * normalized))
+        let gainColor: Color = gain > 0 ? Color.dcAccent : (gain < 0 ? Color.orange : Color.white.opacity(0.6))
 
         return VStack(spacing: 6) {
-            // Gain Label
             Text(String(format: "%+.1f", gain))
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
-                .foregroundStyle(gain > 0 ? Color.electricYellow : (gain < 0 ? Color.orange : Color.white.opacity(0.6)))
+                .foregroundStyle(gainColor)
 
-            // Vertical Equalizer Bar
             ZStack(alignment: .bottom) {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
                     .fill(Color.white.opacity(0.06))
                     .frame(maxWidth: .infinity)
 
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.electricYellow.opacity(0.85),
-                                gain > 3.0 ? Color.orange : Color.electricYellow
-                            ],
-                            startPoint: .bottom,
-                            endPoint: .top
-                        )
-                    )
-                    .frame(height: max(10, 110 * normalizedHeight))
+                    .fill(Color.dcAccent)
+                    .frame(height: barHeight)
             }
             .frame(height: 110)
 
-            // Band Frequency Label
             Text(band.label)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(.white)
 
-            // Band Role Tag
             Text(band.roleDescription)
                 .font(.system(size: 9))
                 .foregroundStyle(.white.opacity(0.5))
@@ -319,7 +309,7 @@ public struct AcousticDSPSheet: View {
                 Spacer()
                 Toggle("", isOn: $dspService.speedCompensationEnabled)
                     .labelsHidden()
-                    .tint(Color.electricYellow)
+                    .tint(Color.dcAccent)
             }
 
             Divider().background(Color.white.opacity(0.08))
@@ -332,15 +322,15 @@ public struct AcousticDSPSheet: View {
                     Spacer()
                     Text(String(format: "%.0f%%", dspService.speechEnhancerIntensity * 100))
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(Color.electricYellow)
+                        .foregroundStyle(Color.dcAccent)
                 }
 
                 Slider(value: $dspService.speechEnhancerIntensity, in: 0.1...1.0, step: 0.05)
-                    .tint(Color.electricYellow)
+                    .tint(Color.dcAccent)
             }
         }
         .padding(16)
-        .background(Color.dashCard)
+        .background(Color.dcSurface)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
@@ -351,7 +341,7 @@ public struct AcousticDSPSheet: View {
             HStack(spacing: 8) {
                 Image(systemName: "info.circle.fill")
                     .font(.system(size: 16))
-                    .foregroundStyle(Color.electricYellow)
+                    .foregroundStyle(Color.dcAccent)
                 Text("How Cabin Road Noise Compensation Works")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(.white)

@@ -140,4 +140,15 @@ final class AcousticDSPTests: XCTestCase {
         XCTAssertEqual(appState.selectedTab, .cast)
         XCTAssertTrue(appState.showAcousticDSPSheet)
     }
+    @MainActor
+    func testCarPlayExternalDisplayBadge() {
+        sut.isEnabled = true
+        XCTAssertTrue(sut.isEnabled)
+        
+        let view = CarPlayExternalDisplayView()
+        XCTAssertNotNil(view)
+        
+        sut.isEnabled = false
+        XCTAssertFalse(sut.isEnabled)
+    }
 }
