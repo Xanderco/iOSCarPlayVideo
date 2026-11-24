@@ -8177,6 +8177,125 @@
           }
         }
       }
+    },
+    "A/V Sync Offset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A/V Sync Offset"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desfase Audio/Video"
+          }
+        }
+      }
+    },
+    "A/V Sync Calibration": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A/V Sync Calibration"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calibración de Sincronía A/V"
+          }
+        }
+      }
+    },
+    "A/V LATENCY COMPENSATION": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A/V LATENCY COMPENSATION"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "COMPENSACIÓN DE LATENCIA A/V"
+          }
+        }
+      }
+    },
+    "AUDIO CONNECTION PRESETS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AUDIO CONNECTION PRESETS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PERFILES DE CONEXIÓN DE AUDIO"
+          }
+        }
+      }
+    },
+    "FINE-TUNE OFFSET": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FINE-TUNE OFFSET"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AJUSTE FINO DE DESFASE"
+          }
+        }
+      }
+    },
+    "Test Audio Pulse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Audio Pulse"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probar Pulso de Audio"
+          }
+        }
+      }
+    },
+    "Reset to 0ms": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reset to 0ms"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restablecer a 0ms"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

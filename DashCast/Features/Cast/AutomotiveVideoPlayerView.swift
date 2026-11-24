@@ -4,7 +4,9 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
+    @ObservedObject var syncService = AudioSyncOffsetService.shared
     @State private var showControls: Bool = true
+    @State private var showSyncCalibration: Bool = false
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
     @Binding var isFullscreen: Bool
@@ -44,6 +46,9 @@ public struct AutomotiveVideoPlayerView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: isFullscreen ? 0 : 16, style: .continuous))
+        .sheet(isPresented: $showSyncCalibration) {
+            AudioSyncCalibrationSheet()
+        }
     }
 
     private var placeholderView: some View {
@@ -118,6 +123,26 @@ public struct AutomotiveVideoPlayerView: View {
                     }
 
                     Spacer()
+
+                    Button {
+                        showSyncCalibration = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "waveform.badge.magnifyingglass")
+                                .font(.system(size: 14, weight: .bold))
+                            if syncService.isOffsetActive {
+                                Text(syncService.formattedOffset)
+                                    .font(ThemeFonts.monospaceDigits(size: 10))
+                                    .fontWeight(.bold)
+                            }
+                        }
+                        .foregroundStyle(syncService.isOffsetActive ? Color.dashYellow : .white)
+                        .padding(.horizontal, syncService.isOffsetActive ? 8 : 7)
+                        .padding(.vertical, 7)
+                        .background(syncService.isOffsetActive ? Color.dashYellow.opacity(0.25) : Color.white.opacity(0.2))
+                        .clipShape(Capsule())
+                    }
+                    .accessibilityLabel("A/V Sync Calibration")
 
                     AirPlayRoutePickerRepresentable(tintColor: .white)
                         .frame(width: 34, height: 34)

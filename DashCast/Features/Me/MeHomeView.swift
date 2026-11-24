@@ -365,6 +365,33 @@ public struct MeHomeView: View {
 
                             Divider().background(Color.dashBorder.opacity(0.5))
 
+                            // A/V Sync Calibration
+                            NavigationLink {
+                                AudioSyncCalibrationSheet()
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "waveform.badge.magnifyingglass")
+                                        .foregroundStyle(Color.dashYellow)
+                                    Text("A/V Sync Calibration")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundStyle(Color.dashTextPrimary)
+                                    Spacer()
+                                    if AudioSyncOffsetService.shared.isOffsetActive {
+                                        Text(AudioSyncOffsetService.shared.formattedOffset)
+                                            .font(ThemeFonts.monospaceDigits(size: 12))
+                                            .foregroundStyle(Color.dashYellow)
+                                    }
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Color.dashTextMuted)
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 14)
+                            }
+                            .buttonStyle(.plain)
+
+                            Divider().background(Color.dashBorder.opacity(0.5))
+
                             // Restore Purchase
                             Button {
                                 Task {
