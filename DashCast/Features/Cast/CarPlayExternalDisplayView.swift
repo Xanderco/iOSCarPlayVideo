@@ -5,6 +5,7 @@ public struct CarPlayExternalDisplayView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var locationService = DriveLocationService.shared
     @ObservedObject var appState = AppState.shared
+    @ObservedObject var audioRouter = DualZoneAudioRouter.shared
 
     public init() {}
 
@@ -39,6 +40,10 @@ public struct CarPlayExternalDisplayView: View {
                         .padding(.vertical, 6)
                         .background(Color.black.opacity(0.6))
                         .clipShape(Capsule())
+
+                        if audioRouter.isHeadphoneZoneActive || audioRouter.isSafetyMuted {
+                            DualZoneAudioBadgeView()
+                        }
 
                         Spacer()
 

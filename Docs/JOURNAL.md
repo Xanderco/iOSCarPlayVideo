@@ -92,6 +92,17 @@
 
 ## Log
 
+### 2026-11-24 18:08 (Bogotá) — DI-62 / CARAA-66: Dual-Zone Passenger Headphone Splitter & Independent Cabin Audio Router
+- **Added `DualZoneAudioRouter` (`DashCast/Core/Audio/DualZoneAudioRouter.swift`)**:
+  - Classifies `AVAudioSession` output ports into passenger personal headphones (`.bluetoothA2DP`, `.bluetoothLE`, `.bluetoothHFP`, `.headphones`, `.usbAudio`), vehicle cabin audio (`.carAudio`, `.airPlay`), and phone speakers.
+  - Configures `.playback` / `.moviePlayback` with `.mixWithOthers` and `.default` route-sharing policy (avoiding `RouteSharingPolicyException` when combining `.mixWithOthers` with non-default policies, and strictly avoiding `.playAndRecord`-only options).
+  - Handles passenger headphone connect/disconnect transitions with configurable fallback (`mutePassengerVideo`, `pausePlayback`, `fallbackToCabin`) so cabin navigation prompts and radio are never monopolized or blasted over car speakers on Bluetooth drop.
+  - Provides independent passenger stream volume trim (`0.0...1.0`) wired to `VideoPlayerService.shared`.
+- **UI & Localization**:
+  - Added `DualZoneAudioSheet`, `AudioOutputRoutePickerRepresentable` (`prioritizesVideoDevices = false`), and `DualZoneAudioBadgeView` (`DashCast/Features/Cast/DualZoneAudioSheet.swift`), integrated into `AutomotiveVideoPlayerView`, `CarOutputPanelView`, `CastHomeView`, and `CarPlayExternalDisplayView` without altering the classic 5-tab layout (D10).
+  - Updated `DashCast/Resources/Localizable.xcstrings` with English & Spanish strings.
+- **Tests**: Added `DashCastTests/DualZoneAudioRouterTests.swift` (8 unit tests) and `testDualZoneAudioSheetOpens` in `DashCastUITests/DashCastSmokeUITests.swift`. Verification pending GitHub Actions macOS CI on `feature/DI-62-dual-zone-audio-router`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

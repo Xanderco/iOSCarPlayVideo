@@ -4,7 +4,9 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
+    @ObservedObject var audioRouter = DualZoneAudioRouter.shared
     @State private var showControls: Bool = true
+    @State private var showDualZoneAudio: Bool = false
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
     @Binding var isFullscreen: Bool
@@ -44,6 +46,9 @@ public struct AutomotiveVideoPlayerView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: isFullscreen ? 0 : 16, style: .continuous))
+        .sheet(isPresented: $showDualZoneAudio) {
+            DualZoneAudioSheet()
+        }
     }
 
     private var placeholderView: some View {
@@ -118,6 +123,25 @@ public struct AutomotiveVideoPlayerView: View {
                     }
 
                     Spacer()
+
+                    Button {
+                        showDualZoneAudio = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: audioRouter.activeZone.iconName)
+                                .font(.system(size: 13, weight: .bold))
+                            if audioRouter.isHeadphoneZoneActive || audioRouter.isSafetyMuted {
+                                Text(audioRouter.activeZone.localizedBadgeTitle)
+                                    .font(.system(size: 10, weight: .bold))
+                            }
+                        }
+                        .foregroundStyle(audioRouter.isSafetyMuted ? Color.dcWarning : (audioRouter.isHeadphoneZoneActive ? Color.dcSuccess : .white))
+                        .padding(.horizontal, (audioRouter.isHeadphoneZoneActive || audioRouter.isSafetyMuted) ? 8 : 7)
+                        .padding(.vertical, 7)
+                        .background(audioRouter.isHeadphoneZoneActive ? Color.dcSuccess.opacity(0.25) : Color.white.opacity(0.2))
+                        .clipShape(Capsule())
+                    }
+                    .accessibilityLabel("Dual-Zone Audio Router")
 
                     AirPlayRoutePickerRepresentable(tintColor: .white)
                         .frame(width: 34, height: 34)

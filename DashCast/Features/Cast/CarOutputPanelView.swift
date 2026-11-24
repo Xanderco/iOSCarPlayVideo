@@ -5,8 +5,10 @@ import SwiftUI
 struct CarOutputPanelView: View {
     @ObservedObject private var output = CarVideoOutputController.shared
     @ObservedObject private var parkedGuard = CarVideoOutputController.shared.parkedGuard
+    @ObservedObject private var audioRouter = DualZoneAudioRouter.shared
     @State private var copiedURL = false
     @State private var mirrorToCarPlay = CarMirrorFeature.isEnabled()
+    @State private var showDualZoneAudio = false
 
     var body: some View {
         ScrollView {
@@ -14,6 +16,7 @@ struct CarOutputPanelView: View {
                 parkedStatusCard
                 airPlayCard
                 mirroringCard
+                dualZoneAudioCard
                 Text("Video on the car display is for passengers and parked use only. DashCast pauses video and stops mirroring automatically when the vehicle starts moving.")
                     .font(.system(size: 12))
                     .foregroundStyle(Color.dashTextMuted)
@@ -25,6 +28,9 @@ struct CarOutputPanelView: View {
         .background(Color.dashBackground.ignoresSafeArea())
         .onAppear { output.setPanelVisible(true) }
         .onDisappear { output.setPanelVisible(false) }
+        .sheet(isPresented: $showDualZoneAudio) {
+            DualZoneAudioSheet()
+        }
     }
 
     // MARK: Parked status
@@ -195,6 +201,51 @@ struct CarOutputPanelView: View {
                 Label(message, systemImage: "exclamationmark.triangle.fill")
                     .font(.system(size: 12))
                     .foregroundStyle(Color.dashOrange)
+            }
+        }
+        .modifier(CardStyle())
+    }
+
+    // MARK: Dual-Zone Passenger Audio
+
+    private var dualZoneAudioCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            cardHeader(
+                icon: "headphones",
+                title: "Dual-Zone Passenger Audio",
+                badge: audioRouter.isHeadphoneZoneActive ? "HEADPHONES" : nil
+            )
+
+            Text("Route passenger video sound to Bluetooth headphones while CarPlay keeps cabin navigation prompts and radio playing.")
+                .font(.system(size: 13))
+                .foregroundStyle(Color.dashTextSecondary)
+
+            HStack(spacing: 12) {
+                AudioOutputRoutePickerRepresentable(tintColor: .dcAccent)
+                    .frame(width: 44, height: 44)
+                    .background(Color.dcSurfaceRaised)
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(audioRouter.activeZone.localizedHeadline)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(Color.dcTextPrimary)
+                    Text(audioRouter.routeSnapshot.activePrimaryEndpoint?.name ?? "Tap picker for passenger headphones")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.dcTextTertiary)
+                }
+
+                Spacer()
+
+                Button("Audio Zones") {
+                    showDualZoneAudio = true
+                }
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(Color.dcOnAccent)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.dcAccent)
+                .clipShape(Capsule())
             }
         }
         .modifier(CardStyle())
