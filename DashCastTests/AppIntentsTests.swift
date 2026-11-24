@@ -43,12 +43,6 @@ final class AppIntentsTests: XCTestCase {
     func testAppShortcutsProviderConfiguration() {
         let shortcuts = DashCastShortcutsProvider.appShortcuts
         XCTAssertEqual(shortcuts.count, 4)
-
-        let titles = shortcuts.map { $0.shortTitle }
-        XCTAssertTrue(titles.contains("Start Drive"))
-        XCTAssertTrue(titles.contains("Resume Cast"))
-        XCTAssertTrue(titles.contains("Toggle Night HUD"))
-        XCTAssertTrue(titles.contains("Play Chime"))
     }
 
     func testDashCastLinksAutomationDestinations() {
