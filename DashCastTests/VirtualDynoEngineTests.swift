@@ -64,7 +64,7 @@ final class VirtualDynoEngineTests: XCTestCase {
 
         XCTAssertEqual(sut.state, .sprinting)
         XCTAssertNotNil(sut.activeTelemetry)
-        XCTAssertEqual(sut.activeTelemetry?.currentSpeedMph, 1.0 * 2.23693629, accuracy: 0.01)
+        XCTAssertEqual(sut.activeTelemetry?.currentSpeedMph ?? 0.0, 1.0 * 2.23693629, accuracy: 0.01)
     }
 
     @MainActor
@@ -125,16 +125,16 @@ final class VirtualDynoEngineTests: XCTestCase {
         sut.armManually()
 
         sut.processSample(speedMps: 2.0, longitudinalG: 0.4, lateralG: 0.1, timestamp: t0)
-        XCTAssertEqual(sut.activeTelemetry?.peakLongitudinalG, 0.4, accuracy: 0.001)
+        XCTAssertEqual(sut.activeTelemetry?.peakLongitudinalG ?? 0.0, 0.4, accuracy: 0.001)
 
         // Huge acceleration hit
         sut.processSample(speedMps: 10.0, longitudinalG: 0.95, lateralG: -0.25, timestamp: t0.addingTimeInterval(0.5))
-        XCTAssertEqual(sut.activeTelemetry?.peakLongitudinalG, 0.95, accuracy: 0.001)
-        XCTAssertEqual(sut.activeTelemetry?.peakLateralG, 0.25, accuracy: 0.001)
+        XCTAssertEqual(sut.activeTelemetry?.peakLongitudinalG ?? 0.0, 0.95, accuracy: 0.001)
+        XCTAssertEqual(sut.activeTelemetry?.peakLateralG ?? 0.0, 0.25, accuracy: 0.001)
 
         // Lower G subsequent sample shouldn't lower peak
         sut.processSample(speedMps: 15.0, longitudinalG: 0.3, lateralG: 0.05, timestamp: t0.addingTimeInterval(1.0))
-        XCTAssertEqual(sut.activeTelemetry?.peakLongitudinalG, 0.95, accuracy: 0.001)
+        XCTAssertEqual(sut.activeTelemetry?.peakLongitudinalG ?? 0.0, 0.95, accuracy: 0.001)
     }
 
     @MainActor
