@@ -95,7 +95,7 @@
 ### 2026-11-24 18:08 (Bogotá) — DI-62 / CARAA-66: Dual-Zone Passenger Headphone Splitter & Independent Cabin Audio Router
 - **Added `DualZoneAudioRouter` (`DashCast/Core/Audio/DualZoneAudioRouter.swift`)**:
   - Classifies `AVAudioSession` output ports into passenger personal headphones (`.bluetoothA2DP`, `.bluetoothLE`, `.bluetoothHFP`, `.headphones`, `.usbAudio`), vehicle cabin audio (`.carAudio`, `.airPlay`), and phone speakers.
-  - Configures `.playback` / `.moviePlayback` with `.mixWithOthers` and `.independent` route-sharing policy (with clean fallback if rejected by simulator/OS) while strictly avoiding `.playAndRecord`-only options.
+  - Configures `.playback` / `.moviePlayback` with `.mixWithOthers` and `.default` route-sharing policy (avoiding `RouteSharingPolicyException` when combining `.mixWithOthers` with non-default policies, and strictly avoiding `.playAndRecord`-only options).
   - Handles passenger headphone connect/disconnect transitions with configurable fallback (`mutePassengerVideo`, `pausePlayback`, `fallbackToCabin`) so cabin navigation prompts and radio are never monopolized or blasted over car speakers on Bluetooth drop.
   - Provides independent passenger stream volume trim (`0.0...1.0`) wired to `VideoPlayerService.shared`.
 - **UI & Localization**:

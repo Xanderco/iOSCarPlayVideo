@@ -69,7 +69,7 @@ final class DualZoneAudioRouterTests: XCTestCase {
 
     // MARK: - Session Plan & Cabin Coexistence
 
-    func testSessionPlanUsesMixWithOthersAndIndependentPolicyWhenDualZoneEnabled() {
+    func testSessionPlanUsesMixWithOthersAndDefaultPolicyWhenDualZoneEnabled() {
         let airpods = makeEndpoint(id: "bt-1", name: "AirPods", port: .bluetoothA2DP)
         let snapshot = AudioRouteSnapshot(outputs: [airpods])
 
@@ -87,7 +87,25 @@ final class DualZoneAudioRouterTests: XCTestCase {
         XCTAssertFalse(plan.options.contains(.allowBluetoothA2DP))
         XCTAssertFalse(plan.options.contains(.allowBluetoothHFP))
         XCTAssertFalse(plan.options.contains(.allowAirPlay))
-        XCTAssertEqual(plan.routeSharingPolicy, .independent)
+        // `.mixWithOthers` requires `.default` route sharing policy on iOS to avoid RouteSharingPolicyException.
+        XCTAssertEqual(plan.routeSharingPolicy, .default)
+    }
+
+    func testSessionPlanAirPlayCabinSharedUsesLongFormVideoWithoutMixWithOthers() {
+        let airplay = makeEndpoint(id: "ap-1", name: "Car AirPlay", port: .airPlay)
+        let snapshot = AudioRouteSnapshot(outputs: [airplay])
+
+        let plan = DualZoneAudioRouter.buildSessionPlan(
+            isDualZoneEnabled: true,
+            mode: .cabinShared,
+            preserveCabinNavigation: false,
+            duckCabinAudio: false,
+            snapshot: snapshot
+        )
+
+        XCTAssertEqual(plan.category, .playback)
+        XCTAssertTrue(plan.options.isEmpty)
+        XCTAssertEqual(plan.routeSharingPolicy, .longFormVideo)
     }
 
     func testSessionPlanExclusiveCabinSharedOmitsMixWithOthersWhenCabinPreservationDisabled() {
@@ -204,17 +222,19 @@ final class DualZoneAudioRouterTests: XCTestCase {
             XCTFail("Expected pauseVideo action when disconnectFallback == .pausePlayback")
         }
 
-        // Reconnect and test Fallback to Cabin
+        // Reconnect restores unmute, then test Fallback to Cabin
         adapter.snapshot = AudioRouteSnapshot(outputs: [carplay, wired])
         router.handleRouteChange(to: adapter.snapshot, reason: .newDeviceAvailable)
-        router.disconnectFallback = .fallbackToCabin
+        XCTAssertEqual(lastAction, .restoreUnmute)
+        XCTAssertFalse(router.isSafetyMuted)
 
+        router.disconnectFallback = .fallbackToCabin
         adapter.snapshot = AudioRouteSnapshot(outputs: [carplay])
         router.handleRouteChange(to: adapter.snapshot, reason: .oldDeviceUnavailable)
 
         XCTAssertEqual(router.activeZone, .cabinCoexistence)
         XCTAssertFalse(router.isSafetyMuted)
-        XCTAssertEqual(lastAction, .restoreUnmute)
+        XCTAssertEqual(lastAction, .none)
     }
 
     @MainActor

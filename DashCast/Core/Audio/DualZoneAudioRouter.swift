@@ -239,16 +239,14 @@ public final class SystemAudioSessionAdapter: AudioSessionApplying {
 
     nonisolated public static func applyToSystemSession(_ plan: AudioSessionConfigurationPlan, activate: Bool) throws {
         let session = AVAudioSession.sharedInstance()
-        do {
+        if plan.routeSharingPolicy != .default && plan.options.isEmpty {
             try session.setCategory(
                 plan.category,
                 mode: plan.mode,
                 policy: plan.routeSharingPolicy,
-                options: plan.options
+                options: []
             )
-        } catch {
-            // Some simulator/device combinations reject `.independent` with `.moviePlayback`;
-            // fall back cleanly to standard `.playback` category configuration without dropping `.mixWithOthers`.
+        } else {
             try session.setCategory(plan.category, mode: plan.mode, options: plan.options)
         }
 
@@ -441,18 +439,17 @@ public final class DualZoneAudioRouter: ObservableObject {
         }
         if duckCabinAudio && !wantsCoexistence {
             options.insert(.duckOthers)
-        } else if duckCabinAudio && wantsCoexistence && mode == .cabinShared {
-            options.insert(.duckOthers)
         }
 
-        // `.independent` enables independent route selection via `AVRoutePickerView`
-        // for passenger headphones without hijacking the vehicle's default CarPlay route.
+        // Apple's AVAudioSession throws `RouteSharingPolicyException` (NSException) if
+        // `.mixWithOthers` or `.duckOthers` is combined with any non-`.default` RouteSharingPolicy.
         let policy: AVAudioSession.RouteSharingPolicy
-        switch mode {
-        case .autoDualZone, .passengerHeadphones:
-            policy = .independent
-        case .cabinShared:
-            policy = snapshot.hasAirPlayAudioConnected ? .longFormVideo : .default
+        if !options.isEmpty {
+            policy = .default
+        } else if snapshot.hasAirPlayAudioConnected && mode == .cabinShared {
+            policy = .longFormVideo
+        } else {
+            policy = .default
         }
 
         return AudioSessionConfigurationPlan(
