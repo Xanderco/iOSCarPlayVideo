@@ -8177,6 +8177,533 @@
           }
         }
       }
+    },
+    "Cockpit Thermals": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cockpit Thermals"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Térmica de Cabina"
+          }
+        }
+      }
+    },
+    "Nominal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nominal"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nominal"
+          }
+        }
+      }
+    },
+    "Fair": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fair"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aceptable"
+          }
+        }
+      }
+    },
+    "Serious": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Serious"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grave"
+          }
+        }
+      }
+    },
+    "Critical": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Critical"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crítico"
+          }
+        }
+      }
+    },
+    "Optimal Temperature • 60 FPS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optimal Temperature • 60 FPS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temperatura Óptima • 60 FPS"
+          }
+        }
+      }
+    },
+    "Elevated Cockpit Heat • 60 FPS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elevated Cockpit Heat • 60 FPS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calor Elevado en Cabina • 60 FPS"
+          }
+        }
+      }
+    },
+    "Eco Mode Active • 30 FPS Cap": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eco Mode Active • 30 FPS Cap"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Eco Activo • Límite 30 FPS"
+          }
+        }
+      }
+    },
+    "Thermal Protection Active • 30 FPS Cap • OLED Dimmer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thermal Protection Active • 30 FPS Cap • OLED Dimmer"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protección Térmica Activa • Límite 30 FPS • Atenuador OLED"
+          }
+        }
+      }
+    },
+    "Critical Limit • Video Paused • Emergency Cooling": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Critical Limit • Video Paused • Emergency Cooling"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límite Crítico • Video Pausado • Enfriamiento de Emergencia"
+          }
+        }
+      }
+    },
+    "DEVICE THERMAL STATUS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DEVICE THERMAL STATUS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ESTADO TÉRMICO DEL DISPOSITIVO"
+          }
+        }
+      }
+    },
+    "RENDER CAP": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RENDER CAP"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LÍMITE RENDER"
+          }
+        }
+      }
+    },
+    "OLED DIMMER": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OLED DIMMER"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ATENUADOR OLED"
+          }
+        }
+      }
+    },
+    "VIDEO CODEC": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VIDEO CODEC"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CÓDEC DE VIDEO"
+          }
+        }
+      }
+    },
+    "OLED Pure Black Dimmer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OLED Pure Black Dimmer"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atenuador Negro Puro OLED"
+          }
+        }
+      }
+    },
+    "Turns phone screen pure black to stop backlight heat on hot car mounts while CarPlay feed stays alive.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turns phone screen pure black to stop backlight heat on hot car mounts while CarPlay feed stays alive."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apaga la pantalla del teléfono en negro puro para detener el calor de retroiluminación en soportes mientras CarPlay sigue activo."
+          }
+        }
+      }
+    },
+    "Activate OLED Canvas Dimmer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activate OLED Canvas Dimmer"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar Atenuador OLED"
+          }
+        }
+      }
+    },
+    "Restore Display Brightness": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore Display Brightness"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restaurar Brillo de Pantalla"
+          }
+        }
+      }
+    },
+    "AUTOMATIC SAFEGUARDS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AUTOMATIC SAFEGUARDS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PROTECCIONES AUTOMÁTICAS"
+          }
+        }
+      }
+    },
+    "Eco Mode (30 FPS Cap)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eco Mode (30 FPS Cap)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Eco (Límite 30 FPS)"
+          }
+        }
+      }
+    },
+    "Caps local render loops to 30 FPS. Recommended for road trips in direct sunlight.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Caps local render loops to 30 FPS. Recommended for road trips in direct sunlight."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limita renderizado a 30 FPS. Recomendado para viajes bajo luz solar directa."
+          }
+        }
+      }
+    },
+    "Auto-Dim on High Heat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-Dim on High Heat"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atenuación Automática en Calor Alto"
+          }
+        }
+      }
+    },
+    "Engages OLED black screen when iOS reports serious thermal limits.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Engages OLED black screen when iOS reports serious thermal limits."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa pantalla negra OLED cuando iOS reporta calor grave."
+          }
+        }
+      }
+    },
+    "Critical Heat Acoustic Chime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Critical Heat Acoustic Chime"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerta Acústica de Calor Crítico"
+          }
+        }
+      }
+    },
+    "Emits an audible cockpit alert before device reaches emergency shutdown.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emits an audible cockpit alert before device reaches emergency shutdown."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emite una alerta audible en cabina antes del apagado de emergencia del dispositivo."
+          }
+        }
+      }
+    },
+    "THERMAL SIMULATION (DEBUG / PARKED)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "THERMAL SIMULATION (DEBUG / PARKED)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIMULACIÓN TÉRMICA (DEPURACIÓN / ESTACIONADO)"
+          }
+        }
+      }
+    },
+    "Windshield Solar Heat & Battery Health": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windshield Solar Heat & Battery Health"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Calor Solar de Parabrisas y Salud de Batería"
+          }
+        }
+      }
+    },
+    "COCKPIT THERMAL SAVER ACTIVE": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "COCKPIT THERMAL SAVER ACTIVE"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AHORRO TÉRMICO DE CABINA ACTIVO"
+          }
+        }
+      }
+    },
+    "OLED Pure Black Mode • 60% Display Heat Reduction": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OLED Pure Black Mode • 60% Display Heat Reduction"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Negro Puro OLED • Reducción del 60% de Calor de Pantalla"
+          }
+        }
+      }
+    },
+    "CarPlay External Display & Background GPS are unaffected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CarPlay External Display & Background GPS are unaffected"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La Pantalla Externa de CarPlay y el GPS en segundo plano no se ven afectados"
+          }
+        }
+      }
+    },
+    "Tap Anywhere to Wake Display": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap Anywhere to Wake Display"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca en cualquier parte para despertar la pantalla"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
