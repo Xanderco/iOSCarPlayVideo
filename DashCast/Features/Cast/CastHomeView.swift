@@ -20,6 +20,7 @@ public struct CastHomeView: View {
     @StateObject private var playlistStore = PlaylistStore.shared
     @StateObject private var mediaServerStore = MediaServerStore.shared
     @State private var isImportingPlaylist: Bool = false
+    @State private var showingDRMEducationSheet: Bool = false
     @State private var showingPlaylistFileImporter: Bool = false
     @State private var showingQRScanner: Bool = false
     @State private var showingAddServer: Bool = false
@@ -91,6 +92,18 @@ public struct CastHomeView: View {
                         }
 
                         Button {
+                            showingDRMEducationSheet = true
+                        } label: {
+                            Image(systemName: "lock.shield.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(Color.dashYellow)
+                                .frame(width: 34, height: 34)
+                                .background(Color.dashSurface)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
+                        }
+
+                        Button {
                             showingCastGuide = true
                         } label: {
                             Image(systemName: "questionmark")
@@ -118,6 +131,15 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingCastGuide) {
                 CarCastGuideModalView()
+            }
+            .sheet(isPresented: $showingDRMEducationSheet) {
+                DRMEducationSheet()
+            }
+            .onChange(of: appState.showDRMDiagnostics) { _, newValue in
+                if newValue {
+                    showingDRMEducationSheet = true
+                    appState.showDRMDiagnostics = false
+                }
             }
             .sheet(isPresented: $showingWebBrowser) {
                 WebVideoBrowserView()

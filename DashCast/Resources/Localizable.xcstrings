@@ -8177,6 +8177,125 @@
           }
         }
       }
+    },
+    "CarPlay Video & DRM Guide": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CarPlay Video & DRM Guide"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guía de Video CarPlay y DRM"
+          }
+        }
+      }
+    },
+    "What Streams to Your Car?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What Streams to Your Car?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Qué puedes reproducir en tu auto?"
+          }
+        }
+      }
+    },
+    "Supported in Your Car (While Parked)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supported in Your Car (While Parked)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compatible en tu auto (estacionado)"
+          }
+        }
+      }
+    },
+    "Blocked by Apple & Commercial DRM": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blocked by Apple & Commercial DRM"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloqueado por Apple y DRM comercial"
+          }
+        }
+      }
+    },
+    "Live Stream Inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Stream Inspector"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspector de transmisiones en vivo"
+          }
+        }
+      }
+    },
+    "Inspect Stream Compatibility": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspect Stream Compatibility"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspeccionar compatibilidad de transmisión"
+          }
+        }
+      }
+    },
+    "1-Tap Diagnostic Reference Tests": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1-Tap Diagnostic Reference Tests"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pruebas de diagnóstico de 1 toque"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

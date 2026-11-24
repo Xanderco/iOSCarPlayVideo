@@ -7,6 +7,7 @@ public final class AppState: ObservableObject {
 
     @Published public var selectedTab: TabItem = .cast
     @Published public var isProLifetimeUnlocked: Bool = false
+    @Published public var showDRMDiagnostics: Bool = false
     @Published public var showPaywall: Bool = false
     @Published public var showWidgetEditor: Bool = false
     @Published public var showCarPlaySimulator: Bool = false
@@ -92,6 +93,9 @@ public final class AppState: ObservableObject {
         switch destination {
         case .cast: selectedTab = .cast
         case .drive: selectedTab = .drive
+        case .drmDiagnostics, .streamDiagnostics:
+            selectedTab = .cast
+            showDRMDiagnostics = true
         }
         return true
     }
