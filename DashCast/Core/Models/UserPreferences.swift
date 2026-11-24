@@ -14,6 +14,8 @@ public struct UserPreferences: Codable {
     public var driveVehicleImage: String
     /// Automatic trip detection (AutoTripService). nil = not chosen yet => ON once Always location is granted.
     public var autoTripDetectionEnabled: Bool?
+    public var highwayBufferEnabled: Bool
+    public var streamCacheQuotaGigabytes: Int
 
     public init(
         useMilesPerHour: Bool = false,
@@ -27,7 +29,9 @@ public struct UserPreferences: Codable {
         driveCountry: String = "Colombia",
         driveVehicleName: String = "Chevrolet Trax",
         driveVehicleImage: String = "car_chevrolet_corvette",
-        autoTripDetectionEnabled: Bool? = nil
+        autoTripDetectionEnabled: Bool? = nil,
+        highwayBufferEnabled: Bool = true,
+        streamCacheQuotaGigabytes: Int = 5
     ) {
         self.useMilesPerHour = useMilesPerHour
         self.isProLifetimeUnlocked = isProLifetimeUnlocked
@@ -41,6 +45,8 @@ public struct UserPreferences: Codable {
         self.driveVehicleName = driveVehicleName
         self.driveVehicleImage = driveVehicleImage
         self.autoTripDetectionEnabled = autoTripDetectionEnabled
+        self.highwayBufferEnabled = highwayBufferEnabled
+        self.streamCacheQuotaGigabytes = streamCacheQuotaGigabytes
     }
 
     enum CodingKeys: String, CodingKey {
@@ -56,6 +62,8 @@ public struct UserPreferences: Codable {
         case driveVehicleName
         case driveVehicleImage
         case autoTripDetectionEnabled
+        case highwayBufferEnabled
+        case streamCacheQuotaGigabytes
     }
 
     public init(from decoder: Decoder) throws {
@@ -72,5 +80,7 @@ public struct UserPreferences: Codable {
         driveVehicleName = try container.decodeIfPresent(String.self, forKey: .driveVehicleName) ?? "Chevrolet Trax"
         driveVehicleImage = try container.decodeIfPresent(String.self, forKey: .driveVehicleImage) ?? "car_chevrolet_corvette"
         autoTripDetectionEnabled = try container.decodeIfPresent(Bool.self, forKey: .autoTripDetectionEnabled)
+        highwayBufferEnabled = try container.decodeIfPresent(Bool.self, forKey: .highwayBufferEnabled) ?? true
+        streamCacheQuotaGigabytes = try container.decodeIfPresent(Int.self, forKey: .streamCacheQuotaGigabytes) ?? 5
     }
 }

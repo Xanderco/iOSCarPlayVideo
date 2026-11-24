@@ -8177,6 +8177,193 @@
           }
         }
       }
+    },
+    "Storage & Highway Cache": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storage & Highway Cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almacenamiento y Caché de Carretera"
+          }
+        }
+      }
+    },
+    "Rolling 60s Highway Buffer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rolling 60s Highway Buffer"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Búfer de Carretera Continuo (60s)"
+          }
+        }
+      }
+    },
+    "Buffers 60s forward to survive cellular dead zones, mountain roads, and tunnels.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buffers 60s forward to survive cellular dead zones, mountain roads, and tunnels."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Almacena 60s por adelantado para sobrevivir a zonas muertas de telefonía, carreteras de montaña y túneles."
+          }
+        }
+      }
+    },
+    "STREAM CACHE STORAGE": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STREAM CACHE STORAGE"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ALMACENAMIENTO DE CACHÉ DE TRANSMISIÓN"
+          }
+        }
+      }
+    },
+    "HIGHWAY READY": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HIGHWAY READY"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LISTO PARA CARRETERA"
+          }
+        }
+      }
+    },
+    "Cache Quota Limit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cache Quota Limit"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límite de Cuota de Caché"
+          }
+        }
+      }
+    },
+    "1-Tap Clear Unpinned Cache": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1-Tap Clear Unpinned Cache"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar Caché No Fijada en 1 Toque"
+          }
+        }
+      }
+    },
+    "Clear Entire Cache?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Entire Cache?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Borrar Toda la Caché?"
+          }
+        }
+      }
+    },
+    "CACHED VIDEO STREAMS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CACHED VIDEO STREAMS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TRANSMISIONES DE VIDEO EN CACHÉ"
+          }
+        }
+      }
+    },
+    "No streams cached yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No streams cached yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay transmisiones en caché aún"
+          }
+        }
+      }
+    },
+    "Favorite and live streams will automatically preload segmented chunks for deadzone resilience.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Favorite and live streams will automatically preload segmented chunks for deadzone resilience."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las transmisiones favoritas y en vivo precargarán fragmentos segmentados para resistir zonas muertas."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
