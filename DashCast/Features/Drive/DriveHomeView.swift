@@ -70,6 +70,7 @@ public struct DriveHomeView: View {
 
                         // Top right quick toggles
                         VStack(spacing: 8) {
+                            CockpitThermalBadgeView(isCompact: true)
                             Button {
                                 appState.setSpeedUnit(milesPerHour: !appState.useMilesPerHour)
                             } label: {
@@ -110,6 +111,14 @@ public struct DriveHomeView: View {
 
                     // Bottom Automotive HUD Console
                     bottomHUDConsole
+                }
+            }
+            .sheet(isPresented: $appState.showThermalSheet) {
+                ThermalProtectionSheet()
+            }
+            .overlay {
+                if CockpitThermalService.shared.isScreenDimmed {
+                    CockpitThermalDimmerOverlay()
                 }
             }
             .sheet(isPresented: $showingTripSummary) {

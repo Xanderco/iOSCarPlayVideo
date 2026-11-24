@@ -5,6 +5,7 @@ public struct CarPlayExternalDisplayView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var locationService = DriveLocationService.shared
     @ObservedObject var appState = AppState.shared
+    @ObservedObject var thermalService = CockpitThermalService.shared
 
     public init() {}
 
@@ -30,8 +31,8 @@ public struct CarPlayExternalDisplayView: View {
                     // Minimal CarPlay status watermark
                     HStack {
                         HStack(spacing: 6) {
-                            Circle().fill(Color.dashGreen).frame(width: 8, height: 8)
-                            Text("DashCast · Parked Playback")
+                            Circle().fill(thermalService.statusColor).frame(width: 8, height: 8)
+                            Text(thermalService.isThrottlingActive ? "DashCast · \(thermalService.targetFrameRate) FPS Throttled" : "DashCast · Parked Playback")
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundStyle(Color.white)
                         }
