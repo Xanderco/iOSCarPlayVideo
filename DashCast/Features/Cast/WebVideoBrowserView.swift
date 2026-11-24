@@ -63,15 +63,20 @@ public struct WebVideoBrowserView: View {
                 if isShowingHomeGrid {
                     sourcesHomeGridView
                 } else {
-                    WebViewRepresentable(
-                        webView: webView,
-                        urlString: $urlString,
-                        canGoBack: $canGoBack,
-                        canGoForward: $canGoForward,
-                        title: $currentTitle,
-                        onNavigationCommitted: { extractor.resetReports() }
-                    )
-                    .ignoresSafeArea(edges: .bottom)
+                    ZStack {
+                        WebViewRepresentable(
+                            webView: webView,
+                            urlString: $urlString,
+                            canGoBack: $canGoBack,
+                            canGoForward: $canGoForward,
+                            title: $currentTitle,
+                            onNavigationCommitted: { extractor.resetReports() }
+                        )
+                        .ignoresSafeArea(edges: .bottom)
+
+                        DarkShieldFilterOverlay(isWebBrowser: true)
+                            .ignoresSafeArea(edges: .bottom)
+                    }
                 }
 
                 // Bottom Browser Toolbar (<, >, ⌂, 🔖, 🚗 Send to car)
