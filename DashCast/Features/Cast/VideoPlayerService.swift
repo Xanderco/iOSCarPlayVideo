@@ -110,6 +110,7 @@ public final class VideoPlayerService: ObservableObject {
             // Live iPhone mirror: keep the buffer (and so the delay) short.
             playerItem.preferredForwardBufferDuration = 1
         }
+        AudioSyncOffsetService.shared.apply(to: playerItem)
         observe(item: playerItem)
 
         player.replaceCurrentItem(with: playerItem)
