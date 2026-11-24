@@ -160,14 +160,17 @@ public final class DRMCompatibilityInspector: ObservableObject {
     /// Inspects a given stream URL string synchronously or asynchronously.
     public func inspect(urlString: String) -> DRMInspectionResult {
         let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let url = URL(string: trimmed) else {
+        guard let url = URL(string: trimmed),
+              let scheme = url.scheme?.lowercased(),
+              ["http", "https", "file", "rtmp", "dashcast"].contains(scheme),
+              !(url.host ?? "").isEmpty || scheme == "file" else {
             return DRMInspectionResult(
                 urlString: trimmed,
                 streamType: .unknown,
                 isCarPlayCompatible: false,
                 detectedCodecs: ["Unknown"],
                 drmProtectionDescription: "Invalid URL Format",
-                technicalSummary: "The entered stream address could not be parsed as a valid URL.",
+                technicalSummary: "The entered stream address could not be parsed as a valid URL with an accepted protocol (http, https, file, rtmp).",
                 educationalNotice: "Check that the URL begins with http:// or https:// and contains a valid host.",
                 resolutionRecommendation: "Ensure you copy a complete stream link or direct video file address."
             )
