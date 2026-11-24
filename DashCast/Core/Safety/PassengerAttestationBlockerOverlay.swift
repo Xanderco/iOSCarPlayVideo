@@ -17,11 +17,11 @@ public struct PassengerAttestationBlockerOverlay: View {
                 VStack(spacing: 16) {
                     ZStack {
                         Circle()
-                            .fill(Color.dcOrange.opacity(0.2))
+                            .fill(Color.dcWarning.opacity(0.2))
                             .frame(width: 72, height: 72)
                         Image(systemName: "hand.raised.fill")
                             .font(.system(size: 32, weight: .bold))
-                            .foregroundStyle(Color.dcOrange)
+                            .foregroundStyle(Color.dcWarning)
                     }
 
                     Text("Video Playback Paused")

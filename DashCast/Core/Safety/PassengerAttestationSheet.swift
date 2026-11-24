@@ -28,11 +28,11 @@ public struct PassengerAttestationSheet: View {
                         VStack(spacing: 12) {
                             ZStack {
                                 Circle()
-                                    .fill(Color.dcOrange.opacity(0.18))
+                                    .fill(Color.dcWarning.opacity(0.18))
                                     .frame(width: 88, height: 88)
                                 Image(systemName: "hand.raised.fill")
                                     .font(.system(size: 40, weight: .bold))
-                                    .foregroundStyle(Color.dcOrange)
+                                    .foregroundStyle(Color.dcWarning)
                             }
 
                             Text("Passenger Attestation Required")
@@ -42,10 +42,10 @@ public struct PassengerAttestationSheet: View {
 
                             Text("Vehicle in Motion (\(String(format: "%.1f", gate.currentSpeedMph)) mph)")
                                 .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                                .foregroundStyle(Color.dcOrange)
+                                .foregroundStyle(Color.dcWarning)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 4)
-                                .background(Capsule().fill(Color.dcOrange.opacity(0.15)))
+                                .background(Capsule().fill(Color.dcWarning.opacity(0.15)))
                         }
                         .padding(.top, 12)
 
@@ -71,7 +71,7 @@ public struct PassengerAttestationSheet: View {
                                 .fill(Color.dcSurface)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .stroke(Color.dcBorder, lineWidth: 1)
+                                        .stroke(Color.dcStroke, lineWidth: 1)
                                 )
                         )
 
@@ -106,7 +106,7 @@ public struct PassengerAttestationSheet: View {
                                 .fill(Color.dcSurfaceRaised)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                        .stroke(finger1Touched && finger2Touched ? Color.dcAccent : Color.dcBorder, lineWidth: 1.5)
+                                        .stroke(finger1Touched && finger2Touched ? Color.dcAccent : Color.dcStroke, lineWidth: 1.5)
                                 )
                         )
 
@@ -177,7 +177,7 @@ public struct PassengerAttestationSheet: View {
                     .frame(width: 80, height: 80)
                     .overlay(
                         Circle()
-                            .stroke(isTouched ? Color.dcAccent : Color.dcBorder, lineWidth: 2)
+                            .stroke(isTouched ? Color.dcAccent : Color.dcStroke, lineWidth: 2)
                     )
 
                 VStack(spacing: 4) {
@@ -187,7 +187,7 @@ public struct PassengerAttestationSheet: View {
 
                     Text("Finger \(index)")
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(isTouched ? Color.dcAccent : Color.dcTextMuted)
+                        .foregroundStyle(isTouched ? Color.dcAccent : Color.dcTextTertiary)
                 }
             }
         }
@@ -226,7 +226,7 @@ public struct PassengerAuditLogSheet: View {
                     VStack(spacing: 12) {
                         Image(systemName: "checkmark.shield")
                             .font(.system(size: 40))
-                            .foregroundStyle(Color.dcTextMuted)
+                            .foregroundStyle(Color.dcTextTertiary)
                         Text("No audit events recorded yet")
                             .font(.system(size: 15))
                             .foregroundStyle(Color.dcTextSecondary)
@@ -244,7 +244,7 @@ public struct PassengerAuditLogSheet: View {
 
                                     Text(formattedDate(event.timestamp))
                                         .font(.system(size: 11))
-                                        .foregroundStyle(Color.dcTextMuted)
+                                        .foregroundStyle(Color.dcTextTertiary)
                                 }
 
                                 Text(event.details)
@@ -272,7 +272,7 @@ public struct PassengerAuditLogSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Clear") { gate.clearAuditHistory() }
-                        .foregroundStyle(Color.dcOrange)
+                        .foregroundStyle(Color.dcWarning)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Close") { dismiss() }

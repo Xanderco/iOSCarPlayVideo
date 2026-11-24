@@ -43,7 +43,7 @@ public struct PassengerAttestationBadgeView: View {
 
     private var badgeColor: Color {
         if gate.isVehicleMovingAboveThreshold {
-            return gate.isPassengerModeActive ? Color.dcAccent : Color.dcOrange
+            return gate.isPassengerModeActive ? Color.dcAccent : Color.dcWarning
         }
         return Color.dcTextSecondary
     }
