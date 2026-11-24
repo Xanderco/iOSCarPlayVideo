@@ -69,6 +69,7 @@ targets:
     sources:
       - path: DashCastCastWidget
       - path: DashCast/Features/Cast/Shared/CarCastActivityAttributes.swift
+      - path: DashCast/Features/Cast/Shared/EVChargingActivityAttributes.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast.castwidget
