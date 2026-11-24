@@ -5,6 +5,10 @@ public struct CarPlayExternalDisplayView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var locationService = DriveLocationService.shared
     @ObservedObject var appState = AppState.shared
+    @ObservedObject var thermalService = CockpitThermalService.shared
+    @ObservedObject var visionService = DarkShieldVisionService.shared
+    @ObservedObject var rotaryService = CarPlayRotaryNavigationService.shared
+    @ObservedObject var attestationGate = PassengerAttestationGate.shared
 
     public init() {}
 
@@ -24,14 +28,20 @@ public struct CarPlayExternalDisplayView: View {
             if playerService.currentChannel != nil {
                 // Video is active: Render video full-screen on the car display
                 ZStack(alignment: .bottom) {
-                    CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
-                        .ignoresSafeArea()
+                    ZStack {
+                        CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
+                            .ignoresSafeArea()
+                        DarkShieldFilterOverlay()
+                            .ignoresSafeArea()
+                        PassengerAttestationBlockerOverlay()
+                            .ignoresSafeArea()
+                    }
 
                     // Minimal CarPlay status watermark
                     HStack {
                         HStack(spacing: 6) {
-                            Circle().fill(Color.dashGreen).frame(width: 8, height: 8)
-                            Text("DashCast · Parked Playback")
+                            Circle().fill(thermalService.statusColor).frame(width: 8, height: 8)
+                            Text(thermalService.isThrottlingActive ? "DashCast · \(thermalService.targetFrameRate) FPS Throttled" : (attestationGate.isVehicleMovingAboveThreshold ? "DashCast · Motion" : "DashCast · Parked Playback"))
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundStyle(Color.white)
                         }
@@ -39,6 +49,27 @@ public struct CarPlayExternalDisplayView: View {
                         .padding(.vertical, 6)
                         .background(Color.black.opacity(0.6))
                         .clipShape(Capsule())
+
+                        if attestationGate.isPassengerModeActive && attestationGate.isVehicleMovingAboveThreshold {
+                            HUDPassengerWatermarkOverlay(isCompact: true)
+                        }
+
+                        if visionService.isActive {
+                            HStack(spacing: 6) {
+                                Circle().fill(visionService.statusColor).frame(width: 8, height: 8)
+                                Text("DarkShield · \(visionService.statusTitle)")
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(Color.white)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.black.opacity(0.6))
+                            .clipShape(Capsule())
+                        }
+
+                        if rotaryService.isRotaryNavigationActive {
+                            CarPlayRotaryFocusBadgeView(isCompact: true)
+                        }
 
                         Spacer()
 

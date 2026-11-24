@@ -72,6 +72,10 @@ public struct CastHomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {
+                        PassengerAttestationBadgeView(isCompact: true)
+                        DarkShieldBadgeView(isCompact: true)
+                        CockpitThermalBadgeView(isCompact: true)
+
                         if !appState.isProLifetimeUnlocked {
                             Button {
                                 appState.showPaywall = true
@@ -764,6 +768,17 @@ public struct CastHomeView: View {
                         }
                     }
                     .padding(.bottom, 30)
+                }
+            }
+            .sheet(isPresented: $appState.showDarkShieldSheet) {
+                DarkShieldVisionSheet()
+            }
+            .sheet(isPresented: $appState.showThermalSheet) {
+                ThermalProtectionSheet()
+            }
+            .overlay {
+                if CockpitThermalService.shared.isScreenDimmed {
+                    CockpitThermalDimmerOverlay()
                 }
             }
             .sheet(isPresented: $showingAddM3UDialog) {
