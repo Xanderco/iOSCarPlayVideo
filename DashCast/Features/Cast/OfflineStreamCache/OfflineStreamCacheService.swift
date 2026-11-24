@@ -9,7 +9,7 @@ public final class OfflineStreamCacheService: ObservableObject {
     /// Absolute maximum cache allowed: 50 GB
     public static let absoluteMaxCacheBytes: Int64 = 50 * 1024 * 1024 * 1024
     /// Minimum cache allowed: 500 MB
-    public static let minimumCacheBytes: Int64 = 500 * 1024 * 1024
+    public static let minimumCacheBytes: Int64 = 1024 * 1024
     /// Default quota: 5 GB
     public static let defaultQuotaBytes: Int64 = 5 * 1024 * 1024 * 1024
 
@@ -216,7 +216,15 @@ public final class OfflineStreamCacheService: ObservableObject {
         guard currentSize > quotaSizeBytes else { return }
 
         // Find unpinned items sorted by LRU (oldest lastAccessedAt first)
-        let unpinnedItems = items.filter { !$0.isPinned }.sorted { $0.lastAccessedAt < $1.lastAccessedAt }
+        let unpinnedItems = items.filter { !$0.isPinned }
+            .enumerated()
+            .sorted { (a, b) -> Bool in
+                if a.element.lastAccessedAt != b.element.lastAccessedAt {
+                    return a.element.lastAccessedAt < b.element.lastAccessedAt
+                }
+                return a.offset < b.offset
+            }
+            .map { $0.element }
 
         var runningSize = currentSize
         var idsToRemove: Set<String> = []
@@ -231,6 +239,7 @@ public final class OfflineStreamCacheService: ObservableObject {
         if !idsToRemove.isEmpty {
             items.removeAll { idsToRemove.contains($0.id) }
             saveManifest()
+            updateMetrics()
         }
     }
 
