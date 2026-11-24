@@ -89,6 +89,8 @@ public enum DashCastLinks {
     /// so navigation redesigns only need to update `AppState.handleDeepLink`.
     public enum Destination: String, CaseIterable {
         case cast, drive
+        case drmDiagnostics = "drm-diagnostics"
+        case streamDiagnostics = "stream-diagnostics"
     }
 
     public static func destination(for url: URL) -> Destination? {
