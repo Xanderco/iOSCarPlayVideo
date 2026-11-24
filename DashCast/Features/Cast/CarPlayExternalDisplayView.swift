@@ -8,6 +8,7 @@ public struct CarPlayExternalDisplayView: View {
     @ObservedObject var thermalService = CockpitThermalService.shared
     @ObservedObject var visionService = DarkShieldVisionService.shared
     @ObservedObject var rotaryService = CarPlayRotaryNavigationService.shared
+    @ObservedObject var attestationGate = PassengerAttestationGate.shared
 
     public init() {}
 
@@ -32,13 +33,15 @@ public struct CarPlayExternalDisplayView: View {
                             .ignoresSafeArea()
                         DarkShieldFilterOverlay()
                             .ignoresSafeArea()
+                        PassengerAttestationBlockerOverlay()
+                            .ignoresSafeArea()
                     }
 
                     // Minimal CarPlay status watermark
                     HStack {
                         HStack(spacing: 6) {
                             Circle().fill(thermalService.statusColor).frame(width: 8, height: 8)
-                            Text(thermalService.isThrottlingActive ? "DashCast · \(thermalService.targetFrameRate) FPS Throttled" : "DashCast · Parked Playback")
+                            Text(thermalService.isThrottlingActive ? "DashCast · \(thermalService.targetFrameRate) FPS Throttled" : (attestationGate.isVehicleMovingAboveThreshold ? "DashCast · Motion" : "DashCast · Parked Playback"))
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundStyle(Color.white)
                         }
@@ -46,6 +49,10 @@ public struct CarPlayExternalDisplayView: View {
                         .padding(.vertical, 6)
                         .background(Color.black.opacity(0.6))
                         .clipShape(Capsule())
+
+                        if attestationGate.isPassengerModeActive && attestationGate.isVehicleMovingAboveThreshold {
+                            HUDPassengerWatermarkOverlay(isCompact: true)
+                        }
 
                         if visionService.isActive {
                             HStack(spacing: 6) {

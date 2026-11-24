@@ -4,6 +4,7 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
+    @ObservedObject var attestationGate = PassengerAttestationGate.shared
     @State private var showControls: Bool = true
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
@@ -23,6 +24,18 @@ public struct AutomotiveVideoPlayerView: View {
                         .ignoresSafeArea()
                     DarkShieldFilterOverlay()
                         .ignoresSafeArea()
+                    PassengerAttestationBlockerOverlay()
+                        .ignoresSafeArea()
+
+                    // Unobtrusive Passenger Watermark
+                    VStack {
+                        HStack {
+                            HUDPassengerWatermarkOverlay()
+                            Spacer()
+                        }
+                        .padding(12)
+                        Spacer()
+                    }
                 }
                 .onTapGesture {
                     withAnimation(.easeInOut(duration: 0.25)) {

@@ -88,10 +88,12 @@ public enum DashCastLinks {
     public static let vision = URL(string: "dashcast://vision")!
     public static let rotary = URL(string: "dashcast://rotary")!
 
+    public static let safety = URL(string: "dashcast://safety")!
+
     /// Destinations a widget may deep-link to. Deliberately not tied to tab layout,
     /// so navigation redesigns only need to update `AppState.handleDeepLink`.
     public enum Destination: String, CaseIterable {
-        case cast, drive, thermal, vision, rotary
+        case cast, drive, thermal, vision, rotary, safety
     }
 
     public static func destination(for url: URL) -> Destination? {
@@ -101,6 +103,7 @@ public enum DashCastLinks {
         let lower = target.lowercased()
         if lower == "darkshield" { return .vision }
         if lower == "rotary" || lower == "carplay-focus" { return .rotary }
+        if lower == "safety" || lower == "attestation" || lower == "passenger" { return .safety }
         return Destination(rawValue: lower)
     }
 }

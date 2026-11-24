@@ -72,6 +72,7 @@ public struct CastHomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {
+                        PassengerAttestationBadgeView(isCompact: true)
                         DarkShieldBadgeView(isCompact: true)
                         CockpitThermalBadgeView(isCompact: true)
 

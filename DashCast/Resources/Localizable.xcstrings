@@ -9571,6 +9571,278 @@
           }
         }
       }
+    },
+    "Passenger Mode Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passenger Mode Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Pasajero Activo"
+          }
+        }
+      }
+    },
+    "Passenger Mode Active · Eyes on Road": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passenger Mode Active · Eyes on Road"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modo Pasajero Activo · Ojos en la Carretera"
+          }
+        }
+      }
+    },
+    "Passenger Attestation Required": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passenger Attestation Required"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atestación de Pasajero Requerida"
+          }
+        }
+      }
+    },
+    "Vehicle in Motion (%@ mph)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicle in Motion (%@ mph)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehículo en Movimiento (%@ mph)"
+          }
+        }
+      }
+    },
+    "Automotive Safety Compliance": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automotive Safety Compliance"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cumplimiento de Seguridad Automotriz"
+          }
+        }
+      }
+    },
+    "Touch with 2 Fingers to Attest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touch with 2 Fingers to Attest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toque con 2 Dedos para Atestiguar"
+          }
+        }
+      }
+    },
+    "I Am a Passenger · Unlock Playback": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I Am a Passenger · Unlock Playback"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soy un Pasajero · Desbloquear Reproducción"
+          }
+        }
+      }
+    },
+    "View Audit Log": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Audit Log"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver Registro de Auditoría"
+          }
+        }
+      }
+    },
+    "Safety Gate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safety Gate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puerta de Seguridad"
+          }
+        }
+      }
+    },
+    "Safety Audit Log": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safety Audit Log"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registro de Auditoría de Seguridad"
+          }
+        }
+      }
+    },
+    "No audit events recorded yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No audit events recorded yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se han registrado eventos de auditoría aún"
+          }
+        }
+      }
+    },
+    "Video Playback Paused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video Playback Paused"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducción de Video Pausada"
+          }
+        }
+      }
+    },
+    "I Am a Passenger · Attest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I Am a Passenger · Attest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soy un Pasajero · Atestiguar"
+          }
+        }
+      }
+    },
+    "Driver Safety Geofence Gate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Driver Safety Geofence Gate"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puerta de Geocerca de Seguridad del Conductor"
+          }
+        }
+      }
+    },
+    "Finger 1": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finger 1"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dedo 1"
+          }
+        }
+      }
+    },
+    "Finger 2": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Finger 2"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dedo 2"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
