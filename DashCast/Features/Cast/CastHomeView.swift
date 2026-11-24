@@ -13,6 +13,7 @@ public struct CastHomeView: View {
     @State private var showingWebBrowser: Bool = false
     @State private var showingCastGuide: Bool = false
     @State private var showingFavorites: Bool = false
+    @State private var showingAcousticDSPSheet: Bool = false
     @State private var showingBroadcastPicker: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
@@ -113,8 +114,27 @@ public struct CastHomeView: View {
                                 .clipShape(Circle())
                                 .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
                         }
+
+                        Button {
+                            showingAcousticDSPSheet = true
+                        } label: {
+                            Image(systemName: "speaker.wave.3.fill")
+                                .font(.system(size: 13))
+                                .foregroundStyle(Color.dashTextPrimary)
+                                .frame(width: 34, height: 34)
+                                .background(Color.dashSurface)
+                                .clipShape(Circle())
+                                .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
+                        }
+                        .accessibilityLabel("Cabin Acoustic DSP")
                     }
                 }
+            }
+            .sheet(isPresented: $showingAcousticDSPSheet) {
+                AcousticDSPSheet()
+            }
+            .sheet(isPresented: $appState.showAcousticDSPSheet) {
+                AcousticDSPSheet()
             }
             .sheet(isPresented: $showingCastGuide) {
                 CarCastGuideModalView()

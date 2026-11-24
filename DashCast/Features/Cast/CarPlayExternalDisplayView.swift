@@ -5,6 +5,7 @@ public struct CarPlayExternalDisplayView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var locationService = DriveLocationService.shared
     @ObservedObject var appState = AppState.shared
+    @ObservedObject var dspService = CabinAcousticDSPService.shared
 
     public init() {}
 
@@ -39,6 +40,22 @@ public struct CarPlayExternalDisplayView: View {
                         .padding(.vertical, 6)
                         .background(Color.black.opacity(0.6))
                         .clipShape(Capsule())
+
+                        if dspService.isEnabled {
+                            HStack(spacing: 5) {
+                                Image(systemName: "speaker.wave.3.fill")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundStyle(Color.dcAccent)
+                                Text("DSP Active")
+                                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(Color.white)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Color.black.opacity(0.6))
+                            .clipShape(Capsule())
+                            .accessibilityIdentifier("CarPlay_AcousticDSP_Badge")
+                        }
 
                         Spacer()
 
