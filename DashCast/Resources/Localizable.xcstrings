@@ -8177,6 +8177,159 @@
           }
         }
       }
+    },
+    "Cabin Acoustic DSP": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabin Acoustic DSP"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DSP Acústico de Cabina"
+          }
+        }
+      }
+    },
+    "Dynamic Speech Enhancer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dynamic Speech Enhancer"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mejorador Dinámico de Voz"
+          }
+        }
+      }
+    },
+    "Counteracting cabin road & wind noise": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Counteracting cabin road & wind noise"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contrarrestando ruido de rodadura y viento"
+          }
+        }
+      }
+    },
+    "Audio DSP bypassed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio DSP bypassed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DSP de audio desactivado"
+          }
+        }
+      }
+    },
+    "Acoustic Telemetry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acoustic Telemetry"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetría Acústica"
+          }
+        }
+      }
+    },
+    "Speed-Compensated Auto-EQ": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed-Compensated Auto-EQ"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-EQ Compensado por Velocidad"
+          }
+        }
+      }
+    },
+    "Speech Enhancer Intensity": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speech Enhancer Intensity"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intensidad del Mejorador de Voz"
+          }
+        }
+      }
+    },
+    "Cabin Acoustic Profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabin Acoustic Profile"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Perfil Acústico de Cabina"
+          }
+        }
+      }
+    },
+    "Live 5-Band Equalizer Spectrum": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live 5-Band Equalizer Spectrum"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Espectro Ecualizador de 5 Bandas"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -84,11 +84,13 @@ public enum DashCastLinks {
     public static let scheme = "dashcast"
     public static let cast = URL(string: "dashcast://cast")!
     public static let drive = URL(string: "dashcast://drive")!
+    public static let acousticDSP = URL(string: "dashcast://acoustic-dsp")!
 
     /// Destinations a widget may deep-link to. Deliberately not tied to tab layout,
     /// so navigation redesigns only need to update `AppState.handleDeepLink`.
     public enum Destination: String, CaseIterable {
         case cast, drive
+        case acousticDSP = "acoustic-dsp"
     }
 
     public static func destination(for url: URL) -> Destination? {

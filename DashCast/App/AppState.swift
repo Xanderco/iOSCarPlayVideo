@@ -10,6 +10,7 @@ public final class AppState: ObservableObject {
     @Published public var showPaywall: Bool = false
     @Published public var showWidgetEditor: Bool = false
     @Published public var showCarPlaySimulator: Bool = false
+    @Published public var showAcousticDSPSheet: Bool = false
     @Published public var initialCarPlayMode: String = "App in CarPlay"
     @Published public var isDriveActive: Bool = false
     @Published public var useMilesPerHour: Bool = false
@@ -92,6 +93,9 @@ public final class AppState: ObservableObject {
         switch destination {
         case .cast: selectedTab = .cast
         case .drive: selectedTab = .drive
+        case .acousticDSP:
+            selectedTab = .cast
+            showAcousticDSPSheet = true
         }
         return true
     }
