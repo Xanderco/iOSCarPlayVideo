@@ -12,6 +12,7 @@ public final class AppState: ObservableObject {
     @Published public var showDarkShieldSheet: Bool = false
     @Published public var showRotarySheet: Bool = false
     @Published public var showAttestationSheet: Bool = false
+    @Published public var showDynoSheet: Bool = false
     @Published public var showWidgetEditor: Bool = false
     @Published public var showCarPlaySimulator: Bool = false
     @Published public var initialCarPlayMode: String = "App in CarPlay"
@@ -100,6 +101,7 @@ public final class AppState: ObservableObject {
         case .vision: showDarkShieldSheet = true
         case .rotary: showRotarySheet = true
         case .safety: showAttestationSheet = true
+        case .dyno: showDynoSheet = true
         }
         return true
     }

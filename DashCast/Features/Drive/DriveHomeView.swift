@@ -120,6 +120,9 @@ public struct DriveHomeView: View {
             .sheet(isPresented: $appState.showThermalSheet) {
                 ThermalProtectionSheet()
             }
+            .sheet(isPresented: $appState.showDynoSheet) {
+                VirtualDynoSheet(useMilesPerHour: appState.useMilesPerHour)
+            }
             .overlay {
                 if CockpitThermalService.shared.isScreenDimmed {
                     CockpitThermalDimmerOverlay()
@@ -240,6 +243,12 @@ public struct DriveHomeView: View {
             .padding(.vertical, 8)
             .background(Color.dashSurface)
             .clipShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal)
+
+            // Virtual Dyno 0-60 Sprint Gauge
+            VirtualDynoGaugeView(useMilesPerHour: appState.useMilesPerHour) {
+                appState.showDynoSheet = true
+            }
             .padding(.horizontal)
 
             // Controls: Start / Pause / Resume / End

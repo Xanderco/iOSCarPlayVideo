@@ -241,6 +241,15 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
             course: location.courseAccuracy >= 0 ? location.course : -1,
             timestamp: location.timestamp
         )
+
+        // Feed telemetry into Virtual Dyno
+        let speedMps = rawSpeed >= 0 ? rawSpeed : (speedKmh / 3.6)
+        VirtualDynoEngine.shared.processSample(
+            speedMps: speedMps,
+            longitudinalG: DrivingScorer.shared.lastLongitudinalG,
+            lateralG: DrivingScorer.shared.lastLateralG,
+            timestamp: location.timestamp
+        )
     }
 
     // Manual simulation injection for tests & preview

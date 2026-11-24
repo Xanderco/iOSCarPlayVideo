@@ -16,6 +16,8 @@ public final class DrivingScorer: ObservableObject {
     @Published public private(set) var harshBrakingCount: Int = 0
     @Published public private(set) var harshAccelerationCount: Int = 0
     @Published public private(set) var harshCorneringCount: Int = 0
+    @Published public private(set) var lastLongitudinalG: Double = 0.0
+    @Published public private(set) var lastLateralG: Double = 0.0
 
     // Thresholds (m/s²)
     nonisolated public static let brakingThreshold = -3.5      // ~0.36 g
@@ -38,6 +40,8 @@ public final class DrivingScorer: ObservableObject {
         harshBrakingCount = 0
         harshAccelerationCount = 0
         harshCorneringCount = 0
+        lastLongitudinalG = 0.0
+        lastLateralG = 0.0
         lastSpeedKmh = nil
         lastCourse = nil
         lastSampleTime = nil
@@ -52,6 +56,7 @@ public final class DrivingScorer: ObservableObject {
             let dt = timestamp.timeIntervalSince(previousTime)
             if dt > 0.3 && dt < 3.0 {
                 let accelerationMs2 = ((speedKmh - previousSpeed) / 3.6) / dt
+                lastLongitudinalG = accelerationMs2 / 9.80665
                 if accelerationMs2 < Self.brakingThreshold {
                     recordDetectedEvent(.braking, at: timestamp)
                 } else if accelerationMs2 > Self.accelerationThreshold {
@@ -63,6 +68,7 @@ public final class DrivingScorer: ObservableObject {
                     let lateral = Self.lateralAcceleration(
                         speedKmh: speedKmh, previousCourse: previousCourse, course: course, dt: dt
                     )
+                    lastLateralG = lateral / 9.80665
                     if lateral > Self.corneringThreshold {
                         recordDetectedEvent(.cornering, at: timestamp)
                     }

@@ -41,4 +41,13 @@ final class AppStateTests: XCTestCase {
             XCTAssertFalse(item.iconName.isEmpty)
         }
     }
+
+    @MainActor
+    func testDynoDeepLink() {
+        let state = AppState()
+        XCTAssertFalse(state.showDynoSheet)
+        let handled = state.handleDeepLink(URL(string: "dashcast://dyno")!)
+        XCTAssertTrue(handled)
+        XCTAssertTrue(state.showDynoSheet)
+    }
 }
