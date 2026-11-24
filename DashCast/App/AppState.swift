@@ -8,6 +8,7 @@ public final class AppState: ObservableObject {
     @Published public var selectedTab: TabItem = .cast
     @Published public var isProLifetimeUnlocked: Bool = false
     @Published public var showPaywall: Bool = false
+    @Published public var showingAutomationsGuide: Bool = false
     @Published public var showWidgetEditor: Bool = false
     @Published public var showCarPlaySimulator: Bool = false
     @Published public var initialCarPlayMode: String = "App in CarPlay"
@@ -90,8 +91,23 @@ public final class AppState: ObservableObject {
     public func handleDeepLink(_ url: URL) -> Bool {
         guard let destination = DashCastLinks.destination(for: url) else { return false }
         switch destination {
-        case .cast: selectedTab = .cast
-        case .drive: selectedTab = .drive
+        case .cast:
+            selectedTab = .cast
+        case .drive:
+            selectedTab = .drive
+        case .startTrip:
+            selectedTab = .drive
+            DashCastAutomationService.shared.triggerStartTrip()
+        case .resumeCast:
+            selectedTab = .cast
+            DashCastAutomationService.shared.triggerResumeCast()
+        case .nightHUD:
+            selectedTab = .drive
+            DashCastAutomationService.shared.triggerToggleNightHUD()
+        case .playChime:
+            DashCastAutomationService.shared.triggerPlayChime()
+        case .automations:
+            showingAutomationsGuide = true
         }
         return true
     }

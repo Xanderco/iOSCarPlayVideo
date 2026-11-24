@@ -8177,6 +8177,244 @@
           }
         }
       }
+    },
+    "Start Drive Recording": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start Drive Recording"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar Grabación de Conducción"
+          }
+        }
+      }
+    },
+    "Resume Video Cast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume Video Cast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reanudar Transmisión de Video"
+          }
+        }
+      }
+    },
+    "Toggle Night Vision HUD": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toggle Night Vision HUD"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alternar HUD de Visión Nocturna"
+          }
+        }
+      }
+    },
+    "Play Welcome Chime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play Welcome Chime"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir Timbre de Bienvenida"
+          }
+        }
+      }
+    },
+    "Siri & Automations": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siri & Automations"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Siri y Automatizaciones"
+          }
+        }
+      }
+    },
+    "Hands-Free In-Car Automations": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hands-Free In-Car Automations"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatizaciones Manos Libres en el Auto"
+          }
+        }
+      }
+    },
+    "Control DashCast completely hands-free while driving using Siri voice commands and automatic CarPlay trigger workflows.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control DashCast completely hands-free while driving using Siri voice commands and automatic CarPlay trigger workflows."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Controla DashCast totalmente con manos libres mientras conduces usando comandos de voz de Siri y flujos automáticos de CarPlay."
+          }
+        }
+      }
+    },
+    "QUICK TEST INTENTS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "QUICK TEST INTENTS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PROBAR INTENCIONES RÁPIDAS"
+          }
+        }
+      }
+    },
+    "SIRI VOICE COMMANDS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIRI VOICE COMMANDS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "COMANDOS DE VOZ DE SIRI"
+          }
+        }
+      }
+    },
+    "RECOMMENDED AUTOMATIONS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "RECOMMENDED AUTOMATIONS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AUTOMATIZACIONES RECOMENDADAS"
+          }
+        }
+      }
+    },
+    "HOW TO CONFIGURE IN APPLE SHORTCUTS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HOW TO CONFIGURE IN APPLE SHORTCUTS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CÓMO CONFIGURAR EN ATAJOS DE APPLE"
+          }
+        }
+      }
+    },
+    "When CarPlay Connects": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When CarPlay Connects"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando CarPlay se conecta"
+          }
+        }
+      }
+    },
+    "When Driving Focus Turns On": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When Driving Focus Turns On"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando se activa el Modo Concentración al Conducir"
+          }
+        }
+      }
+    },
+    "When CarPlay Disconnects": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When CarPlay Disconnects"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando CarPlay se desconecta"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -84,11 +84,21 @@ public enum DashCastLinks {
     public static let scheme = "dashcast"
     public static let cast = URL(string: "dashcast://cast")!
     public static let drive = URL(string: "dashcast://drive")!
+    public static let startTrip = URL(string: "dashcast://start-trip")!
+    public static let resumeCast = URL(string: "dashcast://resume-cast")!
+    public static let nightHUD = URL(string: "dashcast://night-hud")!
+    public static let playChime = URL(string: "dashcast://play-chime")!
+    public static let automations = URL(string: "dashcast://automations")!
 
-    /// Destinations a widget may deep-link to. Deliberately not tied to tab layout,
-    /// so navigation redesigns only need to update `AppState.handleDeepLink`.
+    /// Destinations a widget, Siri Shortcut, or automation may deep-link to.
+    /// Deliberately not tied to tab layout, so navigation redesigns only need to update `AppState.handleDeepLink`.
     public enum Destination: String, CaseIterable {
         case cast, drive
+        case startTrip = "start-trip"
+        case resumeCast = "resume-cast"
+        case nightHUD = "night-hud"
+        case playChime = "play-chime"
+        case automations = "automations"
     }
 
     public static func destination(for url: URL) -> Destination? {
