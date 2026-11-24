@@ -8704,6 +8704,533 @@
           }
         }
       }
+    },
+    "DarkShield™ Glare Guard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DarkShield™ Glare Guard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protección Antirreflejos DarkShield™"
+          }
+        }
+      }
+    },
+    "Photopic Amber": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photopic Amber"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ámbar Fotópico"
+          }
+        }
+      }
+    },
+    "Aviation Red": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviation Red"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rojo Aviación"
+          }
+        }
+      }
+    },
+    "OLED Deep Black": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OLED Deep Black"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Negro Puro OLED"
+          }
+        }
+      }
+    },
+    "Standard passthrough": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standard passthrough"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paso estándar sin filtro"
+          }
+        }
+      }
+    },
+    "589nm Contrast Booster": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "589nm Contrast Booster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Potenciador de contraste 589nm"
+          }
+        }
+      }
+    },
+    "650nm Rhodopsin Saver": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "650nm Rhodopsin Saver"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protector de rodopsina 650nm"
+          }
+        }
+      }
+    },
+    "0-Nit Glare Killer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "0-Nit Glare Killer"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminador de reflejos 0-Nit"
+          }
+        }
+      }
+    },
+    "PHOTOPIC FILTER PRESETS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PHOTOPIC FILTER PRESETS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PREAJUSTES DE FILTROS FOTÓPICOS"
+          }
+        }
+      }
+    },
+    "GLARE REDUCTION INTENSITY": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GLARE REDUCTION INTENSITY"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "INTENSIDAD DE REDUCCIÓN DE REFLEJOS"
+          }
+        }
+      }
+    },
+    "Filter Strength": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter Strength"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intensidad del Filtro"
+          }
+        }
+      }
+    },
+    "Soft Muted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soft Muted"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Suave Atenuado"
+          }
+        }
+      }
+    },
+    "Maximum Dark Adaptation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maximum Dark Adaptation"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máxima Adaptación a la Oscuridad"
+          }
+        }
+      }
+    },
+    "AUTOMATED OPTICAL GUARDS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AUTOMATED OPTICAL GUARDS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PROTECCIONES ÓPTICAS AUTOMÁTICAS"
+          }
+        }
+      }
+    },
+    "Auto-Tunnel Night Transition": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto-Tunnel Night Transition"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transición Nocturna Automática en Túnel"
+          }
+        }
+      }
+    },
+    "Instantly engages photopic guard when GPS detects mountain tunnels or covered underpasses.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Instantly engages photopic guard when GPS detects mountain tunnels or covered underpasses."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa instantáneamente la protección fotópica al detectar túneles o pasos subterráneos por GPS."
+          }
+        }
+      }
+    },
+    "Windshield Reflection Suppressor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windshield Reflection Suppressor"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supresor de Reflejos en Parabrisas"
+          }
+        }
+      }
+    },
+    "Subtly darkens top 25% of display canvas to eliminate mirror reflections on slanted windshields.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subtly darkens top 25% of display canvas to eliminate mirror reflections on slanted windshields."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscurece sutilmente el 25% superior de la pantalla para evitar reflejos espejo en parabrisas inclinados."
+          }
+        }
+      }
+    },
+    "Invert Harsh White Web Wrappers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invert Harsh White Web Wrappers"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invertir Fondos Blancos de Páginas Web"
+          }
+        }
+      }
+    },
+    "Automatically darkens blinding white webpage backgrounds in embedded casting browser.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically darkens blinding white webpage backgrounds in embedded casting browser."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscurece automáticamente los fondos blancos deslumbrantes en el navegador integrado."
+          }
+        }
+      }
+    },
+    "OPTICAL SIMULATION (DEBUG / PARKED)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OPTICAL SIMULATION (DEBUG / PARKED)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SIMULACIÓN ÓPTICA (DEBUG / ESTACIONADO)"
+          }
+        }
+      }
+    },
+    "Enter Tunnel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter Tunnel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar a Túnel"
+          }
+        }
+      }
+    },
+    "Exit Tunnel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit Tunnel"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salir de Túnel"
+          }
+        }
+      }
+    },
+    "Cycle Preset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cycle Preset"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiar Preajuste"
+          }
+        }
+      }
+    },
+    "Night Driving & Human Dark Adaptation": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Night Driving & Human Dark Adaptation"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conducción Nocturna y Adaptación Humana a la Oscuridad"
+          }
+        }
+      }
+    },
+    "Blue light (400–490nm) from windshield-mounted displays causes severe Rayleigh scattering in glass and photochemically bleaches rhodopsin in the driver's eye, taking up to 30 minutes to regenerate. DarkShield™ Aviation Red (650nm) and Photopic Amber bypass rod receptors to ensure headlights, pedestrians, and road markings remain instantly visible in pitch darkness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blue light (400–490nm) from windshield-mounted displays causes severe Rayleigh scattering in glass and photochemically bleaches rhodopsin in the driver's eye, taking up to 30 minutes to regenerate. DarkShield™ Aviation Red (650nm) and Photopic Amber bypass rod receptors to ensure headlights, pedestrians, and road markings remain instantly visible in pitch darkness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La luz azul (400–490 nm) de las pantallas montadas en el parabrisas causa dispersión de Rayleigh en el vidrio y degrada la rodopsina ocular, tardando hasta 30 minutos en regenerarse. DarkShield™ Rojo Aviación (650 nm) y Ámbar Fotópico evitan los bastones retinianos para que peatones y marcas viales sigan siendo visibles al instante."
+          }
+        }
+      }
+    },
+    "DarkShield Vision Glare Guard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DarkShield Vision Glare Guard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Protección Antirreflejos DarkShield Vision"
+          }
+        }
+      }
+    },
+    "DarkShield": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DarkShield"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DarkShield"
+          }
+        }
+      }
+    },
+    "Live Filter Response:": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live Filter Response:"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta en Vivo del Filtro:"
+          }
+        }
+      }
+    },
+    "Tunnel Guard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tunnel Guard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardia de Túnel"
+          }
+        }
+      }
+    },
+    "Auto Photopic Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto Photopic Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fotópico Automático Activo"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

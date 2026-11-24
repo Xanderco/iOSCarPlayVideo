@@ -72,6 +72,7 @@ public struct CastHomeView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {
+                        DarkShieldBadgeView(isCompact: true)
                         CockpitThermalBadgeView(isCompact: true)
 
                         if !appState.isProLifetimeUnlocked {
@@ -767,6 +768,9 @@ public struct CastHomeView: View {
                     }
                     .padding(.bottom, 30)
                 }
+            }
+            .sheet(isPresented: $appState.showDarkShieldSheet) {
+                DarkShieldVisionSheet()
             }
             .sheet(isPresented: $appState.showThermalSheet) {
                 ThermalProtectionSheet()

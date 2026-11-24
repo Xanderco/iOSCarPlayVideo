@@ -18,13 +18,17 @@ public struct AutomotiveVideoPlayerView: View {
             Color.black
 
             if playerService.currentChannel != nil {
-                CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            showControls.toggle()
-                        }
+                ZStack {
+                    CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
+                        .ignoresSafeArea()
+                    DarkShieldFilterOverlay()
+                        .ignoresSafeArea()
+                }
+                .onTapGesture {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        showControls.toggle()
                     }
+                }
 
                 if playerService.isBuffering && playerService.playbackError == nil {
                     ProgressView()
@@ -118,6 +122,18 @@ public struct AutomotiveVideoPlayerView: View {
                     }
 
                     Spacer()
+
+                    Button {
+                        AppState.shared.showDarkShieldSheet = true
+                    } label: {
+                        Image(systemName: DarkShieldVisionService.shared.statusIconName)
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(DarkShieldVisionService.shared.isActive ? DarkShieldVisionService.shared.statusColor : Color.white)
+                            .padding(9)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
+                    }
+                    .accessibilityLabel("DarkShield Vision Glare Guard")
 
                     AirPlayRoutePickerRepresentable(tintColor: .white)
                         .frame(width: 34, height: 34)

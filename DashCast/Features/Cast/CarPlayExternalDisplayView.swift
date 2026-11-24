@@ -6,6 +6,7 @@ public struct CarPlayExternalDisplayView: View {
     @ObservedObject var locationService = DriveLocationService.shared
     @ObservedObject var appState = AppState.shared
     @ObservedObject var thermalService = CockpitThermalService.shared
+    @ObservedObject var visionService = DarkShieldVisionService.shared
 
     public init() {}
 
@@ -25,8 +26,12 @@ public struct CarPlayExternalDisplayView: View {
             if playerService.currentChannel != nil {
                 // Video is active: Render video full-screen on the car display
                 ZStack(alignment: .bottom) {
-                    CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
-                        .ignoresSafeArea()
+                    ZStack {
+                        CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
+                            .ignoresSafeArea()
+                        DarkShieldFilterOverlay()
+                            .ignoresSafeArea()
+                    }
 
                     // Minimal CarPlay status watermark
                     HStack {
@@ -40,6 +45,19 @@ public struct CarPlayExternalDisplayView: View {
                         .padding(.vertical, 6)
                         .background(Color.black.opacity(0.6))
                         .clipShape(Capsule())
+
+                        if visionService.isActive {
+                            HStack(spacing: 6) {
+                                Circle().fill(visionService.statusColor).frame(width: 8, height: 8)
+                                Text("DarkShield · \(visionService.statusTitle)")
+                                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                    .foregroundStyle(Color.white)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.black.opacity(0.6))
+                            .clipShape(Capsule())
+                        }
 
                         Spacer()
 
