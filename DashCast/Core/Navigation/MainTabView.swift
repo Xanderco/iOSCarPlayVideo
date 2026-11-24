@@ -37,6 +37,9 @@ public struct MainTabView: View {
         .sheet(isPresented: $appState.showPaywall) {
             LifetimePaywallView()
         }
+        .sheet(isPresented: $appState.showingAutomationsGuide) {
+            ShortcutsGuideView()
+        }
         .fullScreenCover(isPresented: Binding(
             get: { (!passengerNoticeAccepted && !PassengerSafetyNotice.shouldSkip) || ScreenshotLaunch.showOnboarding },
             set: { _ in }
