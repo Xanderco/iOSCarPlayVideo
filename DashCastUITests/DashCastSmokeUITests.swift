@@ -139,6 +139,28 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testDualZoneAudioSheetOpens() throws {
+        let button = app.buttons["Cast_AudioZonesButton"]
+        if !button.waitForExistence(timeout: 5) || !button.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(button.waitForExistence(timeout: 10), "Audio Zones button missing")
+        tapCenter(of: button)
+
+        XCTAssertTrue(
+            app.navigationBars["Dual-Zone Audio"].waitForExistence(timeout: 10),
+            "Dual-Zone Audio sheet did not open"
+        )
+        XCTAssertTrue(
+            app.switches["DualZoneAudio_MasterToggle"].waitForExistence(timeout: 5),
+            "Dual-Zone master toggle missing"
+        )
+        snapshot("05-dual-zone-audio")
+
+        app.navigationBars["Dual-Zone Audio"].buttons["Done"].tap()
+        XCTAssertTrue(app.otherElements["Screen_Cast"].waitForExistence(timeout: 10), "Did not return to Cast tab")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

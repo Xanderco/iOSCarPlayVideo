@@ -57,10 +57,32 @@ public final class VideoPlayerService: ObservableObject {
         setupTimeObserver()
         observeTimeControlStatus()
         observeAppLifecycleAndInterruptions()
-        if handlesRemoteCommands { setupRemoteCommands() }
+        if handlesRemoteCommands {
+            setupRemoteCommands()
+            configureDualZoneAudioBinding()
+        }
         // Route video to AirPlay / car displays and enforce the parked-only guard.
         CarVideoOutputController.shared.attach(player: player) { [weak self] in
             self?.pause()
+        }
+    }
+
+    private func configureDualZoneAudioBinding() {
+        let router = DualZoneAudioRouter.shared
+        player.volume = router.effectivePlayerVolume
+        router.onPlayerDirective = { [weak self] action, volume in
+            guard let self else { return }
+            self.player.volume = volume
+            switch action {
+            case .muteVideo:
+                self.isMuted = true
+            case .pauseVideo:
+                self.pause()
+            case .restoreUnmute:
+                self.isMuted = false
+            case .none:
+                break
+            }
         }
     }
 
@@ -86,10 +108,11 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func configureAudioSession() {
+        let plan = DualZoneAudioRouter.shared.applyCurrentSessionPolicy(activate: false)
+        player.volume = DualZoneAudioRouter.shared.effectivePlayerVolume
         Task.detached(priority: .userInitiated) {
             do {
-                try VideoPlayerService.configureAudioSessionCategory()
-                try AVAudioSession.sharedInstance().setActive(true)
+                try SystemAudioSessionAdapter.applyToSystemSession(plan, activate: true)
             } catch {
                 print("Failed to configure audio session: \(error)")
             }

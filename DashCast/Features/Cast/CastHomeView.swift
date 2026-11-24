@@ -13,6 +13,7 @@ public struct CastHomeView: View {
     @State private var showingWebBrowser: Bool = false
     @State private var showingCastGuide: Bool = false
     @State private var showingFavorites: Bool = false
+    @State private var showingDualZoneAudio: Bool = false
     @State private var showingBroadcastPicker: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var isFullscreenPlayer: Bool = false
@@ -118,6 +119,9 @@ public struct CastHomeView: View {
             }
             .sheet(isPresented: $showingCastGuide) {
                 CarCastGuideModalView()
+            }
+            .sheet(isPresented: $showingDualZoneAudio) {
+                DualZoneAudioSheet()
             }
             .sheet(isPresented: $showingWebBrowser) {
                 WebVideoBrowserView()
@@ -454,6 +458,22 @@ public struct CastHomeView: View {
                     .background(Color.dashSurface)
                     .clipShape(Circle())
                     .overlay(Circle().stroke(Color.dashBorder, lineWidth: 1))
+
+                Button {
+                    showingDualZoneAudio = true
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "headphones")
+                        Text("Audio Zones")
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.dcAccent)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.dcAccentSoft)
+                    .clipShape(Capsule())
+                }
+                .accessibilityIdentifier("Cast_AudioZonesButton")
             }
             .padding(.bottom, 10)
         }

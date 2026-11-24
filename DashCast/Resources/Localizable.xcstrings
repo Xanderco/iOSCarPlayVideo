@@ -8177,6 +8177,737 @@
           }
         }
       }
+    },
+    "Auto Dual-Zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto Dual-Zone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doble Zona Automática"
+          }
+        }
+      }
+    },
+    "Passenger Headphones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passenger Headphones"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audífonos de Pasajero"
+          }
+        }
+      }
+    },
+    "Shared Cabin Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shared Cabin Audio"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio Compartido en Cabina"
+          }
+        }
+      }
+    },
+    "Uses Bluetooth headphones when connected while keeping CarPlay navigation & radio clear.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uses Bluetooth headphones when connected while keeping CarPlay navigation & radio clear."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usa audífonos Bluetooth cuando están conectados manteniendo clara la navegación y radio de CarPlay."
+          }
+        }
+      }
+    },
+    "Locks passenger video audio to personal headphones and guards cabin audio on disconnect.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locks passenger video audio to personal headphones and guards cabin audio on disconnect."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquea el audio del video de pasajero en audífonos personales y protege el audio de cabina al desconectar."
+          }
+        }
+      }
+    },
+    "Routes video sound through the vehicle display or speakers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Routes video sound through the vehicle display or speakers."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enruta el sonido del video por la pantalla o altavoces del vehículo."
+          }
+        }
+      }
+    },
+    "Mute Video (Protect Cabin Nav)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mute Video (Protect Cabin Nav)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silenciar Video (Proteger Navegación)"
+          }
+        }
+      }
+    },
+    "Pause Video Playback": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause Video Playback"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausar Reproducción de Video"
+          }
+        }
+      }
+    },
+    "Switch to Cabin Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to Cabin Audio"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiar a Audio de Cabina"
+          }
+        }
+      }
+    },
+    "Silences video immediately so cabin speakers and turn-by-turn prompts are never hijacked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silences video immediately so cabin speakers and turn-by-turn prompts are never hijacked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silencia el video de inmediato para no interrumpir los altavoces de cabina ni las indicaciones paso a paso."
+          }
+        }
+      }
+    },
+    "Pauses video until passenger headphones reconnect.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pauses video until passenger headphones reconnect."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pausa el video hasta que se reconecten los audífonos del pasajero."
+          }
+        }
+      }
+    },
+    "Continues video audio through the car or phone speakers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continues video audio through the car or phone speakers."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continúa el audio del video por los altavoces del auto o del iPhone."
+          }
+        }
+      }
+    },
+    "Headphones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Headphones"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audífonos"
+          }
+        }
+      }
+    },
+    "Cabin Coexist": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabin Coexist"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabina Coexiste"
+          }
+        }
+      }
+    },
+    "Cabin Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabin Audio"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio Cabina"
+          }
+        }
+      }
+    },
+    "Muted Safe": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muted Safe"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silencio Seguro"
+          }
+        }
+      }
+    },
+    "Passenger Headphones Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passenger Headphones Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audífonos de Pasajero Activos"
+          }
+        }
+      }
+    },
+    "Cabin Nav & Radio Preserved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabin Nav & Radio Preserved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navegación y Radio Preservados"
+          }
+        }
+      }
+    },
+    "Safety Mute Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Safety Mute Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silencio de Seguridad Activo"
+          }
+        }
+      }
+    },
+    "Dual-Zone Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dual-Zone Audio"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio de Doble Zona"
+          }
+        }
+      }
+    },
+    "ACTIVE OUTPUTS": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ACTIVE OUTPUTS"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SALIDAS ACTIVAS"
+          }
+        }
+      }
+    },
+    "Unmute to Cabin": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unmute to Cabin"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar Audio en Cabina"
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dismiss"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descartar"
+          }
+        }
+      }
+    },
+    "Passenger Bluetooth Output": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passenger Bluetooth Output"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salida Bluetooth de Pasajero"
+          }
+        }
+      }
+    },
+    "Tap the audio picker to pair passenger AirPods or Bluetooth headphones for video sound while CarPlay keeps cabin audio separate.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the audio picker to pair passenger AirPods or Bluetooth headphones for video sound while CarPlay keeps cabin audio separate."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca el selector de audio para vincular AirPods o audífonos Bluetooth de pasajero mientras CarPlay mantiene el audio de cabina separado."
+          }
+        }
+      }
+    },
+    "Headphones Connected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Headphones Connected"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audífonos Conectados"
+          }
+        }
+      }
+    },
+    "Select Passenger Headphones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select Passenger Headphones"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seleccionar Audífonos"
+          }
+        }
+      }
+    },
+    "Independent passenger audio active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Independent passenger audio active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio independiente de pasajero activo"
+          }
+        }
+      }
+    },
+    "AirPods, Beats, or wired headset": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirPods, Beats, or wired headset"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AirPods, Beats o audífonos con cable"
+          }
+        }
+      }
+    },
+    "Dual-Zone Audio Splitter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dual-Zone Audio Splitter"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Divisor de Audio Doble Zona"
+          }
+        }
+      }
+    },
+    "Isolate passenger video audio without muting cabin systems": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Isolate passenger video audio without muting cabin systems"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aísla el audio del video sin silenciar los sistemas de cabina"
+          }
+        }
+      }
+    },
+    "Keep CarPlay Navigation & Radio Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep CarPlay Navigation & Radio Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantener Activa la Navegación y Radio de CarPlay"
+          }
+        }
+      }
+    },
+    "Mixes non-exclusively so turn-by-turn prompts and cabin radio keep playing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mixes non-exclusively so turn-by-turn prompts and cabin radio keep playing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mezcla de forma no exclusiva para que las indicaciones y la radio sigan sonando."
+          }
+        }
+      }
+    },
+    "Passenger Stream Volume": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passenger Stream Volume"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volumen del Video de Pasajero"
+          }
+        }
+      }
+    },
+    "Mute passenger audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mute passenger audio"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Silenciar audio de pasajero"
+          }
+        }
+      }
+    },
+    "Adjusts passenger video volume independently without changing your vehicle's head-unit volume.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adjusts passenger video volume independently without changing your vehicle's head-unit volume."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajusta el volumen del video de pasajero de forma independiente sin cambiar el volumen del auto."
+          }
+        }
+      }
+    },
+    "When Headphones Disconnect": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When Headphones Disconnect"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al Desconectar Audífonos"
+          }
+        }
+      }
+    },
+    "Dual-Zone Audio Router": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dual-Zone Audio Router"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enrutador de Audio Doble Zona"
+          }
+        }
+      }
+    },
+    "Dual-Zone Passenger Audio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dual-Zone Passenger Audio"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio Doble Zona de Pasajero"
+          }
+        }
+      }
+    },
+    "HEADPHONES": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HEADPHONES"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AUDÍFONOS"
+          }
+        }
+      }
+    },
+    "Route passenger video sound to Bluetooth headphones while CarPlay keeps cabin navigation prompts and radio playing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route passenger video sound to Bluetooth headphones while CarPlay keeps cabin navigation prompts and radio playing."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enruta el sonido del video de pasajero a audífonos Bluetooth mientras CarPlay mantiene la navegación y la radio."
+          }
+        }
+      }
+    },
+    "Audio Zones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio Zones"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zonas de Audio"
+          }
+        }
+      }
+    },
+    "Tap picker for passenger headphones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap picker for passenger headphones"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca el selector para audífonos de pasajero"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
