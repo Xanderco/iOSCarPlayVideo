@@ -176,7 +176,8 @@ public enum CabinHapticCue: String, Codable, CaseIterable, Identifiable, Sendabl
             return CabinHapticWaveformSpec(
                 patternFamily: "Tactile Detent",
                 events: [
-                    HapticEventSpec(kind: .transient, relativeTime: 0.00, duration: 0.0, intensity: 0.52, sharpness: 0.65)
+                    HapticEventSpec(kind: .transient, relativeTime: 0.00, duration: 0.0, intensity: 0.55, sharpness: 0.68),
+                    HapticEventSpec(kind: .continuous, relativeTime: 0.01, duration: 0.03, intensity: 0.22, sharpness: 0.42)
                 ]
             )
         }
@@ -459,7 +460,7 @@ public final class CabinHapticsEngine: ObservableObject {
         currentSpeedKmh = normalizedSpeed
         isVehicleMoving = normalizedSpeed >= Self.movingSpeedThresholdKmh || isAutomotiveMoving == true
 
-        if isSpeedWarningEnabled && normalizedSpeed >= speedWarningLimitKmh {
+        if normalizedSpeed >= speedWarningLimitKmh {
             return trigger(.speedWarning, now: now)
         }
         return nil
