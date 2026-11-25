@@ -133,6 +133,13 @@ final class DashCastSmokeUITests: XCTestCase {
         let exit = app.buttons["Exit"]
         XCTAssertTrue(exit.waitForExistence(timeout: 10), "Browser sheet did not open")
         XCTAssertTrue(app.textFields.firstMatch.exists, "Browser address bar missing")
+
+        let bookmarksCard = app.buttons["Browser_BookmarksCard"]
+        XCTAssertTrue(bookmarksCard.waitForExistence(timeout: 5), "Bookmarks card missing")
+        bookmarksCard.tap()
+        XCTAssertTrue(app.navigationBars["Bookmarks"].waitForExistence(timeout: 5), "Bookmarks sheet did not open")
+        app.navigationBars["Bookmarks"].buttons["Done"].tap()
+
         snapshot("04-browser")
 
         exit.tap()
