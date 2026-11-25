@@ -62,6 +62,7 @@ public struct ChannelRow: View {
     private let isPlaying: Bool
     private let isFavorite: Bool
     private let progress: Double?
+    private let epgSlot: ChannelEPGSlot?
     private let isUnavailable: Bool
     private let onToggleFavorite: (() -> Void)?
 
@@ -75,6 +76,7 @@ public struct ChannelRow: View {
         isPlaying: Bool = false,
         isFavorite: Bool = false,
         progress: Double? = nil,
+        epgSlot: ChannelEPGSlot? = nil,
         isUnavailable: Bool = false,
         onToggleFavorite: (() -> Void)? = nil
     ) {
@@ -85,6 +87,7 @@ public struct ChannelRow: View {
         self.isPlaying = isPlaying
         self.isFavorite = isFavorite
         self.progress = progress
+        self.epgSlot = epgSlot
         self.isUnavailable = isUnavailable
         self.onToggleFavorite = onToggleFavorite
     }
@@ -95,6 +98,7 @@ public struct ChannelRow: View {
         isLive: Bool = true,
         isPlaying: Bool = false,
         isFavorite: Bool? = nil,
+        epgSlot: ChannelEPGSlot? = nil,
         onToggleFavorite: (() -> Void)? = nil
     ) {
         self.init(
@@ -104,8 +108,25 @@ public struct ChannelRow: View {
             isLive: isLive,
             isPlaying: isPlaying,
             isFavorite: isFavorite ?? channel.isFavorite,
+            epgSlot: epgSlot,
             onToggleFavorite: onToggleFavorite
         )
+    }
+
+    private var effectiveProgress: Double? {
+        progress ?? epgSlot?.progress
+    }
+
+    private var epgSummaryText: String? {
+        guard let epgSlot, !epgSlot.isEmpty else { return nil }
+        var parts: [String] = []
+        if let now = epgSlot.now {
+            parts.append(String(localized: "Now: \(now.title)"))
+        }
+        if let next = epgSlot.next {
+            parts.append(String(localized: "Next: \(next.title)"))
+        }
+        return parts.joined(separator: " · ")
     }
 
     public var body: some View {
@@ -137,8 +158,14 @@ public struct ChannelRow: View {
                         .foregroundStyle(Color.dcTextSecondary)
                         .lineLimit(1)
                 }
-                if let progress {
-                    ProgressView(value: min(max(progress, 0), 1))
+                if let epgSummaryText, !epgSummaryText.isEmpty {
+                    Text(epgSummaryText)
+                        .font(DSTypography.caption)
+                        .foregroundStyle(Color.dcTextSecondary)
+                        .lineLimit(1)
+                }
+                if let effectiveProgress {
+                    ProgressView(value: min(max(effectiveProgress, 0), 1))
                         .tint(Color.dcAccent)
                         .padding(.top, DSSpacing.xxs)
                 }
@@ -173,14 +200,18 @@ public struct ChannelRow: View {
     }
 
     private var accessibilityLabelText: String {
-        [title, isLive ? "Live" : nil, subtitle].compactMap { $0 }.joined(separator: ", ")
+        [title, isLive ? "Live" : nil, subtitle, epgSummaryText].compactMap { $0 }.joined(separator: ", ")
     }
 
     private var accessibilityValueText: String {
         var parts: [String] = []
         if isPlaying { parts.append("Now playing") }
         if isFavorite { parts.append("Favorite") }
-        if let progress { parts.append("\(Int((progress * 100).rounded())) percent watched") }
+        if let progress {
+            parts.append("\(Int((progress * 100).rounded())) percent watched")
+        } else if let epgProgress = epgSlot?.progress {
+            parts.append("\(Int((epgProgress * 100).rounded())) percent elapsed")
+        }
         if isUnavailable { parts.append("Unavailable") }
         return parts.joined(separator: ", ")
     }

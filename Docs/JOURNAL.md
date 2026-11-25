@@ -92,6 +92,12 @@
 
 ## Log
 
+### 2026-11-25 06:20 (Bogotá) — XMLTV EPG parser & Now/Next guide strip [DI-70]
+- **M3U EPG metadata (`ChannelModel.swift`, `IPTVParser.swift`, `PlaylistStore.swift`)**: Added `tvgID` on `ChannelModel` and `epgURL` on `IPTVPlaylist`; added `IPTVParser.parseM3UWithMetadata(content:baseURL:)` to extract `url-tvg` / `x-tvg-url` from `#EXTM3U` headers and `tvg-id` from `#EXTINF` entries while keeping backward-compatible Codable decoding.
+- **XMLTV guide engine (`XMLTVGuideService.swift`)**: Implemented pure Foundation `XMLParser` decoding for `<channel>` `<display-name>` and `<programme>` entries, XMLTV timestamp parsing, injectable `URLSession` feed loading/caching, and `ChannelEPGSlot` Now/Next + progress calculation (matching `tvgID` with `<display-name>` fallback).
+- **UI & localization (`ChannelRow.swift`, `CastHomeView.swift`, `Localizable.xcstrings`)**: Added Now/Next program strip and progress bar to `ChannelRow` and `CastHomeView` Media Sources channel cards, auto-loading EPG guides when playlists have `epgURL`, with EN/ES strings (`Now: %@`, `Next: %@`).
+- **Tests (`XMLTVGuideTests.swift`)**: Added offline unit tests using stubbed `URLProtocol` covering M3U header/`tvg-id` extraction, legacy Codable compatibility, XMLTV parsing, date formats, Now/Next/progress slots, and HTTP/XML error handling.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

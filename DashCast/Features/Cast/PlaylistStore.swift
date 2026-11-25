@@ -116,8 +116,8 @@ public final class PlaylistStore: ObservableObject {
     @discardableResult
     public func addPlaylist(data: Data, sourceURL: URL?, title: String?) throws -> IPTVPlaylist {
         guard let content = IPTVParser.decode(data) else { throw ImportError.unreadable }
-        let channels = IPTVParser.parseM3U(content: content, baseURL: sourceURL)
-        guard !channels.isEmpty else { throw ImportError.noChannels }
+        let parsed = IPTVParser.parseM3UWithMetadata(content: content, baseURL: sourceURL)
+        guard !parsed.channels.isEmpty else { throw ImportError.noChannels }
 
         let name = title?.isEmpty == false
             ? title!
@@ -125,7 +125,8 @@ public final class PlaylistStore: ObservableObject {
 
         // Re-importing the same URL replaces the old copy instead of duplicating it.
         if let sourceURL, let index = playlists.firstIndex(where: { $0.url == sourceURL }) {
-            playlists[index].channels = channels
+            playlists[index].channels = parsed.channels
+            playlists[index].epgURL = parsed.primaryEPGURL
             playlists[index].title = name
             save()
             return playlists[index]
@@ -135,7 +136,12 @@ public final class PlaylistStore: ObservableObject {
             throw ImportError.proRequired
         }
 
-        let playlist = IPTVPlaylist(title: name, url: sourceURL, channels: channels)
+        let playlist = IPTVPlaylist(
+            title: name,
+            url: sourceURL,
+            epgURL: parsed.primaryEPGURL,
+            channels: parsed.channels
+        )
         playlists.append(playlist)
         save()
         return playlist
