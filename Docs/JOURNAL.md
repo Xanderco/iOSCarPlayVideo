@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-25 15:35 (Bogotá) — DI-77: Playlist rename, reorder, group hiding & local backup export/import [DI-77]
+- **What:** Added `PlaylistStore` management methods (`renamePlaylist(id:title:)`, `movePlaylists(fromOffsets:toOffset:)`, persisted `hiddenGroups` with `visibleChannels` / `visibleGroupedChannels()`, and `exportBackupData()` / `importBackupData(_:replaceExisting:)` honoring `EntitlementGate` atomically), `PlaylistBackupService.swift` (versioned JSON backup + M3U export), and `PlaylistManageSheet.swift` wired from `CastHomeView.mediaSourcePlaylistsSheet` ("Manage" toolbar button + hidden-groups banner). Updated `CarPlaySceneDelegate` to respect `visibleGroupedChannels()`.
+- **Tests:** Added `PlaylistManagementTests` (7 tests covering rename, move reorder, hidden group persistence/filtering, M3U export round-trip, JSON backup merge/replace, atomic Pro gate enforcement, and invalid/empty/unsupported payload rejection) plus UI smoke test `testMediaSourcesManagePlaylistsSheetOpens`, and EN/ES localization strings in `Localizable.xcstrings`.
+- **Follow-ups:** Update `AppStoreMedia/metadata.md` §4 once merged to `main` to remove the "playlist renaming or reordering" caveat.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

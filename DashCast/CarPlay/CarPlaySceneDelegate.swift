@@ -113,9 +113,9 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         favoritesTemplate?.updateSections(makeFavoritesSections(store: store))
 
         // Group lists pushed from Library carry their group name in `userInfo`;
-        // refresh them so they never show channels that were removed.
+        // refresh them so they never show channels that were removed or hidden.
         guard let interfaceController else { return }
-        let groups = store.groupedChannels(store.allChannels)
+        let groups = store.visibleGroupedChannels()
         for case let template as CPListTemplate in interfaceController.templates {
             guard let group = template.userInfo as? String else { continue }
             let channels = groups.first(where: { $0.group == group })?.channels ?? []
@@ -138,10 +138,10 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         }
     }
 
-    /// Library root: one row per group. Tapping a group pushes its channel list.
+    /// Library root: one row per visible group. Tapping a group pushes its channel list.
     private func makeLibrarySections(store: PlaylistStore) -> [CPListSection] {
         let maxItems = Int(CPListTemplate.maximumItemCount)
-        let groups = store.groupedChannels(store.allChannels)
+        let groups = store.visibleGroupedChannels()
         guard !groups.isEmpty else { return [] }
 
         let items: [CPListItem] = groups.prefix(maxItems).map { entry in
