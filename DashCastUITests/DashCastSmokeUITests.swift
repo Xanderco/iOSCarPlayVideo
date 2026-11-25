@@ -139,6 +139,24 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testIncidentDashCamSheetOpens() throws {
+        let driveTab = tabButton("Drive")
+        XCTAssertTrue(driveTab.waitForExistence(timeout: 15), "Drive tab missing")
+        driveTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Drive"].waitForExistence(timeout: 10), "Drive screen missing")
+
+        let dashCamButton = app.buttons["Drive_DashCamButton"]
+        XCTAssertTrue(dashCamButton.waitForExistence(timeout: 10), "Incident DashCam button missing")
+        tapCenter(of: dashCamButton)
+
+        let navBar = app.navigationBars["Incident DashCam"]
+        XCTAssertTrue(navBar.waitForExistence(timeout: 10), "Incident DashCam sheet did not open")
+        snapshot("05-incident-dashcam")
+
+        navBar.buttons["Close"].tap()
+        XCTAssertTrue(dashCamButton.waitForExistence(timeout: 10), "Did not return to Drive tab")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

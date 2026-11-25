@@ -75,13 +75,13 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Used to scan QR codes for quickly importing playlist links."
+            "value": "Used to scan QR codes for playlist links and capture the optional 60-second rolling DashCam incident buffer on this iPhone."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Se usa para escanear códigos QR e importar rápidamente enlaces de listas de reproducción."
+            "value": "Se usa para escanear códigos QR de listas de reproducción y grabar el búfer rotativo opcional de 60 segundos de la DashCam en este iPhone."
           }
         }
       }

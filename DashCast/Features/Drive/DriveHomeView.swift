@@ -5,6 +5,7 @@ public struct DriveHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var locationService = DriveLocationService.shared
     @StateObject private var drivingScorer = DrivingScorer.shared
+    @StateObject private var dashCamEngine = IncidentDashCamEngine.shared
 
     @State private var showingTripSummary: Bool = false
     @State private var completedTrip: TripModel?
@@ -12,6 +13,7 @@ public struct DriveHomeView: View {
     @State private var showingPermissions: Bool = false
     @State private var showingDriveSettings: Bool = false
     @State private var showingLiveActivityPreview: Bool = false
+    @State private var showingDashCam: Bool = false
 
     public init() {}
 
@@ -104,6 +106,19 @@ public struct DriveHomeView: View {
                                     .background(Color.dashSurface.opacity(0.85))
                                     .clipShape(Circle())
                             }
+
+                            Button {
+                                showingDashCam = true
+                            } label: {
+                                Image(systemName: "video.fill")
+                                    .font(.system(size: 15))
+                                    .foregroundStyle(dashCamEngine.isArmed ? Color.dcLive : Color.dashTextPrimary)
+                                    .padding(8)
+                                    .background(Color.dashSurface.opacity(0.85))
+                                    .clipShape(Circle())
+                            }
+                            .accessibilityIdentifier("Drive_DashCamButton")
+                            .accessibilityLabel("Incident DashCam")
                         }
                         .padding()
                     }
@@ -138,6 +153,9 @@ public struct DriveHomeView: View {
             }
             .sheet(isPresented: $showingDriveSettings) {
                 DriveSettingsView()
+            }
+            .sheet(isPresented: $showingDashCam) {
+                IncidentDashCamView()
             }
             .alert("Location needed", isPresented: Binding(
                 get: { locationService.lastErrorMessage != nil },

@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-24 20:06 (Bogotá) — [DashCam] Rolling G-Shock Incident Buffer & Windshield Telemetry Overlay Loop (DI-64 / CARAA-68)
+- **Added `IncidentDashCamEngine.swift`** (`DashCast/Core/DashCam/`): 60-second rolling circular buffer (`RollingSegmentBuffer` rotating 10s video segments + telemetry ring buffer), pure `IncidentTriggerPolicy` deceleration math (> 0.6G strict threshold, CoreMotion `userAcceleration` vector magnitude + GPS speed-delta deceleration, 15s cooldown deduplication), `WindshieldTelemetryOverlay` (speed in KM/H or MPH + G-force + timestamp watermark + `AVVideoCompositionCoreAnimationTool` export overlay), and secure local sandbox archiving (`DashCastDashCam/IncidentClips/` excluded from backup with file protection, lock flags, and 20-clip retention cap).
+- **Added `IncidentDashCamView.swift`** (`DashCast/Features/Drive/`) and wired quick-launch `Drive_DashCamButton` in `DriveHomeView.swift` plus telemetry hook in `DriveLocationService.swift`. Updated `NSCameraUsageDescription` (`Info.plist`, `InfoPlist.xcstrings`) and EN/ES `Localizable.xcstrings`.
+- **Tests**: Added 8 unit tests in `DashCastTests/IncidentDashCamEngineTests.swift` and UI test `testIncidentDashCamSheetOpens` in `DashCastUITests/DashCastSmokeUITests.swift`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

@@ -241,6 +241,14 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
             course: location.courseAccuracy >= 0 ? location.course : -1,
             timestamp: location.timestamp
         )
+
+        if IncidentDashCamEngine.shared.isArmed {
+            IncidentDashCamEngine.shared.ingestTelemetry(
+                speedKmh: speedKmh,
+                timestamp: location.timestamp,
+                useMilesPerHour: AppState.shared.useMilesPerHour
+            )
+        }
     }
 
     // Manual simulation injection for tests & preview
@@ -255,5 +263,11 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         currentSpeedKmh = speedKmh
         if speedKmh > topSpeedKmh { topSpeedKmh = speedKmh }
         DrivingScorer.shared.recordPoint(speedKmh: speedKmh)
+        if IncidentDashCamEngine.shared.isArmed {
+            IncidentDashCamEngine.shared.ingestTelemetry(
+                speedKmh: speedKmh,
+                useMilesPerHour: AppState.shared.useMilesPerHour
+            )
+        }
     }
 }
