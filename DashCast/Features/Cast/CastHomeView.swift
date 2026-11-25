@@ -26,6 +26,22 @@ public struct CastHomeView: View {
     @State private var importErrorMessage: String?
     @State private var importSuccessMessage: String?
     @State private var localImportError: String?
+    @State private var channelSearchText: String = ""
+    @State private var selectedChannelScope: PlaylistChannelFilterScope = .all
+
+    private var channelFilter: PlaylistChannelFilter {
+        PlaylistChannelFilter(query: channelSearchText, scope: selectedChannelScope)
+    }
+
+    private var channelGroups: [String] {
+        playlistStore.groupedChannels().map(\.group)
+    }
+
+    private var filteredChannels: [ChannelModel] {
+        channelFilter.apply(to: playlistStore.allChannels) { channel in
+            playlistStore.isFavorite(channel)
+        }
+    }
 
     public init() {}
 
@@ -593,6 +609,25 @@ public struct CastHomeView: View {
                                 .foregroundStyle(Color.dashYellow)
                             Spacer()
 
+                            if !playlistStore.playlists.isEmpty {
+                                Button {
+                                    Task { await playlistStore.refreshAll() }
+                                } label: {
+                                    if playlistStore.isRefreshing {
+                                        ProgressView()
+                                            .controlSize(.small)
+                                            .tint(.dcAccent)
+                                    } else {
+                                        Image(systemName: "arrow.clockwise")
+                                            .font(.system(size: 13, weight: .semibold))
+                                            .foregroundStyle(Color.dcAccent)
+                                    }
+                                }
+                                .disabled(playlistStore.isRefreshing)
+                                .accessibilityLabel("Refresh playlists")
+                                .accessibilityIdentifier("MediaSources_RefreshButton")
+                            }
+
                             Button {
                                 showingQRScanner = true
                             } label: {
@@ -637,6 +672,7 @@ public struct CastHomeView: View {
                                     } label: {
                                         Label("Refresh All", systemImage: "arrow.clockwise")
                                     }
+                                    .disabled(playlistStore.isRefreshing)
                                 }
                             } label: {
                                 Text("+ Add Source")
@@ -654,6 +690,8 @@ public struct CastHomeView: View {
                                 .foregroundStyle(Color.dashYellow)
                                 .padding(.horizontal)
                         }
+
+                        refreshFeedbackBanner
 
                         if playlistStore.playlists.isEmpty {
                             Button {
@@ -714,56 +752,67 @@ public struct CastHomeView: View {
                             .padding(.horizontal)
                         }
 
-                        ForEach(playlistStore.allChannels) { channel in
-                            Button {
-                                playerService.load(channel: channel)
-                                showingPlaylistsSheet = false
-                            } label: {
-                                HStack(spacing: 14) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .fill(Color.dashSurfaceHighlight)
-                                            .frame(width: 44, height: 44)
+                        channelSearchAndFilterBar
 
-                                        Image(systemName: "tv.fill")
+                        if filteredChannels.isEmpty {
+                            channelEmptyFilterState
+                        } else {
+                            ForEach(filteredChannels) { channel in
+                                Button {
+                                    playerService.load(channel: channel)
+                                    showingPlaylistsSheet = false
+                                } label: {
+                                    HStack(spacing: 14) {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(Color.dashSurfaceHighlight)
+                                                .frame(width: 44, height: 44)
+
+                                            Image(systemName: "tv.fill")
+                                                .foregroundStyle(Color.dashYellow)
+                                        }
+
+                                        VStack(alignment: .leading, spacing: 3) {
+                                            Text(channel.name)
+                                                .font(.system(size: 15, weight: .semibold))
+                                                .foregroundStyle(Color.dashTextPrimary)
+
+                                            Text(channel.groupTitle)
+                                                .font(.system(size: 12))
+                                                .foregroundStyle(Color.dashTextSecondary)
+                                        }
+
+                                        Spacer()
+
+                                        Button {
+                                            playlistStore.toggleFavorite(channel)
+                                        } label: {
+                                            Image(systemName: playlistStore.isFavorite(channel) ? "heart.fill" : "heart")
+                                                .font(.system(size: 18))
+                                                .foregroundStyle(Color.dashYellow)
+                                        }
+                                        .buttonStyle(.plain)
+
+                                        Image(systemName: "play.circle.fill")
+                                            .font(.system(size: 22))
                                             .foregroundStyle(Color.dashYellow)
                                     }
-
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(channel.name)
-                                            .font(.system(size: 15, weight: .semibold))
-                                            .foregroundStyle(Color.dashTextPrimary)
-
-                                        Text(channel.groupTitle)
-                                            .font(.system(size: 12))
-                                            .foregroundStyle(Color.dashTextSecondary)
-                                    }
-
-                                    Spacer()
-
-                                    Button {
-                                        playlistStore.toggleFavorite(channel)
-                                    } label: {
-                                        Image(systemName: playlistStore.isFavorite(channel) ? "heart.fill" : "heart")
-                                            .font(.system(size: 18))
-                                            .foregroundStyle(Color.dashYellow)
-                                    }
-                                    .buttonStyle(.plain)
-
-                                    Image(systemName: "play.circle.fill")
-                                        .font(.system(size: 22))
-                                        .foregroundStyle(Color.dashYellow)
+                                    .padding()
+                                    .background(Color.dashSurface)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                                    .padding(.horizontal)
                                 }
-                                .padding()
-                                .background(Color.dashSurface)
-                                .clipShape(RoundedRectangle(cornerRadius: 14))
-                                .padding(.horizontal)
+                                .buttonStyle(.plain)
+                                .accessibilityIdentifier("MediaSources_Channel")
                             }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("MediaSources_Channel")
                         }
                     }
                     .padding(.bottom, 30)
+                }
+            }
+            .onChange(of: channelGroups) { _, groups in
+                if case .group(let activeGroup) = selectedChannelScope, !groups.contains(activeGroup) {
+                    selectedChannelScope = .all
                 }
             }
             .sheet(isPresented: $showingAddM3UDialog) {
@@ -810,6 +859,219 @@ public struct CastHomeView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private var refreshFeedbackBanner: some View {
+        if playlistStore.isRefreshing {
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                    .tint(.dcAccent)
+                Text("Refreshing playlists…")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(Color.dcTextSecondary)
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.dcSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal)
+            .accessibilityIdentifier("MediaSources_RefreshFeedback")
+        } else if let summary = playlistStore.lastRefreshSummary {
+            let timeText = summary.completedAt.formatted(date: .omitted, time: .shortened)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    Image(systemName: summary.failedCount > 0 ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(summary.failedCount > 0 ? Color.dcDanger : Color.dcSuccess)
+
+                    if summary.failedCount > 0 {
+                        Text("Refresh incomplete: \(summary.refreshedCount) updated, \(summary.failedCount) failed")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.dcTextPrimary)
+                    } else if !summary.hasURLPlaylists {
+                        Text("No URL playlists to refresh.")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(Color.dcTextSecondary)
+                    } else if summary.refreshedCount == 1 {
+                        Text("Updated 1 playlist · \(timeText)")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.dcTextSecondary)
+                    } else {
+                        Text("Updated \(summary.refreshedCount) playlists · \(timeText)")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.dcTextSecondary)
+                    }
+
+                    Spacer()
+                }
+
+                if let error = summary.lastError {
+                    Text(error)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.dcTextSecondary)
+                        .lineLimit(2)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(summary.failedCount > 0 ? Color.dcDanger.opacity(0.14) : Color.dcSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(summary.failedCount > 0 ? Color.dcDanger.opacity(0.35) : Color.dcStroke, lineWidth: 1)
+            )
+            .padding(.horizontal)
+            .accessibilityIdentifier("MediaSources_RefreshFeedback")
+        }
+    }
+
+    private var channelSearchAndFilterBar: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color.dcTextTertiary)
+
+                TextField("Search channels or groups", text: $channelSearchText)
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.dcTextPrimary)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .accessibilityIdentifier("MediaSources_SearchField")
+
+                if !channelSearchText.isEmpty {
+                    Button {
+                        channelSearchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 15))
+                            .foregroundStyle(Color.dcTextTertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Clear search")
+                    .accessibilityIdentifier("MediaSources_ClearSearchButton")
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color.dcSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.dcStroke, lineWidth: 1)
+            )
+            .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    channelFilterChip(
+                        scope: .all,
+                        icon: nil,
+                        identifier: "MediaSources_FilterChip_All"
+                    ) {
+                        Text("All (\(playlistStore.allChannels.count))")
+                    }
+
+                    channelFilterChip(
+                        scope: .favorites,
+                        icon: "heart.fill",
+                        identifier: "MediaSources_FilterChip_Favorites"
+                    ) {
+                        Text("Favorites (\(playlistStore.favoriteChannels.count))")
+                    }
+
+                    ForEach(channelGroups, id: \.self) { group in
+                        channelFilterChip(
+                            scope: .group(group),
+                            icon: nil,
+                            identifier: "MediaSources_FilterChip_\(group)"
+                        ) {
+                            Text(group)
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+        }
+    }
+
+    private func channelFilterChip<Label: View>(
+        scope: PlaylistChannelFilterScope,
+        icon: String?,
+        identifier: String,
+        @ViewBuilder label: () -> Label
+    ) -> some View {
+        let isSelected = selectedChannelScope == scope
+        return Button {
+            selectedChannelScope = scope
+        } label: {
+            HStack(spacing: 5) {
+                if let icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                label()
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(1)
+            }
+            .foregroundStyle(isSelected ? Color.black : Color.dcTextSecondary)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(isSelected ? Color.dcAccent : Color.dcSurface)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? Color.clear : Color.dcStroke, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier(identifier)
+    }
+
+    private var channelEmptyFilterState: some View {
+        let isFavoritesEmpty = selectedChannelScope == .favorites && channelSearchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return VStack(spacing: 10) {
+            Image(systemName: isFavoritesEmpty ? "heart.slash" : "magnifyingglass")
+                .font(.system(size: 26))
+                .foregroundStyle(Color.dcTextTertiary)
+
+            Text(isFavoritesEmpty ? "No favorite channels yet" : "No matching channels")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundStyle(Color.dcTextPrimary)
+
+            Text(isFavoritesEmpty ? "Tap the heart on any channel to save it here." : "Try a different search or filter.")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.dcTextSecondary)
+                .multilineTextAlignment(.center)
+
+            if channelFilter.isActive {
+                Button {
+                    channelSearchText = ""
+                    selectedChannelScope = .all
+                } label: {
+                    Text("Clear filters")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(Color.black)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(Color.dcAccent)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 2)
+                .accessibilityIdentifier("MediaSources_ClearFiltersButton")
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 24)
+        .padding(.horizontal, 16)
+        .background(Color.dcSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal)
+        .accessibilityIdentifier("MediaSources_EmptySearchState")
     }
 
     private var favoritesSheet: some View {

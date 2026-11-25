@@ -36,8 +36,21 @@ public final class PlaylistStore: ObservableObject {
         }
     }
 
+    public struct RefreshSummary: Equatable, Sendable {
+        public let refreshedCount: Int
+        public let failedCount: Int
+        public let lastError: String?
+        public let completedAt: Date
+
+        public var hasURLPlaylists: Bool {
+            refreshedCount + failedCount > 0
+        }
+    }
+
     @Published public private(set) var playlists: [IPTVPlaylist]
     @Published public private(set) var favoriteIDs: Set<String>
+    @Published public private(set) var isRefreshing: Bool = false
+    @Published public private(set) var lastRefreshSummary: RefreshSummary?
 
     private let persistence: PersistenceController
     private let session: URLSession
@@ -141,12 +154,37 @@ public final class PlaylistStore: ObservableObject {
         return playlist
     }
 
-    /// Re-downloads every playlist that came from a URL.
-    public func refreshAll() async {
+    /// Re-downloads every playlist that came from a URL and records a refresh summary.
+    @discardableResult
+    public func refreshAll() async -> RefreshSummary {
+        isRefreshing = true
+        defer { isRefreshing = false }
+
+        var refreshed = 0
+        var failed = 0
+        var firstError: String?
+
         for playlist in playlists {
             guard let url = playlist.url else { continue }
-            _ = try? await importPlaylist(from: url.absoluteString, title: playlist.title)
+            do {
+                _ = try await importPlaylist(from: url.absoluteString, title: playlist.title)
+                refreshed += 1
+            } catch {
+                failed += 1
+                if firstError == nil {
+                    firstError = error.localizedDescription
+                }
+            }
         }
+
+        let summary = RefreshSummary(
+            refreshedCount: refreshed,
+            failedCount: failed,
+            lastError: firstError,
+            completedAt: Date()
+        )
+        lastRefreshSummary = summary
+        return summary
     }
 
     public func removePlaylist(id: UUID) {

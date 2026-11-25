@@ -125,6 +125,46 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testMediaSourcesChannelSearchAndFilterChips() throws {
+        let row = app.buttons["Cast_MediaSourceRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
+        tapCenter(of: row)
+
+        XCTAssertTrue(
+            app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
+            "Media Sources sheet did not open"
+        )
+
+        let searchField = app.textFields["MediaSources_SearchField"]
+        XCTAssertTrue(searchField.waitForExistence(timeout: 10), "Channel search field missing")
+
+        let allChip = app.buttons["MediaSources_FilterChip_All"]
+        let favChip = app.buttons["MediaSources_FilterChip_Favorites"]
+        XCTAssertTrue(allChip.exists, "All filter chip missing")
+        XCTAssertTrue(favChip.exists, "Favorites filter chip missing")
+
+        favChip.tap()
+        let clearFilters = app.buttons["MediaSources_ClearFiltersButton"]
+        XCTAssertTrue(clearFilters.waitForExistence(timeout: 5), "Empty filter state / Clear filters button did not appear")
+        clearFilters.tap()
+
+        let firstChannel = app.buttons.matching(identifier: "MediaSources_Channel").firstMatch
+        XCTAssertTrue(firstChannel.waitForExistence(timeout: 5), "Channels did not restore after clearing filters")
+
+        searchField.tap()
+        searchField.typeText("zzzznomatch")
+        XCTAssertTrue(clearFilters.waitForExistence(timeout: 5), "Empty search state did not appear for unmatched query")
+        snapshot("03d-media-sources-empty-search")
+
+        let clearSearch = app.buttons["MediaSources_ClearSearchButton"]
+        XCTAssertTrue(clearSearch.exists, "Clear search button missing")
+        clearSearch.tap()
+        XCTAssertTrue(firstChannel.waitForExistence(timeout: 5), "Channels did not restore after clearing search")
+
+        app.navigationBars["Media Sources"].buttons["Done"].tap()
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
+    }
+
     func testBrowserSheetOpens() throws {
         let row = app.buttons["Cast_BrowserRow"]
         XCTAssertTrue(row.waitForExistence(timeout: 15), "Browser row missing")
