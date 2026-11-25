@@ -222,16 +222,18 @@ final class CarPlayVideoServer: @unchecked Sendable {
                 return
             }
             switch MJPEGStream.route(forRequest: data) {
-            case .viewerPage:
-                let host = LocalNetworkAddress.preferredIPv4()
-                let html = MJPEGStream.viewerHTML(title: "DashCast CarPlay", streamPath: "/stream", host: host, port: self.port)
-                self.respondAndClose(connection, MJPEGStream.httpResponse(status: "200 OK", contentType: "text/html; charset=utf-8", body: Data(html.utf8)))
+            case .page:
+                self.respondAndClose(connection, MJPEGStream.httpResponse(
+                    status: "200 OK",
+                    contentType: "text/html; charset=utf-8",
+                    body: MJPEGStream.viewerPage()
+                ))
             case .stream:
-                let header = MJPEGStream.multipartHeader()
+                let header = MJPEGStream.streamResponseHeader()
                 connection.send(content: header, completion: .contentProcessed { [weak self] error in
                     if error != nil { self?.removeClient(clientID) }
                 })
-            case .notStream:
+            case .notFound:
                 self.respondAndClose(connection, MJPEGStream.httpResponse(status: "404 Not Found", contentType: "text/plain", body: Data("Not found".utf8)))
             }
         }

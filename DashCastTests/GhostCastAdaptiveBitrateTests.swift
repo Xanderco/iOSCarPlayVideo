@@ -128,9 +128,14 @@ final class GhostCastAdaptiveBitrateTests: XCTestCase {
         XCTAssertEqual(config720.framesPerSecond, 30)
         XCTAssertEqual(config720.averageBitRate, 2_500_000)
 
-        let encoder = MirrorHLSEncoder(config: config1080)
-        XCTAssertEqual(encoder.config.averageBitRate, 6_000_000)
-        encoder.updateConfig(config720)
-        XCTAssertEqual(encoder.config.averageBitRate, 2_500_000)
+        let server = CarPlayVideoServer(port: 9098)
+        var callbackConfig: MirrorEncoderConfig?
+        server.onProfileChange = { profile in
+            callbackConfig = profile.encoderConfig
+        }
+        server.simulateDelivery(queueDepth: 4, latency: 0.020)
+        XCTAssertEqual(callbackConfig, config720)
+        XCTAssertEqual(callbackConfig?.averageBitRate, 2_500_000)
+        XCTAssertEqual(GhostCastProfile.high1080p60.encoderConfig, config1080)
     }
 }
