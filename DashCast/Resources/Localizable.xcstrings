@@ -8177,6 +8177,397 @@
           }
         }
       }
+    },
+    "DLNA playback paused while the vehicle is moving.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DLNA playback paused while the vehicle is moving."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducción DLNA pausada mientras el vehículo está en movimiento."
+          }
+        }
+      }
+    },
+    "Free casting limit reached. Upgrade to DashCast Pro for unlimited DLNA casting.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free casting limit reached. Upgrade to DashCast Pro for unlimited DLNA casting."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límite gratuito alcanzado. Actualiza a DashCast Pro para transmisión DLNA ilimitada."
+          }
+        }
+      }
+    },
+    "DLNA Receiver": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DLNA Receiver"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Receptor DLNA"
+          }
+        }
+      }
+    },
+    "Discoverable on Wi-Fi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discoverable on Wi-Fi"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visible en Wi-Fi"
+          }
+        }
+      }
+    },
+    "Ready for DLNA / UPnP apps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ready for DLNA / UPnP apps"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Listo para apps DLNA / UPnP"
+          }
+        }
+      }
+    },
+    "Starting local receiver…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starting local receiver…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciando receptor local…"
+          }
+        }
+      }
+    },
+    "Passengers on the same hotspot or Wi-Fi can cast directly to DashCast.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passengers on the same hotspot or Wi-Fi can cast directly to DashCast."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los pasajeros en el mismo punto de acceso o Wi-Fi pueden transmitir directamente a DashCast."
+          }
+        }
+      }
+    },
+    "Turn on to accept media pushed from DLNA or UPnP apps.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on to accept media pushed from DLNA or UPnP apps."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa para aceptar contenido enviado desde apps DLNA o UPnP."
+          }
+        }
+      }
+    },
+    "PLAYING": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PLAYING"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "REPRODUCIENDO"
+          }
+        }
+      }
+    },
+    "PAUSED": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PAUSED"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PAUSADO"
+          }
+        }
+      }
+    },
+    "LOADING": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LOADING"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CARGANDO"
+          }
+        }
+      }
+    },
+    "STANDBY": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STANDBY"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EN ESPERA"
+          }
+        }
+      }
+    },
+    "Car Display Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Car Display Name"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre de la pantalla del coche"
+          }
+        }
+      }
+    },
+    "DashCast Car Display": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast Car Display"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pantalla DashCast"
+          }
+        }
+      }
+    },
+    "UPnP Descriptor URL": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UPnP Descriptor URL"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL del descriptor UPnP"
+          }
+        }
+      }
+    },
+    "Vehicle moving · DLNA paused": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehicle moving · DLNA paused"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vehículo en movimiento · DLNA en pausa"
+          }
+        }
+      }
+    },
+    "Incoming DLNA streams resume automatically when parked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incoming DLNA streams resume automatically when parked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las transmisiones DLNA entrantes se reanudan automáticamente al estacionar."
+          }
+        }
+      }
+    },
+    "Incoming Stream Queue": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incoming Stream Queue"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cola de transmisiones entrantes"
+          }
+        }
+      }
+    },
+    "Clear": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limpiar"
+          }
+        }
+      }
+    },
+    "No Incoming Streams Yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Incoming Streams Yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin transmisiones entrantes aún"
+          }
+        }
+      }
+    },
+    "Open a DLNA-compatible player on another phone or laptop and select \"%@\".": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open a DLNA-compatible player on another phone or laptop and select \"%@\"."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre un reproductor compatible con DLNA en otro teléfono o portátil y selecciona «%@»."
+          }
+        }
+      }
+    },
+    "Discoverable on local Wi-Fi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Discoverable on local Wi-Fi"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visible en el Wi-Fi local"
+          }
+        }
+      }
+    },
+    "Receive streams over Wi-Fi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Receive streams over Wi-Fi"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recibe transmisiones por Wi-Fi"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

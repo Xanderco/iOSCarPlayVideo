@@ -139,6 +139,25 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testDLNAReceiverSheetOpens() throws {
+        let row = app.buttons["Cast_DLNAReceiverRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "DLNA Receiver row missing")
+        tapCenter(of: row)
+
+        XCTAssertTrue(
+            app.navigationBars["DLNA Receiver"].waitForExistence(timeout: 10),
+            "DLNA Receiver sheet did not open"
+        )
+        XCTAssertTrue(
+            app.switches["DLNA_VisibilityToggle"].waitForExistence(timeout: 5),
+            "DLNA visibility toggle missing"
+        )
+        snapshot("05-dlna-receiver")
+
+        app.navigationBars["DLNA Receiver"].buttons["Done"].tap()
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers
