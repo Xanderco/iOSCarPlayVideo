@@ -8177,6 +8177,125 @@
           }
         }
       }
+    },
+    "Retry via Server Transcode": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry via Server Transcode"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar con transcodificación del servidor"
+          }
+        }
+      }
+    },
+    "Network error: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network error: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error de red: %@"
+          }
+        }
+      }
+    },
+    "%@ containers aren't natively supported by iOS AVPlayer. Retry via Server Transcode to stream as HLS.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ containers aren't natively supported by iOS AVPlayer. Retry via Server Transcode to stream as HLS."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los contenedores %@ no son compatibles de forma nativa con iOS AVPlayer. Reintenta con transcodificación del servidor para transmitir en HLS."
+          }
+        }
+      }
+    },
+    "%@ containers aren't natively supported by iOS AVPlayer. Use server-side HLS transcoding (Jellyfin, Emby, or Plex) or an MP4/HLS stream.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ containers aren't natively supported by iOS AVPlayer. Use server-side HLS transcoding (Jellyfin, Emby, or Plex) or an MP4/HLS stream."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los contenedores %@ no son compatibles de forma nativa con iOS AVPlayer. Usa transcodificación HLS en el servidor (Jellyfin, Emby o Plex) o un flujo MP4/HLS."
+          }
+        }
+      }
+    },
+    "This video's container or codec isn't supported natively by iOS AVPlayer. Retry via Server Transcode to stream as HLS.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This video's container or codec isn't supported natively by iOS AVPlayer. Retry via Server Transcode to stream as HLS."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El contenedor o códec de este video no es compatible de forma nativa con iOS AVPlayer. Reintenta con transcodificación del servidor para transmitir en HLS."
+          }
+        }
+      }
+    },
+    "This video's container or codec isn't supported natively by iOS AVPlayer. Try server-side HLS transcoding or an H.264/AAC MP4 stream.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This video's container or codec isn't supported natively by iOS AVPlayer. Try server-side HLS transcoding or an H.264/AAC MP4 stream."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El contenedor o códec de este video no es compatible de forma nativa con iOS AVPlayer. Prueba con transcodificación HLS del servidor o un flujo MP4 H.264/AAC."
+          }
+        }
+      }
+    },
+    "This video could not be played.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This video could not be played."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo reproducir este video."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
