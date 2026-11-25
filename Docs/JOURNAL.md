@@ -92,6 +92,18 @@
 
 ## Log
 
+### 2026-11-25 05:22 (Bogotá) — CarPlay Guideline 2 Compliance & Quick-Resume Recent Channels [DI-69]
+- **CarPlay Guideline 2 copy cleanup (`CarPlaySceneDelegate.swift`):**
+  - Replaced all `"on your iPhone"` / `"Open DashCast on your iPhone"` / `"Start Broadcast on iPhone"` copy in `infoTemplate()`, `libraryTemplate()`, `favoritesTemplate()`, `mirrorInstructionsTemplate(onMirror:)`, and `mirrorInstructionSteps` with car-safe parked/setup copy so CarPlay templates never instruct drivers to operate their phone.
+  - Added `static func infoTemplate()` so unit tests inspect all 4 CarPlay tab templates directly.
+- **Recent Channels Quick-Resume (`PlaylistStore.swift`, `VideoPlayerService.swift`, `CarPlaySceneDelegate.swift`):**
+  - Added persisted, capped (`maxRecentChannels = 10`) most-recent-first channel tracking in `PlaylistStore` (`recordRecentChannel(_:)`, `clearRecentChannels()`, `recentChannels`), ignoring `CarPlayMirrorPlayback.channelID` and omitting channels from removed playlists.
+  - Wired `VideoPlayerService.shared.onChannelLoaded` to record recents on every playback start.
+  - Surfaced a `Recent` section (up to 5 items with category subtitle) at the top of `CarPlaySceneDelegate.makeLibrarySections(store:)`, followed by `Categories`.
+- **Tests & Localization (`CarPlaySceneTests.swift`, `PlaylistStoreTests.swift`, `Localizable.xcstrings`):**
+  - Added `testCarPlayTemplatesContainNoIPhoneInstructions` and `testLibrarySectionsSurfaceRecentChannelsAtTopInMostRecentOrder` plus 5 `PlaylistStore` recent-channel tests; added EN/ES entries for all new CarPlay strings in `Localizable.xcstrings`.
+  - **Verification:** Pushing branch `feature/DI-69-carplay-guideline-2-recent-channels` to verify via GitHub Actions CI (`build-and-test`).
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

@@ -11,6 +11,9 @@ public final class PlaylistStore: ObservableObject {
         return store
     }()
 
+    /// Maximum number of recently played channels persisted for CarPlay Quick-Resume.
+    public static let maxRecentChannels = 10
+
     /// Free-tier gate for adding a *new* playlist source (re-importing an existing one is always allowed).
     /// Receives the current number of sources. `nil` (tests, previews) means unrestricted.
     public var canAddSource: (@MainActor (Int) -> Bool)?
@@ -38,10 +41,12 @@ public final class PlaylistStore: ObservableObject {
 
     @Published public private(set) var playlists: [IPTVPlaylist]
     @Published public private(set) var favoriteIDs: Set<String>
+    @Published public private(set) var recentChannelURLs: [String]
 
     private let persistence: PersistenceController
     private let session: URLSession
     private let favoritesKey = "dashcast_favorite_channel_ids"
+    private let recentChannelsKey = "dashcast_recent_channel_urls"
     private let defaults: UserDefaults
 
     public init(persistence: PersistenceController = .shared,
@@ -52,6 +57,7 @@ public final class PlaylistStore: ObservableObject {
         self.session = session
         self.playlists = persistence.loadPlaylists()
         self.favoriteIDs = Set(defaults.stringArray(forKey: favoritesKey) ?? [])
+        self.recentChannelURLs = Array((defaults.stringArray(forKey: recentChannelsKey) ?? []).prefix(Self.maxRecentChannels))
     }
 
     // MARK: - Read
@@ -67,6 +73,15 @@ public final class PlaylistStore: ObservableObject {
 
     public var favoriteChannels: [ChannelModel] {
         allChannels.filter { favoriteIDs.contains(favoriteKey(for: $0)) }
+    }
+
+    /// Recently played channels resolved against `allChannels`, most recent first.
+    public var recentChannels: [ChannelModel] {
+        var byURL: [String: ChannelModel] = [:]
+        for channel in allChannels where byURL[channel.streamURL.absoluteString] == nil {
+            byURL[channel.streamURL.absoluteString] = channel
+        }
+        return recentChannelURLs.compactMap { byURL[$0] }
     }
 
     /// Channels grouped by `group-title`, preserving first-seen order.
@@ -158,6 +173,29 @@ public final class PlaylistStore: ObservableObject {
         let key = favoriteKey(for: channel)
         if favoriteIDs.contains(key) { favoriteIDs.remove(key) } else { favoriteIDs.insert(key) }
         defaults.set(Array(favoriteIDs), forKey: favoritesKey)
+        NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
+    }
+
+    /// Records a played channel at the front of the Recent list, persisted and capped at `maxRecentChannels`.
+    public func recordRecentChannel(_ channel: ChannelModel) {
+        guard channel.id != CarPlayMirrorPlayback.channelID else { return }
+        let key = favoriteKey(for: channel)
+        guard recentChannelURLs.first != key else { return }
+
+        var updated = recentChannelURLs.filter { $0 != key }
+        updated.insert(key, at: 0)
+        if updated.count > Self.maxRecentChannels {
+            updated = Array(updated.prefix(Self.maxRecentChannels))
+        }
+        recentChannelURLs = updated
+        defaults.set(updated, forKey: recentChannelsKey)
+        NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
+    }
+
+    public func clearRecentChannels() {
+        guard !recentChannelURLs.isEmpty else { return }
+        recentChannelURLs = []
+        defaults.removeObject(forKey: recentChannelsKey)
         NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
     }
 
