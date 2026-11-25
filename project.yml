@@ -87,6 +87,8 @@ targets:
     sources:
       - path: DashCastWidgets
       - path: DashCast/Shared/WidgetSharedStore.swift
+      - path: DashCast/Resources/CarImages
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.xanderco.dashcast.widgets

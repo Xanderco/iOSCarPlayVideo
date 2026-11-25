@@ -19,15 +19,40 @@ final class WidgetSharedStoreTests: XCTestCase {
     func testEncodeDecodeRoundTrip() throws {
         let payload = WidgetSharedPayload(
             car: SharedCarSnapshot(name: "Blue Bolt", brand: "Mazda", model: "MX-5", plate: "KXY-482",
-                                   photoData: Data([0xFF, 0xD8, 0x01]), accentHex: "#40D9BF"),
+                                   photoData: Data([0xFF, 0xD8, 0x01]), carImageName: "car_toyota_supra",
+                                   accentHex: "#40D9BF"),
             lastTrip: SharedTripSnapshot(distanceMeters: 18_250, score: 87,
                                          date: Date(timeIntervalSince1970: 1_790_000_000), durationSeconds: 1_500),
             usesMiles: true,
             updatedAt: Date(timeIntervalSince1970: 1_790_000_100))
         let decoded = try WidgetSharedStore.decode(WidgetSharedStore.encode(payload))
         XCTAssertEqual(decoded, payload)
+        XCTAssertEqual(decoded.car?.carImageName, "car_toyota_supra")
         XCTAssertEqual(decoded.version, WidgetSharedPayload.currentVersion)
         XCTAssertEqual(decoded.lastTrip!.distanceKm, 18.25, accuracy: 0.001)
+    }
+
+    func testLegacyCarSnapshotWithoutCarImageNameDecodesSafely() throws {
+        let legacyJSON = Data("""
+        {
+          "version": 1,
+          "car": {
+            "name": "Roadster",
+            "brand": "Porsche",
+            "model": "911 GT3 RS",
+            "plate": "OLD-911"
+          },
+          "usesMiles": false,
+          "updatedAt": 1790000000
+        }
+        """.utf8)
+        let decoded = try WidgetSharedStore.decode(legacyJSON)
+        XCTAssertEqual(decoded.car?.name, "Roadster")
+        XCTAssertEqual(decoded.car?.brand, "Porsche")
+        XCTAssertEqual(decoded.car?.model, "911 GT3 RS")
+        XCTAssertEqual(decoded.car?.plate, "OLD-911")
+        XCTAssertNil(decoded.car?.carImageName)
+        XCTAssertNil(decoded.car?.photoData)
     }
 
     func testStoreSaveAndLoad() {
@@ -49,12 +74,59 @@ final class WidgetSharedStoreTests: XCTestCase {
 
     func testSnapshotFromWidgetConfig() {
         let config = WidgetConfigModel(carBrand: "Toyota", carModelName: "Supra",
+                                       carImageName: "car_toyota_supra",
                                        driverGreeting: "  ", plateText: "SUP-001")
         let car = WidgetSharedPublisher.snapshot(from: config)
         XCTAssertEqual(car.brand, "Toyota")
         XCTAssertEqual(car.name, "Supra", "Blank greeting falls back to the model name")
         XCTAssertEqual(car.plate, "SUP-001")
+        XCTAssertEqual(car.carImageName, "car_toyota_supra")
         XCTAssertNil(car.photoData)
+    }
+
+    func testPublishSelectedVehicleCreatesAndPreservesCustomFields() {
+        let store = WidgetSharedStore(defaults: defaults)
+        let supra = VehicleCatalogService.shared.vehicles.first { $0.id == "toyota_supra" }!
+        let mustang = VehicleCatalogService.shared.vehicles.first { $0.id == "ford_mustang" }!
+
+        // When no widget car exists yet, creates one from the garage vehicle.
+        WidgetSharedPublisher.publishSelectedVehicle(supra, store: store)
+        let initial = store.load().car
+        XCTAssertEqual(initial?.brand, "Toyota")
+        XCTAssertEqual(initial?.model, "GR Supra")
+        XCTAssertEqual(initial?.name, "GR Supra")
+        XCTAssertEqual(initial?.carImageName, "car_toyota_supra")
+
+        // When a custom plate/greeting/photo/accent exist, switching garage vehicle preserves them.
+        let customPhoto = Data([0xFF, 0xD8, 0x01, 0x02])
+        store.update {
+            $0.car = SharedCarSnapshot(
+                name: "Track Beast",
+                brand: "Toyota",
+                model: "GR Supra",
+                plate: "APEX-01",
+                photoData: customPhoto,
+                carImageName: "car_toyota_supra",
+                accentHex: "#FFE600"
+            )
+        }
+        WidgetSharedPublisher.publishSelectedVehicle(mustang, store: store)
+        let updated = store.load().car
+        XCTAssertEqual(updated?.name, "Track Beast")
+        XCTAssertEqual(updated?.brand, "Ford")
+        XCTAssertEqual(updated?.model, "Mustang Dark Horse")
+        XCTAssertEqual(updated?.carImageName, "car_ford_mustang")
+        XCTAssertEqual(updated?.plate, "APEX-01")
+        XCTAssertEqual(updated?.photoData, customPhoto)
+        XCTAssertEqual(updated?.accentHex, "#FFE600")
+    }
+
+    func testAllCatalogVehiclesHaveResolvableArtwork() {
+        for vehicle in VehicleCatalogService.shared.vehicles {
+            let hasAsset = UIImage(named: vehicle.imageName) != nil
+            let hasBundlePNG = Bundle.main.path(forResource: vehicle.imageName, ofType: "png") != nil
+            XCTAssertTrue(hasAsset || hasBundlePNG, "Missing built-in image for \(vehicle.id) (\(vehicle.imageName))")
+        }
     }
 
     func testPublishWritesToStore() {

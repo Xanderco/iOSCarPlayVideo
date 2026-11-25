@@ -9,20 +9,24 @@ public struct SharedCarSnapshot: Codable, Equatable {
     public var plate: String?
     /// Small JPEG thumbnail of the user's own car photo (already downscaled by the app).
     public var photoData: Data?
+    /// Built-in vehicle artwork resource/asset name (e.g. "car_porsche_911").
+    public var carImageName: String?
     public var accentHex: String?
 
     public init(name: String, brand: String, model: String, plate: String? = nil,
-                photoData: Data? = nil, accentHex: String? = nil) {
+                photoData: Data? = nil, carImageName: String? = nil, accentHex: String? = nil) {
         self.name = name
         self.brand = brand
         self.model = model
         self.plate = plate
         self.photoData = photoData
+        self.carImageName = carImageName
         self.accentHex = accentHex
     }
 
     public static let placeholder = SharedCarSnapshot(
-        name: "My Car", brand: "DashCast", model: "Set up in app", plate: "DASH-01")
+        name: "My Car", brand: "DashCast", model: "Set up in app", plate: "DASH-01",
+        carImageName: "car_porsche_911")
 }
 
 public struct SharedTripSnapshot: Codable, Equatable {

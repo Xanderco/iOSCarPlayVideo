@@ -32,4 +32,19 @@ final class PersistenceTests: XCTestCase {
         XCTAssertEqual(loaded.first?.id, trip.id)
         XCTAssertEqual(loaded.first?.distanceMeters, 4200)
     }
+
+    func testSaveAndLoadSelectedVehicleIdSyncsWidgetStore() {
+        XCTAssertNil(persistence.loadSelectedVehicleId())
+        let widgetStore = WidgetSharedStore(defaults: testDefaults)
+
+        persistence.saveSelectedVehicleId("bmw_m4", widgetStore: widgetStore)
+
+        let reloadedPersistence = PersistenceController(userDefaults: testDefaults)
+        XCTAssertEqual(reloadedPersistence.loadSelectedVehicleId(), "bmw_m4")
+
+        let sharedCar = widgetStore.load().car
+        XCTAssertEqual(sharedCar?.brand, "BMW")
+        XCTAssertEqual(sharedCar?.model, "M4 Competition")
+        XCTAssertEqual(sharedCar?.carImageName, "car_bmw_m4")
+    }
 }

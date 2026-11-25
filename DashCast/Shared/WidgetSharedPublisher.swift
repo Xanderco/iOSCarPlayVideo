@@ -13,6 +13,7 @@ enum WidgetSharedPublisher {
             model: config.carModelName,
             plate: config.plateText,
             photoData: config.customPhotoData.flatMap { thumbnail(from: $0) },
+            carImageName: config.carImageName,
             accentHex: config.textColorHex)
     }
 
@@ -24,6 +25,39 @@ enum WidgetSharedPublisher {
     static func publishWidgets(_ widgets: [WidgetConfigModel], store: WidgetSharedStore = .shared) {
         let car = widgets.first.map(snapshot(from:))
         store.update { $0.car = car }
+        reload()
+    }
+
+    static func publishSelectedVehicle(
+        _ vehicle: VehicleModel,
+        catalog: VehicleCatalogService = .shared,
+        store: WidgetSharedStore = .shared
+    ) {
+        let brandName = catalog.brands.first(where: { $0.id == vehicle.brandId })?.name ?? vehicle.brandId.capitalized
+        store.update { payload in
+            if var existing = payload.car {
+                let trimmedName = existing.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                if trimmedName.isEmpty
+                    || existing.name == existing.model
+                    || existing.name == SharedCarSnapshot.placeholder.name {
+                    existing.name = vehicle.name
+                }
+                existing.brand = brandName
+                existing.model = vehicle.name
+                existing.carImageName = vehicle.imageName
+                payload.car = existing
+            } else {
+                payload.car = SharedCarSnapshot(
+                    name: vehicle.name,
+                    brand: brandName,
+                    model: vehicle.name,
+                    plate: nil,
+                    photoData: nil,
+                    carImageName: vehicle.imageName,
+                    accentHex: nil
+                )
+            }
+        }
         reload()
     }
 

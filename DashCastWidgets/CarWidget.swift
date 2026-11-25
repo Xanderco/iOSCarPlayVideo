@@ -64,6 +64,15 @@ struct CarArtwork: View {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFill()
+        } else if let builtIn = builtInCarImage(named: car.carImageName) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(WidgetPalette.color(hex: car.accentHex).opacity(0.14))
+                Image(uiImage: builtIn)
+                    .resizable()
+                    .scaledToFit()
+                    .padding(4)
+            }
         } else {
             ZStack {
                 Circle().fill(WidgetPalette.color(hex: car.accentHex).opacity(0.18))
@@ -72,6 +81,31 @@ struct CarArtwork: View {
                     .foregroundStyle(WidgetPalette.color(hex: car.accentHex))
             }
         }
+    }
+
+    private func builtInCarImage(named name: String?) -> UIImage? {
+        guard let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else {
+            return nil
+        }
+        let raw: UIImage?
+        if let asset = UIImage(named: name) {
+            raw = asset
+        } else if let path = Bundle.main.path(forResource: name, ofType: "png"),
+                  let fileImage = UIImage(contentsOfFile: path) {
+            raw = fileImage
+        } else {
+            raw = nil
+        }
+        guard let image = raw else { return nil }
+        let maxSide: CGFloat = 320
+        let longest = max(image.size.width, image.size.height)
+        guard longest > maxSide, longest > 0 else { return image }
+        let scale = maxSide / longest
+        let targetSize = CGSize(
+            width: max(1, (image.size.width * scale).rounded()),
+            height: max(1, (image.size.height * scale).rounded())
+        )
+        return image.preparingThumbnail(of: targetSize) ?? image
     }
 }
 

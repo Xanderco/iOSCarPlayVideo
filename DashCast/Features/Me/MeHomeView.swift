@@ -73,6 +73,15 @@ public struct MeHomeView: View {
             .sheet(isPresented: $showingMediaServers) {
                 MediaServersHomeView()
             }
+            .onAppear {
+                if let savedId = PersistenceController.shared.loadSelectedVehicleId(),
+                   let index = vehicles.firstIndex(where: { $0.id == savedId }) {
+                    selectedVehicleIndex = index
+                }
+                if WidgetSharedStore.shared.load().car == nil {
+                    WidgetSharedPublisher.publishSelectedVehicle(currentVehicle)
+                }
+            }
         }
     }
 
@@ -111,8 +120,15 @@ public struct MeHomeView: View {
 
                         Menu {
                             ForEach(Array(vehicles.enumerated()), id: \.element.id) { index, vehicle in
-                                Button(vehicle.name) {
+                                Button {
                                     selectedVehicleIndex = index
+                                    PersistenceController.shared.saveSelectedVehicleId(vehicle.id)
+                                } label: {
+                                    if index == selectedVehicleIndex {
+                                        Label(vehicle.name, systemImage: "checkmark")
+                                    } else {
+                                        Text(vehicle.name)
+                                    }
                                 }
                             }
                         } label: {
@@ -120,6 +136,8 @@ public struct MeHomeView: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundStyle(Color.dashTextMuted)
                         }
+                        .accessibilityIdentifier("Me_GarageVehiclePicker")
+                        .accessibilityLabel("Garage Vehicle")
                     }
 
                     // Plan Pill Badge (Free / Pro lifetime)
