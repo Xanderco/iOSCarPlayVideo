@@ -1,19 +1,47 @@
 import Foundation
 import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 @MainActor
 public final class LocalVideoManager: ObservableObject {
     public static let shared = LocalVideoManager()
 
-    public enum ImportError: LocalizedError {
+    nonisolated public static let supportedVideoContentTypes: [UTType] = [
+        .movie,
+        .video,
+        .mpeg4Movie,
+        .quickTimeMovie,
+        .avi
+    ]
+
+    nonisolated private static let supportedVideoExtensions: Set<String> = [
+        "mp4", "mov", "m4v", "avi"
+    ]
+
+    nonisolated public static func isSupportedVideoURL(_ url: URL) -> Bool {
+        let ext = url.pathExtension.lowercased()
+        guard !ext.isEmpty else { return false }
+        if supportedVideoExtensions.contains(ext) {
+            return true
+        }
+        if let type = UTType(filenameExtension: ext) {
+            return type.conforms(to: .movie) || type.conforms(to: .video)
+        }
+        return false
+    }
+
+    public enum ImportError: LocalizedError, Equatable {
         case noVideoData
+        case unsupportedFileType
         case copyFailed(String)
 
         public var errorDescription: String? {
             switch self {
             case .noVideoData:
                 return "The selected item has no video data. If it is stored in iCloud, open it in Photos once to download it and try again."
+            case .unsupportedFileType:
+                return "That file isn't a supported video format."
             case .copyFailed(let reason):
                 return "Couldn't save the video: \(reason)"
             }
@@ -46,6 +74,22 @@ public final class LocalVideoManager: ObservableObject {
             throw ImportError.noVideoData
         }
         return try importFile(at: movie.url, originalName: movie.originalName)
+    }
+
+    /// Imports a video picked from the Files app (iCloud Drive, On My iPhone, USB-C drives)
+    /// using security-scoped resource access.
+    @discardableResult
+    public func importSecurityScopedFile(at url: URL) throws -> ChannelModel {
+        isImporting = true
+        defer { isImporting = false }
+
+        let accessing = url.startAccessingSecurityScopedResource()
+        defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+
+        guard Self.isSupportedVideoURL(url) else {
+            throw ImportError.unsupportedFileType
+        }
+        return try importFile(at: url, originalName: url.lastPathComponent)
     }
 
     /// Moves/copies a video file into the library. Separated from PhotosPicker for testability.

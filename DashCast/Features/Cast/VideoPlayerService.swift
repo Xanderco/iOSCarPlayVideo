@@ -4,6 +4,42 @@ import Combine
 import MediaPlayer
 import UIKit
 
+public enum VideoAspectMode: String, CaseIterable, Sendable, Codable {
+    case fit
+    case fill
+    case stretch
+
+    public var videoGravity: AVLayerVideoGravity {
+        switch self {
+        case .fit: return .resizeAspect
+        case .fill: return .resizeAspectFill
+        case .stretch: return .resize
+        }
+    }
+
+    public var displayName: String {
+        switch self {
+        case .fit: return "Fit"
+        case .fill: return "Fill"
+        case .stretch: return "Stretch"
+        }
+    }
+
+    public var systemImage: String {
+        switch self {
+        case .fit: return "rectangle.arrowtriangle.2.inward"
+        case .fill: return "rectangle.arrowtriangle.2.outward"
+        case .stretch: return "arrow.up.left.and.arrow.down.right"
+        }
+    }
+
+    public var next: VideoAspectMode {
+        let all = Self.allCases
+        guard let index = all.firstIndex(of: self) else { return .fit }
+        return all[(index + 1) % all.count]
+    }
+}
+
 @MainActor
 public final class VideoPlayerService: ObservableObject {
     /// The only instance that owns the lock-screen / CarPlay / headset remote commands.
@@ -32,6 +68,10 @@ public final class VideoPlayerService: ObservableObject {
     @Published public var isMuted: Bool = false {
         didSet { player.isMuted = isMuted }
     }
+    @Published public var aspectMode: VideoAspectMode = .fit
+    @Published public private(set) var playbackRate: Float = 1.0
+
+    nonisolated public static let supportedPlaybackRates: [Float] = [0.5, 1.0, 1.25, 1.5, 2.0]
 
     public let player: AVPlayer = AVPlayer()
     private var timeObserverToken: Any?
@@ -206,7 +246,44 @@ public final class VideoPlayerService: ObservableObject {
         wantsToPlay = true
         configureAudioSession()
         player.play()
+        if playbackRate != 1.0 {
+            player.rate = playbackRate
+        }
         lastCastingTick = Date()
+    }
+
+    nonisolated public static func validatedPlaybackRate(_ rate: Float) -> Float {
+        guard rate.isFinite else { return 1.0 }
+        return min(max(rate, 0.5), 2.0)
+    }
+
+    nonisolated public static func formatPlaybackRate(_ rate: Float) -> String {
+        let valid = validatedPlaybackRate(rate)
+        if valid == floor(valid) {
+            return "\(Int(valid))x"
+        }
+        let roundedHundredths = (valid * 100).rounded() / 100
+        if roundedHundredths * 10 == floor(roundedHundredths * 10) {
+            return String(format: "%.1fx", roundedHundredths)
+        }
+        return String(format: "%.2fx", roundedHundredths)
+    }
+
+    public func setPlaybackRate(_ rate: Float) {
+        let valid = Self.validatedPlaybackRate(rate)
+        playbackRate = valid
+        if isPlaying || wantsToPlay {
+            player.rate = valid
+        }
+        updateNowPlayingInfo()
+    }
+
+    public func setAspectMode(_ mode: VideoAspectMode) {
+        aspectMode = mode
+    }
+
+    public func cycleAspectMode() {
+        aspectMode = aspectMode.next
     }
 
     /// Charges elapsed playback time to the free-tier allowance and stops playback when it runs out.
@@ -336,6 +413,9 @@ public final class VideoPlayerService: ObservableObject {
                        AVAudioSession.InterruptionOptions(rawValue: rawOptions).contains(.shouldResume),
                        self.wantsToPlay {
                         self.player.play()
+                        if self.playbackRate != 1.0 {
+                            self.player.rate = self.playbackRate
+                        }
                     }
                 }
             }
@@ -369,7 +449,7 @@ public final class VideoPlayerService: ObservableObject {
             MPMediaItemPropertyTitle: channel.name,
             MPMediaItemPropertyAlbumTitle: channel.groupTitle,
             MPNowPlayingInfoPropertyElapsedPlaybackTime: currentTime,
-            MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0,
+            MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? Double(playbackRate) : 0.0,
             MPNowPlayingInfoPropertyIsLiveStream: duration <= 0
         ]
         if duration > 0 {
