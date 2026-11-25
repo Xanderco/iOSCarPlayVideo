@@ -105,10 +105,23 @@ final class DashCastSmokeUITests: XCTestCase {
         let scanQRCard = app.buttons["MediaSources_ScanQRCard"]
         XCTAssertTrue(scanQRHeader.exists || scanQRCard.exists, "QR Scan entry missing")
 
-        // Open Add Server sheet and verify form
+        // Open Add Server sheet and verify form (including Plex & Xtream segments)
         if addServerButton.exists {
             addServerButton.tap()
             XCTAssertTrue(app.navigationBars["Add Server"].waitForExistence(timeout: 5), "Add Server sheet failed to open")
+            let kindPicker = app.segmentedControls["mediaServerKindPicker"]
+            XCTAssertTrue(kindPicker.waitForExistence(timeout: 5), "Server kind picker missing")
+            let plexSegment = kindPicker.buttons["Plex"]
+            XCTAssertTrue(plexSegment.waitForExistence(timeout: 3), "Plex segment missing")
+            plexSegment.tap()
+            XCTAssertTrue(app.secureTextFields["mediaServerPlexTokenField"].waitForExistence(timeout: 3), "Plex token field missing")
+
+            let xtreamSegment = kindPicker.buttons["Xtream"]
+            XCTAssertTrue(xtreamSegment.waitForExistence(timeout: 3), "Xtream segment missing")
+            xtreamSegment.tap()
+            XCTAssertTrue(app.textFields["mediaServerUsernameField"].waitForExistence(timeout: 3), "Xtream username field missing")
+            XCTAssertTrue(app.secureTextFields["mediaServerPasswordField"].exists, "Xtream password field missing")
+
             snapshot("03b-add-media-server")
             app.navigationBars["Add Server"].buttons["Cancel"].tap()
         }

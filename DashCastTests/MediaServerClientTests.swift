@@ -459,3 +459,353 @@ final class MediaServerStoreTests: XCTestCase {
         XCTAssertNil(PlaylistQRPayload.playlistURL(from: ""))
     }
 }
+
+// MARK: - Xtream Codes & Plex Tests
+
+final class XtreamAndPlexMediaServerTests: XCTestCase {
+    private var session: URLSession!
+    private var defaults: UserDefaults!
+    private var suiteName: String!
+
+    override func setUp() {
+        super.setUp()
+        MediaServerStubURLProtocol.reset()
+        session = MediaServerStubURLProtocol.makeSession()
+        suiteName = "XtreamAndPlexTests-\(UUID().uuidString)"
+        defaults = UserDefaults(suiteName: suiteName)
+    }
+
+    override func tearDown() {
+        defaults.removePersistentDomain(forName: suiteName)
+        MediaServerStubURLProtocol.reset()
+        session = nil
+        super.tearDown()
+    }
+
+    private func query(_ url: URL?) -> [String: String] {
+        var result: [String: String] = [:]
+        for item in URLComponents(url: url!, resolvingAgainstBaseURL: false)?.queryItems ?? [] {
+            result[item.name] = item.value
+        }
+        return result
+    }
+
+    // MARK: URL normalization
+
+    func testNormalizedServerURLForXtreamAndPlex() {
+        XCTAssertEqual(
+            MediaServerClient.normalizedServerURL("http://iptv.example.com:8080/player_api.php", kind: .xtream)?.absoluteString,
+            "http://iptv.example.com:8080"
+        )
+        XCTAssertEqual(
+            MediaServerClient.normalizedServerURL("iptv.example.com:8080/get.php", kind: .xtream)?.absoluteString,
+            "http://iptv.example.com:8080"
+        )
+        XCTAssertEqual(
+            MediaServerClient.normalizedServerURL("192.168.1.20:32400/web/", kind: .plex)?.absoluteString,
+            "http://192.168.1.20:32400"
+        )
+    }
+
+    // MARK: Xtream Codes API & Stream URLs
+
+    func testXtreamAuthenticateSuccessAndRejection() async throws {
+        MediaServerStubURLProtocol.handler = { _, _ in
+            (200, Data(#"""
+            {
+              "user_info": {"username": "driver", "status": "Active", "auth": 1, "exp_date": "1800000000"},
+              "server_info": {"url": "stream.example.com", "port": "8080", "server_protocol": "http"}
+            }
+            """#.utf8))
+        }
+        let client = MediaServerClient(kind: .xtream,
+                                       baseURL: URL(string: "http://stream.example.com:8080")!,
+                                       deviceId: "dev-1",
+                                       session: session)
+        let auth = try await client.authenticateXtream(username: "driver", password: "xt-password")
+        XCTAssertTrue(auth.isAuthorized)
+        XCTAssertEqual(auth.userInfo?.username, "driver")
+        XCTAssertEqual(client.userId, "driver")
+        XCTAssertEqual(client.accessToken, "xt-password")
+
+        let reqURL = MediaServerStubURLProtocol.recorded.first?.request.url
+        XCTAssertEqual(reqURL?.path, "/player_api.php")
+        XCTAssertEqual(query(reqURL)["username"], "driver")
+        XCTAssertEqual(query(reqURL)["password"], "xt-password")
+
+        // Auth = 0 should reject credentials and clear token
+        MediaServerStubURLProtocol.handler = { _, _ in
+            (200, Data(#"{"user_info": {"username": "driver", "status": "Disabled", "auth": 0}}"#.utf8))
+        }
+        do {
+            try await client.authenticateXtream(username: "driver", password: "bad")
+            XCTFail("Expected invalidCredentials")
+        } catch {
+            XCTAssertEqual(error as? MediaServerError, .invalidCredentials)
+        }
+        XCTAssertNil(client.accessToken)
+    }
+
+    func testXtreamJSONDecodingAndUnifiedBrowse() async throws {
+        MediaServerStubURLProtocol.handler = { request, _ in
+            let action = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "action" })?.value
+            switch action {
+            case "get_live_categories":
+                return (200, Data(#"[{"category_id": 10, "category_name": "Sports", "parent_id": 0}]"#.utf8))
+            case "get_live_streams":
+                return (200, Data(#"[{"stream_id": 501, "name": "Track Feed HD", "stream_icon": "https://cdn.example.com/logo.png", "category_id": "10", "container_extension": "ts"}]"#.utf8))
+            case "get_vod_categories":
+                return (200, Data(#"[{"category_id": "20", "category_name": "Documentaries"}]"#.utf8))
+            case "get_vod_streams":
+                return (200, Data(#"[{"stream_id": 702, "name": "Le Mans", "stream_icon": "https://cdn.example.com/vod.jpg", "category_id": "20", "container_extension": "mp4"}]"#.utf8))
+            case "get_series_info":
+                return (200, Data(#"""
+                {
+                  "seasons": [{"season_number": 1, "name": "Season 1"}],
+                  "episodes": {
+                    "1": [{"id": "9001", "episode_num": 1, "season": 1, "title": "Episode One", "container_extension": "mp4"}]
+                  },
+                  "info": {"name": "Motorsport Docs"}
+                }
+                """#.utf8))
+            default:
+                return (200, Data("[]".utf8))
+            }
+        }
+
+        let client = MediaServerClient(kind: .xtream,
+                                       baseURL: URL(string: "http://xt.example.com:8080")!,
+                                       deviceId: "dev-1",
+                                       accessToken: "secret-pw",
+                                       userId: "alice",
+                                       session: session)
+
+        let libs = try await client.libraries()
+        XCTAssertEqual(libs.map(\.id), ["xtream:live", "xtream:vod", "xtream:series"])
+
+        let liveCats = try await client.items(parentId: "xtream:live")
+        XCTAssertEqual(liveCats.first?.id, "xtream:live:cat:10")
+        XCTAssertEqual(liveCats.first?.isFolder, true)
+
+        let liveStreams = try await client.items(parentId: "xtream:live:cat:10")
+        let channel = try XCTUnwrap(liveStreams.first)
+        XCTAssertEqual(channel.name, "Track Feed HD")
+        XCTAssertEqual(try client.streamURL(for: channel).absoluteString,
+                       "http://xt.example.com:8080/live/alice/secret-pw/501.ts")
+        XCTAssertEqual(client.imageURL(for: channel)?.absoluteString, "https://cdn.example.com/logo.png")
+
+        let vodCats = try await client.items(parentId: "xtream:vod")
+        XCTAssertEqual(vodCats.first?.id, "xtream:vod:cat:20")
+
+        let vodItems = try await client.items(parentId: "xtream:vod:cat:20")
+        let movie = try XCTUnwrap(vodItems.first)
+        XCTAssertEqual(try client.streamURL(for: movie).absoluteString,
+                       "http://xt.example.com:8080/movie/alice/secret-pw/702.mp4")
+
+        let seasons = try await client.seasons(seriesId: "xtream:series:show:44")
+        XCTAssertEqual(seasons.first?.indexNumber, 1)
+
+        let episodes = try await client.episodes(seriesId: "xtream:series:show:44")
+        let ep = try XCTUnwrap(episodes.first)
+        XCTAssertEqual(ep.episodeLabel, "S1E1")
+        XCTAssertEqual(try client.streamURL(for: ep).absoluteString,
+                       "http://xt.example.com:8080/series/alice/secret-pw/9001.mp4")
+    }
+
+    func testXtreamStreamURLConstructionAndAuthGuard() throws {
+        let client = MediaServerClient(kind: .xtream,
+                                       baseURL: URL(string: "https://panel.example.com/portal")!,
+                                       deviceId: "dev-1",
+                                       accessToken: "pass123",
+                                       userId: "user1")
+        XCTAssertEqual(
+            try client.xtreamStreamURL(kind: .live, streamId: "99").absoluteString,
+            "https://panel.example.com/portal/live/user1/pass123/99.m3u8"
+        )
+        XCTAssertEqual(
+            try client.xtreamStreamURL(kind: .movie, streamId: "42", containerExtension: ".mkv").absoluteString,
+            "https://panel.example.com/portal/movie/user1/pass123/42.mkv"
+        )
+        XCTAssertEqual(
+            try client.xtreamStreamURL(kind: .series, streamId: "77", containerExtension: "mp4").absoluteString,
+            "https://panel.example.com/portal/series/user1/pass123/77.mp4"
+        )
+
+        let unauth = MediaServerClient(kind: .xtream,
+                                       baseURL: URL(string: "https://panel.example.com")!,
+                                       deviceId: "dev-1")
+        XCTAssertThrowsError(try unauth.xtreamStreamURL(kind: .live, streamId: "1")) {
+            XCTAssertEqual($0 as? MediaServerError, .notAuthenticated)
+        }
+    }
+
+    // MARK: Plex API, Section Parsing & Stream URLs
+
+    func testPlexAuthenticateHeadersAndFailureMapping() async throws {
+        MediaServerStubURLProtocol.handler = { _, _ in
+            (200, Data(#"""
+            {"MediaContainer":{"friendlyName":"Garage Plex","machineIdentifier":"mach-9","version":"1.41.0","myPlexUsername":"alex"}}
+            """#.utf8))
+        }
+        let client = MediaServerClient(kind: .plex,
+                                       baseURL: URL(string: "http://192.168.1.50:32400")!,
+                                       deviceId: "dev-plex",
+                                       session: session)
+        let identity = try await client.authenticatePlex(token: "PLEX-TOK-1")
+        XCTAssertEqual(identity.friendlyName, "Garage Plex")
+        XCTAssertEqual(client.accessToken, "PLEX-TOK-1")
+        XCTAssertEqual(client.userId, "alex")
+
+        let req = try XCTUnwrap(MediaServerStubURLProtocol.recorded.first?.request)
+        XCTAssertEqual(req.value(forHTTPHeaderField: "X-Plex-Token"), "PLEX-TOK-1")
+        XCTAssertEqual(req.value(forHTTPHeaderField: "X-Plex-Client-Identifier"), "dev-plex")
+        XCTAssertEqual(req.value(forHTTPHeaderField: "Accept"), "application/json")
+
+        MediaServerStubURLProtocol.handler = { _, _ in (401, Data()) }
+        do {
+            try await client.authenticatePlex(token: "bad-tok")
+            XCTFail("Expected invalidCredentials")
+        } catch {
+            XCTAssertEqual(error as? MediaServerError, .invalidCredentials)
+        }
+        XCTAssertNil(client.accessToken)
+    }
+
+    func testPlexSectionsItemsAndStreamURLs() async throws {
+        MediaServerStubURLProtocol.handler = { request, _ in
+            switch request.url?.path {
+            case "/library/sections":
+                return (200, Data(#"""
+                {"MediaContainer":{"Directory":[
+                  {"key":"1","title":"Movies","type":"movie"},
+                  {"key":"2","title":"TV Shows","type":"show"}
+                ]}}
+                """#.utf8))
+            case "/library/sections/1/all":
+                return (200, Data(#"""
+                {"MediaContainer":{"Metadata":[
+                  {
+                    "ratingKey":"101","type":"movie","title":"Senna","year":2010,
+                    "duration":6360000,"viewOffset":300000,"viewCount":0,
+                    "thumb":"/library/metadata/101/thumb/1700",
+                    "Media":[{"id":201,"container":"mp4","Part":[{"id":301,"key":"/library/parts/301/1700/file.mp4","container":"mp4"}]}]
+                  },
+                  {
+                    "ratingKey":"102","type":"movie","title":"Rush","year":2013,
+                    "Media":[{"id":202,"container":"mkv","Part":[{"id":302,"key":"/library/parts/302/1701/file.mkv","container":"mkv"}]}]
+                  }
+                ]}}
+                """#.utf8))
+            case "/library/metadata/200/children":
+                return (200, Data(#"""
+                {"MediaContainer":{"Metadata":[
+                  {"ratingKey":"201","type":"season","title":"Season 1","index":1}
+                ]}}
+                """#.utf8))
+            case "/library/metadata/200/allLeaves":
+                return (200, Data(#"""
+                {"MediaContainer":{"Metadata":[
+                  {"ratingKey":"202","type":"episode","title":"Pilot","index":1,"parentIndex":1,"parentRatingKey":"201","grandparentTitle":"Drive Series",
+                   "Media":[{"id":500,"container":"mp4","Part":[{"id":501,"key":"/library/parts/501/1/ep.mp4","container":"mp4"}]}]}
+                ]}}
+                """#.utf8))
+            default:
+                return (204, Data())
+            }
+        }
+
+        let client = MediaServerClient(kind: .plex,
+                                       baseURL: URL(string: "http://plex.local:32400")!,
+                                       deviceId: "dev-1",
+                                       accessToken: "PLEXSECRET",
+                                       userId: "alex",
+                                       session: session)
+
+        let libs = try await client.libraries()
+        XCTAssertEqual(libs.map(\.name), ["Movies", "TV Shows"])
+        XCTAssertEqual(libs.first?.collectionType, "movies")
+        XCTAssertEqual(libs.last?.collectionType, "tvshows")
+
+        let movies = try await client.items(parentId: "1")
+        XCTAssertEqual(movies.count, 2)
+
+        let mp4Movie = movies[0]
+        XCTAssertEqual(mp4Movie.resumePositionSeconds, 300, accuracy: 0.001)
+        XCTAssertEqual(mp4Movie.runtimeSeconds ?? 0, 6360, accuracy: 0.001)
+        let directURL = try client.streamURL(for: mp4Movie)
+        XCTAssertEqual(directURL.path, "/library/parts/301/1700/file.mp4")
+        XCTAssertEqual(query(directURL)["X-Plex-Token"], "PLEXSECRET")
+
+        let thumbURL = client.imageURL(for: mp4Movie)
+        XCTAssertEqual(thumbURL?.path, "/library/metadata/101/thumb/1700")
+        XCTAssertEqual(query(thumbURL)["X-Plex-Token"], "PLEXSECRET")
+
+        let mkvMovie = movies[1]
+        let hlsURL = try client.streamURL(for: mkvMovie)
+        XCTAssertEqual(hlsURL.path, "/video/:/transcode/universal/start.m3u8")
+        XCTAssertEqual(query(hlsURL)["path"], "/library/metadata/102")
+        XCTAssertEqual(query(hlsURL)["X-Plex-Token"], "PLEXSECRET")
+
+        let seasons = try await client.seasons(seriesId: "200")
+        XCTAssertEqual(seasons.map(\.id), ["201"])
+        let episodes = try await client.episodes(seriesId: "200")
+        XCTAssertEqual(episodes.first?.episodeLabel, "S1E1")
+
+        let report = MediaServerClient.PlaybackReport(itemId: "101", mediaSourceId: "/library/parts/301/1700/file.mp4",
+                                                      playSessionId: "ps1", positionTicks: MediaTicks.ticks(fromSeconds: 45),
+                                                      isPaused: false, playMethod: "DirectPlay")
+        try await client.reportPlayback(.progress, report: report)
+        let timelineReq = try XCTUnwrap(MediaServerStubURLProtocol.recorded.last?.request)
+        XCTAssertEqual(timelineReq.url?.path, "/:/timeline")
+        XCTAssertEqual(query(timelineReq.url)["state"], "playing")
+        XCTAssertEqual(query(timelineReq.url)["time"], "45000")
+    }
+
+    // MARK: Keychain / TokenStore Isolation
+
+    @MainActor
+    func testPlexAndXtreamKeepSecretsOutOfUserDefaults() async throws {
+        MediaServerStubURLProtocol.handler = { request, _ in
+            if request.url?.path == "/player_api.php" {
+                return (200, Data(#"{"user_info":{"username":"xtuser","status":"Active","auth":1},"server_info":{"url":"xt.example.com"}}"#.utf8))
+            }
+            return (200, Data(#"{"MediaContainer":{"friendlyName":"Home Plex","machineIdentifier":"plex-1","myPlexUsername":"plexuser"}}"#.utf8))
+        }
+
+        let tokens = InMemoryMediaServerTokenStore()
+        let store = MediaServerStore(defaults: defaults, tokenStore: tokens, session: session)
+
+        let plexAccount = try await store.signInPlex(serverAddress: "192.168.1.99:32400", token: "TOP-SECRET-PLEX-TOKEN")
+        let xtreamAccount = try await store.signIn(kind: .xtream, serverAddress: "http://xt.example.com:8080",
+                                                   username: "xtuser", password: "TOP-SECRET-XTREAM-PASS")
+
+        XCTAssertEqual(plexAccount.kind, .plex)
+        XCTAssertEqual(plexAccount.serverName, "Home Plex")
+        XCTAssertEqual(tokens.token(for: plexAccount.id), "TOP-SECRET-PLEX-TOKEN")
+
+        XCTAssertEqual(xtreamAccount.kind, .xtream)
+        XCTAssertEqual(tokens.token(for: xtreamAccount.id), "TOP-SECRET-XTREAM-PASS")
+
+        for (_, value) in defaults.dictionaryRepresentation() {
+            if let data = value as? Data, let text = String(data: data, encoding: .utf8) {
+                XCTAssertFalse(text.contains("TOP-SECRET-PLEX-TOKEN"))
+                XCTAssertFalse(text.contains("TOP-SECRET-XTREAM-PASS"))
+            }
+            if let text = value as? String {
+                XCTAssertFalse(text.contains("TOP-SECRET-PLEX-TOKEN"))
+                XCTAssertFalse(text.contains("TOP-SECRET-XTREAM-PASS"))
+            }
+        }
+
+        let reloaded = MediaServerStore(defaults: defaults, tokenStore: tokens)
+        XCTAssertEqual(reloaded.accounts.count, 2)
+        XCTAssertEqual(reloaded.client(for: xtreamAccount).accessToken, "TOP-SECRET-XTREAM-PASS")
+
+        store.remove(plexAccount)
+        store.remove(xtreamAccount)
+        XCTAssertNil(tokens.token(for: plexAccount.id))
+        XCTAssertNil(tokens.token(for: xtreamAccount.id))
+        XCTAssertTrue(store.accounts.isEmpty)
+    }
+}

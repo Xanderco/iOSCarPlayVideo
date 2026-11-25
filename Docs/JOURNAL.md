@@ -92,6 +92,12 @@
 
 ## Log
 
+### 2026-11-25 00:08 (Bogotá) — DI-66: Xtream Codes & Plex Library Connectors
+- **MediaServerModels.swift & MediaServerClient.swift**: Extended `MediaServerKind` with `.plex` and `.xtream` (plus `pickerLabel`, `defaultAddressPlaceholder`, and suffix stripping in `normalizedServerURL`). Added Xtream Codes DTOs (`XtreamAuthResponse`, `XtreamCategory`, `XtreamLiveStream`, `XtreamVodStream`, `XtreamSeries`, `XtreamSeriesInfo`) with resilient string/int JSON decoding and Plex DTOs (`PlexServerIdentityContainer`, `PlexDirectory`, `PlexMetadata`, `PlexMedia`, `PlexPart`) with millisecond-to-tick mapping. Implemented unified `libraries()`, `items(parentId:)`, `resumeItems()`, `item(id:)`, `seasons(seriesId:)`, `episodes(seriesId:seasonId:)`, `streamURL(for:)`, `imageURL(for:)`, and `reportPlayback(_:report:)` across Jellyfin, Emby, Plex, and Xtream.
+- **MediaServerStore.swift**: Added `.plex` (`signInPlex` / `X-Plex-Token`) and `.xtream` sign-in flows keeping all tokens and Xtream passwords strictly in `MediaServerTokenStore` (Keychain) and out of `UserDefaults`.
+- **MediaServerViews.swift, CastHomeView.swift & Localizable.xcstrings**: Added `.plex` and `.xtream` segments to `AddMediaServerView` with conditional `X-Plex-Token` / account fields and EN/ES localizations.
+- **Tests**: Updated `MediaSourcesEntryTests.testMediaServerKindDisplayNamesAndProperties` from 2 to 4 cases (justified by adding `.plex` and `.xtream`), added `XtreamAndPlexMediaServerTests` in `MediaServerClientTests.swift`, and extended `DashCastSmokeUITests.testMediaSourcesJellyfinAndQREntry` to verify Plex and Xtream onboarding fields.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

@@ -472,7 +472,7 @@ public struct CastHomeView: View {
                         // MARK: Section 1 - Media Servers (Jellyfin & Emby)
                         VStack(spacing: 10) {
                             HStack {
-                                Text("Media Servers (Jellyfin & Emby)")
+                                Text("Media Servers")
                                     .font(.system(size: 13, weight: .bold))
                                     .foregroundStyle(Color.dashYellow)
                                 Spacer()
@@ -504,11 +504,11 @@ public struct CastHomeView: View {
                                         }
 
                                         VStack(alignment: .leading, spacing: 3) {
-                                            Text("Connect Jellyfin / Emby")
+                                            Text("Connect Media Server")
                                                 .font(.system(size: 15, weight: .semibold))
                                                 .foregroundStyle(Color.dashTextPrimary)
 
-                                            Text("Stream movies & shows from your home media server")
+                                            Text("Stream from Jellyfin, Emby, Plex, or Xtream")
                                                 .font(.system(size: 12))
                                                 .foregroundStyle(Color.dashTextSecondary)
                                                 .lineLimit(2)

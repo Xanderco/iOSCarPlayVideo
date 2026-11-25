@@ -8177,6 +8177,125 @@
           }
         }
       }
+    },
+    "Connect a Jellyfin, Emby, Plex, or Xtream server to browse and play your own movies, shows, and live streams.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect a Jellyfin, Emby, Plex, or Xtream server to browse and play your own movies, shows, and live streams."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conecta un servidor Jellyfin, Emby, Plex o Xtream para explorar y reproducir tus propias películas, series y transmisiones en vivo."
+          }
+        }
+      }
+    },
+    "Plex Token": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plex Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Token de Plex"
+          }
+        }
+      }
+    },
+    "X-Plex-Token": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "X-Plex-Token"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "X-Plex-Token"
+          }
+        }
+      }
+    },
+    "Your Xtream Codes password is stored securely in the iOS Keychain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Xtream Codes password is stored securely in the iOS Keychain."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu contraseña de Xtream Codes se guarda de forma segura en el Llavero de iOS."
+          }
+        }
+      }
+    },
+    "Connect Media Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect Media Server"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectar servidor multimedia"
+          }
+        }
+      }
+    },
+    "Stream from Jellyfin, Emby, Plex, or Xtream": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stream from Jellyfin, Emby, Plex, or Xtream"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduce desde Jellyfin, Emby, Plex o Xtream"
+          }
+        }
+      }
+    },
+    "Your access token is stored securely in the iOS Keychain. Your password is never saved.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your access token is stored securely in the iOS Keychain. Your password is never saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tu token de acceso se guarda de forma segura en el Llavero de iOS. Tu contraseña nunca se guarda."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
