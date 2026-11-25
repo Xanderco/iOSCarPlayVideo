@@ -6,6 +6,7 @@ public final class PersistenceController {
     private let tripsKey = "dashcast_saved_trips"
     private let playlistsKey = "dashcast_saved_playlists"
     private let widgetsKey = "dashcast_saved_widgets"
+    private let selectedVehicleIdKey = "dashcast_selected_vehicle_id"
 
     private let userDefaults: UserDefaults
 
@@ -75,5 +76,17 @@ public final class PersistenceController {
             return UserPreferences()
         }
         return decoded
+    }
+
+    // Selected Garage Vehicle Persistence
+    public func saveSelectedVehicleId(_ vehicleId: String, widgetStore: WidgetSharedStore = .shared) {
+        userDefaults.set(vehicleId, forKey: selectedVehicleIdKey)
+        if let vehicle = VehicleCatalogService.shared.vehicles.first(where: { $0.id == vehicleId }) {
+            WidgetSharedPublisher.publishSelectedVehicle(vehicle, store: widgetStore)
+        }
+    }
+
+    public func loadSelectedVehicleId() -> String? {
+        userDefaults.string(forKey: selectedVehicleIdKey)
     }
 }
