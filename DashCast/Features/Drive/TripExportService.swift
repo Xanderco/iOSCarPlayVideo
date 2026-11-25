@@ -109,8 +109,7 @@ public enum TripExportService {
     public static func csvEscaped(_ field: String) -> String {
         let needsQuoting = field.contains(",")
             || field.contains("\"")
-            || field.contains("\n")
-            || field.contains("\r")
+            || field.unicodeScalars.contains { $0 == "\n" || $0 == "\r" }
         guard needsQuoting else { return field }
         let escaped = field.replacingOccurrences(of: "\"", with: "\"\"")
         return "\"\(escaped)\""
