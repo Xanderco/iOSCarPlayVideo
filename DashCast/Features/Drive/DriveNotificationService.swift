@@ -1,16 +1,35 @@
 import Foundation
 import UserNotifications
 
+protocol NotificationRequestScheduling {
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
+    func notificationStatus() async -> UNAuthorizationStatus
+    func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: ((Error?) -> Void)?)
+}
+
+extension UNUserNotificationCenter: NotificationRequestScheduling {
+    func notificationStatus() async -> UNAuthorizationStatus {
+        let settings = await notificationSettings()
+        return settings.authorizationStatus
+    }
+}
+
 public final class DriveNotificationService {
     public static let shared = DriveNotificationService()
 
-    private let center = UNUserNotificationCenter.current()
+    private let scheduler: NotificationRequestScheduling
 
-    public init() {}
+    public convenience init() {
+        self.init(scheduler: UNUserNotificationCenter.current())
+    }
+
+    init(scheduler: NotificationRequestScheduling) {
+        self.scheduler = scheduler
+    }
 
     public func requestAuthorization() async -> Bool {
         do {
-            let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            let granted = try await scheduler.requestAuthorization(options: [.alert, .sound, .badge])
             return granted
         } catch {
             return false
@@ -18,8 +37,7 @@ public final class DriveNotificationService {
     }
 
     public func checkAuthorizationStatus() async -> UNAuthorizationStatus {
-        let settings = await center.notificationSettings()
-        return settings.authorizationStatus
+        await scheduler.notificationStatus()
     }
 
     public func sendDriveRecordingNotification(distanceKm: Double) {
@@ -30,7 +48,7 @@ public final class DriveNotificationService {
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: "dashcast.drive.recording", content: content, trigger: trigger)
-        center.add(request, withCompletionHandler: nil)
+        scheduler.add(request, withCompletionHandler: nil)
     }
 
     /// Used by AutoTripService; units follow the user's km/mi setting.
@@ -43,7 +61,7 @@ public final class DriveNotificationService {
         content.body = String(format: "%.1f mi · %d min · top %.0f mph\n🏁 Score %d/100", miles, mins, trip.maxSpeedKmh * 0.621371, trip.drivingScore)
         content.sound = .default
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-        center.add(UNNotificationRequest(identifier: "dashcast.trip.saved", content: content, trigger: trigger), withCompletionHandler: nil)
+        scheduler.add(UNNotificationRequest(identifier: "dashcast.trip.saved", content: content, trigger: trigger), withCompletionHandler: nil)
     }
 
     public func sendTripSavedNotification(trip: TripModel) {
@@ -57,7 +75,7 @@ public final class DriveNotificationService {
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: "dashcast.trip.saved", content: content, trigger: trigger)
-        center.add(request, withCompletionHandler: nil)
+        scheduler.add(request, withCompletionHandler: nil)
     }
 
     public func scheduleFeatureTips() {
@@ -76,7 +94,7 @@ public final class DriveNotificationService {
 
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: tip.delay, repeats: false)
             let request = UNNotificationRequest(identifier: "dashcast.tip.\(index)", content: content, trigger: trigger)
-            center.add(request, withCompletionHandler: nil)
+            scheduler.add(request, withCompletionHandler: nil)
         }
     }
 }

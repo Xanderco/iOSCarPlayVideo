@@ -1,5 +1,25 @@
 import XCTest
+import UserNotifications
 @testable import DashCast
+
+private final class MockNotificationScheduler: NotificationRequestScheduling {
+    var authorizationResult = true
+    var status: UNAuthorizationStatus = .authorized
+    private(set) var addedRequests: [UNNotificationRequest] = []
+
+    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
+        authorizationResult
+    }
+
+    func notificationStatus() async -> UNAuthorizationStatus {
+        status
+    }
+
+    func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: ((Error?) -> Void)?) {
+        addedRequests.append(request)
+        completionHandler?(nil)
+    }
+}
 
 final class DriveSettingsAndNotificationTests: XCTestCase {
     func testUserPreferencesDriveDefaults() {
@@ -41,7 +61,8 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
     }
 
     func testTripSavedNotificationGeneration() {
-        let service = DriveNotificationService.shared
+        let scheduler = MockNotificationScheduler()
+        let service = DriveNotificationService(scheduler: scheduler)
         let trip = TripModel(
             distanceMeters: 4800,
             averageSpeedKmh: 35.0,
@@ -50,9 +71,31 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         )
 
         service.sendTripSavedNotification(trip: trip)
+        service.sendTripSavedNotification(trip: trip, useMiles: true)
         service.sendDriveRecordingNotification(distanceKm: 0.1)
         service.scheduleFeatureTips()
-        // If no crash occurred, notifications requests dispatched to UNUserNotificationCenter
-        XCTAssertTrue(true)
+
+        XCTAssertEqual(scheduler.addedRequests.count, 7)
+
+        let metricTripRequest = scheduler.addedRequests[0]
+        XCTAssertEqual(metricTripRequest.identifier, "dashcast.trip.saved")
+        XCTAssertEqual(metricTripRequest.content.title, "Trip saved")
+        XCTAssertTrue(metricTripRequest.content.body.contains("4.8 km"))
+        XCTAssertTrue(metricTripRequest.content.body.contains("Score 92/100"))
+
+        let imperialTripRequest = scheduler.addedRequests[1]
+        XCTAssertEqual(imperialTripRequest.identifier, "dashcast.trip.saved")
+        XCTAssertTrue(imperialTripRequest.content.body.contains("mi"))
+        XCTAssertTrue(imperialTripRequest.content.body.contains("mph"))
+
+        let recordingRequest = scheduler.addedRequests[2]
+        XCTAssertEqual(recordingRequest.identifier, "dashcast.drive.recording")
+        XCTAssertEqual(recordingRequest.content.title, "Recording your drive")
+        XCTAssertTrue(recordingRequest.content.body.contains("0.1 km so far"))
+
+        let tipRequests = Array(scheduler.addedRequests.dropFirst(3))
+        XCTAssertEqual(tipRequests.map(\.identifier), ["dashcast.tip.0", "dashcast.tip.1", "dashcast.tip.2", "dashcast.tip.3"])
+        let delays = tipRequests.compactMap { ($0.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval }
+        XCTAssertEqual(delays, [3600, 7200, 14400, 21600])
     }
 }
