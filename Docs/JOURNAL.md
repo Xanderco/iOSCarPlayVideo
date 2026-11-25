@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-25 17:19 (Bogotá) — DI-79: GPX Route & CSV Mileage Log Export [DI-79]
+- **What:** Added `TripExportService.swift` generating valid GPX 1.1 XML (`<trk>`, `<trkseg>`, `<trkpt>` with elevation, ISO-8601 UTC `<time>`, and `<extensions><speed>`) and RFC-4180-safe CSV mileage logs (`Date,Duration,Distance,AvgSpeed,MaxSpeed,DrivingScore,HardBrakes,RapidAccel,SharpTurns`) with `km`/`mi` unit support and temporary file export helpers. Added toolbar export menus in `TripDetailView.swift` ("Export GPX", "Export CSV") and `TripHistoryView.swift` ("Export Mileage Log (CSV)") backed by a shared `UIActivityViewController` share sheet and error alert, plus `Drive_TripHistoryButton` identifier in `DriveHomeView.swift`.
+- **Tests:** Added `TripExportServiceTests.swift` (6 unit tests covering GPX XML structure and `XMLParser` validation, XML escaping, ISO-8601 UTC timestamps, RFC-4180 CSV quoting, km/mi unit conversion, empty-trip/empty-history edge cases, and temp file output). Added EN/ES strings to `Localizable.xcstrings`.
+- **Follow-ups:** Verify GitHub Actions CI (`build-and-test`) passes on the PR; awaiting Alexander Gate review to merge into `main`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

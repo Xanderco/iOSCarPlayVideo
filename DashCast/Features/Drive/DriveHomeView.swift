@@ -93,6 +93,7 @@ public struct DriveHomeView: View {
                                     .clipShape(Circle())
                             }
                             .accessibilityLabel("Trip History")
+                            .accessibilityIdentifier("Drive_TripHistoryButton")
 
                             Button {
                                 showingDriveSettings = true

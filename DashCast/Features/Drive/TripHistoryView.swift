@@ -6,6 +6,8 @@ public struct TripHistoryView: View {
 
     @State private var trips: [TripModel] = []
     @State private var showingClearAlert = false
+    @State private var shareItem: TripShareFileItem?
+    @State private var exportErrorMessage: String?
 
     public init() {}
 
@@ -115,7 +117,22 @@ public struct TripHistoryView: View {
                 }
 
                 if !trips.isEmpty {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        Menu {
+                            Button {
+                                exportMileageLogCSV()
+                            } label: {
+                                Label("Export Mileage Log (CSV)", systemImage: "tablecells")
+                            }
+                            .accessibilityIdentifier("TripHistory_ExportCSVButton")
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(Color.dashYellow)
+                        }
+                        .accessibilityLabel("Export Mileage Log (CSV)")
+                        .accessibilityIdentifier("TripHistory_ExportMenu")
+
                         Button {
                             showingClearAlert = true
                         } label: {
@@ -127,6 +144,7 @@ public struct TripHistoryView: View {
                     }
                 }
             }
+            .tripExportPresentation(shareItem: $shareItem, errorMessage: $exportErrorMessage)
             .alert("Clear Trip History?", isPresented: $showingClearAlert) {
                 Button("Clear All", role: .destructive) {
                     clearAllTrips()
@@ -243,5 +261,17 @@ public struct TripHistoryView: View {
     private func clearAllTrips() {
         trips.removeAll()
         PersistenceController.shared.saveTrips(trips)
+    }
+
+    private func exportMileageLogCSV() {
+        do {
+            let url = try TripExportService.exportMileageLogCSVFile(
+                for: trips,
+                useMiles: appState.useMilesPerHour
+            )
+            shareItem = TripShareFileItem(url: url)
+        } catch {
+            exportErrorMessage = error.localizedDescription
+        }
     }
 }

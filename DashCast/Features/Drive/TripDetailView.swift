@@ -1,5 +1,6 @@
 import SwiftUI
 import MapKit
+import UIKit
 
 public struct TripDetailView: View {
     @Environment(\.dismiss) private var dismiss
@@ -7,6 +8,8 @@ public struct TripDetailView: View {
     public let trip: TripModel
 
     @State private var mapMode: TripMapMode = .replay
+    @State private var shareItem: TripShareFileItem?
+    @State private var exportErrorMessage: String?
 
     public init(trip: TripModel) {
         self.trip = trip
@@ -157,6 +160,50 @@ public struct TripDetailView: View {
         }
         .navigationTitle(trip.startTime.formatted(date: .abbreviated, time: .shortened))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        exportGPX()
+                    } label: {
+                        Label("Export GPX", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
+                    }
+                    .accessibilityIdentifier("TripDetail_ExportGPXButton")
+
+                    Button {
+                        exportCSV()
+                    } label: {
+                        Label("Export CSV", systemImage: "tablecells")
+                    }
+                    .accessibilityIdentifier("TripDetail_ExportCSVButton")
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.dashYellow)
+                }
+                .accessibilityLabel("Export Trip")
+                .accessibilityIdentifier("TripDetail_ExportMenu")
+            }
+        }
+        .tripExportPresentation(shareItem: $shareItem, errorMessage: $exportErrorMessage)
+    }
+
+    private func exportGPX() {
+        do {
+            let url = try TripExportService.exportGPXFile(for: trip)
+            shareItem = TripShareFileItem(url: url)
+        } catch {
+            exportErrorMessage = error.localizedDescription
+        }
+    }
+
+    private func exportCSV() {
+        do {
+            let url = try TripExportService.exportCSVFile(for: trip, useMiles: appState.useMilesPerHour)
+            shareItem = TripShareFileItem(url: url)
+        } catch {
+            exportErrorMessage = error.localizedDescription
+        }
     }
 
     private var scoreColor: Color {
@@ -220,5 +267,43 @@ public struct TripDetailView: View {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%dm %02ds", mins, secs)
+    }
+}
+
+struct TripShareFileItem: Identifiable {
+    let id = UUID()
+    let url: URL
+}
+
+struct TripActivityShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+extension View {
+    func tripExportPresentation(
+        shareItem: Binding<TripShareFileItem?>,
+        errorMessage: Binding<String?>
+    ) -> some View {
+        self
+            .sheet(item: shareItem) { item in
+                TripActivityShareSheet(activityItems: [item.url])
+            }
+            .alert(
+                "Export Failed",
+                isPresented: Binding(
+                    get: { errorMessage.wrappedValue != nil },
+                    set: { if !$0 { errorMessage.wrappedValue = nil } }
+                )
+            ) {
+                Button("OK", role: .cancel) { errorMessage.wrappedValue = nil }
+            } message: {
+                Text(errorMessage.wrappedValue ?? "")
+            }
     }
 }
