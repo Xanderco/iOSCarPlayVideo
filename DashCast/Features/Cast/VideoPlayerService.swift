@@ -15,8 +15,11 @@ public final class VideoPlayerService: ObservableObject {
 
     /// Free-tier casting allowance. `nil` (tests, previews) means unrestricted.
     public var entitlementGate: EntitlementGate?
+    public var resumeStore: PlaybackResumeStore
     private var lastCastingTick: Date?
     private var pendingCastingSeconds: TimeInterval = 0
+    private var pendingResumeSeekSeconds: Double?
+    private var lastResumeSaveDate: Date = .distantPast
 
     @Published public private(set) var currentChannel: ChannelModel?
     /// Mirrors the player's real `timeControlStatus` (not just the last button tap).
@@ -29,6 +32,8 @@ public final class VideoPlayerService: ObservableObject {
     /// False while the app is in the background. Views must detach the player from their
     /// AVPlayerLayer then, otherwise iOS pauses video items and audio stops when the phone locks.
     @Published public private(set) var isVideoLayerAttached: Bool = true
+    /// True while system Picture-in-Picture owns the player layer, preventing background detachment.
+    @Published public private(set) var isPictureInPictureActive: Bool = false
     @Published public var isMuted: Bool = false {
         didSet { player.isMuted = isMuted }
     }
@@ -52,7 +57,8 @@ public final class VideoPlayerService: ObservableObject {
     /// - Parameter handlesRemoteCommands: only `shared` passes `true`. Every extra instance (tests,
     ///   previews) used to add its own play/pause/toggle targets to the process-wide
     ///   `MPRemoteCommandCenter`, and a toggle delivered to two targets flips twice (= no-op).
-    public init(handlesRemoteCommands: Bool = false) {
+    public init(handlesRemoteCommands: Bool = false, resumeStore: PlaybackResumeStore? = nil) {
+        self.resumeStore = resumeStore ?? .shared
         player.allowsExternalPlayback = true
         setupTimeObserver()
         observeTimeControlStatus()
@@ -98,12 +104,18 @@ public final class VideoPlayerService: ObservableObject {
 
     // MARK: - Loading
 
-    public func load(channel: ChannelModel) {
+    public func load(channel: ChannelModel, shouldResume: Bool = true) {
+        saveCurrentResumePosition(force: true)
+
         currentChannel = channel
         playbackError = nil
         currentTime = 0
         duration = 0
         isBuffering = true
+        lastResumeSaveDate = .distantPast
+        pendingResumeSeekSeconds = (shouldResume && channel.id != CarPlayMirrorPlayback.channelID)
+            ? resumeStore.resumePosition(for: channel)
+            : nil
 
         let playerItem = AVPlayerItem(asset: AVURLAsset(url: channel.streamURL))
         if channel.id == CarPlayMirrorPlayback.channelID {
@@ -143,8 +155,18 @@ public final class VideoPlayerService: ObservableObject {
                     switch status {
                     case .readyToPlay:
                         self.duration = seconds.isFinite ? seconds : 0
+                        if let resumeAt = self.pendingResumeSeekSeconds {
+                            self.pendingResumeSeekSeconds = nil
+                            if self.duration > 0 && resumeAt < self.duration * PlaybackResumeStore.completionThreshold {
+                                self.seek(to: resumeAt)
+                                self.currentTime = resumeAt
+                            } else if self.duration <= 0, let channel = self.currentChannel {
+                                self.resumeStore.clearPosition(for: channel)
+                            }
+                        }
                         self.updateNowPlayingInfo()
                     case .failed:
+                        self.pendingResumeSeekSeconds = nil
                         self.handleFailure(message ?? "This video could not be played.")
                     default:
                         break
@@ -162,8 +184,12 @@ public final class VideoPlayerService: ObservableObject {
             },
             center.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main) { [weak self] _ in
                 Task { @MainActor [weak self] in
-                    self?.wantsToPlay = false
-                    self?.player.pause()
+                    guard let self else { return }
+                    self.wantsToPlay = false
+                    self.player.pause()
+                    if let channel = self.currentChannel {
+                        self.resumeStore.clearPosition(for: channel)
+                    }
                 }
             }
         ]
@@ -232,6 +258,7 @@ public final class VideoPlayerService: ObservableObject {
     public func pause() {
         wantsToPlay = false
         player.pause()
+        saveCurrentResumePosition(force: true)
     }
 
     public func togglePlayPause() {
@@ -248,6 +275,8 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func stop() {
+        saveCurrentResumePosition(force: true)
+        pendingResumeSeekSeconds = nil
         wantsToPlay = false
         player.pause()
         player.replaceCurrentItem(with: nil)
@@ -262,8 +291,11 @@ public final class VideoPlayerService: ObservableObject {
 
     public func seek(to seconds: Double) {
         guard seconds.isFinite else { return }
-        let target = CMTime(seconds: max(0, seconds), preferredTimescale: 600)
+        let clamped = max(0, seconds)
+        let target = CMTime(seconds: clamped, preferredTimescale: 600)
+        currentTime = clamped
         player.seek(to: target, toleranceBefore: .zero, toleranceAfter: .zero)
+        saveCurrentResumePosition(force: true)
     }
 
     public func skip(seconds: Double) {
@@ -279,6 +311,28 @@ public final class VideoPlayerService: ObservableObject {
             return max(0, min(target, duration))
         }
         return max(0, target)
+    }
+
+    /// Persists the current playback position for non-live items (`duration > 0`).
+    public func saveCurrentResumePosition(force: Bool = false) {
+        guard let channel = currentChannel, duration > 0 else { return }
+        let now = Date()
+        if !force && now.timeIntervalSince(lastResumeSaveDate) < 5 {
+            return
+        }
+        lastResumeSaveDate = now
+        resumeStore.savePosition(currentTime, duration: duration, for: channel, now: now)
+    }
+
+    /// Updates PiP ownership so entering background does not detach the player layer mid-PiP.
+    public func setPictureInPictureActive(_ active: Bool, isInBackground: Bool? = nil) {
+        isPictureInPictureActive = active
+        let inBackground = isInBackground ?? (UIApplication.shared.applicationState == .background)
+        if active {
+            isVideoLayerAttached = true
+        } else if inBackground {
+            isVideoLayerAttached = false
+        }
     }
 
     // MARK: - Observation
@@ -305,6 +359,9 @@ public final class VideoPlayerService: ObservableObject {
                 if let item = self.player.currentItem, item.duration.seconds.isFinite {
                     self.duration = item.duration.seconds
                 }
+                if self.isPlaying {
+                    self.saveCurrentResumePosition(force: false)
+                }
             }
         }
     }
@@ -313,7 +370,13 @@ public final class VideoPlayerService: ObservableObject {
         let center = NotificationCenter.default
         center.publisher(for: UIApplication.didEnterBackgroundNotification)
             .sink { [weak self] _ in
-                MainActor.assumeIsolated { self?.isVideoLayerAttached = false }
+                MainActor.assumeIsolated {
+                    guard let self else { return }
+                    self.saveCurrentResumePosition(force: true)
+                    if !self.isPictureInPictureActive {
+                        self.isVideoLayerAttached = false
+                    }
+                }
             }
             .store(in: &cancellables)
 

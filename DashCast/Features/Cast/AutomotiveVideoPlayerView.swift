@@ -4,6 +4,7 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
+    @StateObject private var pipCoordinator = PictureInPictureCoordinator()
     @State private var showControls: Bool = true
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
@@ -18,7 +19,10 @@ public struct AutomotiveVideoPlayerView: View {
             Color.black
 
             if playerService.currentChannel != nil {
-                CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
+                CustomVideoPlayerRepresentable(
+                    player: playerService.isVideoLayerAttached ? playerService.player : nil,
+                    pipCoordinator: pipCoordinator
+                )
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.25)) {
@@ -121,6 +125,23 @@ public struct AutomotiveVideoPlayerView: View {
 
                     AirPlayRoutePickerRepresentable(tintColor: .white)
                         .frame(width: 34, height: 34)
+
+                    if pipCoordinator.isSupported {
+                        Button {
+                            pipCoordinator.togglePictureInPicture()
+                        } label: {
+                            Image(systemName: pipCoordinator.isActive ? "pip.exit" : "pip.enter")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundStyle(.white)
+                                .padding(9)
+                                .background(Color.white.opacity(0.2))
+                                .clipShape(Circle())
+                        }
+                        .disabled(!pipCoordinator.isPossible && !pipCoordinator.isActive)
+                        .opacity((pipCoordinator.isPossible || pipCoordinator.isActive) ? 1.0 : 0.45)
+                        .accessibilityLabel(pipCoordinator.isActive ? LocalizedStringKey("Exit Picture in Picture") : LocalizedStringKey("Enter Picture in Picture"))
+                        .accessibilityIdentifier("Player_PiPButton")
+                    }
 
                     Button {
                         playerService.stop()
@@ -237,9 +258,15 @@ public struct AutomotiveVideoPlayerView: View {
 /// AVPlayer, so the phone and the external display can render the same video at the same time.
 public struct CustomVideoPlayerRepresentable: UIViewRepresentable {
     public let player: AVPlayer?
+    public let pipCoordinator: PictureInPictureCoordinator?
 
-    public init(player: AVPlayer?) {
+    public init(player: AVPlayer?, pipCoordinator: PictureInPictureCoordinator? = nil) {
         self.player = player
+        self.pipCoordinator = pipCoordinator
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(pipCoordinator: pipCoordinator)
     }
 
     public func makeUIView(context: Context) -> PlayerLayerView {
@@ -247,21 +274,168 @@ public struct CustomVideoPlayerRepresentable: UIViewRepresentable {
         view.backgroundColor = .black
         view.playerLayer.videoGravity = .resizeAspect
         view.playerLayer.player = player
+        pipCoordinator?.attach(playerLayer: view.playerLayer) { active in
+            VideoPlayerService.shared.setPictureInPictureActive(active)
+        }
         return view
     }
 
     public func updateUIView(_ uiView: PlayerLayerView, context: Context) {
+        context.coordinator.pipCoordinator = pipCoordinator
         if uiView.playerLayer.player !== player {
             uiView.playerLayer.player = player
         }
+        pipCoordinator?.attach(playerLayer: uiView.playerLayer) { active in
+            VideoPlayerService.shared.setPictureInPictureActive(active)
+        }
     }
 
-    public static func dismantleUIView(_ uiView: PlayerLayerView, coordinator: ()) {
+    public static func dismantleUIView(_ uiView: PlayerLayerView, coordinator: Coordinator) {
+        coordinator.pipCoordinator?.detach(playerLayer: uiView.playerLayer)
         uiView.playerLayer.player = nil
+    }
+
+    public final class Coordinator {
+        weak var pipCoordinator: PictureInPictureCoordinator?
+        init(pipCoordinator: PictureInPictureCoordinator?) {
+            self.pipCoordinator = pipCoordinator
+        }
     }
 }
 
 public final class PlayerLayerView: UIView {
     public override static var layerClass: AnyClass { AVPlayerLayer.self }
     public var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+}
+
+/// Manages `AVPictureInPictureController` lifecycle for `PlayerLayerView`.
+@MainActor
+public final class PictureInPictureCoordinator: NSObject, ObservableObject, AVPictureInPictureControllerDelegate {
+    @Published public private(set) var isSupported: Bool = AVPictureInPictureController.isPictureInPictureSupported()
+    @Published public private(set) var isPossible: Bool = false
+    @Published public private(set) var isActive: Bool = false
+
+    private var controller: AVPictureInPictureController?
+    private weak var attachedLayer: AVPlayerLayer?
+    private var possibleObservation: NSKeyValueObservation?
+    private var activeObservation: NSKeyValueObservation?
+    private var onActiveChanged: ((Bool) -> Void)?
+
+    public override init() {
+        super.init()
+    }
+
+    public func attach(playerLayer: AVPlayerLayer, onActiveChanged: ((Bool) -> Void)? = nil) {
+        self.onActiveChanged = onActiveChanged
+        let supported = AVPictureInPictureController.isPictureInPictureSupported()
+        isSupported = supported
+        guard supported else { return }
+
+        if attachedLayer === playerLayer, controller != nil {
+            return
+        }
+
+        cleanupController()
+
+        guard let pip = AVPictureInPictureController(playerLayer: playerLayer) else {
+            isSupported = false
+            return
+        }
+
+        pip.delegate = self
+        pip.canStartPictureInPictureAutomaticallyFromInline = true
+        attachedLayer = playerLayer
+        controller = pip
+
+        possibleObservation = pip.observe(\.isPictureInPicturePossible, options: [.initial, .new]) { [weak self] controller, _ in
+            let possible = controller.isPictureInPicturePossible
+            Task { @MainActor [weak self] in
+                self?.isPossible = possible
+            }
+        }
+
+        activeObservation = pip.observe(\.isPictureInPictureActive, options: [.initial, .new]) { [weak self] controller, _ in
+            let active = controller.isPictureInPictureActive
+            Task { @MainActor [weak self] in
+                self?.updateActiveState(active)
+            }
+        }
+    }
+
+    public func detach(playerLayer: AVPlayerLayer) {
+        guard attachedLayer === playerLayer else { return }
+        cleanupController()
+        updateActiveState(false)
+        isPossible = false
+    }
+
+    public func togglePictureInPicture() {
+        guard let controller else { return }
+        if controller.isPictureInPictureActive {
+            controller.stopPictureInPicture()
+        } else if controller.isPictureInPicturePossible {
+            controller.startPictureInPicture()
+        }
+    }
+
+    private func cleanupController() {
+        possibleObservation?.invalidate()
+        possibleObservation = nil
+        activeObservation?.invalidate()
+        activeObservation = nil
+        controller?.delegate = nil
+        controller = nil
+        attachedLayer = nil
+    }
+
+    private func updateActiveState(_ active: Bool) {
+        if isActive != active {
+            isActive = active
+        }
+        onActiveChanged?(active)
+    }
+
+    // MARK: - AVPictureInPictureControllerDelegate
+
+    nonisolated public func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        dispatchToMain { [weak self] in
+            self?.updateActiveState(true)
+        }
+    }
+
+    nonisolated public func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        dispatchToMain { [weak self] in
+            self?.updateActiveState(true)
+        }
+    }
+
+    nonisolated public func pictureInPictureController(
+        _ pictureInPictureController: AVPictureInPictureController,
+        failedToStartPictureInPictureWithError error: Error
+    ) {
+        dispatchToMain { [weak self] in
+            self?.updateActiveState(false)
+        }
+    }
+
+    nonisolated public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
+        dispatchToMain { [weak self] in
+            self?.updateActiveState(false)
+        }
+    }
+
+    nonisolated public func pictureInPictureController(
+        _ pictureInPictureController: AVPictureInPictureController,
+        restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void
+    ) {
+        completionHandler(true)
+    }
+
+    nonisolated private func dispatchToMain(_ block: @escaping @MainActor @Sendable () -> Void) {
+        if Thread.isMainThread {
+            MainActor.assumeIsolated { block() }
+        } else {
+            Task { @MainActor in block() }
+        }
+    }
 }

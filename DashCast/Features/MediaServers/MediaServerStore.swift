@@ -141,7 +141,7 @@ public final class MediaServerPlaybackCoordinator: ObservableObject {
         let method: String
         if case .directPlay = MediaStreamMode.preferred(for: fresh) { method = "DirectPlay" } else { method = "Transcode" }
 
-        player.load(channel: channel)
+        player.load(channel: channel, shouldResume: false)
 
         let resumeAt = resume ? fresh.resumePositionSeconds : 0
         if resumeAt > 1 {
