@@ -139,6 +139,34 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testPlayerAudioAndSubtitleTrackPickerOpens() throws {
+        let row = app.buttons["Cast_MediaSourceRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
+        tapCenter(of: row)
+
+        let firstChannel = app.buttons.matching(identifier: "MediaSources_Channel").firstMatch
+        XCTAssertTrue(firstChannel.waitForExistence(timeout: 10), "No channels listed")
+        firstChannel.tap()
+
+        let trackPickerButton = app.buttons["Player_TrackPickerButton"]
+        XCTAssertTrue(trackPickerButton.waitForExistence(timeout: 15), "Audio & Subtitles button missing on player")
+        trackPickerButton.tap()
+
+        XCTAssertTrue(
+            app.navigationBars["Audio & Subtitles"].waitForExistence(timeout: 10),
+            "Audio & Subtitles sheet did not open"
+        )
+        let offOption = app.buttons["TrackPicker_Subtitle_Off"]
+        XCTAssertTrue(offOption.waitForExistence(timeout: 5), "Subtitles Off option missing")
+        snapshot("05-player-track-picker")
+        offOption.tap()
+
+        let doneButton = app.buttons["TrackPicker_DoneButton"]
+        XCTAssertTrue(doneButton.waitForExistence(timeout: 5), "Done button missing in track picker")
+        doneButton.tap()
+        XCTAssertTrue(trackPickerButton.waitForExistence(timeout: 10), "Did not return to player overlay")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

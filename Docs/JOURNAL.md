@@ -92,6 +92,14 @@
 
 ## Log
 
+### 2026-11-24 23:08 (Bogotá) — Subtitle Track Selector & Multi-Language Audio Switcher [DI-65]
+- **What changed**:
+  - Added `DashCast/Features/Cast/MediaTrackSelectionPolicy.swift` with `MediaTrackKind`, `MediaTrackOption`, `AVMediaSelectionGroup` extraction (`.audible` and `.legible`), forced-subtitle filtering, deduplication, BCP-47/base-language auto-matching, and `UserDefaults` preference persistence.
+  - Updated `DashCast/Features/Cast/VideoPlayerService.swift` to asynchronously discover `.audible`/`.legible` groups via `AVAsset.loadMediaSelectionGroup(for:)`, observe `AVPlayerItem.mediaSelectionDidChangeNotification`, apply saved language preferences on item ready, and expose `selectAudioTrack(_:)`, `selectSubtitleTrack(_:)`, `refreshMediaTracks()`, and `clearTrackPreferences()` without redundant `select` calls or playback stalls.
+  - Updated `DashCast/Features/Cast/AutomotiveVideoPlayerView.swift` with an accessible Audio & Subtitles button (`Player_TrackPickerButton`) and `MediaTrackPickerSheet` using `dc*` design tokens and EN/ES `Localizable.xcstrings` entries.
+  - Added `DashCastTests/MediaTrackSelectionTests.swift` (7 tests) and `testPlayerAudioAndSubtitleTrackPickerOpens` in `DashCastUITests/DashCastSmokeUITests.swift`.
+- **Verification**: Pending GitHub Actions macOS CI verification.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
