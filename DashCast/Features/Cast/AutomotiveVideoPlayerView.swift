@@ -4,6 +4,8 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
+    @ObservedObject var playlistStore = PlaylistStore.shared
+    @ObservedObject var localVideoManager = LocalVideoManager.shared
     @State private var showControls: Bool = true
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
@@ -115,9 +117,15 @@ public struct AutomotiveVideoPlayerView: View {
                                 .font(.system(size: 11))
                                 .foregroundStyle(Color.dashTextSecondary)
                         }
+
+                        if let remaining = playerService.sleepTimerRemaining {
+                            sleepCountdownPill(remaining)
+                        }
                     }
 
                     Spacer()
+
+                    sleepTimerMenu
 
                     AirPlayRoutePickerRepresentable(tintColor: .white)
                         .frame(width: 34, height: 34)
@@ -152,7 +160,19 @@ public struct AutomotiveVideoPlayerView: View {
                 Spacer()
 
                 // Center transport controls
-                HStack(spacing: 36) {
+                HStack(spacing: hasUpNextQueue ? 24 : 36) {
+                    if hasUpNextQueue {
+                        Button {
+                            playerService.playPrevious(in: upNextQueue)
+                        } label: {
+                            Image(systemName: "backward.end.fill")
+                                .font(.system(size: 24))
+                                .foregroundStyle(.white)
+                        }
+                        .accessibilityLabel(Text("Previous channel"))
+                        .accessibilityIdentifier("Player_PreviousChannelButton")
+                    }
+
                     Button {
                         playerService.skip(seconds: -10)
                     } label: {
@@ -176,6 +196,18 @@ public struct AutomotiveVideoPlayerView: View {
                         Image(systemName: "goforward.10")
                             .font(.system(size: 28))
                             .foregroundStyle(.white)
+                    }
+
+                    if hasUpNextQueue {
+                        Button {
+                            playerService.playNext(in: upNextQueue)
+                        } label: {
+                            Image(systemName: "forward.end.fill")
+                                .font(.system(size: 24))
+                                .foregroundStyle(.white)
+                        }
+                        .accessibilityLabel(Text("Next channel"))
+                        .accessibilityIdentifier("Player_NextChannelButton")
                     }
                 }
 
@@ -217,6 +249,57 @@ public struct AutomotiveVideoPlayerView: View {
                 .padding(.bottom, 12)
             }
         }
+    }
+
+    // MARK: - Up-Next & sleep timer [DI-76]
+
+    /// Playlist channels when the current channel is one of them, else imported local videos.
+    private var upNextQueue: [ChannelModel] {
+        VideoPlayerService.navigationQueue(
+            for: playerService.currentChannel,
+            candidates: [playlistStore.allChannels, localVideoManager.localVideos]
+        )
+    }
+
+    private var hasUpNextQueue: Bool { upNextQueue.count > 1 }
+
+    private var sleepTimerMenu: some View {
+        Menu {
+            Picker(selection: Binding(
+                get: { playerService.sleepTimerPreset },
+                set: { playerService.setSleepTimer($0) }
+            )) {
+                ForEach(SleepTimerPreset.allCases) { preset in
+                    Text(LocalizedStringKey(preset.labelKey)).tag(preset)
+                }
+            } label: {
+                Text("Sleep timer")
+            }
+        } label: {
+            Image(systemName: playerService.sleepTimerPreset == .off ? "moon.zzz" : "moon.zzz.fill")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(playerService.sleepTimerPreset == .off ? Color.white : Color.dashYellow)
+                .padding(9)
+                .background(Color.white.opacity(0.2))
+                .clipShape(Circle())
+        }
+        .accessibilityLabel(Text("Sleep timer"))
+        .accessibilityIdentifier("Player_SleepTimerMenu")
+    }
+
+    private func sleepCountdownPill(_ remaining: TimeInterval) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "moon.zzz.fill")
+                .font(.system(size: 10, weight: .bold))
+            Text("Sleep in \(formatTime(remaining))")
+                .font(ThemeFonts.monospaceDigits(size: 11))
+        }
+        .foregroundStyle(.black)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .background(Color.dashYellow)
+        .clipShape(Capsule())
+        .accessibilityIdentifier("Player_SleepTimerCountdown")
     }
 
     private func formatTime(_ seconds: Double) -> String {

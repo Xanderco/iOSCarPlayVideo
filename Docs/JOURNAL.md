@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-25 15:10 (Bogotá) — DI-76: Up-Next channel navigation & parked sleep timer [DI-76]
+- **What:** `VideoPlayerService+UpNext.swift` adds `playNext(in:)` / `playPrevious(in:)` (wrap-around, matches by id or stream URL) and a `SleepTimerPreset` (Off / 15 / 30 / 60 min) countdown driven by a wall-clock deadline, so it stays correct after the screen locks; expiry pauses playback and clears the timer, `stop()` cancels it. The player HUD gets previous/next buttons (shown only when the current channel is in the playlist or local-video list with 2+ entries), a moon sleep-timer menu and a "Sleep in mm:ss" pill. EN/ES strings added. Incremental HUD change only (D10).
+- **Tests:** `UpNextSleepTimerTests` (13 tests: wrap/bounds, unknown current, stream-URL match, queue selection, load-on-next, preset durations, countdown, expiry pause, cancel on Off/stop, restart). Verified on CI (no local Mac).
+- **Follow-ups:** wire next/previous to `MPRemoteCommandCenter` / steering-wheel track buttons once a queue is owned by the service.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

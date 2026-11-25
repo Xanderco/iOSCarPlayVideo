@@ -32,6 +32,14 @@ public final class VideoPlayerService: ObservableObject {
     @Published public var isMuted: Bool = false {
         didSet { player.isMuted = isMuted }
     }
+    /// Active parked-session sleep timer preset (`.off` when no timer runs). See VideoPlayerService+UpNext.
+    @Published public internal(set) var sleepTimerPreset: SleepTimerPreset = .off
+    /// Seconds left on the sleep timer, `nil` when no timer runs.
+    @Published public internal(set) var sleepTimerRemaining: TimeInterval?
+    /// Wall-clock deadline of the sleep timer; computing remaining time from it keeps the
+    /// countdown correct after the app was suspended or the screen locked.
+    var sleepTimerDeadline: Date?
+    var sleepTimerTicker: Timer?
 
     public let player: AVPlayer = AVPlayer()
     private var timeObserverToken: Any?
@@ -65,6 +73,7 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     deinit {
+        sleepTimerTicker?.invalidate()
         if let token = timeObserverToken {
             player.removeTimeObserver(token)
         }
@@ -248,6 +257,7 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func stop() {
+        cancelSleepTimer()
         wantsToPlay = false
         player.pause()
         player.replaceCurrentItem(with: nil)
@@ -319,7 +329,11 @@ public final class VideoPlayerService: ObservableObject {
 
         center.publisher(for: UIApplication.willEnterForegroundNotification)
             .sink { [weak self] _ in
-                MainActor.assumeIsolated { self?.isVideoLayerAttached = true }
+                MainActor.assumeIsolated {
+                    self?.isVideoLayerAttached = true
+                    // The ticker may not have fired while suspended: catch up on an expired timer.
+                    self?.tickSleepTimer()
+                }
             }
             .store(in: &cancellables)
 
