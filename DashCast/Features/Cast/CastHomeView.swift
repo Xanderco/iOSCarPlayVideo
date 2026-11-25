@@ -26,6 +26,7 @@ public struct CastHomeView: View {
     @State private var importErrorMessage: String?
     @State private var importSuccessMessage: String?
     @State private var localImportError: String?
+    @State private var showingManagePlaylists: Bool = false
 
     public init() {}
 
@@ -714,7 +715,30 @@ public struct CastHomeView: View {
                             .padding(.horizontal)
                         }
 
-                        ForEach(playlistStore.allChannels) { channel in
+                        if !playlistStore.hiddenGroups.isEmpty {
+                            Button {
+                                showingManagePlaylists = true
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "eye.slash.fill")
+                                        .font(.system(size: 12))
+                                    Text("\(playlistStore.hiddenGroups.count) groups hidden · Manage")
+                                        .font(.system(size: 12, weight: .semibold))
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 11))
+                                }
+                                .foregroundStyle(Color.dcAccent)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(Color.dcSurface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .padding(.horizontal)
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        ForEach(playlistStore.visibleChannels) { channel in
                             Button {
                                 playerService.load(channel: channel)
                                 showingPlaylistsSheet = false
@@ -775,6 +799,9 @@ public struct CastHomeView: View {
             .sheet(isPresented: $showingQRScanner) {
                 PlaylistQRImportView()
             }
+            .sheet(isPresented: $showingManagePlaylists) {
+                PlaylistManageSheet(playlistStore: playlistStore)
+            }
             .fileImporter(
                 isPresented: $showingPlaylistFileImporter,
                 allowedContentTypes: PlaylistStore.playlistContentTypes,
@@ -807,6 +834,12 @@ public struct CastHomeView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Done") { showingPlaylistsSheet = false }
                         .foregroundStyle(Color.dashYellow)
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Manage") { showingManagePlaylists = true }
+                        .foregroundStyle(Color.dcAccent)
+                        .accessibilityIdentifier("MediaSources_ManagePlaylistsButton")
                 }
             }
         }

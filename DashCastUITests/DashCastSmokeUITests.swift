@@ -125,6 +125,39 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testMediaSourcesManagePlaylistsSheetOpens() throws {
+        let row = app.buttons["Cast_MediaSourceRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
+        tapCenter(of: row)
+
+        XCTAssertTrue(
+            app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
+            "Media Sources sheet did not open"
+        )
+
+        let manageButton = app.buttons["MediaSources_ManagePlaylistsButton"]
+        XCTAssertTrue(manageButton.waitForExistence(timeout: 5), "Manage button missing")
+        manageButton.tap()
+
+        XCTAssertTrue(
+            app.navigationBars["Manage Playlists"].waitForExistence(timeout: 10),
+            "Manage Playlists sheet did not open"
+        )
+        XCTAssertTrue(
+            app.buttons["PlaylistManage_ExportBackupButton"].waitForExistence(timeout: 5),
+            "Export Backup button missing"
+        )
+        snapshot("03d-manage-playlists")
+
+        app.buttons["PlaylistManage_DoneButton"].tap()
+        XCTAssertTrue(
+            app.navigationBars["Media Sources"].waitForExistence(timeout: 5),
+            "Did not return to Media Sources"
+        )
+        app.navigationBars["Media Sources"].buttons["Done"].tap()
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
+    }
+
     func testBrowserSheetOpens() throws {
         let row = app.buttons["Cast_BrowserRow"]
         XCTAssertTrue(row.waitForExistence(timeout: 15), "Browser row missing")

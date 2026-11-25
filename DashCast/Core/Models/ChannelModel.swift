@@ -1,6 +1,6 @@
 import Foundation
 
-public struct ChannelModel: Codable, Identifiable, Hashable {
+public struct ChannelModel: Codable, Identifiable, Hashable, Sendable {
     public var id: String
     public var name: String
     public var streamURL: URL
@@ -28,7 +28,7 @@ public struct ChannelModel: Codable, Identifiable, Hashable {
     }
 }
 
-public struct IPTVPlaylist: Codable, Identifiable {
+public struct IPTVPlaylist: Codable, Identifiable, Equatable, Sendable {
     public var id: UUID
     public var title: String
     public var url: URL?
