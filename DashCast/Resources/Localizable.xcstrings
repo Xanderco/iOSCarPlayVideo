@@ -8177,6 +8177,40 @@
           }
         }
       }
+    },
+    "Enter Picture in Picture": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter Picture in Picture"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activar imagen dentro de imagen"
+          }
+        }
+      }
+    },
+    "Exit Picture in Picture": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit Picture in Picture"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salir de imagen dentro de imagen"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

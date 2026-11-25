@@ -92,6 +92,19 @@
 
 ## Log
 
+### 2026-11-25 07:23 (Bogotá) — CastEngine: Picture-in-Picture (PiP) & Per-Channel Resume Position Memory [DI-71]
+- **Picture-in-Picture (`AutomotiveVideoPlayerView.swift`, `VideoPlayerService.swift`)**:
+  - Added `PictureInPictureCoordinator` (`AVPictureInPictureControllerDelegate`) wired onto `PlayerLayerView` inside `CustomVideoPlayerRepresentable` with `canStartPictureInPictureAutomaticallyFromInline = true`.
+  - Added a PiP toggle button (`Player_PiPButton`) in `AutomotiveVideoPlayerView`'s player controls when `AVPictureInPictureController.isPictureInPictureSupported()` is true.
+  - Updated `VideoPlayerService.setPictureInPictureActive` so entering background while PiP is active keeps `isVideoLayerAttached = true`, detaching cleanly if PiP stops while still backgrounded.
+- **Playback Resume Store (`PlaybackResumeStore.swift`, `VideoPlayerService.swift`, `MediaServerStore.swift`)**:
+  - Created `PlaybackResumeStore` persisting resume timestamps for VOD streams and local videos (`duration > 0`), keying local files by filename (`file:<lastPathComponent>`) so resume survives app container moves and remote streams by URL.
+  - Auto-clears entries at `>= 95%` completion (`completionThreshold = 0.95`) and on `didPlayToEndTime`, ignores live streams (`duration <= 0`) and `CarPlayMirrorPlayback.channelID`, and evicts oldest entries past `maxEntries = 100`.
+  - Wired `VideoPlayerService.load(channel:shouldResume:)` (auto-seeking when `.readyToPlay` for `duration > 0`, saving periodically while playing and on `pause()`, `stop()`, `seek(to:)`, and `didEnterBackground`), while `MediaServerStore.play(...)` passes `shouldResume: false` so server-side resume stays authoritative.
+- **Tests & Localization**:
+  - Added `DashCastTests/PlaybackResumeTests.swift` (11 unit tests covering VOD/local resume, container moves, `>= 95%` auto-clear, live/mirror ignoring, eviction, `VideoPlayerService` auto-resume on bundled demo video, PiP background layer guard, and coordinator detach safety).
+  - Added EN/ES translations for `"Enter Picture in Picture"` and `"Exit Picture in Picture"` in `DashCast/Resources/Localizable.xcstrings`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
