@@ -92,6 +92,14 @@
 
 ## Log
 
+### 2026-11-25 09:20 (Bogotá) — Browser App Review Brand Cleanup & Functional Bookmarks/Toolbar [DI-73]
+- **App Review brand cleanup (`WebVideoBrowserView.swift`, `CarCastGuideModalView.swift`)**:
+  - Replaced hardcoded third-party streaming brand presets (`TikTok`, `YouTube`, `Instagram`, `Google`, `Tubi`, `Pluto TV`, `Twitch`, `Plex`, `Roku`, `Vimeo`, `Dailymotion`) with neutral quick-access tiles (`Web Search`, `Open Archive`, `Media Server`), and removed the `"YouTube"` copy reference in `CarCastGuideModalView`.
+- **User Bookmarks & Working Browser Controls (`WebBookmarkStore.swift`, `WebVideoBrowserView.swift`)**:
+  - Added `WebBookmarkStore` (`UserDefaults`-backed bookmarks + `UserAgentMode` mobile/desktop switcher + `resolveNavigationURL`).
+  - Wired all previously dead controls: Bookmarks home card & toolbar button (`bookmarksSheet`), Mobile/Desktop user-agent toggle (`Browser_UserAgentToggle`), and Options menu (`Add/Remove Bookmark`, `Reload Page`, `Open in Safari`, `Clear Website Data`).
+- **Tests & Localization**: Added `DashCastTests/WebBookmarkStoreTests.swift`, expanded `WebVideoExtractorTests` & `DashCastSmokeUITests.testBrowserSheetOpens`, and updated `Localizable.xcstrings` (EN/ES).
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

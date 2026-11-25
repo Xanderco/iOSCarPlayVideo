@@ -49,7 +49,7 @@ public struct CarCastGuideModalView: View {
                                     Spacer()
                                 }
 
-                                Text("Stream your IPTV, YouTube, or local video directly to any AirPlay-compatible car screen or wireless CarPlay adapter.")
+                                Text("Stream your IPTV playlists, web video, or local files directly to any AirPlay-compatible car screen or wireless CarPlay adapter.")
                                     .font(.system(size: 13))
                                     .foregroundStyle(Color.dashTextSecondary)
 

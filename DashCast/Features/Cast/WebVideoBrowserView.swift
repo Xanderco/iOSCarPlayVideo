@@ -21,9 +21,11 @@ public struct StreamingSource: Identifiable {
 
 public struct WebVideoBrowserView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @State private var urlString: String = ""
     @State private var isShowingHomeGrid: Bool = true
     @StateObject private var extractor = WebVideoExtractor()
+    @StateObject private var bookmarkStore = WebBookmarkStore.shared
     @State private var canGoBack: Bool = false
     @State private var canGoForward: Bool = false
     @State private var currentTitle: String = "Browser"
@@ -31,26 +33,51 @@ public struct WebVideoBrowserView: View {
     @State private var sendToCarAlertTitle: String = ""
     @State private var sendToCarAlertMessage: String = ""
     @State private var isExtracting: Bool = false
+    @State private var showingBookmarksSheet: Bool = false
 
     private var webView: WKWebView { extractor.webView }
 
+    /// Neutral, trademark-free quick-access destinations (App Review 4.1 / 5.2 compliant).
     public static let preaddedSources: [StreamingSource] = [
-        StreamingSource(id: "tiktok", name: "TikTok", url: "https://www.tiktok.com", iconSystemName: "music.note", tileColor: Color.black, badgeLetter: "TT"),
-        StreamingSource(id: "youtube", name: "YouTube", url: "https://m.youtube.com", iconSystemName: "play.rectangle.fill", tileColor: Color(red: 0.85, green: 0.1, blue: 0.1), badgeLetter: "YT"),
-        StreamingSource(id: "instagram", name: "Instagram", url: "https://www.instagram.com", iconSystemName: "camera.fill", tileColor: Color(red: 0.8, green: 0.15, blue: 0.5), badgeLetter: "IG"),
-        StreamingSource(id: "google", name: "Google", url: "https://www.google.com", iconSystemName: "magnifyingglass", tileColor: Color(red: 0.2, green: 0.5, blue: 0.9), badgeLetter: "G"),
-        StreamingSource(id: "tubi", name: "Tubi", url: "https://tubitv.com", iconSystemName: "play.square.fill", tileColor: Color(red: 0.85, green: 0.35, blue: 0.1), badgeLetter: "Tubi"),
-        StreamingSource(id: "plutotv", name: "Pluto TV", url: "https://pluto.tv", iconSystemName: "circle.circle.fill", tileColor: Color(red: 0.95, green: 0.75, blue: 0.0), badgeLetter: "Pluto"),
-        StreamingSource(id: "twitch", name: "Twitch", url: "https://m.twitch.tv", iconSystemName: "gamecontroller.fill", tileColor: Color(red: 0.5, green: 0.2, blue: 0.85), badgeLetter: "Twitch"),
-        StreamingSource(id: "plex", name: "Plex", url: "https://app.plex.tv", iconSystemName: "play.square.stack.fill", tileColor: Color(red: 0.85, green: 0.55, blue: 0.0), badgeLetter: "Plex"),
-        StreamingSource(id: "roku", name: "Roku", url: "https://therokuchannel.roku.com", iconSystemName: "plus.square.fill", tileColor: Color(red: 0.45, green: 0.1, blue: 0.65), badgeLetter: "Roku"),
-        StreamingSource(id: "vimeo", name: "Vimeo", url: "https://vimeo.com", iconSystemName: "v.circle.fill", tileColor: Color(red: 0.1, green: 0.65, blue: 0.85), badgeLetter: "Vimeo"),
-        StreamingSource(id: "dailymotion", name: "Dailymotion", url: "https://www.dailymotion.com", iconSystemName: "d.circle.fill", tileColor: Color(red: 0.3, green: 0.15, blue: 0.6), badgeLetter: "DM")
+        StreamingSource(
+            id: "web_search",
+            name: "Web Search",
+            url: "https://duckduckgo.com",
+            iconSystemName: "magnifyingglass",
+            tileColor: Color(red: 0.16, green: 0.36, blue: 0.62),
+            badgeLetter: "WEB"
+        ),
+        StreamingSource(
+            id: "public_archive",
+            name: "Open Archive",
+            url: "https://archive.org/details/movies",
+            iconSystemName: "film.stack",
+            tileColor: Color(red: 0.22, green: 0.24, blue: 0.30),
+            badgeLetter: "OPEN"
+        ),
+        StreamingSource(
+            id: "local_media_server",
+            name: "Media Server",
+            url: "http://localhost:8096",
+            iconSystemName: "server.rack",
+            tileColor: Color(red: 0.15, green: 0.42, blue: 0.34),
+            badgeLetter: "LAN"
+        )
     ]
 
     public init(initialURL: String = "") {
         self._urlString = State(initialValue: initialURL)
         self._isShowingHomeGrid = State(initialValue: initialURL.isEmpty)
+    }
+
+    private var activeNavigableURL: URL? {
+        guard !isShowingHomeGrid else { return nil }
+        return webView.url ?? WebBookmarkStore.normalizedHTTPURLString(from: urlString).flatMap(URL.init(string:))
+    }
+
+    private var isCurrentPageBookmarked: Bool {
+        guard let activeURL = activeNavigableURL?.absoluteString else { return false }
+        return bookmarkStore.isBookmarked(urlString: activeURL)
     }
 
     public var body: some View {
@@ -69,6 +96,7 @@ public struct WebVideoBrowserView: View {
                         canGoBack: $canGoBack,
                         canGoForward: $canGoForward,
                         title: $currentTitle,
+                        customUserAgent: bookmarkStore.userAgentMode.customUserAgent,
                         onNavigationCommitted: { extractor.resetReports() }
                     )
                     .ignoresSafeArea(edges: .bottom)
@@ -83,6 +111,9 @@ public struct WebVideoBrowserView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(sendToCarAlertMessage)
+            }
+            .sheet(isPresented: $showingBookmarksSheet) {
+                bookmarksSheet
             }
         }
     }
@@ -126,20 +157,68 @@ public struct WebVideoBrowserView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
             Button {
-                // Device toggle
+                bookmarkStore.toggleUserAgentMode()
+                webView.customUserAgent = bookmarkStore.userAgentMode.customUserAgent
+                if !isShowingHomeGrid {
+                    webView.reload()
+                }
             } label: {
-                Image(systemName: "iphone")
+                Image(systemName: bookmarkStore.userAgentMode.iconSystemName)
                     .font(.system(size: 15))
-                    .foregroundStyle(Color.dashYellow)
+                    .foregroundStyle(bookmarkStore.userAgentMode == .desktop ? Color.dashGreen : Color.dashYellow)
             }
+            .accessibilityLabel(bookmarkStore.userAgentMode.label)
+            .accessibilityIdentifier("Browser_UserAgentToggle")
 
-            Button {
-                // Options menu
+            Menu {
+                if let activeURL = activeNavigableURL {
+                    Button {
+                        let pageTitle = currentTitle.isEmpty || currentTitle == "Browser"
+                            ? (activeURL.host ?? activeURL.absoluteString)
+                            : currentTitle
+                        bookmarkStore.toggleBookmark(title: pageTitle, urlString: activeURL.absoluteString)
+                    } label: {
+                        Label(
+                            isCurrentPageBookmarked ? "Remove Bookmark" : "Add Bookmark",
+                            systemImage: isCurrentPageBookmarked ? "bookmark.slash" : "bookmark.fill"
+                        )
+                    }
+
+                    Button {
+                        webView.reload()
+                    } label: {
+                        Label("Reload Page", systemImage: "arrow.clockwise")
+                    }
+
+                    Button {
+                        openURL(activeURL)
+                    } label: {
+                        Label("Open in Safari", systemImage: "safari")
+                    }
+
+                    Divider()
+                }
+
+                Button {
+                    showingBookmarksSheet = true
+                } label: {
+                    Label("Bookmarks", systemImage: "book")
+                }
+
+                Button(role: .destructive) {
+                    Task { @MainActor in
+                        await clearBrowserData()
+                    }
+                } label: {
+                    Label("Clear Website Data", systemImage: "trash")
+                }
             } label: {
                 Image(systemName: "ellipsis.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(Color.dashYellow)
             }
+            .accessibilityLabel("Browser options")
+            .accessibilityIdentifier("Browser_OptionsMenu")
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -151,14 +230,11 @@ public struct WebVideoBrowserView: View {
     private var sourcesHomeGridView: some View {
         ScrollView {
             VStack(spacing: 20) {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 14), count: 4), spacing: 16) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 14), count: 3), spacing: 16) {
                     ForEach(Self.preaddedSources) { source in
                         Button {
-                            urlString = source.url
-                            isShowingHomeGrid = false
-                            extractor.resetReports()
                             if let url = URL(string: source.url) {
-                                webView.load(URLRequest(url: url))
+                                loadURL(url)
                             }
                         } label: {
                             VStack(spacing: 6) {
@@ -183,7 +259,7 @@ public struct WebVideoBrowserView: View {
                                     }
                                 }
 
-                                Text(source.name)
+                                Text(LocalizedStringKey(source.name))
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(Color.dashTextPrimary)
                                     .lineLimit(1)
@@ -196,26 +272,165 @@ public struct WebVideoBrowserView: View {
                 .padding(.top, 14)
 
                 // Bookmarks Card at bottom of grid
-                HStack(spacing: 12) {
-                    Image(systemName: "bookmark.fill")
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color.dashYellow)
+                Button {
+                    showingBookmarksSheet = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "bookmark.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color.dashYellow)
 
-                    Text("Bookmarks")
-                        .font(.system(size: 15, weight: .bold))
-                        .foregroundStyle(Color.dashTextPrimary)
+                        Text("Bookmarks")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(Color.dashTextPrimary)
 
-                    Spacer()
+                        Spacer()
 
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(Color.dashTextMuted)
+                        if !bookmarkStore.bookmarks.isEmpty {
+                            Text("\(bookmarkStore.bookmarks.count)")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(Color.dashTextSecondary)
+                        }
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(Color.dashTextMuted)
+                    }
+                    .padding(16)
+                    .background(Color.dashSurface)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .contentShape(Rectangle())
                 }
-                .padding(16)
-                .background(Color.dashSurface)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("Browser_BookmarksCard")
                 .padding(.horizontal, 16)
-                .padding(.bottom, 20)
+
+                if !bookmarkStore.bookmarks.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Saved Bookmarks")
+                            .font(.system(size: 13, weight: .bold))
+                            .foregroundStyle(Color.dashYellow)
+                            .padding(.horizontal, 20)
+
+                        VStack(spacing: 1) {
+                            ForEach(bookmarkStore.bookmarks.prefix(5)) { bookmark in
+                                Button {
+                                    if let url = bookmark.url {
+                                        loadURL(url)
+                                    }
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "globe")
+                                            .font(.system(size: 14))
+                                            .foregroundStyle(Color.dashYellow)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(bookmark.title)
+                                                .font(.system(size: 14, weight: .semibold))
+                                                .foregroundStyle(Color.dashTextPrimary)
+                                                .lineLimit(1)
+                                            Text(bookmark.hostDisplay)
+                                                .font(.system(size: 11))
+                                                .foregroundStyle(Color.dashTextSecondary)
+                                                .lineLimit(1)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.system(size: 12))
+                                            .foregroundStyle(Color.dashTextMuted)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .background(Color.dashSurface)
+                                    .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .padding(.horizontal, 16)
+                    }
+                    .padding(.bottom, 20)
+                } else {
+                    Spacer().frame(height: 10)
+                }
+            }
+        }
+    }
+
+    // MARK: - Bookmarks Sheet
+
+    private var bookmarksSheet: some View {
+        NavigationStack {
+            ZStack {
+                Color.dashBackground.ignoresSafeArea()
+
+                if bookmarkStore.bookmarks.isEmpty {
+                    VStack(spacing: 14) {
+                        Image(systemName: "bookmark")
+                            .font(.system(size: 38))
+                            .foregroundStyle(Color.dashYellow)
+                        Text("No Bookmarks Yet")
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundStyle(Color.dashTextPrimary)
+                        Text("Open any website and use Add Bookmark from the options menu to save it here.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.dashTextSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
+                } else {
+                    List {
+                        ForEach(bookmarkStore.bookmarks) { bookmark in
+                            Button {
+                                if let url = bookmark.url {
+                                    showingBookmarksSheet = false
+                                    loadURL(url)
+                                }
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(bookmark.title)
+                                        .font(.system(size: 15, weight: .semibold))
+                                        .foregroundStyle(Color.dashTextPrimary)
+                                    Text(bookmark.urlString)
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(Color.dashTextSecondary)
+                                        .lineLimit(1)
+                                }
+                                .padding(.vertical, 4)
+                            }
+                            .listRowBackground(Color.dashSurface)
+                        }
+                        .onDelete { offsets in
+                            bookmarkStore.removeBookmarks(at: offsets)
+                        }
+                    }
+                    .scrollContentBackground(.hidden)
+                }
+            }
+            .navigationTitle("Bookmarks")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Done") {
+                        showingBookmarksSheet = false
+                    }
+                    .foregroundStyle(Color.dashYellow)
+                }
+
+                if let activeURL = activeNavigableURL {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            let pageTitle = currentTitle.isEmpty || currentTitle == "Browser"
+                                ? (activeURL.host ?? activeURL.absoluteString)
+                                : currentTitle
+                            bookmarkStore.toggleBookmark(title: pageTitle, urlString: activeURL.absoluteString)
+                        } label: {
+                            Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "plus")
+                                .foregroundStyle(Color.dashYellow)
+                        }
+                        .accessibilityLabel(isCurrentPageBookmarked ? "Remove Bookmark" : "Add Bookmark")
+                    }
+                }
             }
         }
     }
@@ -255,13 +470,15 @@ public struct WebVideoBrowserView: View {
             }
 
             Button {
-                // Bookmarks
+                showingBookmarksSheet = true
             } label: {
-                Image(systemName: "bookmark")
+                Image(systemName: isCurrentPageBookmarked ? "bookmark.fill" : "bookmark")
                     .font(.system(size: 16))
-                    .foregroundStyle(Color.dashTextSecondary)
+                    .foregroundStyle(isCurrentPageBookmarked ? Color.dashYellow : Color.dashTextSecondary)
                     .frame(maxWidth: .infinity)
             }
+            .accessibilityLabel("Bookmarks")
+            .accessibilityIdentifier("Browser_BookmarksButton")
 
             Button {
                 sendCurrentVideoToCar()
@@ -287,7 +504,7 @@ public struct WebVideoBrowserView: View {
         )
     }
 
-    // MARK: - Send to car
+    // MARK: - Send to car & Navigation
 
     private func sendCurrentVideoToCar() {
         guard !isShowingHomeGrid else {
@@ -323,21 +540,26 @@ public struct WebVideoBrowserView: View {
     }
 
     private func navigateToInput() {
-        guard !urlString.isEmpty else { return }
-        var fullURL = urlString
-        if !fullURL.lowercased().hasPrefix("http://") && !fullURL.lowercased().hasPrefix("https://") {
-            if fullURL.contains(".") && !fullURL.contains(" ") {
-                fullURL = "https://" + fullURL
-            } else {
-                let encoded = fullURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? fullURL
-                fullURL = "https://www.google.com/search?q=\(encoded)"
-            }
-        }
+        guard let url = WebBookmarkStore.resolveNavigationURL(from: urlString) else { return }
+        loadURL(url)
+    }
+
+    private func loadURL(_ url: URL) {
+        urlString = url.absoluteString
         isShowingHomeGrid = false
         extractor.resetReports()
-        if let url = URL(string: fullURL) {
-            webView.load(URLRequest(url: url))
-        }
+        webView.customUserAgent = bookmarkStore.userAgentMode.customUserAgent
+        webView.load(URLRequest(url: url))
+    }
+
+    private func clearBrowserData() async {
+        await WKWebsiteDataStore.default().removeData(
+            ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
+            modifiedSince: .distantPast
+        )
+        sendToCarAlertTitle = "Browser Data Cleared"
+        sendToCarAlertMessage = "Cookies, cache, and website data have been cleared."
+        showingSendToCarAlert = true
     }
 }
 
@@ -347,6 +569,7 @@ public struct WebViewRepresentable: UIViewRepresentable {
     @Binding public var canGoBack: Bool
     @Binding public var canGoForward: Bool
     @Binding public var title: String
+    public var customUserAgent: String?
     /// Called when a new main-frame navigation commits (link taps included),
     /// so stale video reports from the previous page are discarded.
     public var onNavigationCommitted: (() -> Void)? = nil
@@ -357,13 +580,18 @@ public struct WebViewRepresentable: UIViewRepresentable {
 
     public func makeUIView(context: Context) -> WKWebView {
         webView.navigationDelegate = context.coordinator
+        webView.customUserAgent = customUserAgent
         // Media configuration (inline playback, AirPlay, autoplay) and the
         // video-detection user scripts are set up by WebVideoExtractor at init.
         webView.allowsBackForwardNavigationGestures = true
         return webView
     }
 
-    public func updateUIView(_ uiView: WKWebView, context: Context) {}
+    public func updateUIView(_ uiView: WKWebView, context: Context) {
+        if uiView.customUserAgent != customUserAgent {
+            uiView.customUserAgent = customUserAgent
+        }
+    }
 
     public class Coordinator: NSObject, WKNavigationDelegate {
         var parent: WebViewRepresentable
