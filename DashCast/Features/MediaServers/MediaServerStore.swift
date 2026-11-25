@@ -139,9 +139,16 @@ public final class MediaServerPlaybackCoordinator: ObservableObject {
         let playSessionId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         let channel = try Self.channel(for: fresh, account: account, client: client, playSessionId: playSessionId)
         let method: String
-        if case .directPlay = MediaStreamMode.preferred(for: fresh) { method = "DirectPlay" } else { method = "Transcode" }
+        let transcodeFallbackURL: URL?
+        if case .directPlay = MediaStreamMode.preferred(for: fresh) {
+            method = "DirectPlay"
+            transcodeFallbackURL = try? client.hlsTranscodeURL(for: fresh, playSessionId: playSessionId)
+        } else {
+            method = "Transcode"
+            transcodeFallbackURL = nil
+        }
 
-        player.load(channel: channel)
+        player.load(channel: channel, transcodeFallbackURL: transcodeFallbackURL)
 
         let resumeAt = resume ? fresh.resumePositionSeconds : 0
         if resumeAt > 1 {

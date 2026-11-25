@@ -26,6 +26,15 @@ public final class VideoPlayerService: ObservableObject {
     @Published public private(set) var isBuffering: Bool = false
     /// Human readable reason the current item failed to load/play, if any.
     @Published public private(set) var playbackError: String?
+    /// Container/codec diagnostic result for the latest failure, if any.
+    @Published public private(set) var probeResult: MediaContainerProbeResult?
+    /// Optional server-side HLS transcoding URL when direct playback fails.
+    @Published public private(set) var transcodeFallbackURL: URL?
+
+    /// True when playback failed and a server-side HLS transcode fallback URL can be retried.
+    public var canRetryViaServerTranscode: Bool {
+        playbackError != nil && transcodeFallbackURL != nil && probeResult?.canOfferServerTranscode == true
+    }
     /// False while the app is in the background. Views must detach the player from their
     /// AVPlayerLayer then, otherwise iOS pauses video items and audio stops when the phone locks.
     @Published public private(set) var isVideoLayerAttached: Bool = true
@@ -98,9 +107,11 @@ public final class VideoPlayerService: ObservableObject {
 
     // MARK: - Loading
 
-    public func load(channel: ChannelModel) {
+    public func load(channel: ChannelModel, transcodeFallbackURL: URL? = nil) {
         currentChannel = channel
         playbackError = nil
+        probeResult = nil
+        self.transcodeFallbackURL = transcodeFallbackURL ?? MediaServerClient.hlsTranscodeURL(fromDirectStreamURL: channel.streamURL)
         currentTime = 0
         duration = 0
         isBuffering = true
@@ -116,6 +127,25 @@ public final class VideoPlayerService: ObservableObject {
         updateNowPlayingInfo()
         UsageMetricsManager.shared.recordVideoPlayed()
         play()
+    }
+
+    /// Retries the active channel using its server-side HLS transcode fallback URL, if available.
+    @discardableResult
+    public func retryViaServerTranscode() -> Bool {
+        guard let current = currentChannel, let fallbackURL = transcodeFallbackURL else {
+            return false
+        }
+        let transcodedChannel = ChannelModel(
+            id: current.id,
+            name: current.name,
+            streamURL: fallbackURL,
+            groupTitle: current.groupTitle,
+            logoURL: current.logoURL,
+            isFavorite: current.isFavorite,
+            lastWatched: current.lastWatched
+        )
+        load(channel: transcodedChannel, transcodeFallbackURL: nil)
+        return true
     }
 
     /// Number of live per-item KVO + NotificationCenter observers. Exposed for tests.
@@ -137,7 +167,7 @@ public final class VideoPlayerService: ObservableObject {
             item.observe(\.status, options: [.new]) { [weak self] item, _ in
                 let status = item.status
                 let seconds = item.duration.seconds
-                let message = item.error.map(VideoPlayerService.describe)
+                let error = item.error
                 Task { @MainActor [weak self] in
                     guard let self, self.player.currentItem === item else { return }
                     switch status {
@@ -145,7 +175,7 @@ public final class VideoPlayerService: ObservableObject {
                         self.duration = seconds.isFinite ? seconds : 0
                         self.updateNowPlayingInfo()
                     case .failed:
-                        self.handleFailure(message ?? "This video could not be played.")
+                        self.handleFailure(error: error, fallbackMessage: "This video could not be played.")
                     default:
                         break
                     }
@@ -157,8 +187,9 @@ public final class VideoPlayerService: ObservableObject {
         itemNotificationTokens = [
             center.addObserver(forName: AVPlayerItem.failedToPlayToEndTimeNotification, object: item, queue: .main) { [weak self] note in
                 let error = note.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error
-                let message = error.map(VideoPlayerService.describe) ?? "Playback stopped unexpectedly."
-                Task { @MainActor [weak self] in self?.handleFailure(message) }
+                Task { @MainActor [weak self] in
+                    self?.handleFailure(error: error, fallbackMessage: "Playback stopped unexpectedly.")
+                }
             },
             center.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main) { [weak self] _ in
                 Task { @MainActor [weak self] in
@@ -169,11 +200,26 @@ public final class VideoPlayerService: ObservableObject {
         ]
     }
 
-    private func handleFailure(_ message: String) {
+    private func handleFailure(error: Error?, fallbackMessage: String) {
         wantsToPlay = false
         isBuffering = false
         isPlaying = false
-        playbackError = message
+        if let url = currentChannel?.streamURL {
+            let diagnosis = MediaContainerProbe.diagnose(
+                url: url,
+                error: error,
+                supportsServerTranscode: transcodeFallbackURL != nil
+            )
+            probeResult = diagnosis
+            if error != nil || diagnosis.container.isUnsupportedContainer {
+                playbackError = diagnosis.userFacingReason
+            } else {
+                playbackError = fallbackMessage
+            }
+        } else {
+            probeResult = nil
+            playbackError = error.map(VideoPlayerService.describe) ?? fallbackMessage
+        }
         player.pause()
     }
 
@@ -254,6 +300,8 @@ public final class VideoPlayerService: ObservableObject {
         removeItemObservers()
         currentChannel = nil
         playbackError = nil
+        probeResult = nil
+        transcodeFallbackURL = nil
         isBuffering = false
         currentTime = 0
         duration = 0

@@ -72,20 +72,45 @@ public struct AutomotiveVideoPlayerView: View {
                 .font(.system(size: 12))
                 .foregroundStyle(Color.dashTextSecondary)
                 .multilineTextAlignment(.center)
-                .lineLimit(3)
-            HStack(spacing: 12) {
-                Button("Retry") {
-                    if let channel = playerService.currentChannel {
-                        playerService.load(channel: channel)
+                .lineLimit(4)
+            VStack(spacing: 10) {
+                if playerService.canRetryViaServerTranscode {
+                    Button {
+                        playerService.retryViaServerTranscode()
+                    } label: {
+                        Label("Retry via Server Transcode", systemImage: "arrow.triangle.2.circlepath")
+                            .font(.system(size: 13, weight: .semibold))
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.dashYellow)
+                    .foregroundStyle(.black)
+                    .accessibilityIdentifier("Player_RetryTranscodeButton")
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.dashYellow)
-                .foregroundStyle(.black)
 
-                Button("Close") { playerService.stop() }
-                    .buttonStyle(.bordered)
-                    .tint(.white)
+                HStack(spacing: 12) {
+                    if playerService.canRetryViaServerTranscode {
+                        Button("Retry") {
+                            if let channel = playerService.currentChannel {
+                                playerService.load(channel: channel, transcodeFallbackURL: playerService.transcodeFallbackURL)
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.white)
+                    } else {
+                        Button("Retry") {
+                            if let channel = playerService.currentChannel {
+                                playerService.load(channel: channel, transcodeFallbackURL: playerService.transcodeFallbackURL)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.dashYellow)
+                        .foregroundStyle(.black)
+                    }
+
+                    Button("Close") { playerService.stop() }
+                        .buttonStyle(.bordered)
+                        .tint(.white)
+                }
             }
         }
         .padding()

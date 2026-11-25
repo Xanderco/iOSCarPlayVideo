@@ -302,15 +302,100 @@ public final class MediaServerClient: @unchecked Sendable {
             if let container { query.insert(URLQueryItem(name: "Container", value: container), at: 1) }
             return endpoint("/Videos/\(item.id)/stream", query: query)
         case .hls:
-            query.append(contentsOf: [
-                URLQueryItem(name: "VideoCodec", value: "h264,hevc"),
-                URLQueryItem(name: "AudioCodec", value: "aac,mp3,ac3,eac3"),
-                URLQueryItem(name: "SegmentContainer", value: "mp4"),
-                URLQueryItem(name: "TranscodingMaxAudioChannels", value: "2")
-            ])
+            query.append(contentsOf: Self.hlsTranscodeQueryItems)
             return endpoint("/Videos/\(item.id)/master.m3u8", query: query)
         }
     }
+
+    /// Explicit HLS transcoding URL for Jellyfin / Emby items, used as a fallback when direct play fails.
+    public func hlsTranscodeURL(for item: MediaItem, playSessionId: String? = nil) throws -> URL {
+        try streamURL(for: item, mode: .hls, playSessionId: playSessionId)
+    }
+
+    /// Builds a Plex Universal HLS transcode URL (`/video/:/transcode/universal/start.m3u8`) for an item.
+    public static func plexHLSTranscodeURL(baseURL: URL,
+                                           ratingKey: String,
+                                           token: String,
+                                           deviceId: String,
+                                           clientName: String = MediaServerClient.clientName) -> URL? {
+        guard !ratingKey.isEmpty, !token.isEmpty else { return nil }
+        guard var comps = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else { return nil }
+        var basePath = comps.path
+        while basePath.hasSuffix("/") { basePath.removeLast() }
+        comps.path = basePath + "/video/:/transcode/universal/start.m3u8"
+        comps.queryItems = [
+            URLQueryItem(name: "path", value: "/library/metadata/\(ratingKey)"),
+            URLQueryItem(name: "mediaIndex", value: "0"),
+            URLQueryItem(name: "partIndex", value: "0"),
+            URLQueryItem(name: "protocol", value: "hls"),
+            URLQueryItem(name: "directPlay", value: "0"),
+            URLQueryItem(name: "directStream", value: "1"),
+            URLQueryItem(name: "X-Plex-Client-Identifier", value: deviceId),
+            URLQueryItem(name: "X-Plex-Product", value: clientName),
+            URLQueryItem(name: "X-Plex-Token", value: token)
+        ]
+        return comps.url
+    }
+
+    /// Derives a server-side HLS transcode URL from an existing Jellyfin, Emby, or Plex direct-stream URL.
+    /// Returns `nil` when the URL is already HLS or not a recognized media-server stream URL.
+    public static func hlsTranscodeURL(fromDirectStreamURL url: URL, deviceId: String = "DashCast") -> URL? {
+        guard !MediaContainerProbe.isHLSURL(url),
+              var comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+
+        let queryItems = comps.queryItems ?? []
+        let pathParts = comps.path.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
+
+        // Jellyfin / Emby direct stream: /Videos/{id}/stream or /emby/Videos/{id}/stream
+        if let videosIndex = pathParts.firstIndex(where: { $0.caseInsensitiveCompare("Videos") == .orderedSame }),
+           videosIndex + 2 < pathParts.count,
+           pathParts[videosIndex + 2].caseInsensitiveCompare("stream") == .orderedSame {
+            var newParts = pathParts
+            newParts[videosIndex + 2] = "master.m3u8"
+            comps.path = "/" + newParts.joined(separator: "/")
+
+            var filtered = queryItems.filter {
+                let lower = $0.name.lowercased()
+                return lower != "static" && lower != "container"
+            }
+            if !filtered.contains(where: { $0.name == "DeviceId" }) {
+                filtered.append(URLQueryItem(name: "DeviceId", value: deviceId))
+            }
+            filtered.append(contentsOf: hlsTranscodeQueryItems)
+            comps.queryItems = filtered
+            return comps.url
+        }
+
+        // Plex direct stream carrying X-Plex-Token and a ratingKey or /library/metadata/{id}
+        if let token = queryItems.first(where: { $0.name == "X-Plex-Token" })?.value, !token.isEmpty {
+            let ratingKey: String? = {
+                if let metaIdx = pathParts.firstIndex(of: "metadata"), metaIdx + 1 < pathParts.count {
+                    return pathParts[metaIdx + 1]
+                }
+                return queryItems.first(where: { $0.name == "ratingKey" })?.value
+            }()
+            if let ratingKey, !ratingKey.isEmpty {
+                var baseComps = comps
+                baseComps.path = ""
+                baseComps.queryItems = nil
+                baseComps.fragment = nil
+                if let baseURL = baseComps.url {
+                    return plexHLSTranscodeURL(baseURL: baseURL, ratingKey: ratingKey, token: token, deviceId: deviceId)
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private static let hlsTranscodeQueryItems: [URLQueryItem] = [
+        URLQueryItem(name: "VideoCodec", value: "h264,hevc"),
+        URLQueryItem(name: "AudioCodec", value: "aac,mp3,ac3,eac3"),
+        URLQueryItem(name: "SegmentContainer", value: "mp4"),
+        URLQueryItem(name: "TranscodingMaxAudioChannels", value: "2")
+    ]
 
     public func imageURL(for item: MediaItem, maxWidth: Int = 400) -> URL? {
         guard let tag = item.imageTags?["Primary"] else { return nil }

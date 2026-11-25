@@ -545,12 +545,50 @@ struct MediaPlayLauncher: ViewModifier {
 struct MediaServerPlayerView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject private var coordinator = MediaServerPlaybackCoordinator.shared
+    @ObservedObject private var playerService = VideoPlayerService.shared
 
     var body: some View {
         ZStack(alignment: .topLeading) {
             Color.black.ignoresSafeArea()
-            VideoPlayer(player: VideoPlayerService.shared.player)
+            VideoPlayer(player: playerService.player)
                 .ignoresSafeArea()
+
+            if let error = playerService.playbackError {
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 32))
+                        .foregroundStyle(Color.dashOrange)
+                    Text("Can't play \(playerService.currentChannel?.name ?? "this video")")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                    Text(error)
+                        .font(.system(size: 12))
+                        .foregroundStyle(Color.dashTextSecondary)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(4)
+                    HStack(spacing: 12) {
+                        if playerService.canRetryViaServerTranscode {
+                            Button {
+                                playerService.retryViaServerTranscode()
+                            } label: {
+                                Label("Retry via Server Transcode", systemImage: "arrow.triangle.2.circlepath")
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.dashYellow)
+                            .foregroundStyle(.black)
+                            .accessibilityIdentifier("MediaServer_RetryTranscodeButton")
+                        }
+                        Button("Close") { dismiss() }
+                            .buttonStyle(.bordered)
+                            .tint(.white)
+                    }
+                }
+                .padding()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.75))
+            }
+
             Button {
                 dismiss()
             } label: {
