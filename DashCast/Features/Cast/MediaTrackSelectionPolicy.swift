@@ -228,7 +228,7 @@ public final class MediaTrackSelectionPolicy {
             let rawCode = option.extendedLanguageTag ?? option.locale?.identifier
             let normalizedCode = normalizedLanguageCode(rawCode)
             let isForced = option.hasMediaCharacteristic(.containsOnlyForcedSubtitles)
-            let isSDH = option.hasMediaCharacteristic(.describesMusicAndSound)
+            let isSDH = option.hasMediaCharacteristic(.describesMusicAndSoundForAccessibility)
                 || option.hasMediaCharacteristic(.transcribesSpokenDialogForAccessibility)
             let isDefault = option.hasMediaCharacteristic(.isMainProgramContent)
 
