@@ -92,6 +92,12 @@
 
 ## Log
 
+### 2026-11-25 10:20 (Bogotá) — Channel Search, Group Filter Chips & Refresh Feedback in Media Sources [DI-74]
+- **Added `PlaylistChannelFilter` (`DashCast/Features/Cast/PlaylistChannelFilter.swift`)**: Case-insensitive channel search across `name` and `groupTitle`, scope filtering (`All`, `Favorites`, or specific `groupTitle`), and ordered group extraction.
+- **Added refresh summary tracking to `PlaylistStore`**: Published `isRefreshing` and `lastRefreshSummary` (`RefreshSummary` with `refreshedCount`, `failedCount`, `lastError`, `completedAt`) returned by `@discardableResult refreshAll()`.
+- **Updated `CastHomeView.mediaSourcePlaylistsSheet`**: Added search field (`MediaSources_SearchField`), horizontal scrollable filter chips (`All`, `Favorites`, and per-group chips), empty-filter/favorites states with `Clear filters`, header refresh button, and `refreshFeedbackBanner`.
+- **Tests & Localization**: Added `DashCastTests/PlaylistChannelFilterTests.swift`, expanded `DashCastTests/PlaylistStoreTests.swift` for refresh summaries, added `testMediaSourcesChannelSearchAndFilterChips` to `DashCastUITests/DashCastSmokeUITests.swift`, and added EN/ES strings to `Localizable.xcstrings`. Verified via GitHub Actions CI (`DashCast CI`).
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

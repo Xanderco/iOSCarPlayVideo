@@ -354,8 +354,32 @@ final class PlaylistStoreTests: XCTestCase {
         try store.addPlaylist(data: data(Self.threeChannels), sourceURL: nil, title: "Local")
 
         PlaylistStubURLProtocol.stub(url, status: 200, body: Self.threeChannels)
-        await store.refreshAll()
+        let summary = await store.refreshAll()
         XCTAssertEqual(store.playlists.map(\.title), ["Mine", "Local"])
         XCTAssertEqual(store.playlists[0].channels.map(\.name), ["Movie A", "News Two", "Movie B"])
+        XCTAssertEqual(summary.refreshedCount, 1)
+        XCTAssertEqual(summary.failedCount, 0)
+        XCTAssertNil(summary.lastError)
+        XCTAssertEqual(store.lastRefreshSummary, summary)
+        XCTAssertFalse(store.isRefreshing)
+    }
+
+    func testRefreshAllRecordsFailureSummaryWhenServerErrors() async throws {
+        let store = makeStore(makeEnv())
+        let goodURL = "https://lists.example.com/good.m3u"
+        let badURL = "https://lists.example.com/bad.m3u"
+        PlaylistStubURLProtocol.stub(goodURL, status: 200, body: Self.twoChannels)
+        PlaylistStubURLProtocol.stub(badURL, status: 200, body: Self.threeChannels)
+        try await store.importPlaylist(from: goodURL, title: "Good")
+        try await store.importPlaylist(from: badURL, title: "Bad")
+
+        PlaylistStubURLProtocol.stub(badURL, status: 503, body: "Unavailable")
+        let summary = await store.refreshAll()
+        XCTAssertEqual(summary.refreshedCount, 1)
+        XCTAssertEqual(summary.failedCount, 1)
+        XCTAssertEqual(summary.lastError, PlaylistStore.ImportError.httpStatus(503).errorDescription)
+        XCTAssertTrue(summary.hasURLPlaylists)
+        XCTAssertEqual(store.lastRefreshSummary, summary)
+        XCTAssertFalse(store.isRefreshing)
     }
 }
