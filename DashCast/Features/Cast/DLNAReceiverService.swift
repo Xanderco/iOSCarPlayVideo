@@ -684,7 +684,7 @@ public final class DLNAReceiverService: ObservableObject {
     private var ssdpResponder: SSDPMulticastResponder?
     private var cancellables = Set<AnyCancellable>()
 
-    public init(
+    init(
         defaults: UserDefaults = .standard,
         httpPort: UInt16 = DLNAProtocol.defaultHTTPPort,
         parkedEvaluator: ParkedStateEvaluator = ParkedStateEvaluator(),
@@ -815,7 +815,7 @@ public final class DLNAReceiverService: ObservableObject {
     // MARK: - Motion / Parked Guard
 
     @discardableResult
-    public func updateMotionState(speedKmh: Double?, automotiveMoving: Bool?, at now: Date = Date()) -> VehicleMotionState {
+    func updateMotionState(speedKmh: Double?, automotiveMoving: Bool?, at now: Date = Date()) -> VehicleMotionState {
         let state = parkedEvaluator.update(speedKmh: speedKmh, automotiveMoving: automotiveMoving, at: now)
         handleMotionState(state)
         return state
