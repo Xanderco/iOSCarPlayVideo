@@ -8,9 +8,9 @@ public final class PlaybackResumeStore: ObservableObject {
     public static let shared = PlaybackResumeStore()
 
     /// Completion ratio at or above which resume memory is cleared automatically.
-    public static let completionThreshold: Double = 0.95
-    public static let defaultMaxEntries: Int = 100
-    static let defaultStorageKey = "dashcast_playback_resume_positions"
+    nonisolated public static let completionThreshold: Double = 0.95
+    nonisolated public static let defaultMaxEntries: Int = 100
+    nonisolated public static let defaultStorageKey = "dashcast_playback_resume_positions"
 
     public struct Entry: Codable, Equatable, Sendable {
         public let key: String
