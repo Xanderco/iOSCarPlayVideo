@@ -8,6 +8,7 @@ public struct ChannelModel: Codable, Identifiable, Hashable {
     public var logoURL: URL?
     public var isFavorite: Bool
     public var lastWatched: Date?
+    public var httpHeaders: [String: String]?
 
     public init(
         id: String = UUID().uuidString,
@@ -16,7 +17,8 @@ public struct ChannelModel: Codable, Identifiable, Hashable {
         groupTitle: String = "General",
         logoURL: URL? = nil,
         isFavorite: Bool = false,
-        lastWatched: Date? = nil
+        lastWatched: Date? = nil,
+        httpHeaders: [String: String]? = nil
     ) {
         self.id = id
         self.name = name
@@ -25,6 +27,7 @@ public struct ChannelModel: Codable, Identifiable, Hashable {
         self.logoURL = logoURL
         self.isFavorite = isFavorite
         self.lastWatched = lastWatched
+        self.httpHeaders = httpHeaders
     }
 }
 

@@ -216,4 +216,70 @@ final class IPTVParserTests: XCTestCase {
         XCTAssertEqual(channels.first?.name, "Spaced Out")
         XCTAssertEqual(channels.first?.streamURL.absoluteString, "https://s.example.com/spaced.m3u8")
     }
+
+    // MARK: - HTTP Headers (#EXTVLCOPT / #KODIPROP / Pipe options)
+
+    func testExtvlcoptAndKodipropHeadersAreParsedAndDoNotLeak() {
+        let m3u = """
+        #EXTM3U
+        #EXTINF:-1 group-title="Sports",Protected Sports
+        #EXTVLCOPT:http-user-agent=DashCastPlayer/2.0 (iOS)
+        #EXTVLCOPT:http-referrer=https://sports.example.com/watch
+        #EXTVLCOPT:http-origin=https://sports.example.com
+        https://cdn.example.com/live/sports.m3u8
+        #EXTINF:-1 group-title="News",Open News
+        https://cdn.example.com/live/news.m3u8
+        #EXTINF:-1 group-title="Docs",Kodi Header Stream
+        #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=KodiClient%2F1.0&Authorization=Bearer%20tok123
+        https://cdn.example.com/live/docs.m3u8
+        """
+
+        let channels = parse(m3u)
+        XCTAssertEqual(channels.count, 3)
+
+        XCTAssertEqual(channels[0].httpHeaders?["User-Agent"], "DashCastPlayer/2.0 (iOS)")
+        XCTAssertEqual(channels[0].httpHeaders?["Referer"], "https://sports.example.com/watch")
+        XCTAssertEqual(channels[0].httpHeaders?["Origin"], "https://sports.example.com")
+
+        XCTAssertNil(channels[1].httpHeaders, "Headers from previous channel must not leak")
+
+        XCTAssertEqual(channels[2].httpHeaders?["User-Agent"], "KodiClient/1.0")
+        XCTAssertEqual(channels[2].httpHeaders?["Authorization"], "Bearer tok123")
+    }
+
+    func testPipeSuffixedStreamHeadersStripSuffixAndOverrideTagHeaders() {
+        let m3u = """
+        #EXTM3U
+        #EXTINF:-1,Pipe Channel
+        #EXTVLCOPT:http-user-agent=OldAgent
+        https://cdn.example.com/stream.m3u8|User-Agent=CustomAgent%2F3.0&Referer=https%3A%2F%2Fportal.example.com%2F
+        #EXTINF:-1,Plain Channel
+        https://cdn.example.com/plain.m3u8
+        """
+
+        let channels = parse(m3u)
+        XCTAssertEqual(channels.count, 2)
+        XCTAssertEqual(channels[0].streamURL.absoluteString, "https://cdn.example.com/stream.m3u8")
+        XCTAssertEqual(channels[0].httpHeaders?["User-Agent"], "CustomAgent/3.0")
+        XCTAssertEqual(channels[0].httpHeaders?["Referer"], "https://portal.example.com/")
+        XCTAssertNil(channels[1].httpHeaders)
+    }
+
+    func testChannelModelLegacyJSONDecodesWithoutHttpHeaders() throws {
+        let legacyJSON = """
+        {
+          "id": "ch-legacy-1",
+          "name": "Legacy Stream",
+          "streamURL": "https://cdn.example.com/legacy.m3u8",
+          "groupTitle": "General",
+          "isFavorite": true
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(ChannelModel.self, from: legacyJSON)
+        XCTAssertEqual(decoded.id, "ch-legacy-1")
+        XCTAssertEqual(decoded.name, "Legacy Stream")
+        XCTAssertTrue(decoded.isFavorite)
+        XCTAssertNil(decoded.httpHeaders)
+    }
 }

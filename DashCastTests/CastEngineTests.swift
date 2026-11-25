@@ -1,4 +1,5 @@
 import XCTest
+import AVFoundation
 @testable import DashCast
 
 final class CastEngineTests: XCTestCase {
@@ -62,5 +63,29 @@ final class CastEngineTests: XCTestCase {
         }
         // Stable ids so favorites/recents survive re-reads.
         XCTAssertEqual(IPTVParser.samplePlaylist.map(\.id), playlist.map(\.id))
+    }
+
+    func testVideoPlayerAssetOptionsForwardCustomHTTPHeaders() {
+        let plain = ChannelModel(
+            name: "Plain",
+            streamURL: URL(string: "https://example.com/plain.m3u8")!
+        )
+        XCTAssertNil(VideoPlayerService.assetOptions(for: plain))
+
+        let headers = [
+            "User-Agent": "DashCast/1.0",
+            "Referer": "https://origin.example.com/"
+        ]
+        let headered = ChannelModel(
+            name: "Headered",
+            streamURL: URL(string: "https://example.com/protected.m3u8")!,
+            httpHeaders: headers
+        )
+        let options = VideoPlayerService.assetOptions(for: headered)
+        let attached = options?[VideoPlayerService.httpHeaderFieldsOptionKey] as? [String: String]
+        XCTAssertEqual(attached, headers)
+
+        let asset = VideoPlayerService.makeAsset(for: headered)
+        XCTAssertEqual(asset.url, headered.streamURL)
     }
 }
