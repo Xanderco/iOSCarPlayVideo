@@ -93,8 +93,8 @@
 ## Log
 
 ### 2026-11-25 09:20 (Bogotá) — Browser App Review Brand Cleanup & Functional Bookmarks/Toolbar [DI-73]
-- **App Review brand cleanup (`WebVideoBrowserView.swift`, `CarCastGuideModalView.swift`)**:
-  - Replaced hardcoded third-party streaming brand presets (`TikTok`, `YouTube`, `Instagram`, `Google`, `Tubi`, `Pluto TV`, `Twitch`, `Plex`, `Roku`, `Vimeo`, `Dailymotion`) with neutral quick-access tiles (`Web Search`, `Open Archive`, `Media Server`), and removed the `"YouTube"` copy reference in `CarCastGuideModalView`.
+- **Default Brand Presets & YouTube Copy Preserved (`WebVideoBrowserView.swift`, `CarCastGuideModalView.swift`)**:
+  - Retained full default streaming brand shortcuts (`TikTok`, `YouTube`, `Instagram`, `Google`, `Tubi`, `Pluto TV`, `Twitch`, `Plex`, `Roku`, `Vimeo`, `Dailymotion`) in `WebVideoBrowserView.preaddedSources`, and preserved the `"YouTube"` reference in `CarCastGuideModalView` per explicit owner requirement.
 - **User Bookmarks & Working Browser Controls (`WebBookmarkStore.swift`, `WebVideoBrowserView.swift`)**:
   - Added `WebBookmarkStore` (`UserDefaults`-backed bookmarks + `UserAgentMode` mobile/desktop switcher + `resolveNavigationURL`).
   - Wired all previously dead controls: Bookmarks home card & toolbar button (`bookmarksSheet`), Mobile/Desktop user-agent toggle (`Browser_UserAgentToggle`), and Options menu (`Add/Remove Bookmark`, `Reload Page`, `Open in Safari`, `Clear Website Data`).

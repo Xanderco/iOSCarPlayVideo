@@ -51,10 +51,9 @@ final class WebVideoExtractorTests: XCTestCase {
         for drm in ["netflix", "prime", "hulu", "disney", "hbomax", "appletv", "peacock", "paramount", "crunchyroll"] {
             XCTAssertFalse(ids.contains(drm), "\(drm) should not be a preset")
         }
-        // App Review 4.1 / 5.2 compliance: no third-party streaming brand shortcuts
+        // Owner directive: third-party streaming brand presets are default shortcuts
         for brand in ["tiktok", "youtube", "instagram", "google", "tubi", "plutotv", "twitch", "plex", "roku", "vimeo", "dailymotion"] {
-            XCTAssertFalse(ids.contains(brand), "\(brand) should not be a preset")
-            XCTAssertFalse(names.contains(brand), "\(brand) should not be a preset name")
+            XCTAssertTrue(ids.contains(brand), "\(brand) should be a default preset")
         }
     }
 

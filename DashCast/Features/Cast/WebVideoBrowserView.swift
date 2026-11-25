@@ -37,32 +37,18 @@ public struct WebVideoBrowserView: View {
 
     private var webView: WKWebView { extractor.webView }
 
-    /// Neutral, trademark-free quick-access destinations (App Review 4.1 / 5.2 compliant).
     public static let preaddedSources: [StreamingSource] = [
-        StreamingSource(
-            id: "web_search",
-            name: "Web Search",
-            url: "https://duckduckgo.com",
-            iconSystemName: "magnifyingglass",
-            tileColor: Color(red: 0.16, green: 0.36, blue: 0.62),
-            badgeLetter: "WEB"
-        ),
-        StreamingSource(
-            id: "public_archive",
-            name: "Open Archive",
-            url: "https://archive.org/details/movies",
-            iconSystemName: "film.stack",
-            tileColor: Color(red: 0.22, green: 0.24, blue: 0.30),
-            badgeLetter: "OPEN"
-        ),
-        StreamingSource(
-            id: "local_media_server",
-            name: "Media Server",
-            url: "http://localhost:8096",
-            iconSystemName: "server.rack",
-            tileColor: Color(red: 0.15, green: 0.42, blue: 0.34),
-            badgeLetter: "LAN"
-        )
+        StreamingSource(id: "tiktok", name: "TikTok", url: "https://www.tiktok.com", iconSystemName: "music.note", tileColor: Color.black, badgeLetter: "TT"),
+        StreamingSource(id: "youtube", name: "YouTube", url: "https://m.youtube.com", iconSystemName: "play.rectangle.fill", tileColor: Color(red: 0.85, green: 0.1, blue: 0.1), badgeLetter: "YT"),
+        StreamingSource(id: "instagram", name: "Instagram", url: "https://www.instagram.com", iconSystemName: "camera.fill", tileColor: Color(red: 0.8, green: 0.15, blue: 0.5), badgeLetter: "IG"),
+        StreamingSource(id: "google", name: "Google", url: "https://www.google.com", iconSystemName: "magnifyingglass", tileColor: Color(red: 0.2, green: 0.5, blue: 0.9), badgeLetter: "G"),
+        StreamingSource(id: "tubi", name: "Tubi", url: "https://tubitv.com", iconSystemName: "play.square.fill", tileColor: Color(red: 0.85, green: 0.35, blue: 0.1), badgeLetter: "Tubi"),
+        StreamingSource(id: "plutotv", name: "Pluto TV", url: "https://pluto.tv", iconSystemName: "circle.circle.fill", tileColor: Color(red: 0.95, green: 0.75, blue: 0.0), badgeLetter: "Pluto"),
+        StreamingSource(id: "twitch", name: "Twitch", url: "https://m.twitch.tv", iconSystemName: "gamecontroller.fill", tileColor: Color(red: 0.5, green: 0.2, blue: 0.85), badgeLetter: "Twitch"),
+        StreamingSource(id: "plex", name: "Plex", url: "https://app.plex.tv", iconSystemName: "play.square.stack.fill", tileColor: Color(red: 0.85, green: 0.55, blue: 0.0), badgeLetter: "Plex"),
+        StreamingSource(id: "roku", name: "Roku", url: "https://therokuchannel.roku.com", iconSystemName: "plus.square.fill", tileColor: Color(red: 0.45, green: 0.1, blue: 0.65), badgeLetter: "Roku"),
+        StreamingSource(id: "vimeo", name: "Vimeo", url: "https://vimeo.com", iconSystemName: "v.circle.fill", tileColor: Color(red: 0.1, green: 0.65, blue: 0.85), badgeLetter: "Vimeo"),
+        StreamingSource(id: "dailymotion", name: "Dailymotion", url: "https://www.dailymotion.com", iconSystemName: "d.circle.fill", tileColor: Color(red: 0.3, green: 0.15, blue: 0.6), badgeLetter: "DM")
     ]
 
     public init(initialURL: String = "") {
