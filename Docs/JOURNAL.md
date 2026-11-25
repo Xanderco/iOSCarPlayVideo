@@ -92,6 +92,17 @@
 
 ## Log
 
+### 2026-11-24 19:08 (Bogotá) — Cabin Haptics Engine & Steering Vibration Signaler [CARAA-67] [DI-63]
+- **Added `CabinHapticsEngine.swift` (`DashCast/Core/Haptics/CabinHapticsEngine.swift`)**:
+  - Calibrated CoreHaptics waveforms (`CabinHapticWaveformSpec` + `CHHapticPattern` builder) across 5 pattern families (`Chime Pulse`, `Warning Thud`, `Launch Stage Rumble`, `Buffer Cadence`, `Tactile Detent`) for 9 cues (`streamBuffering`, `streamReady`, `carConnected`, `carDisconnected`, `speedWarning`, `harshDrivingEvent`, `launchStaged`, `launchReady`, `blindSelect`).
+  - Implemented deterministic `CabinHapticsPolicy` for motion-aware suppression while driving (`>= 8 km/h`), critical safety/disconnect bypass, Quiet Mode safety-only override, per-cue cooldown deduplication, speed-threshold alerting, intensity scaling, and UIKit haptic generator fallback.
+- **Added `CabinHapticsSheet.swift` & `SoundsHomeView.swift` entry**:
+  - Interactive Cabin Haptics console in Sounds tab (`Sounds_CabinHapticsRow`) with master/motion/quiet/speed-warning controls, intensity slider, waveform test pad, and recent cue log.
+- **Wired app telemetry & playback hooks**:
+  - Integrated into `VideoPlayerService` (buffering/ready), `CarVideoOutputController` (display connect/disconnect + motion guard), `DriveLocationService` (live speed telemetry), and `DrivingScorer` (harsh driving events).
+- **Tests & Localization**:
+  - Added 12 unit tests in `DashCastTests/CabinHapticsEngineTests.swift`, `testCabinHapticsSheetOpens` in `DashCastUITests/DashCastSmokeUITests.swift`, and EN/ES keys in `Localizable.xcstrings`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

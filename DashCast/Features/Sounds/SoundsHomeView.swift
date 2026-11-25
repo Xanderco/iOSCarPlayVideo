@@ -8,6 +8,7 @@ public struct SoundsHomeView: View {
     @State private var disconnectionSoundId: String = "airline_dingy"
     @State private var homeArrivalSoundId: String = "welcome_traveler"
     @State private var showingShortcutsGuide: Bool = false
+    @State private var showingCabinHaptics: Bool = false
     @State private var showingSoundPickerForSlot: String? = nil
     @State private var soundSearchText: String = ""
     @State private var pickerCategory: String = "Recommend"
@@ -77,6 +78,9 @@ public struct SoundsHomeView: View {
             .sheet(isPresented: $showingShortcutsGuide) {
                 ShortcutsGuideView()
             }
+            .sheet(isPresented: $showingCabinHaptics) {
+                CabinHapticsSheet()
+            }
             .sheet(item: Binding(
                 get: { showingSoundPickerForSlot.map { SoundSlotIdentifiable(id: $0) } },
                 set: { showingSoundPickerForSlot = $0?.id }
@@ -112,8 +116,54 @@ public struct SoundsHomeView: View {
                 currentSoundId: homeArrivalSoundId,
                 slotKey: "arrival"
             )
+
+            // Cabin Haptics & Steering Cues Card
+            cabinHapticsCard
         }
         .padding(.horizontal, 16)
+    }
+
+    private var cabinHapticsCard: some View {
+        Button {
+            showingCabinHaptics = true
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    Circle()
+                        .fill(Color.dcAccentSoft)
+                        .frame(width: 46, height: 46)
+
+                    Image(systemName: "waveform.path")
+                        .font(.system(size: 20, weight: .semibold))
+                        .foregroundStyle(Color.dcAccent)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Cabin Haptics")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundStyle(Color.dashTextPrimary)
+
+                    Text("Tactile waveforms & motion-safe steering cues")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.dashTextSecondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Color.dashTextMuted)
+            }
+            .padding(14)
+            .background(Color.dashSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(Color.dashBorder, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("Sounds_CabinHapticsRow")
     }
 
     private func triggerCard(

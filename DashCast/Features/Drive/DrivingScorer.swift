@@ -101,6 +101,7 @@ public final class DrivingScorer: ObservableObject {
         }
         lastEventTime[type] = time
         recordHarshEvent(type)
+        CabinHapticsEngine.shared.trigger(.harshDrivingEvent, now: time)
     }
 
     public func recordHarshEvent(_ type: HarshEventType) {

@@ -38,6 +38,7 @@ final class CarVideoOutputController: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var panelVisible = false
     private var outputStartedAt: Date?
+    private var wasOutputActive = false
 
     var isBroadcasting: Bool { broadcastStatus.isLive }
 
@@ -170,9 +171,11 @@ final class CarVideoOutputController: ObservableObject {
     // MARK: Parked-only guard
 
     private func handleMotion(_ state: VehicleMotionState) {
+        CabinHapticsEngine.shared.updateMotionState(isMoving: state == .moving)
         if state == .moving, isOutputActive {
             pausedForMotion = true
             pauseHandler?()
+            CabinHapticsEngine.shared.trigger(.speedWarning)
         } else if state != .moving {
             pausedForMotion = false
         }
@@ -181,7 +184,12 @@ final class CarVideoOutputController: ObservableObject {
 
     private func outputDidChange() {
         updateMonitoring()
-        if isOutputActive, parkedGuard.state == .moving {
+        let active = isOutputActive
+        if active != wasOutputActive {
+            wasOutputActive = active
+            CabinHapticsEngine.shared.trigger(active ? .carConnected : .carDisconnected)
+        }
+        if active, parkedGuard.state == .moving {
             pausedForMotion = true
             pauseHandler?()
         }
