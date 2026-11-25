@@ -14,7 +14,9 @@ public struct CastHomeView: View {
     @State private var showingCastGuide: Bool = false
     @State private var showingFavorites: Bool = false
     @State private var showingBroadcastPicker: Bool = false
+    @State private var showingDLNAReceiver: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
+    @StateObject private var dlnaService = DLNAReceiverService.shared
     @State private var isFullscreenPlayer: Bool = false
     @State private var m3uURLInput: String = ""
     @StateObject private var playlistStore = PlaylistStore.shared
@@ -62,6 +64,7 @@ public struct CastHomeView: View {
             }
             .navigationTitle("Cast")
             .task {
+                dlnaService.startIfEnabled()
                 // App Store screenshot launch arguments (no effect on normal launches).
                 if ScreenshotLaunch.playDemoVideo, playerService.currentChannel == nil,
                    let demo = playlistStore.sampleChannels.first {
@@ -157,6 +160,13 @@ public struct CastHomeView: View {
                     LifetimePaywallView().environmentObject(appState)
                 }
             }
+            .sheet(isPresented: $showingDLNAReceiver) {
+                DLNAReceiverSheet()
+                    // The tab-level paywall can't present over this sheet, so present it here too.
+                    .sheet(isPresented: $appState.showPaywall) {
+                        LifetimePaywallView().environmentObject(appState)
+                    }
+            }
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
                 guard let newItem = newItem else { return }
                 Task {
@@ -238,6 +248,21 @@ public struct CastHomeView: View {
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("Cast_BrowserRow")
+
+            Divider().background(Color.dashBorder.opacity(0.6))
+
+            // Row 5: DLNA / UPnP Receiver
+            Button {
+                showingDLNAReceiver = true
+            } label: {
+                menuRow(
+                    icon: "antenna.radiowaves.left.and.right",
+                    title: "DLNA Receiver",
+                    subtitle: dlnaService.isEnabled ? "Discoverable on local Wi-Fi" : "Receive streams over Wi-Fi"
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_DLNAReceiverRow")
         }
         .background(Color.dashSurface)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))

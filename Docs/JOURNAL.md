@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-25 03:08 (Bogotá) — DLNA / UPnP Local Network Receiver & Auto-Discovery [DI-67]
+- **Added `DLNAReceiverService.swift`** (`DashCast/Features/Cast/`): SSDP (`239.255.255.250:1900`) M-SEARCH / NOTIFY (`ssdp:alive` & `ssdp:byebye`) responder, UPnP `MediaRenderer:1` device & `AVTransport:1` / `RenderingControl:1` SCPD XML descriptors, and SOAP `SetAVTransportURI` / `Play` / `Pause` / `Stop` / `GetTransportInfo` / `GetPositionInfo` / `GetMute` / `SetMute` parser with strict `http`/`https` URL validation feeding `VideoPlayerService.shared`, gated by `EntitlementGate` and `ParkedStateEvaluator`.
+- **Added `DLNAReceiverSheet.swift`** and wired a **DLNA Receiver** row in `CastHomeView.swift`: discoverability toggle, customizable friendly car display name, UPnP descriptor URL copy card, motion-lock banner, and incoming stream queue controls with full EN/ES localization in `Localizable.xcstrings`.
+- **Tests**: Added `DLNAReceiverTests.swift` (SSDP parsing/formatting, XML escaping, SOAP parsing & unsafe scheme rejection, parked-guard & entitlement enforcement) and `testDLNAReceiverSheetOpens` in `DashCastSmokeUITests.swift`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
