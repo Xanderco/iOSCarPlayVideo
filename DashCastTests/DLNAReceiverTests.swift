@@ -286,4 +286,85 @@ final class DLNAReceiverTests: XCTestCase {
         XCTAssertFalse(service.blockedByEntitlement)
         XCTAssertEqual(loadedChannels.count, 1)
     }
+
+    func testHTTPRoutesAndSOAPControlResponses() {
+        let suite = "DLNAReceiverTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        addTeardownBlock { defaults.removePersistentDomain(forName: suite) }
+
+        var mutedState = false
+        let service = DLNAReceiverService(
+            defaults: defaults,
+            entitlementChecker: { true },
+            externalParkedChecker: { true },
+            playbackHandler: { _ in },
+            muteHandler: { mutedState = $0 },
+            observeSharedController: false
+        )
+        service.friendlyName = "Roadster Display"
+
+        let descResp = String(decoding: service.handleHTTPRequest(method: "GET", path: "/description.xml", headers: [:], body: Data(), remoteAddress: nil), as: UTF8.self)
+        XCTAssertTrue(descResp.hasPrefix("HTTP/1.1 200 OK\r\n"))
+        XCTAssertTrue(descResp.contains("<friendlyName>Roadster Display</friendlyName>"))
+
+        let avScpd = String(decoding: service.handleHTTPRequest(method: "GET", path: "/upnp/AVTransport.xml", headers: [:], body: Data(), remoteAddress: nil), as: UTF8.self)
+        XCTAssertTrue(avScpd.contains("SetAVTransportURI"))
+
+        let rcScpd = String(decoding: service.handleHTTPRequest(method: "GET", path: "/upnp/RenderingControl.xml", headers: [:], body: Data(), remoteAddress: nil), as: UTF8.self)
+        XCTAssertTrue(rcScpd.contains("SetMute"))
+
+        let notFound = String(decoding: service.handleHTTPRequest(method: "GET", path: "/unknown", headers: [:], body: Data(), remoteAddress: nil), as: UTF8.self)
+        XCTAssertTrue(notFound.hasPrefix("HTTP/1.1 404 Not Found\r\n"))
+
+        let setURI = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+          <s:Body>
+            <u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
+              <InstanceID>0</InstanceID>
+              <CurrentURI>https://cdn.example.com/video.mp4</CurrentURI>
+              <CurrentURIMetaData></CurrentURIMetaData>
+            </u:SetAVTransportURI>
+          </s:Body>
+        </s:Envelope>
+        """
+        let soapResp = String(decoding: service.handleHTTPRequest(
+            method: "POST",
+            path: "/upnp/AVTransport/control",
+            headers: ["soapaction": "\"urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI\""],
+            body: Data(setURI.utf8),
+            remoteAddress: "192.168.1.9"
+        ), as: UTF8.self)
+        XCTAssertTrue(soapResp.hasPrefix("HTTP/1.1 200 OK\r\n"))
+        XCTAssertTrue(soapResp.contains("SetAVTransportURIResponse"))
+
+        let transportInfo = String(decoding: service.handleHTTPRequest(
+            method: "POST",
+            path: "/upnp/AVTransport/control",
+            headers: ["soapaction": "\"urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo\""],
+            body: Data("<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:GetTransportInfo xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\"/></s:Body></s:Envelope>".utf8),
+            remoteAddress: nil
+        ), as: UTF8.self)
+        XCTAssertTrue(transportInfo.contains("<CurrentTransportState>PLAYING</CurrentTransportState>"))
+
+        let setMute = String(decoding: service.handleHTTPRequest(
+            method: "POST",
+            path: "/upnp/RenderingControl/control",
+            headers: ["soapaction": "\"urn:schemas-upnp-org:service:RenderingControl:1#SetMute\""],
+            body: Data("<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:SetMute xmlns:u=\"urn:schemas-upnp-org:service:RenderingControl:1\"><DesiredMute>1</DesiredMute></u:SetMute></s:Body></s:Envelope>".utf8),
+            remoteAddress: nil
+        ), as: UTF8.self)
+        XCTAssertTrue(setMute.contains("SetMuteResponse"))
+        XCTAssertTrue(mutedState)
+
+        let fault = String(decoding: service.handleHTTPRequest(
+            method: "POST",
+            path: "/upnp/AVTransport/control",
+            headers: ["soapaction": "\"urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI\""],
+            body: Data("<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:SetAVTransportURI xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\"><CurrentURI>file:///etc/passwd</CurrentURI></u:SetAVTransportURI></s:Body></s:Envelope>".utf8),
+            remoteAddress: nil
+        ), as: UTF8.self)
+        XCTAssertTrue(fault.hasPrefix("HTTP/1.1 500 Internal Server Error\r\n"))
+        XCTAssertTrue(fault.contains("<errorCode>402</errorCode>"))
+    }
 }

@@ -667,6 +667,7 @@ public final class DLNAReceiverService: ObservableObject {
     @Published public private(set) var lastSenderAddress: String?
     @Published public private(set) var blockedByMotion: Bool = false
     @Published public private(set) var blockedByEntitlement: Bool = false
+    @Published public private(set) var isMuted: Bool = false
 
     public let deviceUUID: String
     public let httpPort: UInt16
@@ -921,6 +922,7 @@ public final class DLNAReceiverService: ObservableObject {
             return .success(())
 
         case .setMute(let muted):
+            isMuted = muted
             muteHandler(muted)
             return .success(())
         }
@@ -962,7 +964,7 @@ public final class DLNAReceiverService: ObservableObject {
 
     // MARK: - HTTP Routing
 
-    private func handleHTTPRequest(
+    func handleHTTPRequest(
         method: String,
         path: String,
         headers: [String: String],
@@ -970,72 +972,77 @@ public final class DLNAReceiverService: ObservableObject {
         remoteAddress: String?
     ) -> Data {
         if method == "GET" {
-            switch path {
-            case "/", "/description.xml", "/upnp/description.xml":
-                let xml = DLNAProtocol.deviceDescriptionXML(
-                    friendlyName: effectiveFriendlyName,
-                    deviceUUID: deviceUUID,
-                    baseURL: currentBaseURL
-                )
-                return DLNAProtocol.httpResponse(status: "200 OK", contentType: "text/xml; charset=\"utf-8\"", body: Data(xml.utf8))
-
-            case "/upnp/AVTransport.xml":
-                return DLNAProtocol.httpResponse(
-                    status: "200 OK",
-                    contentType: "text/xml; charset=\"utf-8\"",
-                    body: Data(DLNAProtocol.avTransportSCPDXML().utf8)
-                )
-
-            case "/upnp/RenderingControl.xml":
-                return DLNAProtocol.httpResponse(
-                    status: "200 OK",
-                    contentType: "text/xml; charset=\"utf-8\"",
-                    body: Data(DLNAProtocol.renderingControlSCPDXML().utf8)
-                )
-
-            default:
-                return DLNAProtocol.httpResponse(status: "404 Not Found", contentType: "text/plain", body: Data("Not Found".utf8))
-            }
+            return handleHTTPGet(path: path)
         }
-
         if method == "POST", path == "/upnp/AVTransport/control" || path == "/upnp/RenderingControl/control" {
-            do {
-                let action = try DLNAProtocol.parseSOAPAction(body: body, soapActionHeader: headers["soapaction"])
-                let outcome = processSOAPAction(action, senderAddress: remoteAddress)
-                if case .failure(let failure) = outcome {
-                    return DLNAProtocol.soapFaultResponse(upnpErrorCode: 701, description: failure.localizedDescription)
-                }
-
-                switch action {
-                case .setAVTransportURI:
-                    return DLNAProtocol.soapSuccessResponse(actionName: "SetAVTransportURI", serviceType: DLNAProtocol.avTransportServiceType)
-                case .play:
-                    return DLNAProtocol.soapSuccessResponse(actionName: "Play", serviceType: DLNAProtocol.avTransportServiceType)
-                case .pause:
-                    return DLNAProtocol.soapSuccessResponse(actionName: "Pause", serviceType: DLNAProtocol.avTransportServiceType)
-                case .stop:
-                    return DLNAProtocol.soapSuccessResponse(actionName: "Stop", serviceType: DLNAProtocol.avTransportServiceType)
-                case .getTransportInfo:
-                    let bodyXML = "<CurrentTransportState>\(currentTransportState.rawValue)</CurrentTransportState><CurrentTransportStatus>OK</CurrentTransportStatus><CurrentSpeed>1</CurrentSpeed>"
-                    return DLNAProtocol.soapSuccessResponse(actionName: "GetTransportInfo", serviceType: DLNAProtocol.avTransportServiceType, bodyElements: bodyXML)
-                case .getPositionInfo:
-                    let activeURL = activeItemID.flatMap { id in incomingQueue.first(where: { $0.id == id })?.streamURL.absoluteString } ?? ""
-                    let bodyXML = "<Track>1</Track><TrackDuration>00:00:00</TrackDuration><TrackMetaData></TrackMetaData><TrackURI>\(DLNAProtocol.escapeXML(activeURL))</TrackURI><RelTime>00:00:00</RelTime><AbsTime>00:00:00</AbsTime>"
-                    return DLNAProtocol.soapSuccessResponse(actionName: "GetPositionInfo", serviceType: DLNAProtocol.avTransportServiceType, bodyElements: bodyXML)
-                case .getMute:
-                    let muted = VideoPlayerService.shared.isMuted ? "1" : "0"
-                    return DLNAProtocol.soapSuccessResponse(actionName: "GetMute", serviceType: DLNAProtocol.renderingControlServiceType, bodyElements: "<CurrentMute>\(muted)</CurrentMute>")
-                case .setMute:
-                    return DLNAProtocol.soapSuccessResponse(actionName: "SetMute", serviceType: DLNAProtocol.renderingControlServiceType)
-                }
-            } catch let error as DLNAProtocol.SOAPParseError {
-                return DLNAProtocol.soapFaultResponse(upnpErrorCode: 402, description: error.localizedDescription)
-            } catch {
-                return DLNAProtocol.soapFaultResponse(upnpErrorCode: 501, description: error.localizedDescription)
-            }
+            return handleSOAPControl(headers: headers, body: body, remoteAddress: remoteAddress)
         }
-
         return DLNAProtocol.httpResponse(status: "404 Not Found", contentType: "text/plain", body: Data("Not Found".utf8))
+    }
+
+    private func handleHTTPGet(path: String) -> Data {
+        switch path {
+        case "/", "/description.xml", "/upnp/description.xml":
+            let xml = DLNAProtocol.deviceDescriptionXML(
+                friendlyName: effectiveFriendlyName,
+                deviceUUID: deviceUUID,
+                baseURL: currentBaseURL
+            )
+            return DLNAProtocol.httpResponse(status: "200 OK", contentType: "text/xml; charset=\"utf-8\"", body: Data(xml.utf8))
+        case "/upnp/AVTransport.xml":
+            return DLNAProtocol.httpResponse(
+                status: "200 OK",
+                contentType: "text/xml; charset=\"utf-8\"",
+                body: Data(DLNAProtocol.avTransportSCPDXML().utf8)
+            )
+        case "/upnp/RenderingControl.xml":
+            return DLNAProtocol.httpResponse(
+                status: "200 OK",
+                contentType: "text/xml; charset=\"utf-8\"",
+                body: Data(DLNAProtocol.renderingControlSCPDXML().utf8)
+            )
+        default:
+            return DLNAProtocol.httpResponse(status: "404 Not Found", contentType: "text/plain", body: Data("Not Found".utf8))
+        }
+    }
+
+    private func handleSOAPControl(headers: [String: String], body: Data, remoteAddress: String?) -> Data {
+        do {
+            let action = try DLNAProtocol.parseSOAPAction(body: body, soapActionHeader: headers["soapaction"])
+            if case .failure(let failure) = processSOAPAction(action, senderAddress: remoteAddress) {
+                return DLNAProtocol.soapFaultResponse(upnpErrorCode: 701, description: failure.localizedDescription)
+            }
+            return soapResponse(for: action)
+        } catch let error as DLNAProtocol.SOAPParseError {
+            return DLNAProtocol.soapFaultResponse(upnpErrorCode: 402, description: error.localizedDescription)
+        } catch {
+            return DLNAProtocol.soapFaultResponse(upnpErrorCode: 501, description: error.localizedDescription)
+        }
+    }
+
+    private func soapResponse(for action: DLNAProtocol.SOAPAction) -> Data {
+        switch action {
+        case .setAVTransportURI:
+            return DLNAProtocol.soapSuccessResponse(actionName: "SetAVTransportURI", serviceType: DLNAProtocol.avTransportServiceType)
+        case .play:
+            return DLNAProtocol.soapSuccessResponse(actionName: "Play", serviceType: DLNAProtocol.avTransportServiceType)
+        case .pause:
+            return DLNAProtocol.soapSuccessResponse(actionName: "Pause", serviceType: DLNAProtocol.avTransportServiceType)
+        case .stop:
+            return DLNAProtocol.soapSuccessResponse(actionName: "Stop", serviceType: DLNAProtocol.avTransportServiceType)
+        case .getTransportInfo:
+            let bodyXML = "<CurrentTransportState>\(currentTransportState.rawValue)</CurrentTransportState><CurrentTransportStatus>OK</CurrentTransportStatus><CurrentSpeed>1</CurrentSpeed>"
+            return DLNAProtocol.soapSuccessResponse(actionName: "GetTransportInfo", serviceType: DLNAProtocol.avTransportServiceType, bodyElements: bodyXML)
+        case .getPositionInfo:
+            let activeURL = activeItemID.flatMap { id in incomingQueue.first(where: { $0.id == id })?.streamURL.absoluteString } ?? ""
+            let bodyXML = "<Track>1</Track><TrackDuration>00:00:00</TrackDuration><TrackMetaData></TrackMetaData><TrackURI>\(DLNAProtocol.escapeXML(activeURL))</TrackURI><RelTime>00:00:00</RelTime><AbsTime>00:00:00</AbsTime>"
+            return DLNAProtocol.soapSuccessResponse(actionName: "GetPositionInfo", serviceType: DLNAProtocol.avTransportServiceType, bodyElements: bodyXML)
+        case .getMute:
+            let muted = isMuted ? "1" : "0"
+            return DLNAProtocol.soapSuccessResponse(actionName: "GetMute", serviceType: DLNAProtocol.renderingControlServiceType, bodyElements: "<CurrentMute>\(muted)</CurrentMute>")
+        case .setMute:
+            return DLNAProtocol.soapSuccessResponse(actionName: "SetMute", serviceType: DLNAProtocol.renderingControlServiceType)
+        }
     }
 }
 
