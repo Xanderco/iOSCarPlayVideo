@@ -101,6 +101,28 @@ struct MirrorEncoderConfig: Equatable {
 
     static let carPlay = MirrorEncoderConfig()
 
+    /// GhostCast 1080p @ 60 fps (6 Mbps) high-quality profile.
+    static let ghostCast1080p60 = MirrorEncoderConfig(
+        maxLongSide: 1920,
+        maxShortSide: 1080,
+        framesPerSecond: 60,
+        averageBitRate: 6_000_000,
+        keyFrameIntervalSeconds: 1,
+        segmentDurationSeconds: 1,
+        playlistWindow: 4
+    )
+
+    /// GhostCast 720p @ 30 fps (2.5 Mbps) low-congestion fallback profile.
+    static let ghostCast720p30 = MirrorEncoderConfig(
+        maxLongSide: 1280,
+        maxShortSide: 720,
+        framesPerSecond: 30,
+        averageBitRate: 2_500_000,
+        keyFrameIntervalSeconds: 1,
+        segmentDurationSeconds: 1,
+        playlistWindow: 4
+    )
+
     var maxKeyFrameInterval: Int { max(1, Int((Double(framesPerSecond) * keyFrameIntervalSeconds).rounded())) }
 
     var minFrameInterval: Double { 1.0 / Double(max(1, framesPerSecond)) }
