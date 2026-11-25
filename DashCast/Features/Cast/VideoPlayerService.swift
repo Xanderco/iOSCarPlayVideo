@@ -98,10 +98,13 @@ public final class VideoPlayerService: ObservableObject {
 
     // MARK: - Loading
 
+    /// AVURLAsset option key used by AVFoundation to forward custom HTTP headers on stream requests.
+    nonisolated public static let httpHeaderFieldsOptionKey = "AVURLAssetHTTPHeaderFieldsKey"
+
     /// Builds `AVURLAsset` options forwarding any per-channel custom HTTP headers.
     nonisolated public static func assetOptions(for channel: ChannelModel) -> [String: Any]? {
         guard let headers = channel.httpHeaders, !headers.isEmpty else { return nil }
-        return [AVURLAssetHTTPHeaderFieldsKey: headers]
+        return [httpHeaderFieldsOptionKey: headers]
     }
 
     /// Creates the `AVURLAsset` for a channel, attaching any parsed HTTP request headers.

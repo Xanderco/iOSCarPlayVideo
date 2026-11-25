@@ -82,7 +82,7 @@ final class CastEngineTests: XCTestCase {
             httpHeaders: headers
         )
         let options = VideoPlayerService.assetOptions(for: headered)
-        let attached = options?[AVURLAssetHTTPHeaderFieldsKey] as? [String: String]
+        let attached = options?[VideoPlayerService.httpHeaderFieldsOptionKey] as? [String: String]
         XCTAssertEqual(attached, headers)
 
         let asset = VideoPlayerService.makeAsset(for: headered)
