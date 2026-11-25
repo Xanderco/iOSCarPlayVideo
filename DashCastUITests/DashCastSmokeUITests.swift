@@ -139,6 +139,46 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testFeedbackSheetOpensAndDisplaysDiagnosticsControls() throws {
+        let meTab = tabButton("Me")
+        XCTAssertTrue(meTab.waitForExistence(timeout: 15), "Me tab button missing")
+        meTab.tap()
+
+        XCTAssertTrue(app.otherElements["Screen_Me"].waitForExistence(timeout: 10), "Me screen missing")
+
+        let feedbackButton = app.buttons["Feedback"]
+        XCTAssertTrue(feedbackButton.waitForExistence(timeout: 10), "Feedback row missing")
+        tapCenter(of: feedbackButton)
+
+        XCTAssertTrue(
+            app.navigationBars["Feedback"].waitForExistence(timeout: 10),
+            "Feedback sheet did not open"
+        )
+        XCTAssertTrue(app.textViews["Feedback_MessageEditor"].waitForExistence(timeout: 5), "Message editor missing")
+        XCTAssertTrue(app.buttons["Feedback_SendMailButton"].exists, "Send via Mail button missing")
+        XCTAssertTrue(app.buttons["Feedback_ShareBundleButton"].exists, "Share bundle button missing")
+
+        let previewButton = app.buttons["Feedback_PreviewDiagnosticsButton"]
+        XCTAssertTrue(previewButton.waitForExistence(timeout: 5), "Preview diagnostics button missing")
+        if !previewButton.isHittable {
+            app.scrollViews.firstMatch.swipeUp()
+        }
+        previewButton.tap()
+
+        XCTAssertTrue(
+            app.navigationBars["Diagnostic Report"].waitForExistence(timeout: 5),
+            "Diagnostic Report preview sheet did not open"
+        )
+        snapshot("05-diagnostics-preview")
+
+        app.navigationBars["Diagnostic Report"].buttons["Done"].tap()
+        XCTAssertTrue(app.navigationBars["Feedback"].waitForExistence(timeout: 5), "Did not return to Feedback sheet")
+        snapshot("05b-feedback")
+
+        app.navigationBars["Feedback"].buttons["Cancel"].tap()
+        XCTAssertTrue(app.otherElements["Screen_Me"].waitForExistence(timeout: 10), "Did not return to Me tab")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

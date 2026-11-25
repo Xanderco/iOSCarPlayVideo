@@ -92,6 +92,13 @@
 
 ## Log
 
+### 2026-11-25 03:20 (Bogotá) — Real Diagnostic Bundle & Support Mail/Share Export in FeedbackView [DI-68]
+- **Resolved App Store Review blocker B3** (`Me -> Feedback` was a fake "Feedback Sent" alert with a no-op screenshot button):
+  - Added `DashCast/Features/Me/SupportDiagnosticsBuilder.swift`: pure, redacted, zero-PII diagnostic snapshot builder (`captureCurrent`, `buildReport`, `redact`, `exportReportFile`, `buildMailtoURL`, `buildComposeBody`). Reports include app version/build, OS, hardware model identifier (no user device name), locale/language, `EntitlementGate` tier, playlist/channel/favorite/media-server counts, and non-sensitive capability flags, with automatic regex redaction of URLs, tokens, emails, and IP addresses.
+  - Updated `DashCast/Features/Me/FeedbackView.swift`: wired `PhotosPicker` for selecting and removing up to 9 screenshots, topic categories, anonymous diagnostics opt-in toggle with live `Diagnostic Report` preview sheet (`ShareLink` `.txt` export), real `mailto:` export to `LegalLinks.supportEmail`, and automatic/manual `UIActivityViewController` system Share Sheet export (with screenshots + `.txt` diagnostic bundle). Migrated `FeedbackView` colors to non-deprecated `dc*` design tokens.
+  - Added EN/ES translations in `DashCast/Resources/Localizable.xcstrings` for all new and existing feedback strings.
+  - Added `DashCastTests/SupportDiagnosticsTests.swift` (7 unit tests covering report formatting, redaction guarantees, `.txt` export, and `mailto:` URL construction) and `DashCastSmokeUITests.testFeedbackSheetOpensAndDisplaysDiagnosticsControls`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
