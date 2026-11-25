@@ -8,11 +8,17 @@ final class MediaSourcesEntryTests: XCTestCase {
     func testMediaServerKindDisplayNamesAndProperties() {
         XCTAssertEqual(MediaServerKind.jellyfin.displayName, "Jellyfin")
         XCTAssertEqual(MediaServerKind.emby.displayName, "Emby")
+        XCTAssertEqual(MediaServerKind.plex.displayName, "Plex")
+        XCTAssertEqual(MediaServerKind.xtream.displayName, "Xtream Codes")
+        XCTAssertEqual(MediaServerKind.xtream.pickerLabel, "Xtream")
         XCTAssertEqual(MediaServerKind.jellyfin.apiPathPrefix, "")
         XCTAssertEqual(MediaServerKind.emby.apiPathPrefix, "/emby")
+        XCTAssertEqual(MediaServerKind.plex.apiPathPrefix, "")
+        XCTAssertEqual(MediaServerKind.xtream.apiPathPrefix, "")
         XCTAssertEqual(MediaServerKind.jellyfin.authorizationHeaderName, "Authorization")
         XCTAssertEqual(MediaServerKind.emby.authorizationHeaderName, "X-Emby-Authorization")
-        XCTAssertEqual(MediaServerKind.allCases.count, 2)
+        XCTAssertEqual(MediaServerKind.plex.authorizationHeaderName, "X-Plex-Token")
+        XCTAssertEqual(MediaServerKind.allCases.count, 4)
     }
 
     // MARK: - PlaylistQRPayload Tests

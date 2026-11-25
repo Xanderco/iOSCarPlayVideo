@@ -2,8 +2,8 @@ import Foundation
 import Combine
 import AVFoundation
 
-/// Saved Jellyfin / Emby logins. Account metadata goes to UserDefaults; the
-/// access token goes ONLY to the Keychain via `MediaServerTokenStore`.
+/// Saved Jellyfin / Emby / Plex / Xtream logins. Account metadata goes to UserDefaults;
+/// tokens and Xtream passwords go ONLY to the Keychain via `MediaServerTokenStore`.
 @MainActor
 public final class MediaServerStore: ObservableObject {
     public static let shared = MediaServerStore()
@@ -36,7 +36,8 @@ public final class MediaServerStore: ObservableObject {
         return new
     }
 
-    /// Validates the address, signs in, stores the token in the Keychain and saves the account.
+    /// Validates the address, signs in, stores the secret in the Keychain and saves the account.
+    /// For `.plex`, `password` is treated as the `X-Plex-Token` if `signInPlex` is not called directly.
     @discardableResult
     public func signIn(kind: MediaServerKind,
                        serverAddress: String,
@@ -46,25 +47,65 @@ public final class MediaServerStore: ObservableObject {
             throw MediaServerError.invalidServerURL
         }
         let client = MediaServerClient(kind: kind, baseURL: baseURL, deviceId: deviceId, session: session)
-        let info = try? await client.publicSystemInfo()
-        let auth = try await client.authenticate(username: username, password: password)
 
-        let account = MediaServerAccount(kind: kind,
+        let account: MediaServerAccount
+        let secret: String
+
+        switch kind {
+        case .jellyfin, .emby:
+            let info = try? await client.publicSystemInfo()
+            let auth = try await client.authenticate(username: username, password: password)
+            account = MediaServerAccount(kind: kind,
                                          baseURL: baseURL,
                                          serverName: info?.serverName ?? baseURL.host ?? kind.displayName,
                                          serverId: auth.serverId ?? info?.id,
                                          username: auth.user.name ?? username,
                                          userId: auth.user.id,
                                          deviceId: deviceId)
-        // Replace an existing login for the same server + user.
-        if let old = accounts.first(where: { $0.baseURL == account.baseURL && $0.userId == account.userId }) {
+            secret = auth.accessToken
+
+        case .plex:
+            let cleanToken = password.trimmingCharacters(in: .whitespacesAndNewlines)
+            let identity = try await client.authenticatePlex(token: cleanToken)
+            let resolvedUser = identity.myPlexUsername ?? (username.isEmpty ? "Plex" : username)
+            account = MediaServerAccount(kind: .plex,
+                                         baseURL: baseURL,
+                                         serverName: identity.friendlyName ?? baseURL.host ?? kind.displayName,
+                                         serverId: identity.machineIdentifier,
+                                         username: resolvedUser,
+                                         userId: identity.myPlexUsername ?? identity.machineIdentifier ?? "plex-user",
+                                         deviceId: deviceId)
+            secret = cleanToken
+
+        case .xtream:
+            let cleanUser = username.trimmingCharacters(in: .whitespacesAndNewlines)
+            let auth = try await client.authenticateXtream(username: cleanUser, password: password)
+            let displayHost = auth.serverInfo?.url ?? baseURL.host ?? kind.displayName
+            account = MediaServerAccount(kind: .xtream,
+                                         baseURL: baseURL,
+                                         serverName: displayHost,
+                                         serverId: nil,
+                                         username: auth.userInfo?.username ?? cleanUser,
+                                         userId: cleanUser,
+                                         deviceId: deviceId)
+            secret = password
+        }
+
+        // Replace an existing login for the same server + kind + user.
+        if let old = accounts.first(where: { $0.baseURL == account.baseURL && $0.kind == account.kind && $0.userId == account.userId }) {
             tokenStore.removeToken(for: old.id)
             accounts.removeAll { $0.id == old.id }
         }
-        tokenStore.setToken(auth.accessToken, for: account.id)
+        tokenStore.setToken(secret, for: account.id)
         accounts.append(account)
         persist()
         return account
+    }
+
+    /// Convenience sign-in for Plex using `X-Plex-Token`.
+    @discardableResult
+    public func signInPlex(serverAddress: String, token: String) async throws -> MediaServerAccount {
+        try await signIn(kind: .plex, serverAddress: serverAddress, username: "", password: token)
     }
 
     public func client(for account: MediaServerAccount) -> MediaServerClient {
@@ -134,8 +175,13 @@ public final class MediaServerPlaybackCoordinator: ObservableObject {
     public func play(_ item: MediaItem, account: MediaServerAccount, client: MediaServerClient, resume: Bool = true) async throws {
         await stopReporting()
 
-        // Refresh to get the latest resume position and media sources.
-        let fresh = (try? await client.item(id: item.id)) ?? item
+        // Refresh to get the latest resume position and media sources (not applicable to Xtream).
+        let fresh: MediaItem
+        if account.kind == .xtream {
+            fresh = item
+        } else {
+            fresh = (try? await client.item(id: item.id)) ?? item
+        }
         let playSessionId = UUID().uuidString.replacingOccurrences(of: "-", with: "")
         let channel = try Self.channel(for: fresh, account: account, client: client, playSessionId: playSessionId)
         let method: String
@@ -151,15 +197,17 @@ public final class MediaServerPlaybackCoordinator: ObservableObject {
         self.client = client
         self.channelId = channel.id
         self.nowPlaying = fresh
-        let report = MediaServerClient.PlaybackReport(itemId: fresh.id,
-                                                      mediaSourceId: fresh.mediaSources?.first?.id ?? fresh.id,
-                                                      playSessionId: playSessionId,
-                                                      positionTicks: MediaTicks.ticks(fromSeconds: resumeAt),
-                                                      isPaused: false,
-                                                      playMethod: method)
-        self.report = report
-        try? await client.reportPlayback(.start, report: report)
-        startReportingLoop()
+        if account.kind != .xtream {
+            let report = MediaServerClient.PlaybackReport(itemId: fresh.id,
+                                                          mediaSourceId: fresh.mediaSources?.first?.id ?? fresh.id,
+                                                          playSessionId: playSessionId,
+                                                          positionTicks: MediaTicks.ticks(fromSeconds: resumeAt),
+                                                          isPaused: false,
+                                                          playMethod: method)
+            self.report = report
+            try? await client.reportPlayback(.start, report: report)
+            startReportingLoop()
+        }
     }
 
     /// Call when the player UI is dismissed.

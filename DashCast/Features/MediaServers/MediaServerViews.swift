@@ -3,7 +3,7 @@ import AVKit
 
 // MARK: - Entry point
 
-/// Root of the media-server feature: saved Jellyfin / Emby servers plus QR playlist import.
+/// Root of the media-server feature: saved Jellyfin / Emby / Plex / Xtream servers plus QR playlist import.
 public struct MediaServersHomeView: View {
     @StateObject private var store = MediaServerStore.shared
     @Environment(\.dismiss) private var dismiss
@@ -17,7 +17,7 @@ public struct MediaServersHomeView: View {
             List {
                 Section {
                     if store.accounts.isEmpty {
-                        Text("Connect a Jellyfin or Emby server to browse and play your own movies and shows.")
+                        Text("Connect a Jellyfin, Emby, Plex, or Xtream server to browse and play your own movies, shows, and live streams.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -50,7 +50,7 @@ public struct MediaServersHomeView: View {
                     }
                     .accessibilityIdentifier("addMediaServerButton")
                 } header: {
-                    Text("Jellyfin & Emby")
+                    Text("Media Servers")
                 }
 
                 Section {
@@ -94,15 +94,24 @@ public struct AddMediaServerView: View {
     @State private var address = ""
     @State private var username = ""
     @State private var password = ""
+    @State private var plexToken = ""
     @State private var isConnecting = false
     @State private var errorMessage: String?
 
     public init() {}
 
     private var canSubmit: Bool {
-        !address.trimmingCharacters(in: .whitespaces).isEmpty
-            && !username.trimmingCharacters(in: .whitespaces).isEmpty
-            && !isConnecting
+        let hasAddress = !address.trimmingCharacters(in: .whitespaces).isEmpty
+        guard hasAddress && !isConnecting else { return false }
+        switch kind {
+        case .plex:
+            return !plexToken.trimmingCharacters(in: .whitespaces).isEmpty
+        case .xtream:
+            return !username.trimmingCharacters(in: .whitespaces).isEmpty
+                && !password.isEmpty
+        case .jellyfin, .emby:
+            return !username.trimmingCharacters(in: .whitespaces).isEmpty
+        }
     }
 
     public var body: some View {
@@ -110,32 +119,50 @@ public struct AddMediaServerView: View {
             Form {
                 Section("Server") {
                     Picker("Type", selection: $kind) {
-                        ForEach(MediaServerKind.allCases) { Text($0.displayName).tag($0) }
+                        ForEach(MediaServerKind.allCases) { Text($0.pickerLabel).tag($0) }
                     }
                     .pickerStyle(.segmented)
-                    TextField("http://192.168.1.10:8096", text: $address)
+                    .accessibilityIdentifier("mediaServerKindPicker")
+
+                    TextField(kind.defaultAddressPlaceholder, text: $address)
                         .keyboardType(.URL)
                         .textContentType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .accessibilityIdentifier("mediaServerAddressField")
                 }
-                Section("Account") {
-                    TextField("Username", text: $username)
-                        .textContentType(.username)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .accessibilityIdentifier("mediaServerUsernameField")
-                    SecureField("Password", text: $password)
-                        .textContentType(.password)
-                        .accessibilityIdentifier("mediaServerPasswordField")
+
+                Section {
+                    if kind == .plex {
+                        SecureField("X-Plex-Token", text: $plexToken)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .accessibilityIdentifier("mediaServerPlexTokenField")
+                    } else {
+                        TextField("Username", text: $username)
+                            .textContentType(.username)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .accessibilityIdentifier("mediaServerUsernameField")
+                        SecureField("Password", text: $password)
+                            .textContentType(.password)
+                            .accessibilityIdentifier("mediaServerPasswordField")
+                    }
+                } header: {
+                    if kind == .plex {
+                        Text("Plex Token")
+                    } else {
+                        Text("Account")
+                    }
                 }
+
                 if let errorMessage {
                     Section {
                         Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                             .foregroundStyle(.red)
                     }
                 }
+
                 Section {
                     Button {
                         Task { await connect() }
@@ -149,7 +176,11 @@ public struct AddMediaServerView: View {
                     .disabled(!canSubmit)
                     .accessibilityIdentifier("mediaServerConnectButton")
                 } footer: {
-                    Text("Your access token is stored securely in the iOS Keychain. Your password is never saved.")
+                    if kind == .xtream {
+                        Text("Your Xtream Codes password is stored securely in the iOS Keychain.")
+                    } else {
+                        Text("Your access token is stored securely in the iOS Keychain. Your password is never saved.")
+                    }
                 }
             }
             .navigationTitle("Add Server")
@@ -167,11 +198,17 @@ public struct AddMediaServerView: View {
         errorMessage = nil
         defer { isConnecting = false }
         do {
-            try await store.signIn(kind: kind,
-                                   serverAddress: address,
-                                   username: username.trimmingCharacters(in: .whitespaces),
-                                   password: password)
-            password = ""
+            if kind == .plex {
+                try await store.signInPlex(serverAddress: address,
+                                           token: plexToken.trimmingCharacters(in: .whitespaces))
+                plexToken = ""
+            } else {
+                try await store.signIn(kind: kind,
+                                       serverAddress: address,
+                                       username: username.trimmingCharacters(in: .whitespaces),
+                                       password: password)
+                password = ""
+            }
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
@@ -229,10 +266,11 @@ struct MediaLibrariesView: View {
 
     static func icon(for collectionType: String?) -> String {
         switch collectionType {
-        case "movies": return "film"
-        case "tvshows": return "tv"
+        case "movies", "movie": return "film"
+        case "tvshows", "show": return "tv"
         case "music": return "music.note"
         case "homevideos": return "video"
+        case "livetv": return "dot.radiowaves.left.and.right"
         default: return "folder"
         }
     }
@@ -339,7 +377,7 @@ struct MediaPosterCell: View {
             } placeholder: {
                 ZStack {
                     Color.dashSurfaceHighlight
-                    Image(systemName: item.isSeries ? "tv" : "film")
+                    Image(systemName: item.isSeries ? "tv" : (item.isFolder ? "folder" : "film"))
                         .font(.title)
                         .foregroundStyle(Color.dashTextMuted)
                 }
