@@ -7,6 +7,7 @@ public struct AutomotiveVideoPlayerView: View {
     @State private var showControls: Bool = true
     @State private var isSeeking: Bool = false
     @State private var seekSliderValue: Double = 0
+    @State private var showingTrackPicker: Bool = false
     @Binding var isFullscreen: Bool
 
     public init(isFullscreen: Binding<Bool> = .constant(false)) {
@@ -44,6 +45,11 @@ public struct AutomotiveVideoPlayerView: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: isFullscreen ? 0 : 16, style: .continuous))
+        .sheet(isPresented: $showingTrackPicker) {
+            MediaTrackPickerSheet(playerService: playerService)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
     }
 
     private var placeholderView: some View {
@@ -121,6 +127,19 @@ public struct AutomotiveVideoPlayerView: View {
 
                     AirPlayRoutePickerRepresentable(tintColor: .white)
                         .frame(width: 34, height: 34)
+
+                    Button {
+                        showingTrackPicker = true
+                    } label: {
+                        Image(systemName: playerService.selectedSubtitleTrack != nil ? "captions.bubble.fill" : "captions.bubble")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(playerService.selectedSubtitleTrack != nil ? Color.dcAccent : .white)
+                            .padding(8)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(Circle())
+                    }
+                    .accessibilityLabel("Audio & Subtitles")
+                    .accessibilityIdentifier("Player_TrackPickerButton")
 
                     Button {
                         playerService.stop()
@@ -264,4 +283,200 @@ public struct CustomVideoPlayerRepresentable: UIViewRepresentable {
 public final class PlayerLayerView: UIView {
     public override static var layerClass: AnyClass { AVPlayerLayer.self }
     public var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+}
+
+// MARK: - Audio & Subtitle Track Picker Sheet
+
+public struct MediaTrackPickerSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var playerService: VideoPlayerService
+
+    public init(playerService: VideoPlayerService = .shared) {
+        self.playerService = playerService
+    }
+
+    public var body: some View {
+        NavigationStack {
+            List {
+                audioSection
+                subtitleSection
+                if playerService.hasSavedTrackPreferences {
+                    preferencesSection
+                }
+            }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.dcBackground.ignoresSafeArea())
+            .navigationTitle("Audio & Subtitles")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color.dcAccent)
+                    .accessibilityIdentifier("TrackPicker_DoneButton")
+                }
+            }
+            .onAppear {
+                playerService.refreshMediaTracks()
+            }
+        }
+    }
+
+    private var audioSection: some View {
+        Section {
+            if playerService.availableAudioTracks.isEmpty {
+                HStack(spacing: DSSpacing.md) {
+                    VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                        Text("Default Audio")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Color.dcTextPrimary)
+                        Text("No alternate audio tracks in this stream.")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dcTextSecondary)
+                    }
+                    Spacer()
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Color.dcAccent)
+                }
+                .frame(minHeight: DSLayout.minTapTarget)
+                .listRowBackground(Color.dcSurface)
+                .accessibilityIdentifier("TrackPicker_Audio_Default")
+            } else {
+                ForEach(playerService.availableAudioTracks) { track in
+                    let isSelected = playerService.selectedAudioTrack?.id == track.id
+                    Button {
+                        playerService.selectAudioTrack(track)
+                    } label: {
+                        trackRow(
+                            title: Text(verbatim: track.displayName),
+                            languageCode: track.languageCode,
+                            badge: nil,
+                            isSelected: isSelected
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .listRowBackground(Color.dcSurface)
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                    .accessibilityIdentifier("TrackPicker_Audio_\(track.id)")
+                }
+            }
+        } header: {
+            Text("Audio")
+                .foregroundStyle(Color.dcTextSecondary)
+        }
+    }
+
+    private var subtitleSection: some View {
+        Section {
+            let isOffSelected = playerService.selectedSubtitleTrack == nil || playerService.selectedSubtitleTrack?.isOff == true
+            Button {
+                playerService.selectSubtitleTrack(nil)
+            } label: {
+                trackRow(
+                    title: Text("Off"),
+                    languageCode: nil,
+                    badge: nil,
+                    isSelected: isOffSelected
+                )
+            }
+            .buttonStyle(.plain)
+            .listRowBackground(Color.dcSurface)
+            .accessibilityAddTraits(isOffSelected ? .isSelected : [])
+            .accessibilityIdentifier("TrackPicker_Subtitle_Off")
+
+            if playerService.availableSubtitleTracks.isEmpty {
+                Text("No subtitle tracks available in this stream.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.dcTextSecondary)
+                    .frame(minHeight: DSLayout.minTapTarget, alignment: .leading)
+                    .listRowBackground(Color.dcSurface)
+                    .accessibilityIdentifier("TrackPicker_Subtitles_Empty")
+            } else {
+                ForEach(playerService.availableSubtitleTracks) { track in
+                    let isSelected = playerService.selectedSubtitleTrack?.id == track.id
+                    Button {
+                        playerService.selectSubtitleTrack(track)
+                    } label: {
+                        trackRow(
+                            title: Text(verbatim: track.displayName),
+                            languageCode: track.languageCode,
+                            badge: track.isSDH ? LocalizedStringKey("SDH") : nil,
+                            isSelected: isSelected
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .listRowBackground(Color.dcSurface)
+                    .accessibilityAddTraits(isSelected ? .isSelected : [])
+                    .accessibilityIdentifier("TrackPicker_Subtitle_\(track.id)")
+                }
+            }
+        } header: {
+            Text("Subtitles")
+                .foregroundStyle(Color.dcTextSecondary)
+        }
+    }
+
+    private var preferencesSection: some View {
+        Section {
+            Button(role: .destructive) {
+                playerService.clearTrackPreferences()
+            } label: {
+                HStack {
+                    Image(systemName: "arrow.counterclockwise")
+                    Text("Clear Saved Preferences")
+                }
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(Color.dcDanger)
+                .frame(minHeight: DSLayout.minTapTarget, alignment: .leading)
+            }
+            .listRowBackground(Color.dcSurface)
+            .accessibilityIdentifier("TrackPicker_ClearPreferencesButton")
+        }
+    }
+
+    private func trackRow(
+        title: Text,
+        languageCode: String?,
+        badge: LocalizedStringKey?,
+        isSelected: Bool
+    ) -> some View {
+        HStack(spacing: DSSpacing.md) {
+            VStack(alignment: .leading, spacing: DSSpacing.xxs) {
+                HStack(spacing: DSSpacing.xs) {
+                    title
+                        .font(.system(size: 15, weight: isSelected ? .semibold : .regular))
+                        .foregroundStyle(Color.dcTextPrimary)
+
+                    if let badge {
+                        Text(badge)
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Color.dcTextSecondary)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(Color.dcSurfaceRaised, in: Capsule())
+                    }
+                }
+
+                if let languageCode {
+                    Text(languageCode.uppercased())
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .foregroundStyle(Color.dcTextSecondary)
+                }
+            }
+
+            Spacer()
+
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(Color.dcAccent)
+            }
+        }
+        .frame(minHeight: DSLayout.minTapTarget)
+        .contentShape(Rectangle())
+    }
 }
