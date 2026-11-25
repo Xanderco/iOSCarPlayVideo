@@ -47,7 +47,6 @@ final class WebVideoExtractorTests: XCTestCase {
 
     func testDRMPresetsRemoved() {
         let ids = Set(WebVideoBrowserView.preaddedSources.map(\.id))
-        let names = Set(WebVideoBrowserView.preaddedSources.map { $0.name.lowercased() })
         for drm in ["netflix", "prime", "hulu", "disney", "hbomax", "appletv", "peacock", "paramount", "crunchyroll"] {
             XCTAssertFalse(ids.contains(drm), "\(drm) should not be a preset")
         }
