@@ -92,6 +92,14 @@
 
 ## Log
 
+### 2026-11-25 18:22 (Bogotá) — M3U custom HTTP headers (#EXTVLCOPT / #KODIPROP / pipe options) & AVURLAsset header forwarding [DI-80]
+- **Problem**: Real-world M3U/IPTV streams frequently require per-channel `User-Agent`, `Referer`, or `Origin` HTTP headers; `IPTVParser` previously ignored `#EXTVLCOPT` lines, corrupted `|Key=Value` pipe suffixes inside URLs, and `VideoPlayerService` created `AVURLAsset` without `AVURLAssetHTTPHeaderFieldsKey`, causing HTTP 403 failures.
+- **Changes**:
+  - Added backward-compatible `httpHeaders: [String: String]?` to `ChannelModel`.
+  - Updated `IPTVParser.parseM3U` to parse `#EXTVLCOPT` (`http-user-agent`, `http-referrer`, `http-origin`, `http-cookie`), `#KODIPROP:inputstream.adaptive.stream_headers`, and stream-line `|Key=Value&...` pipe parameters cleanly without leaking across entries or corrupting `streamURL`.
+  - Updated `VideoPlayerService.load(channel:)` via `assetOptions(for:)` / `makeAsset(for:)` to forward `AVURLAssetHTTPHeaderFieldsKey` onto `AVURLAsset`.
+  - Added unit tests in `IPTVParserTests` and `CastEngineTests`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
