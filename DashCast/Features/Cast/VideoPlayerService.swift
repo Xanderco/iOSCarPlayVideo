@@ -288,8 +288,20 @@ public final class VideoPlayerService: ObservableObject {
             let status = player.timeControlStatus
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.isPlaying = status == .playing
-                self.isBuffering = status == .waitingToPlayAtSpecifiedRate
+                let wasPlaying = self.isPlaying
+                let wasBuffering = self.isBuffering
+                let nowPlaying = status == .playing
+                let nowBuffering = status == .waitingToPlayAtSpecifiedRate
+
+                self.isPlaying = nowPlaying
+                self.isBuffering = nowBuffering
+
+                if nowBuffering && !wasBuffering && self.wantsToPlay {
+                    CabinHapticsEngine.shared.trigger(.streamBuffering)
+                } else if nowPlaying && !wasPlaying && wasBuffering {
+                    CabinHapticsEngine.shared.trigger(.streamReady)
+                }
+
                 self.updateNowPlayingInfo()
             }
         }

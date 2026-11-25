@@ -108,6 +108,7 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         setBackgroundUpdates(false)
         stopTimer()
         currentSpeedKmh = 0
+        CabinHapticsEngine.shared.updateMotionState(isMoving: false, speedKmh: 0)
 
         let score = DrivingScorer.shared.calculateScore()
         let trip = TripModel(
@@ -235,12 +236,13 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         )
         tripPoints.append(point)
 
-        // Pass motion acceleration to scorer
+        // Pass motion acceleration to scorer & cabin haptics telemetry
         DrivingScorer.shared.recordPoint(
             speedKmh: speedKmh,
             course: location.courseAccuracy >= 0 ? location.course : -1,
             timestamp: location.timestamp
         )
+        CabinHapticsEngine.shared.evaluateTelemetry(speedKmh: speedKmh, now: location.timestamp)
     }
 
     // Manual simulation injection for tests & preview
@@ -255,5 +257,6 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         currentSpeedKmh = speedKmh
         if speedKmh > topSpeedKmh { topSpeedKmh = speedKmh }
         DrivingScorer.shared.recordPoint(speedKmh: speedKmh)
+        CabinHapticsEngine.shared.evaluateTelemetry(speedKmh: speedKmh)
     }
 }

@@ -139,6 +139,24 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testCabinHapticsSheetOpens() throws {
+        let soundsTab = tabButton("Sounds")
+        XCTAssertTrue(soundsTab.waitForExistence(timeout: 15), "Sounds tab missing")
+        soundsTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Sounds"].waitForExistence(timeout: 10), "Sounds screen missing")
+
+        let row = app.buttons["Sounds_CabinHapticsRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Cabin Haptics row missing")
+        tapCenter(of: row)
+
+        let navBar = app.navigationBars["Cabin Haptics"]
+        XCTAssertTrue(navBar.waitForExistence(timeout: 10), "Cabin Haptics sheet did not open")
+        snapshot("05-cabin-haptics")
+
+        navBar.buttons["Close"].tap()
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Sounds tab")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers
