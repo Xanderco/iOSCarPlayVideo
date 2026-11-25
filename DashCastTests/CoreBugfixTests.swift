@@ -98,6 +98,90 @@ final class CoreBugfixTests: XCTestCase {
                        "/new/Documents/video_1.mp4")
     }
 
+    @MainActor
+    func testSecurityScopedFileImportValidatesTypeAndCopiesVideo() throws {
+        let suite = "CoreBugfixTests.Files.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+
+        let cachesDir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("CoreBugfixTests-\(UUID().uuidString)")
+        let libraryDir = cachesDir.appendingPathComponent("library")
+        let sourceDir = cachesDir.appendingPathComponent("files_provider")
+        try FileManager.default.createDirectory(at: sourceDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: cachesDir) }
+
+        let mp4URL = sourceDir.appendingPathComponent("road_trip.mp4")
+        try Data([0x00, 0x00, 0x00, 0x18]).write(to: mp4URL)
+        let txtURL = sourceDir.appendingPathComponent("notes.txt")
+        try Data("not a video".utf8).write(to: txtURL)
+
+        XCTAssertTrue(LocalVideoManager.isSupportedVideoURL(mp4URL))
+        XCTAssertTrue(LocalVideoManager.isSupportedVideoURL(URL(fileURLWithPath: "/tmp/clip.m4v")))
+        XCTAssertTrue(LocalVideoManager.isSupportedVideoURL(URL(fileURLWithPath: "/tmp/clip.MOV")))
+        XCTAssertFalse(LocalVideoManager.isSupportedVideoURL(txtURL))
+        XCTAssertFalse(LocalVideoManager.isSupportedVideoURL(URL(fileURLWithPath: "/tmp/noext")))
+        XCTAssertTrue(LocalVideoManager.supportedVideoContentTypes.contains(.movie))
+        XCTAssertTrue(LocalVideoManager.supportedVideoContentTypes.contains(.mpeg4Movie))
+
+        let manager = LocalVideoManager(videosDirectory: libraryDir, defaults: defaults)
+        XCTAssertThrowsError(try manager.importSecurityScopedFile(at: txtURL)) { error in
+            XCTAssertEqual(error as? LocalVideoManager.ImportError, .unsupportedFileType)
+        }
+        XCTAssertFalse(manager.isImporting)
+
+        let imported = try manager.importSecurityScopedFile(at: mp4URL)
+        XCTAssertEqual(imported.name, "road_trip")
+        XCTAssertEqual(imported.groupTitle, "Local Videos")
+        XCTAssertEqual(imported.streamURL.pathExtension, "mp4")
+        XCTAssertTrue(FileManager.default.fileExists(atPath: imported.streamURL.path))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: mp4URL.path), "Files app source must be copied, not deleted")
+        XCTAssertFalse(manager.isImporting)
+        XCTAssertEqual(manager.localVideos.count, 1)
+    }
+
+    @MainActor
+    func testAspectModeMappingAndCycling() {
+        XCTAssertEqual(VideoAspectMode.fit.videoGravity, .resizeAspect)
+        XCTAssertEqual(VideoAspectMode.fill.videoGravity, .resizeAspectFill)
+        XCTAssertEqual(VideoAspectMode.stretch.videoGravity, .resize)
+
+        let service = VideoPlayerService()
+        XCTAssertEqual(service.aspectMode, .fit)
+        service.cycleAspectMode()
+        XCTAssertEqual(service.aspectMode, .fill)
+        service.cycleAspectMode()
+        XCTAssertEqual(service.aspectMode, .stretch)
+        service.cycleAspectMode()
+        XCTAssertEqual(service.aspectMode, .fit)
+
+        let layerView = PlayerLayerView()
+        layerView.playerLayer.videoGravity = VideoAspectMode.fill.videoGravity
+        XCTAssertEqual(layerView.playerLayer.videoGravity, .resizeAspectFill)
+    }
+
+    @MainActor
+    func testPlaybackRateValidationFormattingAndUpdates() {
+        XCTAssertEqual(VideoPlayerService.supportedPlaybackRates, [0.5, 1.0, 1.25, 1.5, 2.0])
+        XCTAssertEqual(VideoPlayerService.validatedPlaybackRate(0.1), 0.5)
+        XCTAssertEqual(VideoPlayerService.validatedPlaybackRate(5.0), 2.0)
+        XCTAssertEqual(VideoPlayerService.validatedPlaybackRate(.nan), 1.0)
+        XCTAssertEqual(VideoPlayerService.validatedPlaybackRate(1.25), 1.25)
+
+        XCTAssertEqual(VideoPlayerService.formatPlaybackRate(0.5), "0.5x")
+        XCTAssertEqual(VideoPlayerService.formatPlaybackRate(1.0), "1x")
+        XCTAssertEqual(VideoPlayerService.formatPlaybackRate(1.25), "1.25x")
+        XCTAssertEqual(VideoPlayerService.formatPlaybackRate(1.5), "1.5x")
+        XCTAssertEqual(VideoPlayerService.formatPlaybackRate(2.0), "2x")
+
+        let service = VideoPlayerService()
+        XCTAssertEqual(service.playbackRate, 1.0)
+        service.setPlaybackRate(1.5)
+        XCTAssertEqual(service.playbackRate, 1.5)
+        service.setPlaybackRate(0.25)
+        XCTAssertEqual(service.playbackRate, 0.5)
+    }
+
     // MARK: External display
 
     func testOnlyExternalDisplayRoleIsTreatedAsExternal() {

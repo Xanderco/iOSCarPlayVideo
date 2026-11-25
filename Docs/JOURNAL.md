@@ -92,6 +92,15 @@
 
 ## Log
 
+### 2026-11-25 13:24 (Bogotá) — Files App Video Importer & Player Aspect Ratio / Speed Controls [DI-75]
+- **Files App Video Importer (`LocalVideoManager.swift`, `CastHomeView.swift`)**:
+  - Added `LocalVideoManager.importSecurityScopedFile(at:)` with `startAccessingSecurityScopedResource()` lifecycle handling, `supportedVideoContentTypes`, `isSupportedVideoURL(_:)`, and `ImportError.unsupportedFileType`.
+  - Replaced the single `PhotosPicker` row on `CastHomeView` (`Cast_LocalVideosRow`) with a clean `Menu` offering **Import from Photos** and **Import from Files** wired to `.photosPicker(...)` and `.fileImporter(...)`.
+- **Aspect Ratio & Playback Speed Controls (`VideoPlayerService.swift`, `AutomotiveVideoPlayerView.swift`, `CarPlayExternalDisplayView.swift`)**:
+  - Added `VideoAspectMode` (`.fit`, `.fill`, `.stretch`) mapped to `AVLayerVideoGravity` and wired `aspectMode.videoGravity` to both phone and CarPlay external display `CustomVideoPlayerRepresentable` layers.
+  - Added `playbackRate` (`0.5x`, `1x`, `1.25x`, `1.5x`, `2x`), validation/formatting helpers, Now Playing rate reporting, and rate preservation across `play()` and audio-interruption resumes, plus Speed menu and Aspect button pills in `AutomotiveVideoPlayerView`.
+- **Tests & Localization**: Added unit tests in `CoreBugfixTests.swift` and EN/ES translations in `Localizable.xcstrings`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

@@ -24,7 +24,10 @@ public struct CarPlayExternalDisplayView: View {
             if playerService.currentChannel != nil {
                 // Video is active: Render video full-screen on the car display
                 ZStack(alignment: .bottom) {
-                    CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
+                    CustomVideoPlayerRepresentable(
+                        player: playerService.isVideoLayerAttached ? playerService.player : nil,
+                        videoGravity: playerService.aspectMode.videoGravity
+                    )
                         .ignoresSafeArea()
 
                     // Minimal CarPlay status watermark

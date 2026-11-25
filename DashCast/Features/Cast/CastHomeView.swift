@@ -15,6 +15,8 @@ public struct CastHomeView: View {
     @State private var showingFavorites: Bool = false
     @State private var showingBroadcastPicker: Bool = false
     @State private var selectedPhotoItem: PhotosPickerItem?
+    @State private var showingPhotosPicker: Bool = false
+    @State private var showingVideoFileImporter: Bool = false
     @State private var isFullscreenPlayer: Bool = false
     @State private var m3uURLInput: String = ""
     @StateObject private var playlistStore = PlaylistStore.shared
@@ -157,6 +159,30 @@ public struct CastHomeView: View {
                     LifetimePaywallView().environmentObject(appState)
                 }
             }
+            .photosPicker(
+                isPresented: $showingPhotosPicker,
+                selection: $selectedPhotoItem,
+                matching: .videos,
+                preferredItemEncoding: .current
+            )
+            .fileImporter(
+                isPresented: $showingVideoFileImporter,
+                allowedContentTypes: LocalVideoManager.supportedVideoContentTypes,
+                allowsMultipleSelection: false
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    guard let url = urls.first else { return }
+                    do {
+                        let channel = try localVideoManager.importSecurityScopedFile(at: url)
+                        playerService.load(channel: channel)
+                    } catch {
+                        localImportError = error.localizedDescription
+                    }
+                case .failure(let error):
+                    localImportError = error.localizedDescription
+                }
+            }
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
                 guard let newItem = newItem else { return }
                 Task {
@@ -201,14 +227,29 @@ public struct CastHomeView: View {
             Divider().background(Color.dashBorder.opacity(0.6))
 
             // Row 2: Local Videos
-            PhotosPicker(selection: $selectedPhotoItem, matching: .videos, preferredItemEncoding: .current) {
+            Menu {
+                Button {
+                    showingPhotosPicker = true
+                } label: {
+                    Label("Import from Photos", systemImage: "photo.on.rectangle")
+                }
+                .accessibilityIdentifier("Cast_ImportFromPhotos")
+
+                Button {
+                    showingVideoFileImporter = true
+                } label: {
+                    Label("Import from Files", systemImage: "folder")
+                }
+                .accessibilityIdentifier("Cast_ImportFromFiles")
+            } label: {
                 menuRow(
                     icon: "folder.fill",
                     title: "Local Videos",
-                    subtitle: localVideoManager.isImporting ? "Importing…" : "Import from Photos"
+                    subtitle: localVideoManager.isImporting ? "Importing…" : "Import from Photos or Files"
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_LocalVideosRow")
 
             Divider().background(Color.dashBorder.opacity(0.6))
 

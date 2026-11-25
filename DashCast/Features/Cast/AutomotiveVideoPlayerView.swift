@@ -18,7 +18,10 @@ public struct AutomotiveVideoPlayerView: View {
             Color.black
 
             if playerService.currentChannel != nil {
-                CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
+                CustomVideoPlayerRepresentable(
+                    player: playerService.isVideoLayerAttached ? playerService.player : nil,
+                    videoGravity: playerService.aspectMode.videoGravity
+                )
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(.easeInOut(duration: 0.25)) {
@@ -201,10 +204,55 @@ public struct AutomotiveVideoPlayerView: View {
                     )
                     .tint(.dashYellow)
 
-                    HStack {
+                    HStack(spacing: 10) {
                         Text(formatTime(playerService.currentTime))
                             .font(ThemeFonts.monospaceDigits(size: 12))
                             .foregroundStyle(Color.dashTextSecondary)
+
+                        Spacer()
+
+                        Menu {
+                            ForEach(VideoPlayerService.supportedPlaybackRates, id: \.self) { rate in
+                                Button {
+                                    playerService.setPlaybackRate(rate)
+                                } label: {
+                                    HStack {
+                                        Text(verbatim: VideoPlayerService.formatPlaybackRate(rate))
+                                        if playerService.playbackRate == rate {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            Text(verbatim: VideoPlayerService.formatPlaybackRate(playerService.playbackRate))
+                                .font(.system(size: 11, weight: .bold, design: .rounded))
+                                .foregroundStyle(playerService.playbackRate == 1.0 ? .white : .black)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(playerService.playbackRate == 1.0 ? Color.white.opacity(0.2) : Color.dashYellow)
+                                .clipShape(Capsule())
+                        }
+                        .accessibilityLabel("Playback speed")
+                        .accessibilityIdentifier("Player_SpeedMenu")
+
+                        Button {
+                            playerService.cycleAspectMode()
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: playerService.aspectMode.systemImage)
+                                    .font(.system(size: 10, weight: .bold))
+                                Text(LocalizedStringKey(playerService.aspectMode.displayName))
+                                    .font(.system(size: 11, weight: .bold, design: .rounded))
+                            }
+                            .foregroundStyle(playerService.aspectMode == .fit ? .white : .black)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(playerService.aspectMode == .fit ? Color.white.opacity(0.2) : Color.dashYellow)
+                            .clipShape(Capsule())
+                        }
+                        .accessibilityLabel("Aspect ratio")
+                        .accessibilityIdentifier("Player_AspectModeButton")
 
                         Spacer()
 
@@ -237,15 +285,17 @@ public struct AutomotiveVideoPlayerView: View {
 /// AVPlayer, so the phone and the external display can render the same video at the same time.
 public struct CustomVideoPlayerRepresentable: UIViewRepresentable {
     public let player: AVPlayer?
+    public let videoGravity: AVLayerVideoGravity
 
-    public init(player: AVPlayer?) {
+    public init(player: AVPlayer?, videoGravity: AVLayerVideoGravity = .resizeAspect) {
         self.player = player
+        self.videoGravity = videoGravity
     }
 
     public func makeUIView(context: Context) -> PlayerLayerView {
         let view = PlayerLayerView()
         view.backgroundColor = .black
-        view.playerLayer.videoGravity = .resizeAspect
+        view.playerLayer.videoGravity = videoGravity
         view.playerLayer.player = player
         return view
     }
@@ -253,6 +303,9 @@ public struct CustomVideoPlayerRepresentable: UIViewRepresentable {
     public func updateUIView(_ uiView: PlayerLayerView, context: Context) {
         if uiView.playerLayer.player !== player {
             uiView.playerLayer.player = player
+        }
+        if uiView.playerLayer.videoGravity != videoGravity {
+            uiView.playerLayer.videoGravity = videoGravity
         }
     }
 
