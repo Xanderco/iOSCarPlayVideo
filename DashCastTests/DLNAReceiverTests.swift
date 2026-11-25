@@ -224,7 +224,7 @@ final class DLNAReceiverTests: XCTestCase {
             .setAVTransportURI(uri: streamURL, title: "Passenger Clip", metadata: nil),
             senderAddress: "192.168.1.44"
         )
-        XCTAssertEqual(result, .success(()))
+        assertSuccess(result)
         XCTAssertEqual(loadedChannels.count, 1)
         XCTAssertEqual(loadedChannels.first?.name, "Passenger Clip")
         XCTAssertEqual(loadedChannels.first?.streamURL, streamURL)
@@ -238,13 +238,13 @@ final class DLNAReceiverTests: XCTestCase {
         XCTAssertEqual(commands, [.pause])
 
         let blockedPlay = service.processSOAPAction(.play(speed: "1"))
-        XCTAssertEqual(blockedPlay, .failure(.blockedWhileMoving))
+        assertFailure(blockedPlay, expected: .blockedWhileMoving)
         XCTAssertEqual(loadedChannels.count, 1)
 
         // Setting a new URI while moving queues the item without starting playback.
         let secondURL = URL(string: "http://192.168.1.44:8000/next.m3u8")!
         let blockedSet = service.processSOAPAction(.setAVTransportURI(uri: secondURL, title: "Next Clip", metadata: nil))
-        XCTAssertEqual(blockedSet, .failure(.blockedWhileMoving))
+        assertFailure(blockedSet, expected: .blockedWhileMoving)
         XCTAssertEqual(service.incomingQueue.count, 2)
         XCTAssertEqual(loadedChannels.count, 1)
 
@@ -254,7 +254,7 @@ final class DLNAReceiverTests: XCTestCase {
         XCTAssertFalse(service.blockedByMotion)
 
         let resumedPlay = service.processSOAPAction(.play(speed: "1"))
-        XCTAssertEqual(resumedPlay, .success(()))
+        assertSuccess(resumedPlay)
         XCTAssertEqual(loadedChannels.count, 2)
         XCTAssertEqual(loadedChannels.last?.streamURL, secondURL)
     }
@@ -276,15 +276,39 @@ final class DLNAReceiverTests: XCTestCase {
 
         let url = URL(string: "https://media.example.com/gated.mp4")!
         let blocked = service.processSOAPAction(.setAVTransportURI(uri: url, title: "Gated", metadata: nil))
-        XCTAssertEqual(blocked, .failure(.entitlementRequired))
+        assertFailure(blocked, expected: .entitlementRequired)
         XCTAssertTrue(service.blockedByEntitlement)
         XCTAssertTrue(loadedChannels.isEmpty)
 
         entitled = true
         let allowed = service.processSOAPAction(.play(speed: "1"))
-        XCTAssertEqual(allowed, .success(()))
+        assertSuccess(allowed)
         XCTAssertFalse(service.blockedByEntitlement)
         XCTAssertEqual(loadedChannels.count, 1)
+    }
+
+    private func assertSuccess(
+        _ result: Result<Void, DLNAActionFailure>,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        if case .failure(let error) = result {
+            XCTFail("Expected success, got failure: \(error)", file: file, line: line)
+        }
+    }
+
+    private func assertFailure(
+        _ result: Result<Void, DLNAActionFailure>,
+        expected: DLNAActionFailure,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        switch result {
+        case .success:
+            XCTFail("Expected failure \(expected), got success", file: file, line: line)
+        case .failure(let error):
+            XCTAssertEqual(error, expected, file: file, line: line)
+        }
     }
 
     func testHTTPRoutesAndSOAPControlResponses() {
