@@ -19,6 +19,7 @@ public struct CastHomeView: View {
     @State private var m3uURLInput: String = ""
     @StateObject private var playlistStore = PlaylistStore.shared
     @StateObject private var mediaServerStore = MediaServerStore.shared
+    @StateObject private var epgGuide = XMLTVGuideService.shared
     @State private var isImportingPlaylist: Bool = false
     @State private var showingPlaylistFileImporter: Bool = false
     @State private var showingQRScanner: Bool = false
@@ -633,7 +634,10 @@ public struct CastHomeView: View {
 
                                 if !playlistStore.playlists.isEmpty {
                                     Button {
-                                        Task { await playlistStore.refreshAll() }
+                                        Task {
+                                            await playlistStore.refreshAll()
+                                            await epgGuide.loadGuides(for: playlistStore.playlists, forceRefresh: true)
+                                        }
                                     } label: {
                                         Label("Refresh All", systemImage: "arrow.clockwise")
                                     }
@@ -715,6 +719,7 @@ public struct CastHomeView: View {
                         }
 
                         ForEach(playlistStore.allChannels) { channel in
+                            let epgSlot = epgGuide.slot(for: channel)
                             Button {
                                 playerService.load(channel: channel)
                                 showingPlaylistsSheet = false
@@ -737,6 +742,10 @@ public struct CastHomeView: View {
                                         Text(channel.groupTitle)
                                             .font(.system(size: 12))
                                             .foregroundStyle(Color.dashTextSecondary)
+
+                                        if !epgSlot.isEmpty {
+                                            epgStrip(for: epgSlot)
+                                        }
                                     }
 
                                     Spacer()
@@ -765,6 +774,9 @@ public struct CastHomeView: View {
                     }
                     .padding(.bottom, 30)
                 }
+            }
+            .task(id: playlistStore.playlists.map(\.epgURL)) {
+                await epgGuide.loadGuides(for: playlistStore.playlists)
             }
             .sheet(isPresented: $showingAddM3UDialog) {
                 addM3UDialogSheet
@@ -810,6 +822,30 @@ public struct CastHomeView: View {
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func epgStrip(for slot: ChannelEPGSlot) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            let summaryParts: [String] = [
+                slot.now.map { String(localized: "Now: \($0.title)") },
+                slot.next.map { String(localized: "Next: \($0.title)") }
+            ].compactMap { $0 }
+
+            if !summaryParts.isEmpty {
+                Text(summaryParts.joined(separator: " · "))
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(Color.dashTextMuted)
+                    .lineLimit(1)
+            }
+
+            if let progress = slot.progress {
+                ProgressView(value: min(max(progress, 0), 1))
+                    .tint(Color.dashYellow)
+                    .scaleEffect(x: 1, y: 0.75, anchor: .center)
+            }
+        }
+        .padding(.top, 2)
     }
 
     private var favoritesSheet: some View {

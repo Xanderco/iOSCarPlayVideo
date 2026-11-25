@@ -1,5 +1,17 @@
 import Foundation
 
+public struct ParsedM3U: Sendable, Equatable {
+    public let epgURLs: [URL]
+    public let channels: [ChannelModel]
+
+    public var primaryEPGURL: URL? { epgURLs.first }
+
+    public init(epgURLs: [URL] = [], channels: [ChannelModel] = []) {
+        self.epgURLs = epgURLs
+        self.channels = channels
+    }
+}
+
 public struct IPTVParser {
     /// Decodes playlist bytes, tolerating a UTF-8 BOM and Latin-1 files.
     public static func decode(_ data: Data) -> String? {
@@ -11,7 +23,16 @@ public struct IPTVParser {
     /// Parses an extended M3U / M3U8 playlist.
     /// - Parameter baseURL: where the playlist came from; used to resolve relative stream paths.
     public static func parseM3U(content: String, baseURL: URL? = nil) -> [ChannelModel] {
+        parseM3UWithMetadata(content: content, baseURL: baseURL).channels
+    }
+
+    /// Parses an extended M3U / M3U8 playlist along with `#EXTM3U` EPG header URLs (`url-tvg`, `x-tvg-url`).
+    /// - Parameter baseURL: where the playlist came from; used to resolve relative stream and EPG paths.
+    public static func parseM3UWithMetadata(content: String, baseURL: URL? = nil) -> ParsedM3U {
         var channels: [ChannelModel] = []
+        var epgURLs: [URL] = []
+        var seenEPGURLs: Set<URL> = []
+
         var text = content
         if text.hasPrefix("\u{FEFF}") { text.removeFirst() }
         let lines = text.components(separatedBy: .newlines)
@@ -19,23 +40,44 @@ public struct IPTVParser {
         var currentName: String?
         var currentGroup: String?
         var currentLogo: URL?
+        var currentTvgID: String?
         var currentGroupFromTag: String?
 
         for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             if trimmed.isEmpty { continue }
 
-            if trimmed.uppercased().hasPrefix("#EXTINF:") {
+            let upper = trimmed.uppercased()
+            if upper.hasPrefix("#EXTM3U") {
+                for attrName in ["url-tvg", "x-tvg-url"] {
+                    guard let rawValue = extractAttribute(named: attrName, from: trimmed),
+                          !rawValue.isEmpty else { continue }
+                    for candidate in rawValue.split(separator: ",") {
+                        let rawURL = String(candidate).trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !rawURL.isEmpty,
+                              let resolved = resolveStreamURL(rawURL, baseURL: baseURL),
+                              seenEPGURLs.insert(resolved).inserted else { continue }
+                        epgURLs.append(resolved)
+                    }
+                }
+            } else if upper.hasPrefix("#EXTINF:") {
                 currentGroup = extractAttribute(named: "group-title", from: trimmed)
                 if let logoStr = extractAttribute(named: "tvg-logo", from: trimmed), !logoStr.isEmpty {
                     currentLogo = URL(string: logoStr)
                 } else {
                     currentLogo = nil
                 }
+                if let rawTvgID = extractAttribute(named: "tvg-id", from: trimmed)?
+                    .trimmingCharacters(in: .whitespacesAndNewlines),
+                   !rawTvgID.isEmpty {
+                    currentTvgID = rawTvgID
+                } else {
+                    currentTvgID = nil
+                }
                 let title = displayTitle(fromExtinf: trimmed)
                 currentName = (title?.isEmpty == false ? title : nil)
                     ?? extractAttribute(named: "tvg-name", from: trimmed)
-            } else if trimmed.uppercased().hasPrefix("#EXTGRP:") {
+            } else if upper.hasPrefix("#EXTGRP:") {
                 currentGroupFromTag = String(trimmed.dropFirst("#EXTGRP:".count)).trimmingCharacters(in: .whitespaces)
             } else if !trimmed.hasPrefix("#") {
                 if let streamURL = resolveStreamURL(trimmed, baseURL: baseURL) {
@@ -48,17 +90,19 @@ public struct IPTVParser {
                         name: name.isEmpty ? "Channel \(channels.count + 1)" : name,
                         streamURL: streamURL,
                         groupTitle: group,
-                        logoURL: currentLogo
+                        logoURL: currentLogo,
+                        tvgID: currentTvgID
                     ))
                 }
                 currentName = nil
                 currentGroup = nil
                 currentGroupFromTag = nil
                 currentLogo = nil
+                currentTvgID = nil
             }
         }
 
-        return channels
+        return ParsedM3U(epgURLs: epgURLs, channels: channels)
     }
 
     /// The display title is everything after the first comma that is not inside quotes.
