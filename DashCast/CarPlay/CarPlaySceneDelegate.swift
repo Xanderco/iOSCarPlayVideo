@@ -27,6 +27,8 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
     /// CarPlay audio apps may stack at most five templates (root included); pushing more
     /// raises an exception in CarPlay. Now Playing counts towards the depth.
     private static let maximumTemplateDepth = 5
+    /// Caps the Quick-Resume section so category folders stay visible on smaller CarPlay lists.
+    private static let maxRecentLibraryItems = 5
 
     // MARK: - Scene lifecycle
 
@@ -44,7 +46,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
 
         // Only templates allowed for the CarPlay Audio category (tab bar, list, Now Playing).
         // CPInformationTemplate is NOT allowed for audio apps and would throw.
-        let tabs: [CPTemplate] = [library, favorites, makeInfoTemplate(), Self.mirrorInstructionsTemplate { [weak self] in
+        let tabs: [CPTemplate] = [library, favorites, Self.infoTemplate(), Self.mirrorInstructionsTemplate { [weak self] in
             self?.startMirror()
         }]
         let tabBar = CPTabBarTemplate(templates: Array(tabs.prefix(Int(CPTabBarTemplate.maximumTabCount))))
@@ -138,28 +140,50 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         }
     }
 
-    /// Library root: one row per group. Tapping a group pushes its channel list.
-    private func makeLibrarySections(store: PlaylistStore) -> [CPListSection] {
-        let maxItems = Int(CPListTemplate.maximumItemCount)
+    /// Library root: optional Recent Quick-Resume section at the top, followed by group folders.
+    func makeLibrarySections(store: PlaylistStore) -> [CPListSection] {
+        let maxSections = Int(CPListTemplate.maximumSectionCount)
+        var remaining = Int(CPListTemplate.maximumItemCount)
         let groups = store.groupedChannels(store.allChannels)
-        guard !groups.isEmpty else { return [] }
+        var sections: [CPListSection] = []
 
-        let items: [CPListItem] = groups.prefix(maxItems).map { entry in
-            let group = entry.group
-            let channels = entry.channels
-            let item = CPListItem(
-                text: group.isEmpty ? String(localized: "Other") : group,
-                detailText: channels.count == 1 ? String(localized: "1 channel") : String(localized: "\(channels.count) channels"),
-                image: UIImage(systemName: "folder.fill")
-            )
-            item.accessoryType = .disclosureIndicator
-            item.handler = { [weak self] _, completion in
-                self?.pushGroup(group, title: group.isEmpty ? String(localized: "Other") : group, channels: channels)
-                completion()
-            }
-            return item
+        // Reserve at least one slot for category folders when groups exist so Recent never crowds them out.
+        let recentCap = groups.isEmpty ? Self.maxRecentLibraryItems : min(Self.maxRecentLibraryItems, max(0, remaining - 1))
+        let recent = Array(store.recentChannels.prefix(recentCap))
+        if !recent.isEmpty && remaining > 0 && sections.count < maxSections {
+            let recentItems = recent.map { makeChannelItem($0, showGroup: true) }
+            remaining -= recentItems.count
+            sections.append(CPListSection(
+                items: recentItems,
+                header: String(localized: "Recent"),
+                sectionIndexTitle: nil
+            ))
         }
-        return [CPListSection(items: items)]
+
+        if !groups.isEmpty && remaining > 0 && sections.count < maxSections {
+            let groupItems: [CPListItem] = groups.prefix(remaining).map { entry in
+                let group = entry.group
+                let channels = entry.channels
+                let item = CPListItem(
+                    text: group.isEmpty ? String(localized: "Other") : group,
+                    detailText: channels.count == 1 ? String(localized: "1 channel") : String(localized: "\(channels.count) channels"),
+                    image: UIImage(systemName: "folder.fill")
+                )
+                item.accessoryType = .disclosureIndicator
+                item.handler = { [weak self] _, completion in
+                    self?.pushGroup(group, title: group.isEmpty ? String(localized: "Other") : group, channels: channels)
+                    completion()
+                }
+                return item
+            }
+            sections.append(CPListSection(
+                items: groupItems,
+                header: recent.isEmpty ? nil : String(localized: "Categories"),
+                sectionIndexTitle: nil
+            ))
+        }
+
+        return sections
     }
 
     private func makeFavoritesSections(store: PlaylistStore) -> [CPListSection] {
@@ -174,7 +198,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             let items = entry.channels.prefix(remaining).map { makeChannelItem($0, showGroup: false) }
             remaining -= items.count
             sections.append(CPListSection(items: Array(items),
-                                          header: entry.group.isEmpty ? "Other" : entry.group,
+                                          header: entry.group.isEmpty ? String(localized: "Other") : entry.group,
                                           sectionIndexTitle: nil))
         }
         return sections
@@ -207,7 +231,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         guard let interfaceController, canPush(onto: interfaceController) else { return }
         let template = CPListTemplate(title: title, sections: channelSections(channels, showGroup: false))
         template.userInfo = group
-        template.emptyViewTitleVariants = ["No channels"]
+        template.emptyViewTitleVariants = [String(localized: "No channels")]
         interfaceController.pushTemplate(template, animated: true, completion: nil)
     }
 
@@ -215,12 +239,14 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         interfaceController.templates.count < Self.maximumTemplateDepth
     }
 
-    private func makeInfoTemplate() -> CPListTemplate {
+    // MARK: - Tab templates (static so unit tests can build them without a car)
+
+    static func infoTemplate() -> CPListTemplate {
         let items = [
-            CPListItem(text: "Your channels, on the big screen",
-                       detailText: "Import IPTV playlists on your iPhone"),
-            CPListItem(text: "Audio while driving",
-                       detailText: "Video is only shown when parked, via AirPlay")
+            CPListItem(text: String(localized: "Your channels, on the big screen"),
+                       detailText: String(localized: "Set up playlists and media sources while parked")),
+            CPListItem(text: String(localized: "Audio while driving"),
+                       detailText: String(localized: "Video is only shown when parked, via AirPlay"))
         ]
         for item in items {
             item.handler = { _, completion in completion() }
@@ -231,14 +257,12 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         return template
     }
 
-    // MARK: - Tab templates (static so unit tests can build them without a car)
-
     static func libraryTemplate() -> CPListTemplate {
         let library = CPListTemplate(title: String(localized: "Library"), sections: [])
         library.tabTitle = String(localized: "Library")
         library.tabImage = UIImage(systemName: "tv.fill")
         library.emptyViewTitleVariants = [String(localized: "No channels")]
-        library.emptyViewSubtitleVariants = [String(localized: "Import an M3U playlist on your iPhone")]
+        library.emptyViewSubtitleVariants = [String(localized: "Add a playlist while parked to see channels here")]
         return library
     }
 
@@ -247,13 +271,13 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         favorites.tabTitle = String(localized: "Favorites")
         favorites.tabImage = UIImage(systemName: "heart.fill")
         favorites.emptyViewTitleVariants = [String(localized: "No Favorites Yet")]
-        favorites.emptyViewSubtitleVariants = [String(localized: "Tap the heart on a channel on your iPhone")]
+        favorites.emptyViewSubtitleVariants = [String(localized: "Star favorite channels while parked for quick access here")]
         return favorites
     }
 
-    /// Car-screen instructions for mirroring the iPhone (the "Cast" tab). A list, because
+    /// Car-screen instructions for mirroring while parked (the "Cast" tab). A list, because
     /// CPInformationTemplate is not allowed for CarPlay Audio apps.
-    /// With `onMirror`, a second section adds the "Show iPhone screen" action, which plays the
+    /// With `onMirror`, a second section adds the mirror action, which plays the
     /// broadcast extension's HLS stream through the system player (ADR-002 §7.5).
     static func mirrorInstructionsTemplate(onMirror: (() -> Void)? = nil) -> CPListTemplate {
         let steps = mirrorInstructionSteps.enumerated().map { index, step -> CPListItem in
@@ -265,44 +289,57 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             item.isEnabled = false
             return item
         }
-        var sections = [CPListSection(items: steps, header: "Show your iPhone on this screen", sectionIndexTitle: nil)]
+        var sections = [CPListSection(
+            items: steps,
+            header: String(localized: "Parked screen mirroring"),
+            sectionIndexTitle: nil
+        )]
         if let onMirror {
             let action = CPListItem(
                 text: mirrorActionTitle,
-                detailText: "Parked only · starts after Start Broadcast on iPhone",
-                image: UIImage(systemName: "iphone")
+                detailText: String(localized: "Parked only · plays once broadcast is active"),
+                image: UIImage(systemName: "play.rectangle.on.rectangle")
             )
             action.handler = { _, completion in
                 onMirror()
                 completion()
             }
-            sections.append(CPListSection(items: [action], header: "Mirror", sectionIndexTitle: nil))
+            sections.append(CPListSection(items: [action], header: String(localized: "Mirror"), sectionIndexTitle: nil))
         }
-        let template = CPListTemplate(title: "Mirror iPhone", sections: sections)
-        template.tabTitle = "Cast"
+        let template = CPListTemplate(title: String(localized: "Screen Mirror"), sections: sections)
+        template.tabTitle = String(localized: "Cast")
         template.tabImage = UIImage(systemName: "rectangle.on.rectangle")
         return template
     }
 
-    static let mirrorActionTitle = "Show iPhone screen"
+    static let mirrorActionTitle = String(localized: "Show mirrored screen")
 
-    /// Original copy; also used by the unit tests.
+    /// Car-safe parked/setup copy complying with CarPlay Guideline 2; also checked by unit tests.
     static let mirrorInstructionSteps: [(title: String, detail: String)] = [
-        ("Open DashCast on your iPhone", "Go to Cast → Car Display."),
-        ("Turn on “Mirror to CarPlay screen”", "Then tap the broadcast button and choose Start Broadcast."),
-        ("Parked only", "Mirroring stops automatically as soon as the vehicle moves.")
+        (
+            String(localized: "Parked setup required"),
+            String(localized: "Enable Car Display mirroring in DashCast settings while parked.")
+        ),
+        (
+            String(localized: "Start screen broadcast"),
+            String(localized: "Begin the broadcast while parked before selecting Show Mirrored Screen below.")
+        ),
+        (
+            String(localized: "Parked only"),
+            String(localized: "Mirroring stops automatically as soon as the vehicle moves.")
+        )
     ]
 
     // MARK: - Playback
 
-    /// "Show iPhone screen": parked-only checks live in `CarPlayMirrorPlayback.decide`.
+    /// Plays the active mirror broadcast when parked; checks live in `CarPlayMirrorPlayback.decide`.
     private func startMirror() {
         switch CarPlayMirrorPlayback.start() {
         case .play:
             updateNowPlayingInfo(for: CarPlayMirrorPlayback.mirrorChannel, isPlaying: true)
             showNowPlaying()
         case .vehicleMoving, .mirrorDisabled, .notBroadcasting:
-            // The instruction rows on this screen already say what to do on the iPhone.
+            // The instruction rows on this screen already describe parked-only mirror setup.
             break
         }
     }

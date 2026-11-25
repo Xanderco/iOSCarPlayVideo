@@ -10,11 +10,14 @@ public final class VideoPlayerService: ObservableObject {
     public static let shared: VideoPlayerService = {
         let service = VideoPlayerService(handlesRemoteCommands: true)
         service.entitlementGate = .shared
+        service.onChannelLoaded = { PlaylistStore.shared.recordRecentChannel($0) }
         return service
     }()
 
     /// Free-tier casting allowance. `nil` (tests, previews) means unrestricted.
     public var entitlementGate: EntitlementGate?
+    /// Invoked whenever `load(channel:)` starts loading a channel. Wired on `shared` to record recents.
+    public var onChannelLoaded: (@MainActor (ChannelModel) -> Void)?
     private var lastCastingTick: Date?
     private var pendingCastingSeconds: TimeInterval = 0
 
@@ -115,6 +118,7 @@ public final class VideoPlayerService: ObservableObject {
         player.replaceCurrentItem(with: playerItem)
         updateNowPlayingInfo()
         UsageMetricsManager.shared.recordVideoPlayed()
+        onChannelLoaded?(channel)
         play()
     }
 

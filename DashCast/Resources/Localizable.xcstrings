@@ -8177,6 +8177,244 @@
           }
         }
       }
+    },
+    "Set up playlists and media sources while parked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set up playlists and media sources while parked"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configura listas y fuentes multimedia mientras estás aparcado"
+          }
+        }
+      }
+    },
+    "Add a playlist while parked to see channels here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a playlist while parked to see channels here"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añade una lista mientras estás aparcado para ver canales aquí"
+          }
+        }
+      }
+    },
+    "Star favorite channels while parked for quick access here": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Star favorite channels while parked for quick access here"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Marca canales favoritos mientras estás aparcado para acceder rápido aquí"
+          }
+        }
+      }
+    },
+    "Recent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recent"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recientes"
+          }
+        }
+      }
+    },
+    "Parked screen mirroring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parked screen mirroring"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicación de pantalla en aparcamiento"
+          }
+        }
+      }
+    },
+    "Show mirrored screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show mirrored screen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar pantalla duplicada"
+          }
+        }
+      }
+    },
+    "Parked only · plays once broadcast is active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parked only · plays once broadcast is active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo en aparcamiento · se reproduce cuando la transmisión está activa"
+          }
+        }
+      }
+    },
+    "Screen Mirror": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Screen Mirror"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicación"
+          }
+        }
+      }
+    },
+    "Parked setup required": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parked setup required"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configuración en aparcamiento"
+          }
+        }
+      }
+    },
+    "Enable Car Display mirroring in DashCast settings while parked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Car Display mirroring in DashCast settings while parked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa la duplicación de pantalla del coche en los ajustes de DashCast mientras estás aparcado."
+          }
+        }
+      }
+    },
+    "Start screen broadcast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start screen broadcast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iniciar transmisión de pantalla"
+          }
+        }
+      }
+    },
+    "Begin the broadcast while parked before selecting Show Mirrored Screen below.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Begin the broadcast while parked before selecting Show Mirrored Screen below."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inicia la transmisión mientras estás aparcado antes de seleccionar Mostrar pantalla duplicada abajo."
+          }
+        }
+      }
+    },
+    "Parked only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parked only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo en aparcamiento"
+          }
+        }
+      }
+    },
+    "Mirroring stops automatically as soon as the vehicle moves.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirroring stops automatically as soon as the vehicle moves."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La duplicación se detiene automáticamente en cuanto el vehículo se mueve."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -358,4 +358,75 @@ final class PlaylistStoreTests: XCTestCase {
         XCTAssertEqual(store.playlists.map(\.title), ["Mine", "Local"])
         XCTAssertEqual(store.playlists[0].channels.map(\.name), ["Movie A", "News Two", "Movie B"])
     }
+
+    // MARK: - Recent channels
+
+    func testRecentChannelsTrackMostRecentFirstWithoutDuplicates() throws {
+        let store = makeStore(makeEnv())
+        try store.addPlaylist(data: data(Self.threeChannels), sourceURL: nil, title: "A")
+        let movieA = store.importedChannels[0]
+        let newsTwo = store.importedChannels[1]
+        let movieB = store.importedChannels[2]
+
+        store.recordRecentChannel(movieA)
+        store.recordRecentChannel(newsTwo)
+        store.recordRecentChannel(movieB)
+        store.recordRecentChannel(movieA)
+
+        XCTAssertEqual(store.recentChannels.map(\.name), ["Movie A", "Movie B", "News Two"])
+    }
+
+    func testRecentChannelsPersistAndReload() throws {
+        let env = makeEnv()
+        let store = makeStore(env)
+        try store.addPlaylist(data: data(Self.twoChannels), sourceURL: nil, title: "A")
+        let news = store.importedChannels[0]
+        let sports = store.importedChannels[1]
+
+        store.recordRecentChannel(news)
+        store.recordRecentChannel(sports)
+
+        let reloaded = makeStore(env)
+        XCTAssertEqual(reloaded.recentChannels.map(\.name), ["Sports One", "News One"])
+    }
+
+    func testRecentChannelsCappedAtMaximum() throws {
+        let store = makeStore(makeEnv())
+        var lines = ["#EXTM3U"]
+        for index in 1...15 {
+            lines.append("#EXTINF:-1 group-title=\"All\",Channel \(index)")
+            lines.append("https://stream.example.com/ch\(index).m3u8")
+        }
+        try store.addPlaylist(data: data(lines.joined(separator: "\n")), sourceURL: nil, title: "Many")
+
+        for channel in store.importedChannels {
+            store.recordRecentChannel(channel)
+        }
+
+        XCTAssertEqual(store.recentChannels.count, PlaylistStore.maxRecentChannels)
+        XCTAssertEqual(store.recentChannels.first?.name, "Channel 15")
+        XCTAssertEqual(store.recentChannels.last?.name, "Channel 6")
+    }
+
+    func testRecentChannelsIgnoreMirrorChannelAndClear() throws {
+        let store = makeStore(makeEnv())
+        try store.addPlaylist(data: data(Self.twoChannels), sourceURL: nil, title: "A")
+        store.recordRecentChannel(CarPlayMirrorPlayback.mirrorChannel)
+        XCTAssertTrue(store.recentChannels.isEmpty)
+
+        store.recordRecentChannel(store.importedChannels[0])
+        XCTAssertEqual(store.recentChannels.count, 1)
+        store.clearRecentChannels()
+        XCTAssertTrue(store.recentChannels.isEmpty)
+    }
+
+    func testRecentChannelsOmitChannelsFromRemovedPlaylists() throws {
+        let store = makeStore(makeEnv())
+        let playlist = try store.addPlaylist(data: data(Self.twoChannels), sourceURL: nil, title: "Temp")
+        store.recordRecentChannel(store.importedChannels[0])
+        XCTAssertEqual(store.recentChannels.count, 1)
+
+        store.removePlaylist(id: playlist.id)
+        XCTAssertTrue(store.recentChannels.isEmpty)
+    }
 }
