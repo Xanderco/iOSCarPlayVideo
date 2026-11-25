@@ -1041,6 +1041,7 @@ public struct CastHomeView: View {
             Text(isFavoritesEmpty ? "No favorite channels yet" : "No matching channels")
                 .font(.system(size: 15, weight: .bold))
                 .foregroundStyle(Color.dcTextPrimary)
+                .accessibilityIdentifier("MediaSources_EmptySearchState")
 
             Text(isFavoritesEmpty ? "Tap the heart on any channel to save it here." : "Try a different search or filter.")
                 .font(.system(size: 12))
@@ -1071,7 +1072,6 @@ public struct CastHomeView: View {
         .background(Color.dcSurface)
         .clipShape(RoundedRectangle(cornerRadius: 14))
         .padding(.horizontal)
-        .accessibilityIdentifier("MediaSources_EmptySearchState")
     }
 
     private var favoritesSheet: some View {
