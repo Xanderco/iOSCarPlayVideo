@@ -70,7 +70,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>DashCast uses the camera to scan QR codes that contain IPTV playlist links.</string>
+	<string>DashCast uses the camera to scan playlist QR codes and record the optional 60-second rolling DashCam incident buffer on this iPhone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>DashCast accesses your photos so you can pick videos and photos to play or show on the car screen.</string>
 	<key>NSSupportsLiveActivities</key>

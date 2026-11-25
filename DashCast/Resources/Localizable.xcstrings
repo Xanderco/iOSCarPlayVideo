@@ -8177,6 +8177,414 @@
           }
         }
       }
+    },
+    "Incident DashCam": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incident DashCam"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCam de Incidentes"
+          }
+        }
+      }
+    },
+    "Windshield Telemetry Loop Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windshield Telemetry Loop Active"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bucle de Telemetria Activo"
+          }
+        }
+      }
+    },
+    "Windshield Incident Camera Standby": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Windshield Incident Camera Standby"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Camara de Incidentes en Espera"
+          }
+        }
+      }
+    },
+    "REC • 60s LOOP": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "REC • 60s LOOP"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GRAB • BUCLE 60s"
+          }
+        }
+      }
+    },
+    "STANDBY": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "STANDBY"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "EN ESPERA"
+          }
+        }
+      }
+    },
+    "Telemetry ring buffer running in sensor mode; real camera activates on device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Telemetry ring buffer running in sensor mode; real camera activates on device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bufer circular de telemetria en modo sensor; la camara real se activa en el dispositivo."
+          }
+        }
+      }
+    },
+    "Grant camera access to capture rolling 10s HD video segments alongside G-force telemetry.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grant camera access to capture rolling 10s HD video segments alongside G-force telemetry."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Concede acceso a la camara para capturar segmentos HD de 10s junto con telemetria de fuerza G."
+          }
+        }
+      }
+    },
+    "60-second circular buffer overwrites old segments automatically unless a >0.6G impact triggers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "60-second circular buffer overwrites old segments automatically unless a >0.6G impact triggers."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El bufer circular de 60 segundos sobrescribe segmentos antiguos automaticamente salvo impacto >0.6G."
+          }
+        }
+      }
+    },
+    "Rolling 60s Incident Loop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rolling 60s Incident Loop"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bucle Rotativo de 60s"
+          }
+        }
+      }
+    },
+    "Buffered: %llds / 60s": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buffered: %llds / 60s"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En bufer: %llds / 60s"
+          }
+        }
+      }
+    },
+    "Disarm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disarm"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desarmar"
+          }
+        }
+      }
+    },
+    "Arm Loop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arm Loop"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armar Bucle"
+          }
+        }
+      }
+    },
+    "Save Last 60s": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save Last 60s"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar Ultimos 60s"
+          }
+        }
+      }
+    },
+    "Test >0.6G Trigger": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test >0.6G Trigger"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probar Disparo >0.6G"
+          }
+        }
+      }
+    },
+    "G-Shock Deceleration Threshold": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "G-Shock Deceleration Threshold"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Umbral de Desaceleracion G-Shock"
+          }
+        }
+      }
+    },
+    "Hard braking or impact above this threshold automatically locks and watermarks the rolling 60-second clip on this iPhone.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hard braking or impact above this threshold automatically locks and watermarks the rolling 60-second clip on this iPhone."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frenadas bruscas o impactos sobre este umbral bloquean y marcan con telemetria el clip de 60 segundos en este iPhone."
+          }
+        }
+      }
+    },
+    "Saved Incident Clips": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved Incident Clips"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clips de Incidentes Guardados"
+          }
+        }
+      }
+    },
+    "No incident clips archived yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No incident clips archived yet"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aun no hay clips de incidentes archivados"
+          }
+        }
+      }
+    },
+    "%llds clip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%llds clip"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clip de %llds"
+          }
+        }
+      }
+    },
+    "Locked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Locked"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloqueado"
+          }
+        }
+      }
+    },
+    "Lock": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lock"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bloquear"
+          }
+        }
+      }
+    },
+    "G-Shock Impact": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "G-Shock Impact"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impacto G-Shock"
+          }
+        }
+      }
+    },
+    "Manual Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manual Save"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado Manual"
+          }
+        }
+      }
+    },
+    "Test Event": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test Event"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Evento de Prueba"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
