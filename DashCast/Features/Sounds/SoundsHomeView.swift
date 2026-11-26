@@ -4,11 +4,11 @@ public struct SoundsHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var soundPlayer = SoundPlayerEngine.shared
 
-    @State private var connectionSoundId: String = "sport_startup"
-    @State private var disconnectionSoundId: String = "airline_dingy"
-    @State private var homeArrivalSoundId: String = "welcome_traveler"
+    @State private var slotSoundIds: [SoundTriggerSlot: String] = Dictionary(
+        uniqueKeysWithValues: SoundTriggerSlot.allCases.map { ($0, $0.defaultSoundId) }
+    )
     @State private var showingShortcutsGuide: Bool = false
-    @State private var showingSoundPickerForSlot: String? = nil
+    @State private var showingSoundPickerForSlot: SoundTriggerSlot? = nil
     @State private var soundSearchText: String = ""
     @State private var pickerCategory: String = "Recommend"
 
@@ -23,7 +23,7 @@ public struct SoundsHomeView: View {
 
                 ScrollView {
                     VStack(spacing: 20) {
-                        // Top Sound Triggers (Disconnection, Home Arrival)
+                        // Top Sound Triggers (Connection, Disconnection, Home Arrival)
                         topTriggerCards
 
                         // Section: Top trending
@@ -77,11 +77,8 @@ public struct SoundsHomeView: View {
             .sheet(isPresented: $showingShortcutsGuide) {
                 ShortcutsGuideView()
             }
-            .sheet(item: Binding(
-                get: { showingSoundPickerForSlot.map { SoundSlotIdentifiable(id: $0) } },
-                set: { showingSoundPickerForSlot = $0?.id }
-            )) { slot in
-                soundPickerSheet(for: slot.id)
+            .sheet(item: $showingSoundPickerForSlot) { slot in
+                soundPickerSheet(for: slot)
             }
             .onAppear {
                 loadPreferences()
@@ -93,37 +90,27 @@ public struct SoundsHomeView: View {
 
     private var topTriggerCards: some View {
         VStack(spacing: 12) {
-            // Disconnection Sound Card
-            triggerCard(
-                icon: "stop.circle.fill",
-                iconColor: Color(red: 0.85, green: 0.25, blue: 0.25),
-                title: "Disconnection Sound",
-                subtitle: "Plays when CarPlay disconnects",
-                currentSoundId: disconnectionSoundId,
-                slotKey: "disconnection"
-            )
-
-            // Home Arrival Sound Card
-            triggerCard(
-                icon: "house.fill",
-                iconColor: Color.dashAmber,
-                title: "Home Arrival Sound",
-                subtitle: "Plays when you arrive home",
-                currentSoundId: homeArrivalSoundId,
-                slotKey: "arrival"
-            )
+            ForEach(SoundTriggerSlot.allCases) { slot in
+                triggerCard(for: slot)
+            }
         }
         .padding(.horizontal, 16)
     }
 
-    private func triggerCard(
-        icon: String,
-        iconColor: Color,
-        title: LocalizedStringKey,
-        subtitle: LocalizedStringKey,
-        currentSoundId: String,
-        slotKey: String
-    ) -> some View {
+    private func triggerColor(for slot: SoundTriggerSlot) -> Color {
+        switch slot {
+        case .connection:
+            return Color.dashGreen
+        case .disconnection:
+            return Color(red: 0.85, green: 0.25, blue: 0.25)
+        case .arrival:
+            return Color.dashAmber
+        }
+    }
+
+    private func triggerCard(for slot: SoundTriggerSlot) -> some View {
+        let currentSoundId = selectedSoundId(for: slot)
+        let iconColor = triggerColor(for: slot)
         let sound = catalog.sounds.first(where: { $0.id == currentSoundId })
         let isPlaying = soundPlayer.currentlyPlayingId == currentSoundId
 
@@ -138,18 +125,19 @@ public struct SoundsHomeView: View {
                         .fill(iconColor.opacity(0.25))
                         .frame(width: 46, height: 46)
 
-                    Image(systemName: isPlaying ? "stop.fill" : (slotKey == "arrival" ? "house.fill" : "play.fill"))
+                    Image(systemName: isPlaying ? "stop.fill" : slot.playGlyphName)
                         .font(.system(size: 20))
                         .foregroundStyle(iconColor)
                 }
             }
+            .accessibilityIdentifier("Sounds_PreviewButton_\(slot.rawValue)")
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(title)
+                Text(slot.titleKey)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(Color.dashTextPrimary)
 
-                Text(subtitle)
+                Text(slot.subtitleKey)
                     .font(.system(size: 11))
                     .foregroundStyle(Color.dashTextSecondary)
 
@@ -157,13 +145,14 @@ public struct SoundsHomeView: View {
                     Text("Selected: \(sound.title)")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(Color.dashYellow)
+                        .accessibilityIdentifier("Sounds_SelectedLabel_\(slot.rawValue)")
                 }
             }
 
             Spacer()
 
             Button {
-                showingSoundPickerForSlot = slotKey
+                showingSoundPickerForSlot = slot
             } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 14, weight: .bold))
@@ -172,6 +161,7 @@ public struct SoundsHomeView: View {
                     .background(Color.dashSurfaceHighlight)
                     .clipShape(Circle())
             }
+            .accessibilityIdentifier("Sounds_PickerButton_\(slot.rawValue)")
         }
         .padding(14)
         .background(Color.dashSurface)
@@ -229,17 +219,10 @@ public struct SoundsHomeView: View {
                     Spacer()
 
                     Menu {
-                        Button("Set as Connection Sound") {
-                            connectionSoundId = sound.id
-                            savePreferences()
-                        }
-                        Button("Set as Disconnection Sound") {
-                            disconnectionSoundId = sound.id
-                            savePreferences()
-                        }
-                        Button("Set as Arrival Sound") {
-                            homeArrivalSoundId = sound.id
-                            savePreferences()
+                        ForEach(SoundTriggerSlot.allCases) { slot in
+                            Button(slot.menuActionTitleKey) {
+                                assignSound(sound.id, to: slot)
+                            }
                         }
                     } label: {
                         Image(systemName: "plus.circle.fill")
@@ -291,10 +274,9 @@ public struct SoundsHomeView: View {
         }
     }
 
-    // MARK: - Sound Picker Sheet (Matching Select CarPlay Connection Sound.jpeg)
+    // MARK: - Sound Picker Sheet
 
-    private func soundPickerSheet(for slot: String) -> some View {
-        let title = slot == "disconnection" ? "Select Disconnection Sound" : "Select Connection Sound"
+    private func soundPickerSheet(for slot: SoundTriggerSlot) -> some View {
         let categories = ["Recommend", "All", "Brands", "Voices", "Engine", "Futuristic"]
 
         return NavigationStack {
@@ -358,13 +340,9 @@ public struct SoundsHomeView: View {
                             }
 
                             ForEach(list) { sound in
+                                let isSelected = selectedSoundId(for: slot) == sound.id
                                 Button {
-                                    if slot == "disconnection" {
-                                        disconnectionSoundId = sound.id
-                                    } else {
-                                        homeArrivalSoundId = sound.id
-                                    }
-                                    savePreferences()
+                                    assignSound(sound.id, to: slot)
                                     showingSoundPickerForSlot = nil
                                 } label: {
                                     HStack(spacing: 14) {
@@ -388,7 +366,6 @@ public struct SoundsHomeView: View {
 
                                         Spacer()
 
-                                        let isSelected = (slot == "disconnection" ? disconnectionSoundId : homeArrivalSoundId) == sound.id
                                         Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                                             .font(.system(size: 18))
                                             .foregroundStyle(isSelected ? Color.dashYellow : Color.dashTextMuted)
@@ -403,6 +380,8 @@ public struct SoundsHomeView: View {
                                     .padding(.horizontal, 16)
                                 }
                                 .buttonStyle(.plain)
+                                .accessibilityIdentifier("Sounds_PickerRow_\(sound.id)")
+                                .accessibilityValue(isSelected ? "selected" : "unselected")
                             }
 
                             Color.clear.frame(height: 90)
@@ -424,10 +403,11 @@ public struct SoundsHomeView: View {
                         .clipShape(Capsule())
                         .shadow(color: Color.dashYellow.opacity(0.35), radius: 10, y: 4)
                 }
+                .accessibilityIdentifier("Sounds_PickerDoneButton")
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
             }
-            .navigationTitle(title)
+            .navigationTitle(slot.pickerTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -438,12 +418,22 @@ public struct SoundsHomeView: View {
                             .font(.system(size: 16, weight: .bold))
                             .foregroundStyle(Color.dashYellow)
                     }
+                    .accessibilityIdentifier("Sounds_PickerCloseButton")
                 }
             }
         }
     }
 
     // MARK: - Helpers
+
+    private func selectedSoundId(for slot: SoundTriggerSlot) -> String {
+        slotSoundIds[slot] ?? slot.defaultSoundId
+    }
+
+    private func assignSound(_ soundId: String, to slot: SoundTriggerSlot) {
+        slotSoundIds[slot] = soundId
+        savePreferences()
+    }
 
     private func tileGradient(for sound: SoundEffectItem) -> LinearGradient {
         switch sound.category {
@@ -475,20 +465,16 @@ public struct SoundsHomeView: View {
 
     private func loadPreferences() {
         let prefs = PersistenceController.shared.loadUserPreferences()
-        if let conn = prefs.connectionSoundId { self.connectionSoundId = conn }
-        if let disc = prefs.disconnectionSoundId { self.disconnectionSoundId = disc }
-        if let arriv = prefs.homeArrivalSoundId { self.homeArrivalSoundId = arriv }
+        for slot in SoundTriggerSlot.allCases {
+            slotSoundIds[slot] = prefs.soundId(for: slot) ?? slot.defaultSoundId
+        }
     }
 
     private func savePreferences() {
         var prefs = PersistenceController.shared.loadUserPreferences()
-        prefs.connectionSoundId = connectionSoundId
-        prefs.disconnectionSoundId = disconnectionSoundId
-        prefs.homeArrivalSoundId = homeArrivalSoundId
+        for slot in SoundTriggerSlot.allCases {
+            prefs.setSoundId(selectedSoundId(for: slot), for: slot)
+        }
         PersistenceController.shared.saveUserPreferences(prefs)
     }
-}
-
-private struct SoundSlotIdentifiable: Identifiable {
-    let id: String
 }

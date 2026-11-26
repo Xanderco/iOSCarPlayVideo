@@ -44,4 +44,67 @@ final class SoundEngineTests: XCTestCase {
         XCTAssertEqual(decoded?.disconnectionSoundId, "airline_dingy")
         XCTAssertEqual(decoded?.homeArrivalSoundId, "welcome_sir")
     }
+
+    func testSoundTriggerSlotMetadataAndDefaultsAreDistinct() {
+        let slots = SoundTriggerSlot.allCases
+        XCTAssertEqual(slots, [.connection, .disconnection, .arrival])
+        XCTAssertEqual(Set(slots.map(\.rawValue)), ["connection", "disconnection", "arrival"])
+
+        let catalogIds = Set(SoundCatalogService.shared.sounds.map(\.id))
+        let defaultIds = slots.map(\.defaultSoundId)
+        XCTAssertEqual(Set(defaultIds).count, slots.count)
+        for defaultId in defaultIds {
+            XCTAssertTrue(catalogIds.contains(defaultId), "Missing default sound '\(defaultId)' in catalog")
+        }
+    }
+
+    func testUserPreferencesSoundSlotMutationIsolation() {
+        var prefs = UserPreferences()
+        XCTAssertEqual(prefs.soundId(for: .connection), "jet_startup")
+        XCTAssertEqual(prefs.soundId(for: .disconnection), "airline_dingy")
+        XCTAssertEqual(prefs.soundId(for: .arrival), "welcome_sir")
+
+        prefs.setSoundId("hyperspace", for: .connection)
+        XCTAssertEqual(prefs.connectionSoundId, "hyperspace")
+        XCTAssertEqual(prefs.disconnectionSoundId, "airline_dingy")
+        XCTAssertEqual(prefs.homeArrivalSoundId, "welcome_sir")
+
+        prefs.setSoundId("crystal_ping", for: .disconnection)
+        XCTAssertEqual(prefs.connectionSoundId, "hyperspace")
+        XCTAssertEqual(prefs.disconnectionSoundId, "crystal_ping")
+        XCTAssertEqual(prefs.homeArrivalSoundId, "welcome_sir")
+
+        prefs.setSoundId("luxury_chime", for: .arrival)
+        XCTAssertEqual(prefs.connectionSoundId, "hyperspace")
+        XCTAssertEqual(prefs.disconnectionSoundId, "crystal_ping")
+        XCTAssertEqual(prefs.homeArrivalSoundId, "luxury_chime")
+
+        prefs.setSoundId(nil, for: .connection)
+        XCTAssertNil(prefs.soundId(for: .connection))
+        XCTAssertEqual(prefs.soundId(for: .disconnection), "crystal_ping")
+        XCTAssertEqual(prefs.soundId(for: .arrival), "luxury_chime")
+    }
+
+    func testPersistenceControllerSoundSlotRoundTrip() {
+        let suiteName = "DashCastSoundSlotTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("Could not create isolated UserDefaults suite")
+            return
+        }
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let persistence = PersistenceController(userDefaults: defaults)
+        XCTAssertEqual(persistence.soundId(for: .connection), SoundTriggerSlot.connection.defaultSoundId)
+        XCTAssertEqual(persistence.soundId(for: .disconnection), SoundTriggerSlot.disconnection.defaultSoundId)
+        XCTAssertEqual(persistence.soundId(for: .arrival), SoundTriggerSlot.arrival.defaultSoundId)
+
+        persistence.setSoundId("turbo_spool", for: .connection)
+        persistence.setSoundId("crystal_ping", for: .disconnection)
+        persistence.setSoundId("ready_for_launch", for: .arrival)
+
+        let reloaded = PersistenceController(userDefaults: defaults)
+        XCTAssertEqual(reloaded.soundId(for: .connection), "turbo_spool")
+        XCTAssertEqual(reloaded.soundId(for: .disconnection), "crystal_ping")
+        XCTAssertEqual(reloaded.soundId(for: .arrival), "ready_for_launch")
+    }
 }
