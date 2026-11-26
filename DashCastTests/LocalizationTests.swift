@@ -140,4 +140,114 @@ final class LocalizationTests: XCTestCase {
             XCTAssertNotNil(tab.localizedTitle)
         }
     }
+
+    @MainActor
+    func testWelcomeOnboardingCopyAndLocalizationKeys() throws {
+        XCTAssertEqual(
+            WelcomeOnboardingCopy.primaryTitleKeyName(page: 0, safetyPage: 3, pageCount: 5, acknowledgedSafety: false),
+            "Continue"
+        )
+        XCTAssertEqual(
+            WelcomeOnboardingCopy.primaryTitleKeyName(page: 2, safetyPage: 3, pageCount: 5, acknowledgedSafety: true),
+            "Continue"
+        )
+        XCTAssertEqual(
+            WelcomeOnboardingCopy.primaryTitleKeyName(page: 3, safetyPage: 3, pageCount: 5, acknowledgedSafety: false),
+            "Please confirm above"
+        )
+        XCTAssertEqual(
+            WelcomeOnboardingCopy.primaryTitleKeyName(page: 3, safetyPage: 3, pageCount: 5, acknowledgedSafety: true),
+            "I understand"
+        )
+        XCTAssertEqual(
+            WelcomeOnboardingCopy.primaryTitleKeyName(page: 4, safetyPage: 3, pageCount: 5, acknowledgedSafety: true),
+            "See DashCast Pro"
+        )
+        _ = WelcomeOnboardingCopy.primaryTitle(page: 3, safetyPage: 3, pageCount: 5, acknowledgedSafety: true)
+
+        try assertCatalogContainsENAndES(keys: WelcomeOnboardingCopy.allLocalizationKeys)
+    }
+
+    @MainActor
+    func testLifetimePaywallCopyAndLocalizationKeys() throws {
+        XCTAssertNil(PaywallCopy.limitBannerKeyName(for: .allowed))
+        XCTAssertNil(PaywallCopy.limitBannerKey(for: .allowed))
+
+        XCTAssertEqual(
+            PaywallCopy.limitBannerKeyName(for: .playlistLimitReached(limit: 1)),
+            "The free plan includes 1 playlist source."
+        )
+        XCTAssertEqual(
+            PaywallCopy.limitBannerKeyName(for: .playlistLimitReached(limit: 3)),
+            "The free plan includes %lld playlist sources."
+        )
+        XCTAssertEqual(
+            PaywallCopy.limitBannerKeyName(for: .dailyCastingLimitReached(minutes: 15)),
+            "You've used today's %lld free casting minutes. They reset at midnight."
+        )
+        XCTAssertNotNil(PaywallCopy.limitBannerKey(for: .dailyCastingLimitReached(minutes: 15)))
+
+        XCTAssertEqual(PaywallCopy.purchaseButtonKeyName(isPurchasing: true), "Contacting the App Store…")
+        XCTAssertEqual(PaywallCopy.purchaseButtonKeyName(isPurchasing: false), "Unlock Pro for %@")
+        _ = PaywallCopy.purchaseButtonTitle(isPurchasing: false, price: "$19.99")
+
+        XCTAssertEqual(PaywallCopy.restoreButtonKeyName(isRestoring: true), "Restoring…")
+        XCTAssertEqual(PaywallCopy.restoreButtonKeyName(isRestoring: false), "Restore Purchases")
+        _ = PaywallCopy.restoreButtonTitle(isRestoring: false)
+
+        XCTAssertEqual(PaywallAlert.purchased.titleKeyName, "Welcome to DashCast Pro")
+        XCTAssertEqual(
+            PaywallAlert.purchased.messageKeyName,
+            "Pro is unlocked on this device and on any device signed in to your Apple Account."
+        )
+        XCTAssertTrue(PaywallAlert.purchased.dismissesPaywall)
+
+        XCTAssertEqual(PaywallAlert.restored.titleKeyName, "Purchase Restored")
+        XCTAssertEqual(PaywallAlert.restored.messageKeyName, "DashCast Pro is unlocked again.")
+        XCTAssertTrue(PaywallAlert.restored.dismissesPaywall)
+
+        XCTAssertEqual(PaywallAlert.pending.titleKeyName, "Waiting for Approval")
+        XCTAssertEqual(
+            PaywallAlert.pending.messageKeyName,
+            "Your purchase is waiting for approval. Pro unlocks automatically once it's approved."
+        )
+        XCTAssertFalse(PaywallAlert.pending.dismissesPaywall)
+
+        XCTAssertEqual(PaywallAlert.nothingToRestore.titleKeyName, "Nothing to Restore")
+        XCTAssertEqual(
+            PaywallAlert.nothingToRestore.messageKeyName,
+            "No DashCast Pro purchase was found for this Apple Account."
+        )
+        XCTAssertFalse(PaywallAlert.nothingToRestore.dismissesPaywall)
+
+        XCTAssertEqual(PaywallAlert.error("Network down").titleKeyName, "Something Went Wrong")
+        XCTAssertNil(PaywallAlert.error("Network down").messageKeyName)
+        XCTAssertFalse(PaywallAlert.error("Network down").dismissesPaywall)
+
+        try assertCatalogContainsENAndES(keys: PaywallCopy.allLocalizationKeys)
+    }
+
+    private func assertCatalogContainsENAndES(keys: [String]) throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = Bundle(for: LocalizationTests.self).url(forResource: "Localizable", withExtension: "xcstrings")
+            ?? projectDir
+                .appendingPathComponent("DashCast")
+                .appendingPathComponent("Resources")
+                .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in keys {
+            let entry = try XCTUnwrap(strings[key], "Missing key in Localizable.xcstrings: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for \(key)")
+            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing EN for \(key)")
+            XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing ES for \(key)")
+        }
+    }
 }

@@ -1,6 +1,99 @@
 import SwiftUI
 import StoreKit
 
+/// Testable localization copy helpers for `LifetimePaywallView`.
+enum PaywallCopy {
+    static let allLocalizationKeys: [String] = [
+        "Close",
+        "DashCast Pro",
+        "Pay once. Own it forever.",
+        "No subscription",
+        "You're charged once, at purchase.",
+        "It never renews, so there's nothing to cancel.",
+        "Shared with your family through Family Sharing.",
+        "Restore it free on any device with your Apple Account.",
+        "Free",
+        "Pro",
+        "Playlist sources",
+        "Casting time",
+        "Unlimited",
+        "%lld min / day",
+        "DashCast Pro is unlocked",
+        "one-time purchase",
+        "Contacting the App Store…",
+        "Unlock Pro for %@",
+        "Try Again",
+        "Restoring…",
+        "Restore Purchases",
+        "%@ is charged once to your Apple Account when you confirm the purchase. This is not a subscription and will never renew.",
+        "Terms of Use (EULA)",
+        "Privacy Policy",
+        "OK",
+        "Welcome to DashCast Pro",
+        "Pro is unlocked on this device and on any device signed in to your Apple Account.",
+        "Purchase Restored",
+        "DashCast Pro is unlocked again.",
+        "Waiting for Approval",
+        "Your purchase is waiting for approval. Pro unlocks automatically once it's approved.",
+        "Nothing to Restore",
+        "No DashCast Pro purchase was found for this Apple Account.",
+        "Something Went Wrong",
+        "The free plan includes 1 playlist source.",
+        "The free plan includes %lld playlist sources.",
+        "You've used today's %lld free casting minutes. They reset at midnight.",
+        "DashCast Pro isn't available from the App Store right now. Please try again later.",
+        "The App Store couldn't verify this purchase.",
+        "DashCast Pro couldn't be loaded from the App Store."
+    ]
+
+    static func limitBannerKeyName(for decision: EntitlementGate.Decision) -> String? {
+        switch decision {
+        case .allowed:
+            return nil
+        case .playlistLimitReached(let limit):
+            return limit == 1
+                ? "The free plan includes 1 playlist source."
+                : "The free plan includes %lld playlist sources."
+        case .dailyCastingLimitReached:
+            return "You've used today's %lld free casting minutes. They reset at midnight."
+        }
+    }
+
+    @MainActor
+    static func limitBannerKey(for decision: EntitlementGate.Decision) -> LocalizedStringKey? {
+        switch decision {
+        case .allowed:
+            return nil
+        case .playlistLimitReached(let limit):
+            return limit == 1
+                ? LocalizedStringKey("The free plan includes 1 playlist source.")
+                : LocalizedStringKey("The free plan includes \(limit) playlist sources.")
+        case .dailyCastingLimitReached(let minutes):
+            return LocalizedStringKey("You've used today's \(minutes) free casting minutes. They reset at midnight.")
+        }
+    }
+
+    static func purchaseButtonKeyName(isPurchasing: Bool) -> String {
+        isPurchasing ? "Contacting the App Store…" : "Unlock Pro for %@"
+    }
+
+    @MainActor
+    static func purchaseButtonTitle(isPurchasing: Bool, price: String) -> LocalizedStringKey {
+        isPurchasing
+            ? LocalizedStringKey("Contacting the App Store…")
+            : LocalizedStringKey("Unlock Pro for \(price)")
+    }
+
+    static func restoreButtonKeyName(isRestoring: Bool) -> String {
+        isRestoring ? "Restoring…" : "Restore Purchases"
+    }
+
+    @MainActor
+    static func restoreButtonTitle(isRestoring: Bool) -> LocalizedStringKey {
+        LocalizedStringKey(restoreButtonKeyName(isRestoring: isRestoring))
+    }
+}
+
 /// Legal links shown on the paywall (App Review guideline 3.1.2 / 5.1.1).
 public enum PaywallLegal {
     /// Values come from LegalLinks (single source of truth).
@@ -29,7 +122,9 @@ public struct LifetimePaywallView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     header
-                    if let reason = gate.lastBlock?.message, !store.isPro {
+                    if let block = gate.lastBlock,
+                       let reason = PaywallCopy.limitBannerKey(for: block),
+                       !store.isPro {
                         limitBanner(reason)
                     }
                     noSubscriptionPledge
@@ -48,8 +143,8 @@ public struct LifetimePaywallView: View {
             if store.proProduct == nil { await store.loadProducts() }
         }
         .alert(item: $alert) { alert in
-            Alert(title: Text(alert.title),
-                  message: Text(alert.message),
+            Alert(title: Text(alert.titleKey),
+                  message: alert.messageText,
                   dismissButton: .default(Text("OK")) {
                       if alert.dismissesPaywall { dismiss() }
                   })
@@ -97,7 +192,7 @@ public struct LifetimePaywallView: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func limitBanner(_ text: String) -> some View {
+    private func limitBanner(_ text: LocalizedStringKey) -> some View {
         HStack(spacing: 10) {
             Image(systemName: "info.circle.fill")
                 .foregroundStyle(Color.dashAmber)
@@ -184,7 +279,7 @@ public struct LifetimePaywallView: View {
                     .padding(.vertical, 14)
             } else if let price = displayPrice {
                 VStack(spacing: 2) {
-                    Text(price)
+                    Text(verbatim: price)
                         .font(ThemeFonts.hudStat(size: 34))
                         .foregroundStyle(Color.dashTextPrimary)
                     Text("one-time purchase")
@@ -194,7 +289,7 @@ public struct LifetimePaywallView: View {
                 .accessibilityElement(children: .combine)
 
                 GlowButton(
-                    title: store.isPurchasing ? "Contacting the App Store…" : "Unlock Pro for \(price)",
+                    title: PaywallCopy.purchaseButtonTitle(isPurchasing: store.isPurchasing, price: price),
                     iconName: "lock.open.fill",
                     gradient: .dashProGoldGradient
                 ) {
@@ -204,7 +299,7 @@ public struct LifetimePaywallView: View {
                 .accessibilityIdentifier("paywall.purchase")
             } else if case .failed(let message) = store.loadState {
                 VStack(spacing: 10) {
-                    Text(message)
+                    Text(verbatim: message)
                         .font(.system(size: 13))
                         .foregroundStyle(Color.dashTextSecondary)
                         .multilineTextAlignment(.center)
@@ -224,7 +319,7 @@ public struct LifetimePaywallView: View {
             Button {
                 restore()
             } label: {
-                Text(store.isRestoring ? "Restoring…" : "Restore Purchases")
+                Text(PaywallCopy.restoreButtonTitle(isRestoring: store.isRestoring))
                     .font(ThemeFonts.hudCaption(size: 14))
                     .foregroundStyle(Color.dashTextSecondary)
                     .underline()
@@ -248,7 +343,7 @@ public struct LifetimePaywallView: View {
             }
             HStack(spacing: 14) {
                 Link("Terms of Use (EULA)", destination: PaywallLegal.termsOfUse)
-                Text("·")
+                Text(verbatim: "·")
                 Link("Privacy Policy", destination: PaywallLegal.privacyPolicy)
             }
         }
@@ -291,13 +386,21 @@ public struct LifetimePaywallView: View {
     }
 }
 
-private enum PaywallAlert: Identifiable {
+enum PaywallAlert: Identifiable, Equatable {
     case purchased, restored, pending, nothingToRestore
     case error(String)
 
-    var id: String { title + message }
+    var id: String {
+        switch self {
+        case .purchased: return "purchased"
+        case .restored: return "restored"
+        case .pending: return "pending"
+        case .nothingToRestore: return "nothingToRestore"
+        case .error(let message): return "error:\(message)"
+        }
+    }
 
-    var title: String {
+    var titleKeyName: String {
         switch self {
         case .purchased: return "Welcome to DashCast Pro"
         case .restored: return "Purchase Restored"
@@ -307,14 +410,35 @@ private enum PaywallAlert: Identifiable {
         }
     }
 
-    var message: String {
+    var messageKeyName: String? {
         switch self {
-        case .purchased: return "Pro is unlocked on this device and on any device signed in to your Apple Account."
-        case .restored: return "DashCast Pro is unlocked again."
-        case .pending: return "Your purchase is waiting for approval. Pro unlocks automatically once it's approved."
-        case .nothingToRestore: return "No DashCast Pro purchase was found for this Apple Account."
-        case .error(let message): return message
+        case .purchased:
+            return "Pro is unlocked on this device and on any device signed in to your Apple Account."
+        case .restored:
+            return "DashCast Pro is unlocked again."
+        case .pending:
+            return "Your purchase is waiting for approval. Pro unlocks automatically once it's approved."
+        case .nothingToRestore:
+            return "No DashCast Pro purchase was found for this Apple Account."
+        case .error:
+            return nil
         }
+    }
+
+    @MainActor
+    var titleKey: LocalizedStringKey {
+        LocalizedStringKey(titleKeyName)
+    }
+
+    @MainActor
+    var messageText: Text {
+        if let key = messageKeyName {
+            return Text(LocalizedStringKey(key))
+        }
+        if case .error(let message) = self {
+            return Text(verbatim: message)
+        }
+        return Text(verbatim: "")
     }
 
     var dismissesPaywall: Bool {

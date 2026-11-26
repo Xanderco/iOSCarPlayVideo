@@ -1,5 +1,55 @@
 import SwiftUI
 
+/// Testable localization copy helpers for `WelcomeOnboardingView`.
+enum WelcomeOnboardingCopy {
+    static let allLocalizationKeys: [String] = [
+        "Your car, your cinema",
+        "Play your own videos and channels on the car display while you're parked.",
+        "Bring your own sources",
+        "M3U and M3U8 playlists, Jellyfin and Emby servers, your Files and Photos. DashCast includes no channels of its own.",
+        "Every trip, remembered",
+        "Turn on automatic trips and DashCast records your drives with route, distance and a smooth-driving score.",
+        "For passengers only",
+        "Video on a car display is for passengers or while parked. DashCast pauses video when it detects the car is moving.",
+        "I won't watch or operate DashCast while driving.",
+        "Pay once, keep it forever",
+        "DashCast Pro is a single purchase. No subscriptions, no renewals. Everything basic stays free.",
+        "I understand",
+        "Please confirm above",
+        "See DashCast Pro",
+        "Continue",
+        "Continue with the free version",
+        "Page %lld of %lld",
+        "Files",
+        "Photos",
+        "SMOOTH SCORE",
+        "ONE-TIME"
+    ]
+
+    static func primaryTitleKeyName(page: Int, safetyPage: Int, pageCount: Int, acknowledgedSafety: Bool) -> String {
+        switch page {
+        case safetyPage:
+            return acknowledgedSafety ? "I understand" : "Please confirm above"
+        case pageCount - 1:
+            return "See DashCast Pro"
+        default:
+            return "Continue"
+        }
+    }
+
+    @MainActor
+    static func primaryTitle(page: Int, safetyPage: Int, pageCount: Int, acknowledgedSafety: Bool) -> LocalizedStringKey {
+        LocalizedStringKey(
+            primaryTitleKeyName(
+                page: page,
+                safetyPage: safetyPage,
+                pageCount: pageCount,
+                acknowledgedSafety: acknowledgedSafety
+            )
+        )
+    }
+}
+
 /// First-run walkthrough (5 pages): what DashCast does, sources, Drive, the passenger-only
 /// acknowledgement (required) and the one-time Pro offer (always skippable).
 /// Visuals are drawn in SwiftUI — no stock or third-party imagery.
@@ -71,7 +121,7 @@ public struct WelcomeOnboardingView: View {
 
     // MARK: Page scaffold
 
-    private func pageView(hero: AnyView, title: String, subtitle: String) -> some View {
+    private func pageView(hero: AnyView, title: LocalizedStringKey, subtitle: LocalizedStringKey) -> some View {
         VStack(spacing: 0) {
             hero
                 .frame(maxWidth: .infinity)
@@ -181,12 +231,13 @@ public struct WelcomeOnboardingView: View {
         .padding(.bottom, 20)
     }
 
-    private var primaryTitle: String {
-        switch page {
-        case safetyPage: return acknowledgedSafety ? "I understand" : "Please confirm above"
-        case pageCount - 1: return "See DashCast Pro"
-        default: return "Continue"
-        }
+    private var primaryTitle: LocalizedStringKey {
+        WelcomeOnboardingCopy.primaryTitle(
+            page: page,
+            safetyPage: safetyPage,
+            pageCount: pageCount,
+            acknowledgedSafety: acknowledgedSafety
+        )
     }
 
     private func advance() {
@@ -242,17 +293,21 @@ public struct WelcomeOnboardingView: View {
     private var sourcesHero: some View {
         ZStack {
             heroBackground([Color(red: 0.04, green: 0.10, blue: 0.12), Color(red: 0.03, green: 0.05, blue: 0.10)])
-            let items: [(String, String)] = [
-                ("list.bullet.rectangle.fill", "M3U"), ("server.rack", "Jellyfin"), ("externaldrive.fill", "Emby"),
-                ("folder.fill", "Files"), ("photo.on.rectangle", "Photos"), ("qrcode.viewfinder", "QR")
+            let items: [(icon: String, id: String, label: Text)] = [
+                ("list.bullet.rectangle.fill", "M3U", Text(verbatim: "M3U")),
+                ("server.rack", "Jellyfin", Text(verbatim: "Jellyfin")),
+                ("externaldrive.fill", "Emby", Text(verbatim: "Emby")),
+                ("folder.fill", "Files", Text("Files")),
+                ("photo.on.rectangle", "Photos", Text("Photos")),
+                ("qrcode.viewfinder", "QR", Text(verbatim: "QR"))
             ]
             LazyVGrid(columns: Array(repeating: GridItem(.fixed(96), spacing: 14), count: 3), spacing: 14) {
-                ForEach(items, id: \.1) { icon, label in
+                ForEach(items, id: \.id) { item in
                     VStack(spacing: 8) {
-                        Image(systemName: icon)
+                        Image(systemName: item.icon)
                             .font(.system(size: 28, weight: .semibold))
                             .foregroundStyle(Color.dcAccent)
-                        Text(label)
+                        item.label
                             .font(.system(size: 12, weight: .semibold))
                             .foregroundStyle(.white.opacity(0.85))
                     }
