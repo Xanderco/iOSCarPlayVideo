@@ -3,6 +3,76 @@ import MapKit
 import CoreLocation
 import UIKit
 
+/// Testable localization copy & state mapping for `DriveLiveMapView` and `LocationPermissionCard`.
+enum LocationPermissionCardCopy {
+    struct Descriptor: Equatable {
+        let icon: String
+        let titleKeyName: String
+        let messageKeyName: String
+        let buttonKeyName: String?
+
+        @MainActor var title: LocalizedStringKey { LocalizedStringKey(titleKeyName) }
+        @MainActor var message: LocalizedStringKey { LocalizedStringKey(messageKeyName) }
+        @MainActor var button: LocalizedStringKey? { buttonKeyName.map { LocalizedStringKey($0) } }
+    }
+
+    static let allLocalizationKeys: [String] = [
+        "Recenter",
+        "Centres the map on your location",
+        "Map of your current location",
+        "Show where you are",
+        "DashCast uses your location to centre the map on you and to record the route of a trip. Trips stay on this iPhone and are never uploaded.",
+        "Allow Location",
+        "Record trips automatically",
+        "Choose “Change to Always Allow” so DashCast can notice when you start driving and save the trip on its own, even with the app closed. You can turn this off any time.",
+        "Allow All the Time",
+        "Location is off for DashCast",
+        "Turn on location in Settings › DashCast › Location to see yourself on the map and record trips.",
+        "Open Settings",
+        "Location is restricted",
+        "Location Services are limited on this device (for example by Screen Time or a device profile), so DashCast can't show your position."
+    ]
+
+    nonisolated static func descriptor(for kind: LocationPermissionCard.Kind) -> Descriptor? {
+        switch kind {
+        case .askWhenInUse:
+            return Descriptor(
+                icon: "location.circle.fill",
+                titleKeyName: "Show where you are",
+                messageKeyName: "DashCast uses your location to centre the map on you and to record the route of a trip. Trips stay on this iPhone and are never uploaded.",
+                buttonKeyName: "Allow Location"
+            )
+        case .askAlways:
+            return Descriptor(
+                icon: "car.circle.fill",
+                titleKeyName: "Record trips automatically",
+                messageKeyName: "Choose “Change to Always Allow” so DashCast can notice when you start driving and save the trip on its own, even with the app closed. You can turn this off any time.",
+                buttonKeyName: "Allow All the Time"
+            )
+        case .denied:
+            return Descriptor(
+                icon: "location.slash.fill",
+                titleKeyName: "Location is off for DashCast",
+                messageKeyName: "Turn on location in Settings › DashCast › Location to see yourself on the map and record trips.",
+                buttonKeyName: "Open Settings"
+            )
+        case .restricted:
+            return Descriptor(
+                icon: "lock.fill",
+                titleKeyName: "Location is restricted",
+                messageKeyName: "Location Services are limited on this device (for example by Screen Time or a device profile), so DashCast can't show your position.",
+                buttonKeyName: nil
+            )
+        case .none:
+            return nil
+        }
+    }
+
+    nonisolated static func descriptor(for status: CLAuthorizationStatus) -> Descriptor? {
+        descriptor(for: LocationPermissionCard.kind(for: status))
+    }
+}
+
 /// Live map for Drive: centred on the user (not the whole region), follows heading while a
 /// trip records, and draws the route recorded so far.
 struct DriveLiveMapView: View {
@@ -35,7 +105,7 @@ struct DriveLiveMapView: View {
                 Button {
                     withAnimation { position = Self.camera(tracking: location.isTracking) }
                 } label: {
-                    Label("Recenter", systemImage: "location.fill")
+                    Label(LocalizedStringKey("Recenter"), systemImage: "location.fill")
                         .font(DSTypography.subheadline)
                         .padding(.horizontal, DSSpacing.md)
                         .padding(.vertical, DSSpacing.xs)
@@ -73,29 +143,25 @@ struct LocationPermissionCard: View {
     }
 
     var body: some View {
-        switch Self.kind(for: location.authorizationStatus) {
-        case .askWhenInUse:
-            card(icon: "location.circle.fill",
-                 title: "Show where you are",
-                 message: "DashCast uses your location to centre the map on you and to record the route of a trip. Trips stay on this iPhone and are never uploaded.",
-                 button: "Allow Location") { location.requestPermissions() }
-        case .askAlways:
-            card(icon: "car.circle.fill",
-                 title: "Record trips automatically",
-                 message: "Choose “Change to Always Allow” so DashCast can notice when you start driving and save the trip on its own, even with the app closed. You can turn this off any time.",
-                 button: "Allow All the Time") { location.requestAlwaysAuthorization() }
-        case .denied:
-            card(icon: "location.slash.fill",
-                 title: "Location is off for DashCast",
-                 message: "Turn on location in Settings › DashCast › Location to see yourself on the map and record trips.",
-                 button: "Open Settings") { openSettings() }
-        case .restricted:
-            card(icon: "lock.fill",
-                 title: "Location is restricted",
-                 message: "Location Services are limited on this device (for example by Screen Time or a device profile), so DashCast can't show your position.",
-                 button: nil) {}
-        case .none:
-            EmptyView()
+        let kind = Self.kind(for: location.authorizationStatus)
+        if let copy = LocationPermissionCardCopy.descriptor(for: kind) {
+            card(
+                icon: copy.icon,
+                title: copy.title,
+                message: copy.message,
+                button: copy.button
+            ) {
+                switch kind {
+                case .askWhenInUse:
+                    location.requestPermissions()
+                case .askAlways:
+                    location.requestAlwaysAuthorization()
+                case .denied:
+                    openSettings()
+                case .restricted, .none:
+                    break
+                }
+            }
         }
     }
 
@@ -105,7 +171,13 @@ struct LocationPermissionCard: View {
         }
     }
 
-    private func card(icon: String, title: String, message: String, button: String?, action: @escaping () -> Void) -> some View {
+    private func card(
+        icon: String,
+        title: LocalizedStringKey,
+        message: LocalizedStringKey,
+        button: LocalizedStringKey?,
+        action: @escaping () -> Void
+    ) -> some View {
         VStack(alignment: .leading, spacing: DSSpacing.sm) {
             Label(title, systemImage: icon)
                 .font(DSTypography.headline)

@@ -1,4 +1,5 @@
 import XCTest
+import CoreLocation
 @testable import DashCast
 
 final class DriveSettingsAndNotificationTests: XCTestCase {
@@ -54,5 +55,66 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         service.scheduleFeatureTips()
         // If no crash occurred, notifications requests dispatched to UNUserNotificationCenter
         XCTAssertTrue(true)
+    }
+
+    // MARK: LocationPermissionCardCopy
+
+    @MainActor
+    func testLocationPermissionCardCopyAllAuthorizationStates() {
+        let notDetermined = LocationPermissionCardCopy.descriptor(for: .notDetermined)
+        XCTAssertEqual(notDetermined?.icon, "location.circle.fill")
+        XCTAssertEqual(notDetermined?.titleKeyName, "Show where you are")
+        XCTAssertEqual(notDetermined?.buttonKeyName, "Allow Location")
+        _ = notDetermined?.title
+        _ = notDetermined?.message
+        _ = notDetermined?.button
+
+        let whenInUse = LocationPermissionCardCopy.descriptor(for: .authorizedWhenInUse)
+        XCTAssertEqual(whenInUse?.icon, "car.circle.fill")
+        XCTAssertEqual(whenInUse?.titleKeyName, "Record trips automatically")
+        XCTAssertEqual(whenInUse?.buttonKeyName, "Allow All the Time")
+        _ = whenInUse?.title
+        _ = whenInUse?.message
+        _ = whenInUse?.button
+
+        let denied = LocationPermissionCardCopy.descriptor(for: .denied)
+        XCTAssertEqual(denied?.icon, "location.slash.fill")
+        XCTAssertEqual(denied?.titleKeyName, "Location is off for DashCast")
+        XCTAssertEqual(denied?.buttonKeyName, "Open Settings")
+        _ = denied?.title
+        _ = denied?.message
+        _ = denied?.button
+
+        let restricted = LocationPermissionCardCopy.descriptor(for: .restricted)
+        XCTAssertEqual(restricted?.icon, "lock.fill")
+        XCTAssertEqual(restricted?.titleKeyName, "Location is restricted")
+        XCTAssertNil(restricted?.buttonKeyName)
+        XCTAssertNil(restricted?.button)
+
+        XCTAssertNil(LocationPermissionCardCopy.descriptor(for: .authorizedAlways))
+    }
+
+    func testDriveLiveMapAndPermissionLocalizationKeysExistInCatalog() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = Bundle(for: DriveSettingsAndNotificationTests.self).url(forResource: "Localizable", withExtension: "xcstrings")
+            ?? projectDir
+                .appendingPathComponent("DashCast")
+                .appendingPathComponent("Resources")
+                .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in LocationPermissionCardCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing key in Localizable.xcstrings: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
+            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing EN for \(key)")
+            XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing ES for \(key)")
+        }
     }
 }
