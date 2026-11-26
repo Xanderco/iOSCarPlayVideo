@@ -23,6 +23,57 @@ public enum PlaylistQRPayload {
     }
 }
 
+/// Localized copy keys for `PlaylistQRImportView`.
+public enum PlaylistQRImportCopy {
+    nonisolated public static let manualLinkPlaceholderString = "…or paste a playlist link"
+    nonisolated public static let importButtonString = "Import"
+    nonisolated public static let navigationTitleString = "Scan Playlist QR"
+    nonisolated public static let closeButtonString = "Close"
+    nonisolated public static let noCameraString = "No camera available on this device."
+    nonisolated public static let cameraDeniedString = "Camera access is off. Enable it in Settings to scan QR codes."
+    nonisolated public static let openSettingsString = "Open Settings"
+    nonisolated public static let waitingForCameraString = "Waiting for camera…"
+    nonisolated public static let scanningPromptString = "Point the camera at a QR code with an M3U / M3U8 playlist link."
+    nonisolated public static let importingFormatString = "Importing %@…"
+    nonisolated public static let importedFormatString = "Added \"%@\" (%lld channels)"
+    nonisolated public static let doneString = "Done"
+    nonisolated public static let scanAgainString = "Scan Again"
+    nonisolated public static let invalidQRPayloadString = "That QR code doesn't contain a playlist link."
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        manualLinkPlaceholderString,
+        importButtonString,
+        navigationTitleString,
+        closeButtonString,
+        noCameraString,
+        cameraDeniedString,
+        openSettingsString,
+        waitingForCameraString,
+        scanningPromptString,
+        importingFormatString,
+        importedFormatString,
+        doneString,
+        scanAgainString,
+        invalidQRPayloadString
+    ]
+
+    @MainActor public static var manualLinkPlaceholderKey: LocalizedStringKey { LocalizedStringKey(manualLinkPlaceholderString) }
+    @MainActor public static var importButtonKey: LocalizedStringKey { LocalizedStringKey(importButtonString) }
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var closeButtonKey: LocalizedStringKey { LocalizedStringKey(closeButtonString) }
+    @MainActor public static var noCameraKey: LocalizedStringKey { LocalizedStringKey(noCameraString) }
+    @MainActor public static var cameraDeniedKey: LocalizedStringKey { LocalizedStringKey(cameraDeniedString) }
+    @MainActor public static var openSettingsKey: LocalizedStringKey { LocalizedStringKey(openSettingsString) }
+    @MainActor public static var waitingForCameraKey: LocalizedStringKey { LocalizedStringKey(waitingForCameraString) }
+    @MainActor public static var scanningPromptKey: LocalizedStringKey { LocalizedStringKey(scanningPromptString) }
+    @MainActor public static var doneKey: LocalizedStringKey { LocalizedStringKey(doneString) }
+    @MainActor public static var scanAgainKey: LocalizedStringKey { LocalizedStringKey(scanAgainString) }
+
+    nonisolated public static func invalidQRPayloadMessage(bundle: Bundle = .main) -> String {
+        String(localized: String.LocalizationValue(invalidQRPayloadString), bundle: bundle)
+    }
+}
+
 /// Scans a QR code with the camera and imports the playlist it points to via `PlaylistStore`.
 public struct PlaylistQRImportView: View {
     @Environment(\.dismiss) private var dismiss
@@ -52,23 +103,23 @@ public struct PlaylistQRImportView: View {
                 statusView
 
                 HStack {
-                    TextField("…or paste a playlist link", text: $manualLink)
+                    TextField(PlaylistQRImportCopy.manualLinkPlaceholderKey, text: $manualLink)
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .textFieldStyle(.roundedBorder)
                         .accessibilityIdentifier("qrManualLinkField")
-                    Button("Import") { handle(payload: manualLink) }
+                    Button(PlaylistQRImportCopy.importButtonKey) { handle(payload: manualLink) }
                         .disabled(manualLink.trimmingCharacters(in: .whitespaces).isEmpty || isImporting)
                 }
                 Spacer()
             }
             .padding(16)
-            .navigationTitle("Scan Playlist QR")
+            .navigationTitle(PlaylistQRImportCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button(PlaylistQRImportCopy.closeButtonKey) { dismiss() }
                 }
             }
             .task {
@@ -93,28 +144,28 @@ public struct PlaylistQRImportView: View {
             } else if AVCaptureDevice.default(for: .video) != nil {
                 AVCaptureQRView { handle(payload: $0) }
             } else {
-                placeholder(icon: "camera.fill", text: "No camera available on this device.")
+                placeholder(icon: "camera.fill", text: PlaylistQRImportCopy.noCameraKey)
             }
         } else if cameraStatus == .denied || cameraStatus == .restricted {
             VStack(spacing: 12) {
-                placeholder(icon: "camera.fill", text: "Camera access is off. Enable it in Settings to scan QR codes.")
+                placeholder(icon: "camera.fill", text: PlaylistQRImportCopy.cameraDeniedKey)
                 if let url = URL(string: UIApplication.openSettingsURLString) {
-                    Link("Open Settings", destination: url)
+                    Link(PlaylistQRImportCopy.openSettingsKey, destination: url)
                 }
             }
         } else if phase == .scanning {
-            placeholder(icon: "qrcode.viewfinder", text: "Waiting for camera…")
+            placeholder(icon: "qrcode.viewfinder", text: PlaylistQRImportCopy.waitingForCameraKey)
         } else {
-            placeholder(icon: "qrcode", text: "")
+            placeholder(icon: "qrcode", text: nil)
         }
     }
 
-    private func placeholder(icon: String, text: String) -> some View {
+    private func placeholder(icon: String, text: LocalizedStringKey?) -> some View {
         ZStack {
             Color.dashSurface
             VStack(spacing: 10) {
                 Image(systemName: icon).font(.system(size: 44)).foregroundStyle(Color.dashTextMuted)
-                if !text.isEmpty {
+                if let text {
                     Text(text).font(.footnote).multilineTextAlignment(.center).foregroundStyle(.secondary)
                 }
             }
@@ -126,7 +177,7 @@ public struct PlaylistQRImportView: View {
     private var statusView: some View {
         switch phase {
         case .scanning:
-            Text("Point the camera at a QR code with an M3U / M3U8 playlist link.")
+            Text(PlaylistQRImportCopy.scanningPromptKey)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -140,14 +191,14 @@ public struct PlaylistQRImportView: View {
                 Label("Added \"\(title)\" (\(channels) channels)", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                     .accessibilityIdentifier("qrImportSuccess")
-                Button("Done") { dismiss() }.buttonStyle(.borderedProminent)
+                Button(PlaylistQRImportCopy.doneKey) { dismiss() }.buttonStyle(.borderedProminent)
             }
         case .failed(let message):
             VStack(spacing: 8) {
                 Label(message, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
                     .multilineTextAlignment(.center)
-                Button("Scan Again") { phase = .scanning }.buttonStyle(.bordered)
+                Button(PlaylistQRImportCopy.scanAgainKey) { phase = .scanning }.buttonStyle(.bordered)
             }
         }
     }
@@ -155,7 +206,7 @@ public struct PlaylistQRImportView: View {
     private func handle(payload: String) {
         guard !isImporting else { return }
         guard let url = PlaylistQRPayload.playlistURL(from: payload) else {
-            phase = .failed("That QR code doesn't contain a playlist link.")
+            phase = .failed(PlaylistQRImportCopy.invalidQRPayloadMessage())
             return
         }
         phase = .importing(url)
