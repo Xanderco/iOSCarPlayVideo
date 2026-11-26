@@ -1,0 +1,40 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "DashCast · Parked mirroring": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast · Parked mirroring"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast · Duplicación estacionada"
+          }
+        }
+      }
+    },
+    "DashCast stopped screen mirroring because your vehicle is moving. Mirroring to the car is only available while parked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast stopped screen mirroring because your vehicle is moving. Mirroring to the car is only available while parked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast detuvo la duplicación de pantalla porque tu vehículo está en movimiento. La duplicación al auto solo está disponible mientras estás estacionado."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
