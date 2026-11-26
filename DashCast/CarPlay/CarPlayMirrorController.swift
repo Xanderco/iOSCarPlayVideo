@@ -85,6 +85,37 @@ final class CarPlayMirrorRendererView: UIView {
     }
 }
 
+/// Localized copy keys and resolvers for the CarPlay mirroring overlay.
+public enum CarPlayMirrorCopy {
+    nonisolated public static let instructionsKey = """
+    Mirror your iPhone here
+
+    1. On iPhone, open DashCast → Cast → Car Display.
+    2. Turn on “Mirror to CarPlay screen”, then Start Broadcast.
+
+    Mirroring works only while the car is parked.
+    """
+
+    nonisolated public static let movingKey = """
+    Mirroring paused
+
+    Your vehicle is moving. The picture comes back when you are parked.
+    """
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        instructionsKey,
+        movingKey
+    ]
+
+    nonisolated public static func localizedInstructions(bundle: Bundle = .main) -> String {
+        NSLocalizedString(instructionsKey, bundle: bundle, comment: "CarPlay mirroring instructions overlay")
+    }
+
+    nonisolated public static func localizedMoving(bundle: Bundle = .main) -> String {
+        NSLocalizedString(movingKey, bundle: bundle, comment: "CarPlay mirroring paused while moving overlay")
+    }
+}
+
 /// What the car screen shows.
 enum CarMirrorDisplayState: Equatable {
     case instructions
@@ -101,20 +132,9 @@ enum CarMirrorDisplayState: Equatable {
 
     static let staleFrameInterval: TimeInterval = 2
 
-    static let instructionsText = """
-    Mirror your iPhone here
+    static var instructionsText: String { CarPlayMirrorCopy.localizedInstructions() }
 
-    1. On iPhone, open DashCast → Cast → Car Display.
-    2. Turn on “Mirror to CarPlay screen”, then Start Broadcast.
-
-    Mirroring works only while the car is parked.
-    """
-
-    static let movingText = """
-    Mirroring paused
-
-    Your vehicle is moving. The picture comes back when you are parked.
-    """
+    static var movingText: String { CarPlayMirrorCopy.localizedMoving() }
 }
 
 /// Root view placed in the CarPlay window: renderer plus an instructions overlay.
@@ -158,12 +178,12 @@ final class CarPlayMirrorRootView: UIView {
         case .instructions:
             renderer.clear()
             renderer.isHidden = true
-            messageLabel.text = CarMirrorDisplayState.instructionsText
+            messageLabel.text = CarPlayMirrorCopy.localizedInstructions()
             messageLabel.isHidden = false
         case .pausedWhileMoving:
             renderer.clear()
             renderer.isHidden = true
-            messageLabel.text = CarMirrorDisplayState.movingText
+            messageLabel.text = CarPlayMirrorCopy.localizedMoving()
             messageLabel.isHidden = false
         }
     }
