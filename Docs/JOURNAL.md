@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 10:20 (Bogotá) — DashCastCastWidget Live Activity String Catalog (EN/ES) & Copy Tests [DI-113]
+- **Live Activity catalog (`DashCastCastWidget/Localizable.xcstrings`)**: Added EN/ES String Catalog covering `"DashCast · %@"`, `"Mirroring"`, `"AirPlay"`, `"External display"`, `"Paused while the vehicle is moving"`, `"Screen mirroring is live"`, `"Playing on connected display"`, and `"DashCast"`.
+- **Extension localization (`CarCastActivityAttributes.swift`, `CarCastLiveActivityWidget.swift`)**: Added `CarCastLiveActivityCopy` helpers and updated `CarCastLiveActivityWidget` / `CarCastLockScreenView` to localize mode and detail status text against the widget bundle while preserving canonical icon matching.
+- **Tests (`DashCastTests/WidgetCustomizationTests.swift`)**: Added `testDashCastCastWidgetLocalizationCatalogComplete`. Verification pending `DashCast CI` on PR.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
