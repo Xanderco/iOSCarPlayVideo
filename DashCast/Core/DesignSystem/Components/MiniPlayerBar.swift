@@ -73,6 +73,7 @@ public struct MiniPlayerBar: View {
             .accessibilityLabel(Text("Now playing: \(title)"))
             .accessibilityValue(Text(subtitle ?? ""))
             .accessibilityHint(Text("Opens the full player"))
+            .accessibilityIdentifier("MiniPlayerBar_ExpandButton")
 
             Button(action: onPlayPause) {
                 ZStack {
@@ -90,6 +91,7 @@ public struct MiniPlayerBar: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(Text(isPlaying ? "Pause" : "Play"))
+            .accessibilityIdentifier("MiniPlayerBar_PlayPauseButton")
 
             if let onClose {
                 Button(action: onClose) {
@@ -101,6 +103,7 @@ public struct MiniPlayerBar: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(Text("Stop playback"))
+                .accessibilityIdentifier("MiniPlayerBar_CloseButton")
             }
         }
         .padding(.leading, DSSpacing.sm)
@@ -114,6 +117,7 @@ public struct MiniPlayerBar: View {
         .padding(.horizontal, DSSpacing.sm)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Mini player"))
+        .accessibilityIdentifier("MiniPlayerBar")
     }
 
     @ViewBuilder

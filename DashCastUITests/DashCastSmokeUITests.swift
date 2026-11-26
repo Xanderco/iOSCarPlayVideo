@@ -139,6 +139,61 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testMiniPlayerBarAcrossNonCastTabs() throws {
+        let row = app.buttons["Cast_MediaSourceRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
+        tapCenter(of: row)
+
+        XCTAssertTrue(
+            app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
+            "Media Sources sheet did not open"
+        )
+        let firstChannel = app.buttons.matching(identifier: "MediaSources_Channel").firstMatch
+        XCTAssertTrue(firstChannel.waitForExistence(timeout: 10), "No sample channels listed")
+        // Tap the left/title side of the row so we don't hit the favorite heart button.
+        firstChannel.coordinate(withNormalizedOffset: CGVector(dx: 0.25, dy: 0.5)).tap()
+
+        XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab after starting channel")
+        let expandButton = app.buttons["MiniPlayerBar_ExpandButton"]
+        let playPauseButton = app.buttons["MiniPlayerBar_PlayPauseButton"]
+        let closeButton = app.buttons["MiniPlayerBar_CloseButton"]
+        XCTAssertFalse(expandButton.exists, "MiniPlayerBar should not appear on the Cast tab")
+
+        let driveTab = tabButton("Drive")
+        XCTAssertTrue(driveTab.waitForExistence(timeout: 10), "Drive tab button missing")
+        driveTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Drive"].waitForExistence(timeout: 10), "Drive screen did not appear")
+        XCTAssertTrue(expandButton.waitForExistence(timeout: 10), "MiniPlayerBar did not appear on Drive tab")
+        XCTAssertTrue(playPauseButton.exists, "MiniPlayerBar play/pause button missing")
+        XCTAssertTrue(closeButton.exists, "MiniPlayerBar close button missing")
+        snapshot("05-mini-player-bar")
+
+        tapCenter(of: playPauseButton)
+        XCTAssertTrue(expandButton.exists, "MiniPlayerBar disappeared after toggling play/pause")
+
+        let widgetsTab = tabButton("Widgets")
+        XCTAssertTrue(widgetsTab.waitForExistence(timeout: 10), "Widgets tab button missing")
+        widgetsTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Widgets"].waitForExistence(timeout: 10), "Widgets screen did not appear")
+        XCTAssertTrue(expandButton.waitForExistence(timeout: 5), "MiniPlayerBar did not persist on Widgets tab")
+
+        tapCenter(of: expandButton)
+        XCTAssertTrue(app.otherElements["Screen_Cast"].waitForExistence(timeout: 10), "Tapping MiniPlayerBar did not return to Cast tab")
+        XCTAssertTrue(tabButton("Cast").isSelected, "Cast tab not selected after expanding MiniPlayerBar")
+        let hiddenOnCast = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: expandButton)
+        wait(for: [hiddenOnCast], timeout: 5)
+
+        let meTab = tabButton("Me")
+        XCTAssertTrue(meTab.waitForExistence(timeout: 10), "Me tab button missing")
+        meTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Me"].waitForExistence(timeout: 10), "Me screen did not appear")
+        XCTAssertTrue(closeButton.waitForExistence(timeout: 5), "MiniPlayerBar did not reappear on Me tab")
+
+        tapCenter(of: closeButton)
+        let dismissed = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: expandButton)
+        wait(for: [dismissed], timeout: 5)
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

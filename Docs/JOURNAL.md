@@ -92,6 +92,16 @@
 
 ## Log
 
+### 2026-11-26 00:20 (Bogotá) — Navigation: Persistent MiniPlayerBar Across Non-Cast Tabs [DI-87]
+- **Wired `MiniPlayerBar` into `MainTabView`** (`DashCast/Core/Navigation/MainTabView.swift`):
+  - Added `MiniPlayerBarState` with `shouldShow(currentChannel:selectedTab:)` and `make(channel:isPlaying:isBuffering:currentTime:duration:)` helpers.
+  - Displays `MiniPlayerBar` above the bottom bar whenever `VideoPlayerService.shared.currentChannel != nil` and `appState.selectedTab != .cast`, supporting both iOS 18+ native `TabView` (`.safeAreaInset(edge: .bottom)`) and iOS 17 `legacyTabs` (`VStack` above `LiquidCapsuleTabBar`).
+  - Wired tap-to-expand (`appState.selectedTab = .cast`), play/pause (`playerService.togglePlayPause()`), and close (`playerService.stop()`).
+- **Accessibility & Localization**:
+  - Added `MiniPlayerBar`, `MiniPlayerBar_ExpandButton`, `MiniPlayerBar_PlayPauseButton`, and `MiniPlayerBar_CloseButton` accessibility identifiers to `DashCast/Core/DesignSystem/Components/MiniPlayerBar.swift`.
+  - Added EN/ES translations in `DashCast/Resources/Localizable.xcstrings` for `"Mini player"`, `"Now playing: %@"`, `"Opens the full player"`, `"Play"`, and `"Stop playback"`.
+- **Tests**: Added unit tests in `DashCastTests/MiniPlayerBarStateTests.swift` and XCUITest coverage `testMiniPlayerBarAcrossNonCastTabs()` in `DashCastUITests/DashCastSmokeUITests.swift`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
