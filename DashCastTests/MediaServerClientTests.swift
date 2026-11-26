@@ -458,4 +458,47 @@ final class MediaServerStoreTests: XCTestCase {
         XCTAssertNil(PlaylistQRPayload.playlistURL(from: "ftp://x.y/p.m3u"))
         XCTAssertNil(PlaylistQRPayload.playlistURL(from: ""))
     }
+
+    func testQRCameraDisplayStateMapping() {
+        XCTAssertEqual(
+            PlaylistQRCameraStatusHelper.displayState(authorizationStatus: .authorized, isScanning: true, hasVideoDevice: true),
+            .liveScanner
+        )
+        XCTAssertEqual(
+            PlaylistQRCameraStatusHelper.displayState(authorizationStatus: .authorized, isScanning: true, hasVideoDevice: false),
+            .noCamera
+        )
+        XCTAssertEqual(
+            PlaylistQRCameraStatusHelper.displayState(authorizationStatus: .denied, isScanning: true, hasVideoDevice: true),
+            .permissionDenied
+        )
+        XCTAssertEqual(
+            PlaylistQRCameraStatusHelper.displayState(authorizationStatus: .restricted, isScanning: true, hasVideoDevice: true),
+            .permissionDenied
+        )
+        XCTAssertEqual(
+            PlaylistQRCameraStatusHelper.displayState(authorizationStatus: .notDetermined, isScanning: true, hasVideoDevice: true),
+            .waiting
+        )
+        XCTAssertEqual(
+            PlaylistQRCameraStatusHelper.displayState(authorizationStatus: .authorized, isScanning: false, hasVideoDevice: true),
+            .inactive
+        )
+        XCTAssertTrue(PlaylistQRCameraStatusHelper.shouldRequestAccess(for: .notDetermined))
+        XCTAssertFalse(PlaylistQRCameraStatusHelper.shouldRequestAccess(for: .denied))
+        XCTAssertFalse(PlaylistQRCameraStatusHelper.shouldRequestAccess(for: .authorized))
+    }
+
+    func testQRPayloadParsingEdgeCases() {
+        XCTAssertEqual(
+            PlaylistQRPayload.playlistURL(from: "urlto:http://192.168.1.25:8080/live/playlist.m3u8")?.absoluteString,
+            "http://192.168.1.25:8080/live/playlist.m3u8"
+        )
+        XCTAssertEqual(
+            PlaylistQRPayload.playlistURL(from: "  \n\"https://cdn.example.org/list.m3u\",  ")?.absoluteString,
+            "https://cdn.example.org/list.m3u"
+        )
+        XCTAssertNil(PlaylistQRPayload.playlistURL(from: "https://"))
+        XCTAssertNil(PlaylistQRPayload.playlistURL(from: "   \n\t  "))
+    }
 }
