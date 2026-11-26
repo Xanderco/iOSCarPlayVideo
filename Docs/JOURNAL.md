@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 11:20 (Bogotá) — Localized MediaServerViews Copy, QR Import & Resume Prompt [DI-114]
+- **MediaServer views (`MediaServerViews.swift`, `PlaylistQRImportView.swift`)**: Extracted `MediaServerViewsCopy` and `PlaylistQRImportCopy` with `LocalizedStringKey` properties and `allLocalizationKeys`, plus `MediaPlayLauncher` localized resume title and `Text(verbatim:)` dynamic item dialog title helpers.
+- **String catalog (`DashCast/Resources/Localizable.xcstrings`)**: Added EN/ES translations for `"Jellyfin & Emby"`, `"Continue Watching"`, `"Nothing here yet"`, `"Play"`, `"Resume from %@"`, `"Start from Beginning"`, `"Playback Failed"`, `"Scan a QR code containing an M3U / M3U8 playlist link to add it to your channels."`, `"Your access token is stored securely in the iOS Keychain. Your password is never saved."`, and all `PlaylistQRImportView` prompts/errors.
+- **Tests (`DashCastTests/MediaSourcesEntryTests.swift`)**: Added `testMediaTimeFormatAndResumeTitleFormatting` and `testMediaServerViewsAndQRImportLocalizationKeysComplete`. Verification pending `DashCast CI` on PR.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

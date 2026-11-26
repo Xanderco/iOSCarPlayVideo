@@ -1,6 +1,99 @@
 import SwiftUI
 import AVKit
 
+/// Localized copy keys and formatting helpers for `MediaServerViews`.
+public enum MediaServerViewsCopy {
+    nonisolated public static let mediaServersTitleString = "Media Servers"
+    nonisolated public static let jellyfinEmbyHeaderString = "Jellyfin & Emby"
+    nonisolated public static let emptyServersPromptString = "Connect a Jellyfin or Emby server to browse and play your own movies and shows."
+    nonisolated public static let addServerString = "Add Server"
+    nonisolated public static let scanPlaylistQRCodeString = "Scan Playlist QR Code"
+    nonisolated public static let playlistsHeaderString = "Playlists"
+    nonisolated public static let playlistsFooterString = "Scan a QR code containing an M3U / M3U8 playlist link to add it to your channels."
+    nonisolated public static let doneString = "Done"
+    nonisolated public static let serverSectionString = "Server"
+    nonisolated public static let typeString = "Type"
+    nonisolated public static let accountSectionString = "Account"
+    nonisolated public static let usernameString = "Username"
+    nonisolated public static let passwordString = "Password"
+    nonisolated public static let connectString = "Connect"
+    nonisolated public static let keychainFooterString = "Your access token is stored securely in the iOS Keychain. Your password is never saved."
+    nonisolated public static let cancelString = "Cancel"
+    nonisolated public static let continueWatchingString = "Continue Watching"
+    nonisolated public static let librariesString = "Libraries"
+    nonisolated public static let nothingHereYetString = "Nothing here yet"
+    nonisolated public static let playFallbackString = "Play"
+    nonisolated public static let resumeFromFormatString = "Resume from %@"
+    nonisolated public static let startFromBeginningString = "Start from Beginning"
+    nonisolated public static let playbackFailedString = "Playback Failed"
+    nonisolated public static let okString = "OK"
+    nonisolated public static let closePlayerString = "Close player"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        mediaServersTitleString,
+        jellyfinEmbyHeaderString,
+        emptyServersPromptString,
+        addServerString,
+        scanPlaylistQRCodeString,
+        playlistsHeaderString,
+        playlistsFooterString,
+        doneString,
+        serverSectionString,
+        typeString,
+        accountSectionString,
+        usernameString,
+        passwordString,
+        connectString,
+        keychainFooterString,
+        cancelString,
+        continueWatchingString,
+        librariesString,
+        nothingHereYetString,
+        playFallbackString,
+        resumeFromFormatString,
+        startFromBeginningString,
+        playbackFailedString,
+        okString,
+        closePlayerString
+    ]
+
+    @MainActor public static var mediaServersTitleKey: LocalizedStringKey { LocalizedStringKey(mediaServersTitleString) }
+    @MainActor public static var jellyfinEmbyHeaderKey: LocalizedStringKey { LocalizedStringKey(jellyfinEmbyHeaderString) }
+    @MainActor public static var emptyServersPromptKey: LocalizedStringKey { LocalizedStringKey(emptyServersPromptString) }
+    @MainActor public static var addServerKey: LocalizedStringKey { LocalizedStringKey(addServerString) }
+    @MainActor public static var scanPlaylistQRCodeKey: LocalizedStringKey { LocalizedStringKey(scanPlaylistQRCodeString) }
+    @MainActor public static var playlistsHeaderKey: LocalizedStringKey { LocalizedStringKey(playlistsHeaderString) }
+    @MainActor public static var playlistsFooterKey: LocalizedStringKey { LocalizedStringKey(playlistsFooterString) }
+    @MainActor public static var doneKey: LocalizedStringKey { LocalizedStringKey(doneString) }
+    @MainActor public static var serverSectionKey: LocalizedStringKey { LocalizedStringKey(serverSectionString) }
+    @MainActor public static var typeKey: LocalizedStringKey { LocalizedStringKey(typeString) }
+    @MainActor public static var accountSectionKey: LocalizedStringKey { LocalizedStringKey(accountSectionString) }
+    @MainActor public static var usernameKey: LocalizedStringKey { LocalizedStringKey(usernameString) }
+    @MainActor public static var passwordKey: LocalizedStringKey { LocalizedStringKey(passwordString) }
+    @MainActor public static var connectKey: LocalizedStringKey { LocalizedStringKey(connectString) }
+    @MainActor public static var keychainFooterKey: LocalizedStringKey { LocalizedStringKey(keychainFooterString) }
+    @MainActor public static var cancelKey: LocalizedStringKey { LocalizedStringKey(cancelString) }
+    @MainActor public static var continueWatchingKey: LocalizedStringKey { LocalizedStringKey(continueWatchingString) }
+    @MainActor public static var librariesKey: LocalizedStringKey { LocalizedStringKey(librariesString) }
+    @MainActor public static var nothingHereYetKey: LocalizedStringKey { LocalizedStringKey(nothingHereYetString) }
+    @MainActor public static var playFallbackKey: LocalizedStringKey { LocalizedStringKey(playFallbackString) }
+    @MainActor public static var startFromBeginningKey: LocalizedStringKey { LocalizedStringKey(startFromBeginningString) }
+    @MainActor public static var playbackFailedKey: LocalizedStringKey { LocalizedStringKey(playbackFailedString) }
+    @MainActor public static var okKey: LocalizedStringKey { LocalizedStringKey(okString) }
+    @MainActor public static var closePlayerKey: LocalizedStringKey { LocalizedStringKey(closePlayerString) }
+
+    nonisolated public static func resumeTitleString(seconds: Double, bundle: Bundle = .main) -> String {
+        let formattedTime = MediaTimeFormat.string(seconds)
+        let format = String(localized: String.LocalizationValue(resumeFromFormatString), bundle: bundle)
+        return String(format: format, formattedTime)
+    }
+
+    @MainActor
+    public static func resumeTitleKey(seconds: Double) -> LocalizedStringKey {
+        LocalizedStringKey("Resume from \(MediaTimeFormat.string(seconds))")
+    }
+}
+
 // MARK: - Entry point
 
 /// Root of the media-server feature: saved Jellyfin / Emby servers plus QR playlist import.
@@ -17,7 +110,7 @@ public struct MediaServersHomeView: View {
             List {
                 Section {
                     if store.accounts.isEmpty {
-                        Text("Connect a Jellyfin or Emby server to browse and play your own movies and shows.")
+                        Text(MediaServerViewsCopy.emptyServersPromptKey)
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -46,31 +139,31 @@ public struct MediaServersHomeView: View {
                     Button {
                         showingAddServer = true
                     } label: {
-                        Label("Add Server", systemImage: "plus.circle.fill")
+                        Label(MediaServerViewsCopy.addServerKey, systemImage: "plus.circle.fill")
                     }
                     .accessibilityIdentifier("addMediaServerButton")
                 } header: {
-                    Text("Jellyfin & Emby")
+                    Text(MediaServerViewsCopy.jellyfinEmbyHeaderKey)
                 }
 
                 Section {
                     Button {
                         showingQRScanner = true
                     } label: {
-                        Label("Scan Playlist QR Code", systemImage: "qrcode.viewfinder")
+                        Label(MediaServerViewsCopy.scanPlaylistQRCodeKey, systemImage: "qrcode.viewfinder")
                     }
                     .accessibilityIdentifier("scanPlaylistQRButton")
                 } header: {
-                    Text("Playlists")
+                    Text(MediaServerViewsCopy.playlistsHeaderKey)
                 } footer: {
-                    Text("Scan a QR code containing an M3U / M3U8 playlist link to add it to your channels.")
+                    Text(MediaServerViewsCopy.playlistsFooterKey)
                 }
             }
-            .navigationTitle("Media Servers")
+            .navigationTitle(MediaServerViewsCopy.mediaServersTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { dismiss() }
+                    Button(MediaServerViewsCopy.doneKey) { dismiss() }
                 }
             }
             .sheet(isPresented: $showingAddServer) {
@@ -108,8 +201,8 @@ public struct AddMediaServerView: View {
     public var body: some View {
         NavigationStack {
             Form {
-                Section("Server") {
-                    Picker("Type", selection: $kind) {
+                Section(MediaServerViewsCopy.serverSectionKey) {
+                    Picker(MediaServerViewsCopy.typeKey, selection: $kind) {
                         ForEach(MediaServerKind.allCases) { Text($0.displayName).tag($0) }
                     }
                     .pickerStyle(.segmented)
@@ -120,13 +213,13 @@ public struct AddMediaServerView: View {
                         .autocorrectionDisabled()
                         .accessibilityIdentifier("mediaServerAddressField")
                 }
-                Section("Account") {
-                    TextField("Username", text: $username)
+                Section(MediaServerViewsCopy.accountSectionKey) {
+                    TextField(MediaServerViewsCopy.usernameKey, text: $username)
                         .textContentType(.username)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .accessibilityIdentifier("mediaServerUsernameField")
-                    SecureField("Password", text: $password)
+                    SecureField(MediaServerViewsCopy.passwordKey, text: $password)
                         .textContentType(.password)
                         .accessibilityIdentifier("mediaServerPasswordField")
                 }
@@ -142,21 +235,21 @@ public struct AddMediaServerView: View {
                     } label: {
                         HStack {
                             Spacer()
-                            if isConnecting { ProgressView() } else { Text("Connect").bold() }
+                            if isConnecting { ProgressView() } else { Text(MediaServerViewsCopy.connectKey).bold() }
                             Spacer()
                         }
                     }
                     .disabled(!canSubmit)
                     .accessibilityIdentifier("mediaServerConnectButton")
                 } footer: {
-                    Text("Your access token is stored securely in the iOS Keychain. Your password is never saved.")
+                    Text(MediaServerViewsCopy.keychainFooterKey)
                 }
             }
-            .navigationTitle("Add Server")
+            .navigationTitle(MediaServerViewsCopy.addServerKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button(MediaServerViewsCopy.cancelKey) { dismiss() }
                 }
             }
         }
@@ -197,7 +290,7 @@ struct MediaLibrariesView: View {
                     .foregroundStyle(.red)
             }
             if let client, !resume.isEmpty {
-                Section("Continue Watching") {
+                Section(MediaServerViewsCopy.continueWatchingKey) {
                     ForEach(resume) { item in
                         Button {
                             playRequest = item
@@ -209,7 +302,7 @@ struct MediaLibrariesView: View {
                 }
             }
             if let client {
-                Section("Libraries") {
+                Section(MediaServerViewsCopy.librariesKey) {
                     ForEach(libraries) { library in
                         NavigationLink {
                             MediaItemGridView(account: account, client: client, parent: library)
@@ -305,7 +398,7 @@ struct MediaItemGridView: View {
             if isLoading && items.isEmpty {
                 ProgressView()
             } else if !isLoading && items.isEmpty && errorMessage == nil {
-                Text("Nothing here yet").foregroundStyle(.secondary)
+                Text(MediaServerViewsCopy.nothingHereYetKey).foregroundStyle(.secondary)
             }
         }
         .navigationTitle(parent.name)
@@ -491,6 +584,23 @@ struct MediaPlayLauncher: ViewModifier {
     @State private var showPlayer = false
     @State private var errorMessage: String?
 
+    @MainActor
+    static func dialogTitle(itemName: String?) -> Text {
+        if let itemName, !itemName.isEmpty {
+            return Text(verbatim: itemName)
+        }
+        return Text(MediaServerViewsCopy.playFallbackKey)
+    }
+
+    @MainActor
+    static func resumeTitleKey(seconds: Double) -> LocalizedStringKey {
+        MediaServerViewsCopy.resumeTitleKey(seconds: seconds)
+    }
+
+    nonisolated static func resumeTitleString(seconds: Double, bundle: Bundle = .main) -> String {
+        MediaServerViewsCopy.resumeTitleString(seconds: seconds, bundle: bundle)
+    }
+
     func body(content: Content) -> some View {
         content
             .onChange(of: request) { _, item in
@@ -502,17 +612,17 @@ struct MediaPlayLauncher: ViewModifier {
                     start(item, resume: false)
                 }
             }
-            .confirmationDialog(request?.name ?? "Play",
+            .confirmationDialog(Self.dialogTitle(itemName: request?.name),
                                 isPresented: $showResumeDialog,
                                 titleVisibility: .visible,
                                 presenting: request) { item in
-                Button("Resume from \(MediaTimeFormat.string(item.resumePositionSeconds))") {
+                Button(Self.resumeTitleKey(seconds: item.resumePositionSeconds)) {
                     start(item, resume: true)
                 }
-                Button("Start from Beginning") {
+                Button(MediaServerViewsCopy.startFromBeginningKey) {
                     start(item, resume: false)
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(MediaServerViewsCopy.cancelKey, role: .cancel) {}
             }
             .onChange(of: showResumeDialog) { _, shown in
                 if !shown { request = nil }
@@ -520,9 +630,9 @@ struct MediaPlayLauncher: ViewModifier {
             .fullScreenCover(isPresented: $showPlayer) {
                 MediaServerPlayerView()
             }
-            .alert("Playback Failed",
+            .alert(MediaServerViewsCopy.playbackFailedKey,
                    isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
-                Button("OK", role: .cancel) {}
+                Button(MediaServerViewsCopy.okKey, role: .cancel) {}
             } message: {
                 Text(errorMessage ?? "")
             }
@@ -560,7 +670,7 @@ struct MediaServerPlayerView: View {
                     .foregroundStyle(.white, .black.opacity(0.6))
             }
             .padding()
-            .accessibilityLabel("Close player")
+            .accessibilityLabel(MediaServerViewsCopy.closePlayerKey)
             .accessibilityIdentifier("mediaServerPlayerClose")
         }
         .onDisappear {
