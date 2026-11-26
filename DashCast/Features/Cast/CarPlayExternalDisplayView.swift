@@ -1,6 +1,73 @@
 import SwiftUI
 import AVKit
 
+/// Pure speed gauge conversion and bounds helpers for `CarPlayExternalDisplayView`.
+public enum CarPlayExternalDisplayFormatter {
+    nonisolated public static let kmhToMphFactor: Double = 0.621371
+    nonisolated public static let gaugeTitleString: String = "SPEED"
+
+    nonisolated public static func speedValue(speedKmh: Double, useMilesPerHour: Bool) -> Double {
+        guard speedKmh.isFinite, speedKmh > 0 else { return 0 }
+        return useMilesPerHour ? speedKmh * kmhToMphFactor : speedKmh
+    }
+
+    nonisolated public static func maxSpeedValue(useMilesPerHour: Bool) -> Double {
+        useMilesPerHour ? 140 : 220
+    }
+
+    nonisolated public static func speedUnit(useMilesPerHour: Bool) -> String {
+        useMilesPerHour ? "MPH" : "KM/H"
+    }
+}
+
+/// Localized copy keys for `CarPlayExternalDisplayView`.
+public enum CarPlayExternalDisplayCopy {
+    nonisolated public static let parkedPlaybackString = "DashCast · Parked Playback"
+    nonisolated public static let speedTitleString = "SPEED"
+    nonisolated public static let mphUnitString = "MPH"
+    nonisolated public static let kmhUnitString = "KM/H"
+    nonisolated public static let readyBadgeString = "READY"
+    nonisolated public static let selectVideoPromptString = "Select video on iPhone to cast"
+    nonisolated public static let defaultDriverGreetingString = "Welcome, Driver"
+    nonisolated public static let brandTitleString = "DashCast"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        parkedPlaybackString,
+        speedTitleString,
+        mphUnitString,
+        kmhUnitString,
+        readyBadgeString,
+        selectVideoPromptString,
+        defaultDriverGreetingString,
+        brandTitleString
+    ]
+
+    @MainActor
+    public static var parkedPlaybackKey: LocalizedStringKey {
+        LocalizedStringKey(parkedPlaybackString)
+    }
+
+    @MainActor
+    public static var readyBadgeKey: LocalizedStringKey {
+        LocalizedStringKey(readyBadgeString)
+    }
+
+    @MainActor
+    public static var selectVideoPromptKey: LocalizedStringKey {
+        LocalizedStringKey(selectVideoPromptString)
+    }
+
+    @MainActor
+    public static var defaultDriverGreetingKey: LocalizedStringKey {
+        LocalizedStringKey(defaultDriverGreetingString)
+    }
+
+    @MainActor
+    public static var brandTitleKey: LocalizedStringKey {
+        LocalizedStringKey(brandTitleString)
+    }
+}
+
 public struct CarPlayExternalDisplayView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var locationService = DriveLocationService.shared
@@ -13,7 +80,7 @@ public struct CarPlayExternalDisplayView: View {
             carBrand: "Porsche",
             carModelName: "911 GT3 RS",
             carImageName: "car_porsche_911",
-            driverGreeting: "Welcome, Driver"
+            driverGreeting: CarPlayExternalDisplayCopy.defaultDriverGreetingString
         )
     }
 
@@ -31,7 +98,7 @@ public struct CarPlayExternalDisplayView: View {
                     HStack {
                         HStack(spacing: 6) {
                             Circle().fill(Color.dashGreen).frame(width: 8, height: 8)
-                            Text("DashCast · Parked Playback")
+                            Text(CarPlayExternalDisplayCopy.parkedPlaybackKey)
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundStyle(Color.white)
                         }
@@ -56,10 +123,17 @@ public struct CarPlayExternalDisplayView: View {
                 // Driving: Render Speedometer and GPS Map
                 HStack(spacing: 20) {
                     NeonGaugeView(
-                        value: appState.useMilesPerHour ? locationService.currentSpeedKmh * 0.621371 : locationService.currentSpeedKmh,
-                        maxValue: appState.useMilesPerHour ? 140 : 220,
-                        title: "SPEED",
-                        unit: appState.useMilesPerHour ? "MPH" : "KM/H",
+                        value: CarPlayExternalDisplayFormatter.speedValue(
+                            speedKmh: locationService.currentSpeedKmh,
+                            useMilesPerHour: appState.useMilesPerHour
+                        ),
+                        maxValue: CarPlayExternalDisplayFormatter.maxSpeedValue(
+                            useMilesPerHour: appState.useMilesPerHour
+                        ),
+                        title: CarPlayExternalDisplayFormatter.gaugeTitleString,
+                        unit: CarPlayExternalDisplayFormatter.speedUnit(
+                            useMilesPerHour: appState.useMilesPerHour
+                        ),
                         accentColor: .dashCyan
                     )
                     .frame(width: 180)
@@ -112,9 +186,15 @@ public struct CarPlayExternalDisplayView: View {
                             Spacer()
 
                             HStack {
-                                Text(activeWidget.driverGreeting)
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(.white)
+                                if activeWidget.driverGreeting == CarPlayExternalDisplayCopy.defaultDriverGreetingString {
+                                    Text(CarPlayExternalDisplayCopy.defaultDriverGreetingKey)
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(.white)
+                                } else {
+                                    Text(activeWidget.driverGreeting)
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(.white)
+                                }
                                 Spacer()
                                 Text(activeWidget.carModelName)
                                     .font(.system(size: 12))
@@ -131,16 +211,16 @@ public struct CarPlayExternalDisplayView: View {
                             .fill(LinearGradient.dashAccentGradient)
 
                         VStack(spacing: 8) {
-                            Text("DashCast")
+                            Text(CarPlayExternalDisplayCopy.brandTitleKey)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundStyle(Color.black.opacity(0.9))
                                 .tracking(1)
 
-                            Text("READY")
+                            Text(CarPlayExternalDisplayCopy.readyBadgeKey)
                                 .font(.system(size: 42, weight: .black, design: .rounded))
                                 .foregroundStyle(.white)
 
-                            Text("Select video on iPhone to cast")
+                            Text(CarPlayExternalDisplayCopy.selectVideoPromptKey)
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(.white.opacity(0.85))
                         }

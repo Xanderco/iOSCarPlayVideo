@@ -142,4 +142,44 @@ final class CarVideoOutputTests: XCTestCase {
         XCTAssertTrue(player.usesExternalPlaybackWhileExternalScreenIsActive)
         XCTAssertTrue(CarVideoOutputController.shared.canStartVideoOutput())
     }
+
+    // MARK: External display formatter & localization
+
+    func testExternalDisplayFormatterMetricAndImperial() {
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.speedValue(speedKmh: 100, useMilesPerHour: false), 100, accuracy: 0.001)
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.maxSpeedValue(useMilesPerHour: false), 220)
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.speedUnit(useMilesPerHour: false), "KM/H")
+
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.speedValue(speedKmh: 100, useMilesPerHour: true), 62.1371, accuracy: 0.001)
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.maxSpeedValue(useMilesPerHour: true), 140)
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.speedUnit(useMilesPerHour: true), "MPH")
+
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.speedValue(speedKmh: -10, useMilesPerHour: true), 0)
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.speedValue(speedKmh: .nan, useMilesPerHour: false), 0)
+        XCTAssertEqual(CarPlayExternalDisplayFormatter.speedValue(speedKmh: .infinity, useMilesPerHour: false), 0)
+    }
+
+    func testExternalDisplayCopyLocalizationKeysHaveEnglishAndSpanish() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in CarPlayExternalDisplayCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
