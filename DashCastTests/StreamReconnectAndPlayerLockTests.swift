@@ -121,8 +121,8 @@ final class StreamReconnectAndPlayerLockTests: XCTestCase {
         XCTAssertEqual(service.reconnectAttempt, 2)
         service.simulatePlaybackFailureForTesting(URLError(.timedOut))
 
-        XCTAssertEqual(service.streamHealth, .failed("Network error: The request timed out."))
-        XCTAssertNotNil(service.playbackError)
+        XCTAssertEqual(service.streamHealth, .failed(VideoPlayerService.describe(URLError(.timedOut))))
+        XCTAssertTrue(service.playbackError?.hasPrefix("Network error:") == true)
         XCTAssertFalse(idleController.isIdleTimerDisabled)
 
         service.stop()

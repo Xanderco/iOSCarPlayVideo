@@ -11,7 +11,7 @@ import AVFoundation
 /// exist, or from CarPlay → Cast → "Show iPhone screen".
 @MainActor
 enum CarPlayMirrorPlayback {
-    static let channelID = "dashcast.mirror.iphone"
+    nonisolated static let channelID = "dashcast.mirror.iphone"
 
     enum Decision: Equatable {
         case play(URL)
