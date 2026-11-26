@@ -1,6 +1,12 @@
 import SwiftUI
 import MapKit
 
+public enum TripMapMode: String, CaseIterable, Identifiable {
+    case replay = "Route Replay"
+    case heatmap = "Speed Heatmap"
+    public var id: String { rawValue }
+}
+
 public struct TripDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
