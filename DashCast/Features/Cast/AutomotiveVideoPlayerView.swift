@@ -4,12 +4,16 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
-    @StateObject private var controlsVisibility = PlayerControlsVisibilityModel()
+    @StateObject private var controlsVisibility: PlayerControlsVisibilityModel
     @State private var seekSliderValue: Double = 0
     @Binding var isFullscreen: Bool
 
     public init(isFullscreen: Binding<Bool> = .constant(false)) {
         self._isFullscreen = isFullscreen
+        let delay = ProcessInfo.processInfo.arguments.contains("-UITests")
+            ? 20.0
+            : PlayerControlsVisibilityModel.defaultAutoHideDelay
+        self._controlsVisibility = StateObject(wrappedValue: PlayerControlsVisibilityModel(autoHideDelay: delay))
     }
 
     public var body: some View {
