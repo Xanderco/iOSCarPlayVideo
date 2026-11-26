@@ -128,4 +128,97 @@ final class TripHistoryAndReplayTests: XCTestCase {
         PersistenceController.shared.saveTrips(cleaned)
         XCTAssertEqual(PersistenceController.shared.loadTrips().count, initialCount)
     }
+
+    // MARK: TripDetailFormatter & Localization
+
+    func testTripDetailFormatterDistanceAndSpeedUnits() {
+        // 5,000 m = 5.00 km / 3.11 mi
+        XCTAssertEqual(TripDetailFormatter.formatDistance(5000, useMilesPerHour: false, decimals: 2), "5.00 km")
+        XCTAssertEqual(TripDetailFormatter.formatDistance(5000, useMilesPerHour: true, decimals: 2), "3.11 mi")
+        XCTAssertEqual(TripDetailFormatter.formatDistance(5000, useMilesPerHour: false, decimals: 1), "5.0 km")
+        XCTAssertEqual(TripDetailFormatter.formatDistance(5000, useMilesPerHour: true, decimals: 1), "3.1 mi")
+
+        // Speed: 100 km/h ~= 62 mph
+        XCTAssertEqual(TripDetailFormatter.formatSpeed(100.0, useMilesPerHour: false), "100 km/h")
+        XCTAssertEqual(TripDetailFormatter.formatSpeed(100.0, useMilesPerHour: true), "62 mph")
+        XCTAssertEqual(TripDetailFormatter.formatSpeed(0.0, useMilesPerHour: true), "0 mph")
+    }
+
+    func testTripDetailFormatterDuration() {
+        XCTAssertEqual(TripDetailFormatter.formatDuration(0), "0m 00s")
+        XCTAssertEqual(TripDetailFormatter.formatDuration(125), "2m 05s")
+        XCTAssertEqual(TripDetailFormatter.formatDuration(-15), "0m 00s")
+
+        // History compact mode (> 60 minutes switches to h/m)
+        XCTAssertEqual(TripDetailFormatter.formatDuration(125, compactMinutesOnlyForHours: true), "2m 5s")
+        XCTAssertEqual(TripDetailFormatter.formatDuration(3900, compactMinutesOnlyForHours: true), "1h 5m")
+    }
+
+    @MainActor
+    func testTripDetailFormatterScoreMessagesAndTones() {
+        XCTAssertEqual(TripDetailFormatter.scoreMessageKeyName(for: 95), "Smooth & Efficient")
+        XCTAssertEqual(TripDetailFormatter.scoreMessageKeyName(for: 90), "Smooth & Efficient")
+        XCTAssertEqual(TripDetailFormatter.scoreMessageKeyName(for: 85), "Good Driving")
+        XCTAssertEqual(TripDetailFormatter.scoreMessageKeyName(for: 80), "Good Driving")
+        XCTAssertEqual(TripDetailFormatter.scoreMessageKeyName(for: 75), "Moderate Ride")
+        XCTAssertEqual(TripDetailFormatter.scoreMessageKeyName(for: 70), "Moderate Ride")
+        XCTAssertEqual(TripDetailFormatter.scoreMessageKeyName(for: 69), "Aggressive Driving Detected")
+
+        XCTAssertEqual(TripDetailFormatter.scoreColorTone(for: 90), .green)
+        XCTAssertEqual(TripDetailFormatter.scoreColorTone(for: 85), .green)
+        XCTAssertEqual(TripDetailFormatter.scoreColorTone(for: 84), .yellow)
+        XCTAssertEqual(TripDetailFormatter.scoreColorTone(for: 70), .yellow)
+        XCTAssertEqual(TripDetailFormatter.scoreColorTone(for: 69), .red)
+
+        _ = TripDetailFormatter.scoreMessage(for: 92)
+        _ = TripDetailFormatter.scoreColor(for: 92)
+    }
+
+    @MainActor
+    func testTripDetailFormatterFieldAndMapModeKeys() {
+        XCTAssertEqual(TripDetailFormatter.mapModeKeyName(for: .replay), "Route Replay")
+        XCTAssertEqual(TripDetailFormatter.mapModeKeyName(for: .heatmap), "Speed Heatmap")
+        _ = TripDetailFormatter.mapModeTitle(for: .replay)
+        _ = TripDetailFormatter.mapModeTitle(for: .heatmap)
+
+        XCTAssertEqual(
+            TripDetailFormatter.StatField.allCases.map(\.keyName),
+            ["DISTANCE", "DURATION", "AVG SPEED", "TOP SPEED"]
+        )
+        XCTAssertEqual(
+            TripDetailFormatter.TimingField.allCases.map(\.keyName),
+            ["Started", "Ended", "Total Time"]
+        )
+        XCTAssertEqual(
+            TripDetailFormatter.TelemetryField.allCases.map(\.keyName),
+            ["Hard Brakes", "Rapid Accel", "Sharp Turns", "Smoothness"]
+        )
+        TripDetailFormatter.StatField.allCases.forEach { _ = $0.title }
+        TripDetailFormatter.TimingField.allCases.forEach { _ = $0.title }
+        TripDetailFormatter.TelemetryField.allCases.forEach { _ = $0.title }
+    }
+
+    func testTripDetailAndHistoryLocalizationKeysExistInCatalog() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = Bundle(for: TripHistoryAndReplayTests.self).url(forResource: "Localizable", withExtension: "xcstrings")
+            ?? projectDir
+                .appendingPathComponent("DashCast")
+                .appendingPathComponent("Resources")
+                .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in TripDetailFormatter.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing key in Localizable.xcstrings: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
+            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing EN for \(key)")
+            XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing ES for \(key)")
+        }
+    }
 }

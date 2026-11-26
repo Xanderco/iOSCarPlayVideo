@@ -1,6 +1,202 @@
 import SwiftUI
 import MapKit
 
+/// Testable formatting and localization helpers for `TripDetailView` and `TripHistoryView`.
+public enum TripDetailFormatter {
+    public enum ScoreColorTone: Equatable {
+        case green
+        case yellow
+        case red
+    }
+
+    public enum StatField: CaseIterable {
+        case distance
+        case duration
+        case avgSpeed
+        case topSpeed
+
+        public var keyName: String {
+            switch self {
+            case .distance: return "DISTANCE"
+            case .duration: return "DURATION"
+            case .avgSpeed: return "AVG SPEED"
+            case .topSpeed: return "TOP SPEED"
+            }
+        }
+
+        public var icon: String {
+            switch self {
+            case .distance: return "road.lanes"
+            case .duration: return "clock.fill"
+            case .avgSpeed: return "gauge.medium"
+            case .topSpeed: return "bolt.fill"
+            }
+        }
+
+        @MainActor
+        public var title: LocalizedStringKey {
+            LocalizedStringKey(keyName)
+        }
+    }
+
+    public enum TimingField: CaseIterable {
+        case started
+        case ended
+        case totalTime
+
+        public var keyName: String {
+            switch self {
+            case .started: return "Started"
+            case .ended: return "Ended"
+            case .totalTime: return "Total Time"
+            }
+        }
+
+        public var icon: String {
+            switch self {
+            case .started: return "calendar"
+            case .ended: return "flag.checkered"
+            case .totalTime: return "hourglass"
+            }
+        }
+
+        @MainActor
+        public var title: LocalizedStringKey {
+            LocalizedStringKey(keyName)
+        }
+    }
+
+    public enum TelemetryField: CaseIterable {
+        case hardBrakes
+        case rapidAccel
+        case sharpTurns
+        case smoothness
+
+        public var keyName: String {
+            switch self {
+            case .hardBrakes: return "Hard Brakes"
+            case .rapidAccel: return "Rapid Accel"
+            case .sharpTurns: return "Sharp Turns"
+            case .smoothness: return "Smoothness"
+            }
+        }
+
+        @MainActor
+        public var title: LocalizedStringKey {
+            LocalizedStringKey(keyName)
+        }
+    }
+
+    public static let allLocalizationKeys: [String] = [
+        "Map Mode",
+        "Route Replay",
+        "Speed Heatmap",
+        "No Route Recorded",
+        "The trip was too short or location was unavailable.",
+        "SCORE",
+        "Smooth & Efficient",
+        "Good Driving",
+        "Moderate Ride",
+        "Aggressive Driving Detected",
+        "DISTANCE",
+        "DURATION",
+        "AVG SPEED",
+        "TOP SPEED",
+        "Started",
+        "Ended",
+        "Total Time",
+        "DRIVING SMOOTHNESS",
+        "Hard Brakes",
+        "Rapid Accel",
+        "Sharp Turns",
+        "Smoothness",
+        "No Trips Recorded Yet",
+        "Trips you record or auto-detect with DashCast will appear here with route replay and telemetry stats.",
+        "TOTAL DRIVES",
+        "TOTAL DISTANCE",
+        "AVG SCORE",
+        "Summary",
+        "All Recorded Trips (%lld)",
+        "Trip History",
+        "Close",
+        "Clear all trips",
+        "Clear Trip History?",
+        "Clear All",
+        "Cancel",
+        "Are you sure you want to delete all recorded trips? This action cannot be undone.",
+        "Replay"
+    ]
+
+    public static func formatDistance(_ meters: Double, useMilesPerHour: Bool, decimals: Int = 2) -> String {
+        let clampedDecimals = max(decimals, 0)
+        if useMilesPerHour {
+            let miles = meters * 0.000621371
+            return String(format: "%.\(clampedDecimals)f mi", miles)
+        } else {
+            let km = meters / 1000.0
+            return String(format: "%.\(clampedDecimals)f km", km)
+        }
+    }
+
+    public static func formatSpeed(_ speedKmh: Double, useMilesPerHour: Bool) -> String {
+        if useMilesPerHour {
+            return String(format: "%.0f mph", speedKmh * 0.621371)
+        } else {
+            return String(format: "%.0f km/h", speedKmh)
+        }
+    }
+
+    public static func formatDuration(_ seconds: TimeInterval, compactMinutesOnlyForHours: Bool = false) -> String {
+        let clamped = max(Int(seconds), 0)
+        let mins = clamped / 60
+        let secs = clamped % 60
+        if compactMinutesOnlyForHours {
+            if mins > 60 {
+                let hours = mins / 60
+                let remMins = mins % 60
+                return "\(hours)h \(remMins)m"
+            }
+            return "\(mins)m \(secs)s"
+        }
+        return String(format: "%dm %02ds", mins, secs)
+    }
+
+    public static func scoreColorTone(for score: Int) -> ScoreColorTone {
+        if score >= 85 { return .green }
+        if score >= 70 { return .yellow }
+        return .red
+    }
+
+    public static func scoreColor(for score: Int) -> Color {
+        switch scoreColorTone(for: score) {
+        case .green: return .dashGreen
+        case .yellow: return .dashYellow
+        case .red: return .dashRed
+        }
+    }
+
+    public static func scoreMessageKeyName(for score: Int) -> String {
+        if score >= 90 { return "Smooth & Efficient" }
+        if score >= 80 { return "Good Driving" }
+        if score >= 70 { return "Moderate Ride" }
+        return "Aggressive Driving Detected"
+    }
+
+    @MainActor
+    public static func scoreMessage(for score: Int) -> LocalizedStringKey {
+        LocalizedStringKey(scoreMessageKeyName(for: score))
+    }
+
+    public static func mapModeKeyName(for mode: TripMapMode) -> String {
+        mode.rawValue
+    }
+
+    @MainActor
+    public static func mapModeTitle(for mode: TripMapMode) -> LocalizedStringKey {
+        LocalizedStringKey(mapModeKeyName(for: mode))
+    }
+}
+
 public struct TripDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
@@ -17,28 +213,15 @@ public struct TripDetailView: View {
     }
 
     private var formattedDistance: String {
-        if appState.useMilesPerHour {
-            let miles = trip.distanceMeters * 0.000621371
-            return String(format: "%.2f mi", miles)
-        } else {
-            return String(format: "%.2f km", trip.distanceKilometers)
-        }
+        TripDetailFormatter.formatDistance(trip.distanceMeters, useMilesPerHour: appState.useMilesPerHour, decimals: 2)
     }
 
     private var formattedAvgSpeed: String {
-        if appState.useMilesPerHour {
-            return String(format: "%.0f mph", trip.averageSpeedKmh * 0.621371)
-        } else {
-            return String(format: "%.0f km/h", trip.averageSpeedKmh)
-        }
+        TripDetailFormatter.formatSpeed(trip.averageSpeedKmh, useMilesPerHour: appState.useMilesPerHour)
     }
 
     private var formattedTopSpeed: String {
-        if appState.useMilesPerHour {
-            return String(format: "%.0f mph", trip.maxSpeedKmh * 0.621371)
-        } else {
-            return String(format: "%.0f km/h", trip.maxSpeedKmh)
-        }
+        TripDetailFormatter.formatSpeed(trip.maxSpeedKmh, useMilesPerHour: appState.useMilesPerHour)
     }
 
     public var body: some View {
@@ -50,9 +233,9 @@ public struct TripDetailView: View {
                     // Map Section with Replay / Heatmap
                     if coordinates.count >= 2 {
                         VStack(spacing: 10) {
-                            Picker("Map Mode", selection: $mapMode) {
+                            Picker(LocalizedStringKey("Map Mode"), selection: $mapMode) {
                                 ForEach(TripMapMode.allCases) { mode in
-                                    Text(mode.rawValue).tag(mode)
+                                    Text(TripDetailFormatter.mapModeTitle(for: mode)).tag(mode)
                                 }
                             }
                             .pickerStyle(.segmented)
@@ -110,23 +293,51 @@ public struct TripDetailView: View {
 
                     // Stats Grid
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                        statCard(title: "DISTANCE", value: formattedDistance, icon: "road.lanes")
-                        statCard(title: "DURATION", value: formatDuration(trip.durationSeconds), icon: "clock.fill")
-                        statCard(title: "AVG SPEED", value: formattedAvgSpeed, icon: "gauge.medium")
-                        statCard(title: "TOP SPEED", value: formattedTopSpeed, icon: "bolt.fill")
+                        statCard(
+                            title: TripDetailFormatter.StatField.distance.title,
+                            value: formattedDistance,
+                            icon: TripDetailFormatter.StatField.distance.icon
+                        )
+                        statCard(
+                            title: TripDetailFormatter.StatField.duration.title,
+                            value: formatDuration(trip.durationSeconds),
+                            icon: TripDetailFormatter.StatField.duration.icon
+                        )
+                        statCard(
+                            title: TripDetailFormatter.StatField.avgSpeed.title,
+                            value: formattedAvgSpeed,
+                            icon: TripDetailFormatter.StatField.avgSpeed.icon
+                        )
+                        statCard(
+                            title: TripDetailFormatter.StatField.topSpeed.title,
+                            value: formattedTopSpeed,
+                            icon: TripDetailFormatter.StatField.topSpeed.icon
+                        )
                     }
                     .padding(.horizontal)
 
                     // Timing Breakdown
                     AutomotiveCard {
                         VStack(spacing: 12) {
-                            timingRow(title: "Started", value: trip.startTime.formatted(date: .abbreviated, time: .shortened), icon: "calendar")
+                            timingRow(
+                                title: TripDetailFormatter.TimingField.started.title,
+                                value: trip.startTime.formatted(date: .abbreviated, time: .shortened),
+                                icon: TripDetailFormatter.TimingField.started.icon
+                            )
                             Divider().background(Color.dashBorder)
                             if let end = trip.endTime {
-                                timingRow(title: "Ended", value: end.formatted(date: .omitted, time: .shortened), icon: "flag.checkered")
+                                timingRow(
+                                    title: TripDetailFormatter.TimingField.ended.title,
+                                    value: end.formatted(date: .omitted, time: .shortened),
+                                    icon: TripDetailFormatter.TimingField.ended.icon
+                                )
                                 Divider().background(Color.dashBorder)
                             }
-                            timingRow(title: "Total Time", value: formatDuration(trip.durationSeconds), icon: "hourglass")
+                            timingRow(
+                                title: TripDetailFormatter.TimingField.totalTime.title,
+                                value: formatDuration(trip.durationSeconds),
+                                icon: TripDetailFormatter.TimingField.totalTime.icon
+                            )
                         }
                     }
                     .padding(.horizontal)
@@ -140,13 +351,29 @@ public struct TripDetailView: View {
                                 .tracking(1.2)
 
                             HStack {
-                                telemetryPill(label: "Hard Brakes", count: trip.harshBrakingCount, color: .dashOrange)
+                                telemetryPill(
+                                    label: TripDetailFormatter.TelemetryField.hardBrakes.title,
+                                    count: trip.harshBrakingCount,
+                                    color: .dashOrange
+                                )
                                 Spacer()
-                                telemetryPill(label: "Rapid Accel", count: trip.harshAccelerationCount, color: .dashOrange)
+                                telemetryPill(
+                                    label: TripDetailFormatter.TelemetryField.rapidAccel.title,
+                                    count: trip.harshAccelerationCount,
+                                    color: .dashOrange
+                                )
                                 Spacer()
-                                telemetryPill(label: "Sharp Turns", count: trip.harshCorneringCount, color: .dashOrange)
+                                telemetryPill(
+                                    label: TripDetailFormatter.TelemetryField.sharpTurns.title,
+                                    count: trip.harshCorneringCount,
+                                    color: .dashOrange
+                                )
                                 Spacer()
-                                telemetryPill(label: "Smoothness", count: trip.drivingScore, color: .dashGreen)
+                                telemetryPill(
+                                    label: TripDetailFormatter.TelemetryField.smoothness.title,
+                                    count: trip.drivingScore,
+                                    color: .dashGreen
+                                )
                             }
                         }
                     }
@@ -160,19 +387,14 @@ public struct TripDetailView: View {
     }
 
     private var scoreColor: Color {
-        if trip.drivingScore >= 85 { return .dashGreen }
-        if trip.drivingScore >= 70 { return .dashYellow }
-        return .dashRed
+        TripDetailFormatter.scoreColor(for: trip.drivingScore)
     }
 
-    private var scoreMessage: String {
-        if trip.drivingScore >= 90 { return "Smooth & Efficient" }
-        if trip.drivingScore >= 80 { return "Good Driving" }
-        if trip.drivingScore >= 70 { return "Moderate Ride" }
-        return "Aggressive Driving Detected"
+    private var scoreMessage: LocalizedStringKey {
+        TripDetailFormatter.scoreMessage(for: trip.drivingScore)
     }
 
-    private func statCard(title: String, value: String, icon: String) -> some View {
+    private func statCard(title: LocalizedStringKey, value: String, icon: String) -> some View {
         AutomotiveCard {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -183,14 +405,14 @@ public struct TripDetailView: View {
                 Text(title)
                     .font(ThemeFonts.hudCaption(size: 11))
                     .foregroundStyle(Color.dashTextMuted)
-                Text(value)
+                Text(verbatim: value)
                     .font(ThemeFonts.hudStat(size: 20))
                     .foregroundStyle(Color.dashTextPrimary)
             }
         }
     }
 
-    private func timingRow(title: String, value: String, icon: String) -> some View {
+    private func timingRow(title: LocalizedStringKey, value: String, icon: String) -> some View {
         HStack {
             Image(systemName: icon)
                 .foregroundStyle(Color.dashTextMuted)
@@ -199,13 +421,13 @@ public struct TripDetailView: View {
                 .font(ThemeFonts.hudCaption(size: 13))
                 .foregroundStyle(Color.dashTextSecondary)
             Spacer()
-            Text(value)
+            Text(verbatim: value)
                 .font(ThemeFonts.monospaceDigits(size: 13))
                 .foregroundStyle(Color.dashTextPrimary)
         }
     }
 
-    private func telemetryPill(label: String, count: Int, color: Color) -> some View {
+    private func telemetryPill(label: LocalizedStringKey, count: Int, color: Color) -> some View {
         VStack(spacing: 2) {
             Text("\(count)")
                 .font(ThemeFonts.hudStat(size: 18))
@@ -217,8 +439,6 @@ public struct TripDetailView: View {
     }
 
     private func formatDuration(_ seconds: TimeInterval) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        return String(format: "%dm %02ds", mins, secs)
+        TripDetailFormatter.formatDuration(seconds)
     }
 }

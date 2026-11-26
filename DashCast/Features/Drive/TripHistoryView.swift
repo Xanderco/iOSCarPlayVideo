@@ -11,13 +11,7 @@ public struct TripHistoryView: View {
 
     private var totalDistanceFormatted: String {
         let totalMeters = trips.reduce(0.0) { $0 + $1.distanceMeters }
-        if appState.useMilesPerHour {
-            let miles = totalMeters * 0.000621371
-            return String(format: "%.1f mi", miles)
-        } else {
-            let km = totalMeters / 1000.0
-            return String(format: "%.1f km", km)
-        }
+        return formatDistance(totalMeters)
     }
 
     private var averageScore: Int {
@@ -58,7 +52,7 @@ public struct TripHistoryView: View {
                                         Text("TOTAL DISTANCE")
                                             .font(ThemeFonts.hudCaption(size: 11))
                                             .foregroundStyle(Color.dashTextMuted)
-                                        Text(totalDistanceFormatted)
+                                        Text(verbatim: totalDistanceFormatted)
                                             .font(ThemeFonts.hudStat(size: 22))
                                             .foregroundStyle(Color.dashYellow)
                                     }
@@ -103,11 +97,11 @@ public struct TripHistoryView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .navigationTitle("Trip History")
+            .navigationTitle(LocalizedStringKey("Trip History"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") {
+                    Button(LocalizedStringKey("Close")) {
                         dismiss()
                     }
                     .font(.system(size: 16))
@@ -123,15 +117,15 @@ public struct TripHistoryView: View {
                                 .font(.system(size: 15))
                                 .foregroundStyle(Color.dashRed)
                         }
-                        .accessibilityLabel("Clear all trips")
+                        .accessibilityLabel(Text("Clear all trips"))
                     }
                 }
             }
-            .alert("Clear Trip History?", isPresented: $showingClearAlert) {
-                Button("Clear All", role: .destructive) {
+            .alert(LocalizedStringKey("Clear Trip History?"), isPresented: $showingClearAlert) {
+                Button(LocalizedStringKey("Clear All"), role: .destructive) {
                     clearAllTrips()
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(LocalizedStringKey("Cancel"), role: .cancel) {}
             } message: {
                 Text("Are you sure you want to delete all recorded trips? This action cannot be undone.")
             }
@@ -160,17 +154,17 @@ public struct TripHistoryView: View {
                     .foregroundStyle(Color.dashTextPrimary)
 
                 HStack(spacing: 6) {
-                    Text(formatDistance(trip.distanceMeters))
+                    Text(verbatim: formatDistance(trip.distanceMeters))
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextSecondary)
-                    Text("·")
+                    Text(verbatim: "·")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextMuted)
-                    Text(formatDuration(trip.durationSeconds))
+                    Text(verbatim: formatDuration(trip.durationSeconds))
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextSecondary)
                     if trip.points.count >= 2 {
-                        Text("·")
+                        Text(verbatim: "·")
                             .font(.system(size: 12))
                             .foregroundStyle(Color.dashTextMuted)
                         HStack(spacing: 2) {
@@ -205,30 +199,15 @@ public struct TripHistoryView: View {
     }
 
     private func scoreColor(for score: Int) -> Color {
-        if score >= 85 { return .dashGreen }
-        if score >= 70 { return .dashYellow }
-        return .dashRed
+        TripDetailFormatter.scoreColor(for: score)
     }
 
     private func formatDistance(_ meters: Double) -> String {
-        if appState.useMilesPerHour {
-            let miles = meters * 0.000621371
-            return String(format: "%.1f mi", miles)
-        } else {
-            let km = meters / 1000.0
-            return String(format: "%.1f km", km)
-        }
+        TripDetailFormatter.formatDistance(meters, useMilesPerHour: appState.useMilesPerHour, decimals: 1)
     }
 
     private func formatDuration(_ seconds: TimeInterval) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        if mins > 60 {
-            let hours = mins / 60
-            let remMins = mins % 60
-            return "\(hours)h \(remMins)m"
-        }
-        return "\(mins)m \(secs)s"
+        TripDetailFormatter.formatDuration(seconds, compactMinutesOnlyForHours: true)
     }
 
     private func loadTrips() {

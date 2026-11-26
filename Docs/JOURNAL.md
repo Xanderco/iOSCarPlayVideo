@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 07:20 (Bogotá) — DI-102: Localized TripDetailView & TripHistoryView Formatting, EN/ES Strings & Unit Tests
+- Extracted `TripDetailFormatter` in `DashCast/Features/Drive/TripDetailView.swift` for metric/imperial distance & speed formatting, duration formatting, score message & color tone mapping, map mode titles, and stat/timing/telemetry localized keys; converted `TripDetailView` (`statCard`, `timingRow`, `telemetryPill`, `scoreMessage`, `TripMapMode` picker) and `TripHistoryView` (alerts, navigation title, toolbar accessibility, shared unit/duration/score helpers) to `LocalizedStringKey` and `Text(verbatim:)` for pre-formatted values.
+- Added complete EN/ES translations for all missing `TripDetailView` and `TripHistoryView` strings in `DashCast/Resources/Localizable.xcstrings`.
+- Added unit tests in `DashCastTests/TripHistoryAndReplayTests.swift` covering metric/imperial distance & speed formatting, duration, score messages/tones, field/map mode keys, and EN/ES String Catalog coverage.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
