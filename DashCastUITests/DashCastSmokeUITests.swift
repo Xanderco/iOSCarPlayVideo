@@ -166,6 +166,7 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(paywallClose.waitForExistence(timeout: 10), "Paywall did not open from Car Display allowance banner")
         paywallClose.tap()
 
+        XCTAssertTrue(carDisplayNav.waitForExistence(timeout: 10), "Car Display sheet did not reappear after closing paywall")
         carDisplayNav.buttons["Close"].tap()
         XCTAssertTrue(castBanner.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }

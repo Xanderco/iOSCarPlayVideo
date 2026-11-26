@@ -133,6 +133,7 @@ public struct FreeCastingAllowanceBanner: View {
     private let accessibilityIdentifier: String
     private let onUpgrade: () -> Void
 
+    @MainActor
     public init(
         gate: EntitlementGate = .shared,
         accessibilityIdentifier: String = "Cast_FreeAllowanceBanner",

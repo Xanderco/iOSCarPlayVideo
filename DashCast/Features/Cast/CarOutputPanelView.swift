@@ -9,6 +9,7 @@ struct CarOutputPanelView: View {
     @ObservedObject private var entitlementGate = EntitlementGate.shared
     @State private var copiedURL = false
     @State private var mirrorToCarPlay = CarMirrorFeature.isEnabled()
+    @State private var showingPaywall = false
 
     var body: some View {
         ScrollView {
@@ -19,7 +20,7 @@ struct CarOutputPanelView: View {
                         gate: entitlementGate,
                         accessibilityIdentifier: "CarDisplay_FreeAllowanceBanner"
                     ) {
-                        appState.showPaywall = true
+                        showingPaywall = true
                     }
                 }
                 airPlayCard
@@ -35,6 +36,9 @@ struct CarOutputPanelView: View {
         .background(Color.dashBackground.ignoresSafeArea())
         .onAppear { output.setPanelVisible(true) }
         .onDisappear { output.setPanelVisible(false) }
+        .sheet(isPresented: $showingPaywall) {
+            LifetimePaywallView().environmentObject(appState)
+        }
     }
 
     // MARK: Parked status

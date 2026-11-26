@@ -137,8 +137,8 @@ final class CastingAllowanceStatusTests: XCTestCase {
         for key in expectedKeys {
             let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings key: \(key)")
             let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
-            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
-            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let enValue = (localizations["en"]?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = (localizations["es"]?["stringUnit"] as? [String: Any])?["value"] as? String
             XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Empty EN value for \(key)")
             XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Empty ES value for \(key)")
         }
