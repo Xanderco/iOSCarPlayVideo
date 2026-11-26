@@ -59,7 +59,8 @@ struct CarCastLiveActivityWidget: Widget {
 
 private func icon(for state: CarCastActivityAttributes.ContentState) -> String {
     if state.isPausedForMotion { return "pause.circle.fill" }
-    return state.mode == "Mirroring" ? "rectangle.on.rectangle" : "airplayvideo"
+    let isMirroring = state.mode == "Mirroring" || state.mode == "Duplicación"
+    return isMirroring ? "rectangle.on.rectangle" : "airplayvideo"
 }
 
 struct CarCastLockScreenView: View {
