@@ -2,13 +2,42 @@ import SwiftUI
 
 /// Stores whether the user acknowledged the passenger-only safety notice.
 public enum PassengerSafetyNotice {
-    public static let acceptedKey = "dashcast_passenger_notice_accepted_v1"
+    nonisolated public static let acceptedKey = "dashcast_passenger_notice_accepted_v1"
 
     /// The notice is skipped only for automated runs: App Store screenshots (`-seedDemoData`) and XCUITests (`-UITests`).
-    public static var shouldSkip: Bool {
-        let args = ProcessInfo.processInfo.arguments
-        return args.contains("-seedDemoData") || args.contains("-UITests")
+    nonisolated public static var shouldSkip: Bool {
+        shouldSkip(arguments: ProcessInfo.processInfo.arguments)
     }
+
+    nonisolated public static func shouldSkip(arguments: [String]) -> Bool {
+        arguments.contains("-seedDemoData") || arguments.contains("-UITests")
+    }
+}
+
+/// Localized copy keys for `PassengerSafetyNoticeView`.
+public enum PassengerSafetyNoticeCopy {
+    nonisolated public static let headingString = "Passengers & parked only"
+    nonisolated public static let eyesOnRoadString = "Never watch video while driving. The driver must keep their eyes on the road."
+    nonisolated public static let passengersOrParkedString = "Video on a car display is for passengers, or when the vehicle is parked (for example while charging)."
+    nonisolated public static let obeyLawsString = "Obey local laws. Some regions ban any screen visible to the driver while moving."
+    nonisolated public static let audioOnlyString = "While driving, use audio only."
+    nonisolated public static let acceptButtonString = "I Understand"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        headingString,
+        eyesOnRoadString,
+        passengersOrParkedString,
+        obeyLawsString,
+        audioOnlyString,
+        acceptButtonString
+    ]
+
+    @MainActor public static var headingKey: LocalizedStringKey { LocalizedStringKey(headingString) }
+    @MainActor public static var eyesOnRoadKey: LocalizedStringKey { LocalizedStringKey(eyesOnRoadString) }
+    @MainActor public static var passengersOrParkedKey: LocalizedStringKey { LocalizedStringKey(passengersOrParkedString) }
+    @MainActor public static var obeyLawsKey: LocalizedStringKey { LocalizedStringKey(obeyLawsString) }
+    @MainActor public static var audioOnlyKey: LocalizedStringKey { LocalizedStringKey(audioOnlyString) }
+    @MainActor public static var acceptButtonKey: LocalizedStringKey { LocalizedStringKey(acceptButtonString) }
 }
 
 /// First-launch screen: video is for passengers or while parked, never for the driver while moving.
@@ -36,16 +65,16 @@ public struct PassengerSafetyNoticeView: View {
                 }
                 .accessibilityHidden(true)
 
-                Text("Passengers & parked only")
+                Text(PassengerSafetyNoticeCopy.headingKey)
                     .font(.system(size: 26, weight: .bold))
                     .foregroundStyle(Color.dashTextPrimary)
                     .multilineTextAlignment(.center)
 
                 VStack(alignment: .leading, spacing: 14) {
-                    row("eye.slash.fill", "Never watch video while driving. The driver must keep their eyes on the road.")
-                    row("parkingsign.circle.fill", "Video on a car display is for passengers, or when the vehicle is parked (for example while charging).")
-                    row("hand.raised.fill", "Obey local laws. Some regions ban any screen visible to the driver while moving.")
-                    row("music.note", "While driving, use audio only.")
+                    row("eye.slash.fill", PassengerSafetyNoticeCopy.eyesOnRoadKey)
+                    row("parkingsign.circle.fill", PassengerSafetyNoticeCopy.passengersOrParkedKey)
+                    row("hand.raised.fill", PassengerSafetyNoticeCopy.obeyLawsKey)
+                    row("music.note", PassengerSafetyNoticeCopy.audioOnlyKey)
                 }
                 .padding(18)
                 .background(Color.dashSurface)
@@ -55,7 +84,7 @@ public struct PassengerSafetyNoticeView: View {
                 Spacer()
 
                 Button(action: onAccept) {
-                    Text("I Understand")
+                    Text(PassengerSafetyNoticeCopy.acceptButtonKey)
                         .font(.system(size: 17, weight: .bold))
                         .foregroundStyle(Color.black)
                         .frame(maxWidth: .infinity)
