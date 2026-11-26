@@ -1,5 +1,39 @@
 import Foundation
 
+/// Localized error copy helpers for `MediaServerError`.
+public enum MediaServerErrorCopy {
+    nonisolated public static let invalidServerURLString = "That doesn't look like a valid server address."
+    nonisolated public static let notAuthenticatedString = "Sign in to this server again."
+    nonisolated public static let invalidCredentialsString = "Wrong username or password."
+    nonisolated public static let httpStatusFormatString = "The server answered with HTTP %d."
+    nonisolated public static let decodingFormatString = "Unexpected server response (%@)."
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        invalidServerURLString,
+        notAuthenticatedString,
+        invalidCredentialsString,
+        httpStatusFormatString,
+        decodingFormatString
+    ]
+
+    nonisolated public static func localizedDescription(for error: MediaServerError, bundle: Bundle = .main) -> String {
+        switch error {
+        case .invalidServerURL:
+            return bundle.localizedString(forKey: invalidServerURLString, value: invalidServerURLString, table: nil)
+        case .notAuthenticated:
+            return bundle.localizedString(forKey: notAuthenticatedString, value: notAuthenticatedString, table: nil)
+        case .invalidCredentials:
+            return bundle.localizedString(forKey: invalidCredentialsString, value: invalidCredentialsString, table: nil)
+        case .httpStatus(let code):
+            let format = bundle.localizedString(forKey: httpStatusFormatString, value: httpStatusFormatString, table: nil)
+            return String(format: format, code)
+        case .decoding(let detail):
+            let format = bundle.localizedString(forKey: decodingFormatString, value: decodingFormatString, table: nil)
+            return String(format: format, detail)
+        }
+    }
+}
+
 public enum MediaServerError: LocalizedError, Equatable {
     case invalidServerURL
     case notAuthenticated
@@ -8,13 +42,7 @@ public enum MediaServerError: LocalizedError, Equatable {
     case decoding(String)
 
     public var errorDescription: String? {
-        switch self {
-        case .invalidServerURL: return "That doesn't look like a valid server address."
-        case .notAuthenticated: return "Sign in to this server again."
-        case .invalidCredentials: return "Wrong username or password."
-        case .httpStatus(let code): return "The server answered with HTTP \(code)."
-        case .decoding(let detail): return "Unexpected server response (\(detail))."
-        }
+        MediaServerErrorCopy.localizedDescription(for: self)
     }
 }
 

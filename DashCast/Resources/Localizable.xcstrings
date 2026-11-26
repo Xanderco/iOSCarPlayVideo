@@ -8177,6 +8177,91 @@
           }
         }
       }
+    },
+    "That doesn't look like a valid server address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That doesn't look like a valid server address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esa no parece una dirección de servidor válida."
+          }
+        }
+      }
+    },
+    "Sign in to this server again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign in to this server again."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vuelve a iniciar sesión en este servidor."
+          }
+        }
+      }
+    },
+    "Wrong username or password.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wrong username or password."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usuario o contraseña incorrectos."
+          }
+        }
+      }
+    },
+    "The server answered with HTTP %d.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server answered with HTTP %d."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor respondió con HTTP %d."
+          }
+        }
+      }
+    },
+    "Unexpected server response (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unexpected server response (%@)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta inesperada del servidor (%@)."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
