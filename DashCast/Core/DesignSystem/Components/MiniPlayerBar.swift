@@ -67,9 +67,9 @@ public struct MiniPlayerBar: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .contentShape(Rectangle())
+                .accessibilityHidden(true)
             }
             .buttonStyle(.plain)
-            .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("Now playing: \(title)"))
             .accessibilityValue(Text(subtitle ?? ""))
             .accessibilityHint(Text("Opens the full player"))
@@ -116,7 +116,6 @@ public struct MiniPlayerBar: View {
         .dsShadow(.floating)
         .padding(.horizontal, DSSpacing.sm)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Mini player"))
         .accessibilityIdentifier("MiniPlayerBar")
     }
 
