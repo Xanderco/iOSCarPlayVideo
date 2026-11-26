@@ -80,9 +80,9 @@ public final class StoreKitManager: ObservableObject {
         public var errorDescription: String? {
             switch self {
             case .productNotFound:
-                return "DashCast Pro isn't available from the App Store right now. Please try again later."
+                return String(localized: "DashCast Pro isn't available from the App Store right now. Please try again later.")
             case .failedVerification:
-                return "The App Store couldn't verify this purchase."
+                return String(localized: "The App Store couldn't verify this purchase.")
             }
         }
     }
@@ -151,7 +151,7 @@ public final class StoreKitManager: ObservableObject {
             let fetched = try await Product.products(for: ProProduct.allIDs)
             proProduct = fetched.first { $0.id == ProProduct.lifetime.rawValue }
             loadState = proProduct == nil
-                ? .failed("DashCast Pro couldn't be loaded from the App Store.")
+                ? .failed(String(localized: "DashCast Pro couldn't be loaded from the App Store."))
                 : .loaded
         } catch {
             loadState = .failed(error.localizedDescription)
