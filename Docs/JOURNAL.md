@@ -92,6 +92,15 @@
 
 ## Log
 
+### 2026-11-25 22:22 (Bogotá) — CastEngine: Stream Stall Auto-Reconnect, Network Recovery, Parked Keep-Awake & Controls Lock [DI-84]
+- **Problem**: Competitor car-display players drop streams on LTE/5G handoffs or brief Wi-Fi dropouts, iOS can dim/lock the screen mid-stream without explicit idle-timer management, and passengers frequently trigger accidental scrub/close taps when handling or mounting the phone.
+- **Added**:
+  - `DashCast/Features/Cast/StreamReconnectPolicy.swift`: `StreamHealthState`, `VideoAspectMode` (Fit/Fill), bounded exponential-backoff `StreamReconnectPolicy` (up to 3 retries: 1s → 2s → 4s, skipping local files and `CarPlayMirrorPlayback`), `IdleTimerControlling`, and `NetworkPathMonitoring` (`NWPathMonitor` wrapper + test mock).
+  - `DashCast/Features/Cast/VideoPlayerService.swift`: stall grace observation (`playbackStalledNotification`), transient error auto-reconnect, automatic immediate reconnect when `NWPathMonitor` reports connectivity restored, foreground-only `isIdleTimerDisabled` keep-awake lifecycle, `isControlsLocked`, and `videoAspectMode`.
+  - `DashCast/Features/Cast/AutomotiveVideoPlayerView.swift`: live stream health status pill, reconnecting overlay with `Reconnect Now` / `Cancel`, `Fit`/`Fill` aspect toggle, **Passenger Controls Lock** (`Player_LockControlsButton` / `Player_UnlockControlsButton`), and 4s auto-hide controls timer.
+  - `DashCastTests/StreamReconnectAndPlayerLockTests.swift` + UI test `testPlayerControlsLockAndAspectToggle` in `DashCastUITests/DashCastSmokeUITests.swift` + EN/ES translations in `DashCast/Resources/Localizable.xcstrings`.
+- **Verification**: Pushed `feature/DI-84-stream-reconnect-player-lock` and verified against GitHub Actions `DashCast CI` (Xcode 26, iOS 26 SDK).
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

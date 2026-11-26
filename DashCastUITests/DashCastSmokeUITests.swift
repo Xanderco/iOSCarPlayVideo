@@ -139,6 +139,36 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testPlayerControlsLockAndAspectToggle() throws {
+        let row = app.buttons["Cast_MediaSourceRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
+        tapCenter(of: row)
+
+        let firstChannel = app.buttons.matching(identifier: "MediaSources_Channel").firstMatch
+        XCTAssertTrue(firstChannel.waitForExistence(timeout: 10), "No channels listed")
+        tapCenter(of: firstChannel)
+
+        let lockButton = app.buttons["Player_LockControlsButton"]
+        XCTAssertTrue(lockButton.waitForExistence(timeout: 10), "Player controls lock button did not appear")
+
+        let aspectButton = app.buttons["Player_AspectModeButton"]
+        XCTAssertTrue(aspectButton.exists, "Player aspect mode button missing")
+        tapCenter(of: aspectButton)
+
+        tapCenter(of: lockButton)
+        let unlockButton = app.buttons["Player_UnlockControlsButton"]
+        XCTAssertTrue(unlockButton.waitForExistence(timeout: 5), "Unlock controls pill did not appear when locked")
+        snapshot("05-player-controls-locked")
+
+        tapCenter(of: unlockButton)
+        XCTAssertTrue(lockButton.waitForExistence(timeout: 5), "Controls did not unlock after tapping unlock pill")
+
+        let closePlayer = app.buttons["Close player"]
+        if closePlayer.exists {
+            tapCenter(of: closePlayer)
+        }
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

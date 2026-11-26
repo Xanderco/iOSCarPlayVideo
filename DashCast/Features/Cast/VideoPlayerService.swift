@@ -8,7 +8,10 @@ import UIKit
 public final class VideoPlayerService: ObservableObject {
     /// The only instance that owns the lock-screen / CarPlay / headset remote commands.
     public static let shared: VideoPlayerService = {
-        let service = VideoPlayerService(handlesRemoteCommands: true)
+        let service = VideoPlayerService(
+            handlesRemoteCommands: true,
+            networkMonitor: SystemNetworkPathMonitor()
+        )
         service.entitlementGate = .shared
         return service
     }()
@@ -26,6 +29,13 @@ public final class VideoPlayerService: ObservableObject {
     @Published public private(set) var isBuffering: Bool = false
     /// Human readable reason the current item failed to load/play, if any.
     @Published public private(set) var playbackError: String?
+    /// Current stream recovery / playback health state.
+    @Published public private(set) var streamHealth: StreamHealthState = .idle
+    @Published public private(set) var reconnectAttempt: Int = 0
+    @Published public private(set) var isNetworkAvailable: Bool = true
+    /// Locks player overlay transport controls to prevent accidental passenger taps.
+    @Published public private(set) var isControlsLocked: Bool = false
+    @Published public var videoAspectMode: VideoAspectMode = .fit
     /// False while the app is in the background. Views must detach the player from their
     /// AVPlayerLayer then, otherwise iOS pauses video items and audio stops when the phone locks.
     @Published public private(set) var isVideoLayerAttached: Bool = true
@@ -34,12 +44,18 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public let player: AVPlayer = AVPlayer()
+    private let reconnectPolicy: StreamReconnectPolicy
+    private let idleTimerController: any IdleTimerControlling
+    private let networkMonitor: any NetworkPathMonitoring
     private var timeObserverToken: Any?
     private var itemObservers: [NSKeyValueObservation] = []
     private var timeControlObserver: NSKeyValueObservation?
     private var itemNotificationTokens: [NSObjectProtocol] = []
     private var cancellables = Set<AnyCancellable>()
     private var wantsToPlay = false
+    private var reconnectTask: Task<Void, Never>?
+    private var stallTask: Task<Void, Never>?
+    private var failedDueToNetworkDrop = false
 
     /// True while playback has been requested and allowed (entitlement gate, parked-only guard).
     /// `isPlaying` instead mirrors AVPlayer's asynchronous `timeControlStatus`.
@@ -52,11 +68,22 @@ public final class VideoPlayerService: ObservableObject {
     /// - Parameter handlesRemoteCommands: only `shared` passes `true`. Every extra instance (tests,
     ///   previews) used to add its own play/pause/toggle targets to the process-wide
     ///   `MPRemoteCommandCenter`, and a toggle delivered to two targets flips twice (= no-op).
-    public init(handlesRemoteCommands: Bool = false) {
+    public init(
+        handlesRemoteCommands: Bool = false,
+        reconnectPolicy: StreamReconnectPolicy = .default,
+        idleTimerController: (any IdleTimerControlling)? = nil,
+        networkMonitor: any NetworkPathMonitoring = NoopNetworkPathMonitor()
+    ) {
+        self.reconnectPolicy = reconnectPolicy
+        self.idleTimerController = idleTimerController ?? UIApplicationIdleTimerController.shared
+        self.networkMonitor = networkMonitor
+        self.isNetworkAvailable = networkMonitor.isConnected
+
         player.allowsExternalPlayback = true
         setupTimeObserver()
         observeTimeControlStatus()
         observeAppLifecycleAndInterruptions()
+        observeNetworkPath()
         if handlesRemoteCommands { setupRemoteCommands() }
         // Route video to AirPlay / car displays and enforce the parked-only guard.
         CarVideoOutputController.shared.attach(player: player) { [weak self] in
@@ -65,6 +92,9 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     deinit {
+        reconnectTask?.cancel()
+        stallTask?.cancel()
+        networkMonitor.stop()
         if let token = timeObserverToken {
             player.removeTimeObserver(token)
         }
@@ -99,12 +129,35 @@ public final class VideoPlayerService: ObservableObject {
     // MARK: - Loading
 
     public func load(channel: ChannelModel) {
+        cancelReconnectTasks()
+        reconnectAttempt = 0
+        failedDueToNetworkDrop = false
         currentChannel = channel
         playbackError = nil
         currentTime = 0
         duration = 0
         isBuffering = true
+        streamHealth = .buffering
 
+        preparePlayerItem(for: channel)
+        UsageMetricsManager.shared.recordVideoPlayed()
+        play()
+    }
+
+    /// Reloads the active channel without resetting usage metrics or clearing the current channel.
+    public func reconnectNow() {
+        guard let channel = currentChannel else { return }
+        cancelReconnectTasks()
+        reconnectAttempt = 0
+        failedDueToNetworkDrop = false
+        playbackError = nil
+        isBuffering = true
+        streamHealth = .buffering
+        preparePlayerItem(for: channel)
+        play()
+    }
+
+    private func preparePlayerItem(for channel: ChannelModel) {
         let playerItem = AVPlayerItem(asset: AVURLAsset(url: channel.streamURL))
         if channel.id == CarPlayMirrorPlayback.channelID {
             // Live iPhone mirror: keep the buffer (and so the delay) short.
@@ -114,8 +167,6 @@ public final class VideoPlayerService: ObservableObject {
 
         player.replaceCurrentItem(with: playerItem)
         updateNowPlayingInfo()
-        UsageMetricsManager.shared.recordVideoPlayed()
-        play()
     }
 
     /// Number of live per-item KVO + NotificationCenter observers. Exposed for tests.
@@ -137,7 +188,8 @@ public final class VideoPlayerService: ObservableObject {
             item.observe(\.status, options: [.new]) { [weak self] item, _ in
                 let status = item.status
                 let seconds = item.duration.seconds
-                let message = item.error.map(VideoPlayerService.describe)
+                let error = item.error
+                let message = error.map(VideoPlayerService.describe)
                 Task { @MainActor [weak self] in
                     guard let self, self.player.currentItem === item else { return }
                     switch status {
@@ -145,7 +197,10 @@ public final class VideoPlayerService: ObservableObject {
                         self.duration = seconds.isFinite ? seconds : 0
                         self.updateNowPlayingInfo()
                     case .failed:
-                        self.handleFailure(message ?? "This video could not be played.")
+                        self.handlePlaybackDrop(
+                            message: message ?? "This video could not be played.",
+                            error: error
+                        )
                     default:
                         break
                     }
@@ -158,23 +213,122 @@ public final class VideoPlayerService: ObservableObject {
             center.addObserver(forName: AVPlayerItem.failedToPlayToEndTimeNotification, object: item, queue: .main) { [weak self] note in
                 let error = note.userInfo?[AVPlayerItemFailedToPlayToEndTimeErrorKey] as? Error
                 let message = error.map(VideoPlayerService.describe) ?? "Playback stopped unexpectedly."
-                Task { @MainActor [weak self] in self?.handleFailure(message) }
+                Task { @MainActor [weak self] in
+                    self?.handlePlaybackDrop(message: message, error: error)
+                }
             },
             center.addObserver(forName: AVPlayerItem.didPlayToEndTimeNotification, object: item, queue: .main) { [weak self] _ in
                 Task { @MainActor [weak self] in
-                    self?.wantsToPlay = false
-                    self?.player.pause()
+                    guard let self else { return }
+                    self.cancelReconnectTasks()
+                    self.wantsToPlay = false
+                    self.player.pause()
+                    self.streamHealth = .idle
+                    self.syncIdleTimer()
+                }
+            },
+            center.addObserver(forName: AVPlayerItem.playbackStalledNotification, object: item, queue: .main) { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    self?.handlePlaybackStall()
                 }
             }
         ]
     }
 
-    private func handleFailure(_ message: String) {
+    private func handlePlaybackStall() {
+        guard wantsToPlay,
+              reconnectPolicy.shouldAutoReconnect(
+                  for: currentChannel,
+                  attempt: reconnectAttempt,
+                  isNetworkAvailable: isNetworkAvailable
+              ) else { return }
+        guard stallTask == nil, reconnectTask == nil else { return }
+
+        let graceNs = UInt64(reconnectPolicy.stallGraceSeconds * 1_000_000_000)
+        stallTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: graceNs)
+            guard !Task.isCancelled, let self else { return }
+            self.stallTask = nil
+            // If playback already resumed during the grace window, do nothing.
+            guard self.wantsToPlay, !self.isPlaying else { return }
+            self.scheduleReconnect(fallbackMessage: "Stream stalled.")
+        }
+    }
+
+    private func handlePlaybackDrop(message: String, error: Error?) {
+        let isTransient = error.map(StreamReconnectPolicy.isTransientNetworkError) ?? true
+        if wantsToPlay,
+           isTransient,
+           reconnectPolicy.shouldAutoReconnect(
+               for: currentChannel,
+               attempt: reconnectAttempt,
+               isNetworkAvailable: isNetworkAvailable
+           ) {
+            scheduleReconnect(fallbackMessage: message)
+            return
+        }
+        handleFailure(message, dueToNetworkDrop: !isNetworkAvailable || isTransient)
+    }
+
+    private func scheduleReconnect(fallbackMessage: String) {
+        guard let channel = currentChannel else { return }
+        let nextAttempt = reconnectAttempt + 1
+        guard reconnectPolicy.shouldAutoReconnect(
+            for: channel,
+            attempt: reconnectAttempt,
+            isNetworkAvailable: isNetworkAvailable
+        ) else {
+            handleFailure(fallbackMessage, dueToNetworkDrop: !isNetworkAvailable)
+            return
+        }
+
+        reconnectTask?.cancel()
+        stallTask?.cancel()
+        stallTask = nil
+        reconnectAttempt = nextAttempt
+        playbackError = nil
+        isBuffering = true
+        isPlaying = false
+        streamHealth = .reconnecting(attempt: nextAttempt, maxAttempts: reconnectPolicy.maxAttempts)
+        syncIdleTimer()
+
+        let delayNs = UInt64(reconnectPolicy.delay(forAttempt: nextAttempt) * 1_000_000_000)
+        reconnectTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: delayNs)
+            guard !Task.isCancelled, let self else { return }
+            self.reconnectTask = nil
+            guard self.wantsToPlay, self.currentChannel?.id == channel.id else { return }
+            self.preparePlayerItem(for: channel)
+            self.play()
+        }
+    }
+
+    private func cancelReconnectTasks() {
+        reconnectTask?.cancel()
+        reconnectTask = nil
+        stallTask?.cancel()
+        stallTask = nil
+    }
+
+    private func handleFailure(_ message: String, dueToNetworkDrop: Bool = false) {
+        cancelReconnectTasks()
         wantsToPlay = false
         isBuffering = false
         isPlaying = false
+        failedDueToNetworkDrop = dueToNetworkDrop
         playbackError = message
+        streamHealth = .failed(message)
         player.pause()
+        syncIdleTimer()
+    }
+
+    /// Exposed for unit testing deterministic failure/stall transitions.
+    func simulatePlaybackFailureForTesting(_ error: Error, message: String? = nil) {
+        handlePlaybackDrop(message: message ?? Self.describe(error), error: error)
+    }
+
+    func simulatePlaybackStallForTesting() {
+        handlePlaybackStall()
     }
 
     nonisolated static func describe(_ error: Error) -> String {
@@ -204,9 +358,13 @@ public final class VideoPlayerService: ObservableObject {
             return
         }
         wantsToPlay = true
+        if !isPlaying && !streamHealth.isReconnecting {
+            streamHealth = .buffering
+        }
         configureAudioSession()
         player.play()
         lastCastingTick = Date()
+        syncIdleTimer()
     }
 
     /// Charges elapsed playback time to the free-tier allowance and stops playback when it runs out.
@@ -230,8 +388,15 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func pause() {
+        cancelReconnectTasks()
         wantsToPlay = false
         player.pause()
+        if let error = playbackError {
+            streamHealth = .failed(error)
+        } else {
+            streamHealth = .idle
+        }
+        syncIdleTimer()
     }
 
     public func togglePlayPause() {
@@ -248,16 +413,43 @@ public final class VideoPlayerService: ObservableObject {
     }
 
     public func stop() {
+        cancelReconnectTasks()
         wantsToPlay = false
+        reconnectAttempt = 0
+        failedDueToNetworkDrop = false
+        isControlsLocked = false
         player.pause()
         player.replaceCurrentItem(with: nil)
         removeItemObservers()
         currentChannel = nil
         playbackError = nil
         isBuffering = false
+        streamHealth = .idle
         currentTime = 0
         duration = 0
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        syncIdleTimer()
+    }
+
+    public func toggleControlsLock() {
+        isControlsLocked.toggle()
+    }
+
+    public func setControlsLocked(_ locked: Bool) {
+        isControlsLocked = locked
+    }
+
+    public func toggleVideoAspectMode() {
+        videoAspectMode = videoAspectMode.toggled()
+    }
+
+    private func syncIdleTimer() {
+        let shouldDisableIdleTimer = isVideoLayerAttached
+            && currentChannel != nil
+            && (isPlaying || streamHealth.isReconnecting)
+        if idleTimerController.isIdleTimerDisabled != shouldDisableIdleTimer {
+            idleTimerController.isIdleTimerDisabled = shouldDisableIdleTimer
+        }
     }
 
     public func seek(to seconds: Double) {
@@ -290,6 +482,27 @@ public final class VideoPlayerService: ObservableObject {
                 guard let self else { return }
                 self.isPlaying = status == .playing
                 self.isBuffering = status == .waitingToPlayAtSpecifiedRate
+                switch status {
+                case .playing:
+                    self.stallTask?.cancel()
+                    self.stallTask = nil
+                    self.reconnectTask?.cancel()
+                    self.reconnectTask = nil
+                    self.reconnectAttempt = 0
+                    self.failedDueToNetworkDrop = false
+                    self.streamHealth = .playing
+                case .waitingToPlayAtSpecifiedRate:
+                    if !self.streamHealth.isReconnecting && self.playbackError == nil {
+                        self.streamHealth = .buffering
+                    }
+                case .paused:
+                    if !self.streamHealth.isReconnecting && self.playbackError == nil {
+                        self.streamHealth = .idle
+                    }
+                @unknown default:
+                    break
+                }
+                self.syncIdleTimer()
                 self.updateNowPlayingInfo()
             }
         }
@@ -309,17 +522,42 @@ public final class VideoPlayerService: ObservableObject {
         }
     }
 
+    private func observeNetworkPath() {
+        networkMonitor.onStatusChange = { [weak self] connected in
+            Task { @MainActor [weak self] in
+                self?.handleNetworkChange(connected)
+            }
+        }
+        networkMonitor.start()
+    }
+
+    private func handleNetworkChange(_ connected: Bool) {
+        isNetworkAvailable = connected
+        guard connected,
+              let channel = currentChannel,
+              !channel.streamURL.isFileURL else { return }
+        if streamHealth.isReconnecting || (failedDueToNetworkDrop && streamHealth.isFailed) {
+            reconnectNow()
+        }
+    }
+
     private func observeAppLifecycleAndInterruptions() {
         let center = NotificationCenter.default
         center.publisher(for: UIApplication.didEnterBackgroundNotification)
             .sink { [weak self] _ in
-                MainActor.assumeIsolated { self?.isVideoLayerAttached = false }
+                MainActor.assumeIsolated {
+                    self?.isVideoLayerAttached = false
+                    self?.syncIdleTimer()
+                }
             }
             .store(in: &cancellables)
 
         center.publisher(for: UIApplication.willEnterForegroundNotification)
             .sink { [weak self] _ in
-                MainActor.assumeIsolated { self?.isVideoLayerAttached = true }
+                MainActor.assumeIsolated {
+                    self?.isVideoLayerAttached = true
+                    self?.syncIdleTimer()
+                }
             }
             .store(in: &cancellables)
 
