@@ -1,5 +1,85 @@
 import SwiftUI
 
+/// Pure formatting and clamping helpers for `UsageMetricsView`.
+public enum UsageMetricsFormatter {
+    nonisolated public static func distanceString(
+        distanceKm: Double,
+        distanceMiles: Double,
+        useMilesPerHour: Bool
+    ) -> String {
+        let raw = useMilesPerHour ? distanceMiles : distanceKm
+        let safe = (raw.isFinite && raw > 0) ? raw : 0
+        return useMilesPerHour
+            ? String(format: "%.1f mi", safe)
+            : String(format: "%.1f km", safe)
+    }
+
+    nonisolated public static func durationString(totalSeconds: Double) -> String {
+        let safe = (totalSeconds.isFinite && totalSeconds > 0) ? totalSeconds : 0
+        let total = Int(safe)
+        let hours = total / 3600
+        let mins = (total % 3600) / 60
+        return "\(hours)h \(mins)m"
+    }
+
+    nonisolated public static func safetyScoreString(score: Double) -> String {
+        guard score.isFinite else { return "0 / 100" }
+        let clamped = min(100, max(0, score))
+        return String(format: "%.0f / 100", clamped)
+    }
+}
+
+/// Localized copy keys for `UsageMetricsView`.
+public enum UsageMetricsCopy {
+    nonisolated public static let navigationTitleString = "Usage Metrics"
+    nonisolated public static let headerTitleString = "Driver Analytics & Usage"
+    nonisolated public static let headerSubtitleString = "100% Private · Stored locally on this device"
+    nonisolated public static let totalDistanceString = "TOTAL DISTANCE"
+    nonisolated public static let totalTripsString = "TOTAL TRIPS"
+    nonisolated public static let avgSafetyScoreString = "AVG SAFETY SCORE"
+    nonisolated public static let videosWatchedString = "VIDEOS WATCHED"
+    nonisolated public static let soundsPlayedString = "SOUNDS PLAYED"
+    nonisolated public static let driveTimeTrackedString = "DRIVE TIME TRACKED"
+    nonisolated public static let firstActiveFormatString = "First active: %@"
+    nonisolated public static let privacyTitleString = "On-Device Privacy Guarantee"
+    nonisolated public static let privacyBodyString = "DashCast never sells, uploads, or tracks your location or driving telemetry to external servers."
+    nonisolated public static let doneString = "Done"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        navigationTitleString,
+        headerTitleString,
+        headerSubtitleString,
+        totalDistanceString,
+        totalTripsString,
+        avgSafetyScoreString,
+        videosWatchedString,
+        soundsPlayedString,
+        driveTimeTrackedString,
+        firstActiveFormatString,
+        privacyTitleString,
+        privacyBodyString,
+        doneString
+    ]
+
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var headerTitleKey: LocalizedStringKey { LocalizedStringKey(headerTitleString) }
+    @MainActor public static var headerSubtitleKey: LocalizedStringKey { LocalizedStringKey(headerSubtitleString) }
+    @MainActor public static var totalDistanceKey: LocalizedStringKey { LocalizedStringKey(totalDistanceString) }
+    @MainActor public static var totalTripsKey: LocalizedStringKey { LocalizedStringKey(totalTripsString) }
+    @MainActor public static var avgSafetyScoreKey: LocalizedStringKey { LocalizedStringKey(avgSafetyScoreString) }
+    @MainActor public static var videosWatchedKey: LocalizedStringKey { LocalizedStringKey(videosWatchedString) }
+    @MainActor public static var soundsPlayedKey: LocalizedStringKey { LocalizedStringKey(soundsPlayedString) }
+    @MainActor public static var driveTimeTrackedKey: LocalizedStringKey { LocalizedStringKey(driveTimeTrackedString) }
+    @MainActor public static var privacyTitleKey: LocalizedStringKey { LocalizedStringKey(privacyTitleString) }
+    @MainActor public static var privacyBodyKey: LocalizedStringKey { LocalizedStringKey(privacyBodyString) }
+    @MainActor public static var doneKey: LocalizedStringKey { LocalizedStringKey(doneString) }
+
+    @MainActor
+    public static func firstActiveKey(_ formattedDate: String) -> LocalizedStringKey {
+        LocalizedStringKey("First active: \(formattedDate)")
+    }
+}
+
 public struct UsageMetricsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
@@ -20,11 +100,11 @@ public struct UsageMetricsView: View {
                     VStack(spacing: 20) {
                         // Header summary
                         VStack(spacing: 6) {
-                            Text("Driver Analytics & Usage")
+                            Text(UsageMetricsCopy.headerTitleKey)
                                 .font(ThemeFonts.hudTitle(size: 22))
                                 .foregroundStyle(Color.dashTextPrimary)
 
-                            Text("100% Private · Stored locally on this device")
+                            Text(UsageMetricsCopy.headerSubtitleKey)
                                 .font(ThemeFonts.hudCaption(size: 13))
                                 .foregroundStyle(Color.dashGreen)
                         }
@@ -32,36 +112,38 @@ public struct UsageMetricsView: View {
 
                         // Big Stats Grid
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
-                            let distanceStr = appState.useMilesPerHour
-                                ? String(format: "%.1f mi", metrics.totalDistanceMiles)
-                                : String(format: "%.1f km", metrics.totalDistanceKm)
+                            let distanceStr = UsageMetricsFormatter.distanceString(
+                                distanceKm: metrics.totalDistanceKm,
+                                distanceMiles: metrics.totalDistanceMiles,
+                                useMilesPerHour: appState.useMilesPerHour
+                            )
+                            let scoreStr = UsageMetricsFormatter.safetyScoreString(score: metrics.averageDrivingScore)
 
-                            metricCard(title: "TOTAL DISTANCE", value: distanceStr, icon: "road.lanes", color: .dashCyan)
-                            metricCard(title: "TOTAL TRIPS", value: "\(metrics.totalTripsRecorded)", icon: "car.side.fill", color: .dashBlue)
-                            metricCard(title: "AVG SAFETY SCORE", value: String(format: "%.0f / 100", metrics.averageDrivingScore), icon: "shield.checkered", color: .dashGreen)
-                            metricCard(title: "VIDEOS WATCHED", value: "\(metrics.totalVideosWatched)", icon: "play.tv.fill", color: .dashGold)
-                            metricCard(title: "SOUNDS PLAYED", value: "\(metrics.totalSoundsPlayed)", icon: "speaker.wave.3.fill", color: .dashOrange)
+                            metricCard(title: UsageMetricsCopy.totalDistanceKey, value: distanceStr, icon: "road.lanes", color: .dashCyan)
+                            metricCard(title: UsageMetricsCopy.totalTripsKey, value: "\(metrics.totalTripsRecorded)", icon: "car.side.fill", color: .dashBlue)
+                            metricCard(title: UsageMetricsCopy.avgSafetyScoreKey, value: scoreStr, icon: "shield.checkered", color: .dashGreen)
+                            metricCard(title: UsageMetricsCopy.videosWatchedKey, value: "\(metrics.totalVideosWatched)", icon: "play.tv.fill", color: .dashGold)
+                            metricCard(title: UsageMetricsCopy.soundsPlayedKey, value: "\(metrics.totalSoundsPlayed)", icon: "speaker.wave.3.fill", color: .dashOrange)
                         }
                         .padding(.horizontal)
 
                         // Drive Hours Breakdown
                         AutomotiveCard {
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("DRIVE TIME TRACKED")
+                                Text(UsageMetricsCopy.driveTimeTrackedKey)
                                     .font(ThemeFonts.hudCaption(size: 11))
                                     .foregroundStyle(Color.dashTextMuted)
                                     .tracking(1.0)
 
                                 HStack {
-                                    let hours = Int(metrics.totalDurationSeconds) / 3600
-                                    let mins = (Int(metrics.totalDurationSeconds) % 3600) / 60
-                                    Text("\(hours)h \(mins)m")
+                                    Text(UsageMetricsFormatter.durationString(totalSeconds: metrics.totalDurationSeconds))
                                         .font(ThemeFonts.speedDisplay(size: 28))
                                         .foregroundStyle(Color.dashTextPrimary)
 
                                     Spacer()
 
-                                    Text("First active: \(metrics.firstLaunchDate.formatted(date: .abbreviated, time: .omitted))")
+                                    let formattedDate = metrics.firstLaunchDate.formatted(date: .abbreviated, time: .omitted)
+                                    Text(UsageMetricsCopy.firstActiveKey(formattedDate))
                                         .font(.system(size: 12))
                                         .foregroundStyle(Color.dashTextMuted)
                                 }
@@ -77,10 +159,10 @@ public struct UsageMetricsView: View {
                                     .foregroundStyle(Color.dashGreen)
 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text("On-Device Privacy Guarantee")
+                                    Text(UsageMetricsCopy.privacyTitleKey)
                                         .font(.system(size: 14, weight: .bold))
                                         .foregroundStyle(.white)
-                                    Text("DashCast never sells, uploads, or tracks your location or driving telemetry to external servers.")
+                                    Text(UsageMetricsCopy.privacyBodyKey)
                                         .font(.system(size: 11))
                                         .foregroundStyle(Color.dashTextSecondary)
                                 }
@@ -91,11 +173,11 @@ public struct UsageMetricsView: View {
                     .padding(.bottom, 30)
                 }
             }
-            .navigationTitle("Usage Metrics")
+            .navigationTitle(UsageMetricsCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") {
+                    Button(UsageMetricsCopy.doneKey) {
                         dismiss()
                     }
                     .foregroundStyle(Color.dashCyan)
