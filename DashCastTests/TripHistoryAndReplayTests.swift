@@ -1,5 +1,6 @@
 import XCTest
 import CoreLocation
+import SwiftUI
 @testable import DashCast
 
 final class TripHistoryAndReplayTests: XCTestCase {
@@ -127,5 +128,57 @@ final class TripHistoryAndReplayTests: XCTestCase {
         let cleaned = loaded.filter { $0.id != testTrip.id }
         PersistenceController.shared.saveTrips(cleaned)
         XCTAssertEqual(PersistenceController.shared.loadTrips().count, initialCount)
+    }
+
+    func testTripSummaryMetricsFormatter() {
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedDistance(meters: 4800, useMilesPerHour: false), "4.80 km")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedDistance(meters: 1609.344, useMilesPerHour: true), "1.00 mi")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedDistance(meters: -10, useMilesPerHour: false), "0.00 km")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedDistance(meters: .nan, useMilesPerHour: true), "0.00 mi")
+
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedSpeed(kmh: 82.4, useMilesPerHour: false), "82 km/h")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedSpeed(kmh: 100.0, useMilesPerHour: true), "62 mph")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedSpeed(kmh: -5, useMilesPerHour: false), "0 km/h")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedSpeed(kmh: .infinity, useMilesPerHour: true), "0 mph")
+
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedDuration(seconds: 125), "2m 05s")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedDuration(seconds: -3), "0m 00s")
+        XCTAssertEqual(TripSummaryMetricsFormatter.formattedDuration(seconds: .nan), "0m 00s")
+
+        XCTAssertEqual(TripSummaryMetricsFormatter.scoreTierString(for: 95), TripSummaryCopy.smoothEfficientScoreString)
+        XCTAssertEqual(TripSummaryMetricsFormatter.scoreTierString(for: 85), TripSummaryCopy.goodDrivingScoreString)
+        XCTAssertEqual(TripSummaryMetricsFormatter.scoreTierString(for: 75), TripSummaryCopy.moderateRideScoreString)
+        XCTAssertEqual(TripSummaryMetricsFormatter.scoreTierString(for: 50), TripSummaryCopy.aggressiveDrivingScoreString)
+    }
+
+    @MainActor
+    func testTripMapModeLocalizedTitles() {
+        XCTAssertEqual(TripMapMode.replay.localizedTitle, TripSummaryCopy.routeReplayKey)
+        XCTAssertEqual(TripMapMode.heatmap.localizedTitle, TripSummaryCopy.speedHeatmapKey)
+        XCTAssertEqual(TripSummaryMetricsFormatter.scoreTierKey(for: 92), LocalizedStringKey(TripSummaryCopy.smoothEfficientScoreString))
+    }
+
+    func testTripSummaryCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in TripSummaryCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
     }
 }
