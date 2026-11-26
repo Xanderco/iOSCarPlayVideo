@@ -4,8 +4,7 @@ import AVKit
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
-    @State private var showControls: Bool = true
-    @State private var isSeeking: Bool = false
+    @StateObject private var controlsVisibility = PlayerControlsVisibilityModel()
     @State private var seekSliderValue: Double = 0
     @Binding var isFullscreen: Bool
 
@@ -20,10 +19,10 @@ public struct AutomotiveVideoPlayerView: View {
             if playerService.currentChannel != nil {
                 CustomVideoPlayerRepresentable(player: playerService.isVideoLayerAttached ? playerService.player : nil)
                     .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .accessibilityIdentifier("Player_VideoSurface")
                     .onTapGesture {
-                        withAnimation(.easeInOut(duration: 0.25)) {
-                            showControls.toggle()
-                        }
+                        controlsVisibility.handleTap()
                     }
 
                 if playerService.isBuffering && playerService.playbackError == nil {
@@ -35,7 +34,7 @@ public struct AutomotiveVideoPlayerView: View {
 
                 if let error = playerService.playbackError {
                     errorOverlay(error)
-                } else if showControls {
+                } else if controlsVisibility.showControls {
                     controlsOverlay
                         .transition(.opacity)
                 }
@@ -43,7 +42,39 @@ public struct AutomotiveVideoPlayerView: View {
                 placeholderView
             }
         }
+        .animation(.easeInOut(duration: 0.25), value: controlsVisibility.showControls)
         .clipShape(RoundedRectangle(cornerRadius: isFullscreen ? 0 : 16, style: .continuous))
+        .onAppear {
+            controlsVisibility.updatePlaybackState(
+                isPlaying: playerService.isPlaying,
+                hasError: playerService.playbackError != nil
+            )
+        }
+        .onDisappear {
+            controlsVisibility.cancelAutoHide()
+        }
+        .onChange(of: playerService.isPlaying) { _, playing in
+            controlsVisibility.updatePlaybackState(
+                isPlaying: playing,
+                hasError: playerService.playbackError != nil
+            )
+        }
+        .onChange(of: playerService.playbackError) { _, error in
+            controlsVisibility.updatePlaybackState(
+                isPlaying: playerService.isPlaying,
+                hasError: error != nil
+            )
+        }
+        .onChange(of: playerService.currentChannel?.id) { _, newID in
+            if newID == nil {
+                controlsVisibility.cancelAutoHide()
+                if isFullscreen {
+                    isFullscreen = false
+                }
+            } else {
+                controlsVisibility.registerInteraction()
+            }
+        }
     }
 
     private var placeholderView: some View {
@@ -83,7 +114,10 @@ public struct AutomotiveVideoPlayerView: View {
                 .tint(.dashYellow)
                 .foregroundStyle(.black)
 
-                Button("Close") { playerService.stop() }
+                Button("Close") {
+                    isFullscreen = false
+                    playerService.stop()
+                }
                     .buttonStyle(.bordered)
                     .tint(.white)
             }
@@ -97,6 +131,10 @@ public struct AutomotiveVideoPlayerView: View {
         ZStack {
             Color.black.opacity(0.45)
                 .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    controlsVisibility.handleTap()
+                }
 
             VStack {
                 // Top bar: title & fullscreen toggle
@@ -123,6 +161,8 @@ public struct AutomotiveVideoPlayerView: View {
                         .frame(width: 34, height: 34)
 
                     Button {
+                        controlsVisibility.cancelAutoHide()
+                        isFullscreen = false
                         playerService.stop()
                     } label: {
                         Image(systemName: "xmark")
@@ -133,8 +173,10 @@ public struct AutomotiveVideoPlayerView: View {
                             .clipShape(Circle())
                     }
                     .accessibilityLabel("Close player")
+                    .accessibilityIdentifier("Player_CloseButton")
 
                     Button {
+                        controlsVisibility.registerInteraction()
                         withAnimation {
                             isFullscreen.toggle()
                         }
@@ -146,6 +188,8 @@ public struct AutomotiveVideoPlayerView: View {
                             .background(Color.white.opacity(0.2))
                             .clipShape(Circle())
                     }
+                    .accessibilityLabel(isFullscreen ? Text("Exit fullscreen") : Text("Enter fullscreen"))
+                    .accessibilityIdentifier(isFullscreen ? "Player_ExitFullscreenButton" : "Player_FullscreenButton")
                 }
                 .padding()
 
@@ -154,14 +198,17 @@ public struct AutomotiveVideoPlayerView: View {
                 // Center transport controls
                 HStack(spacing: 36) {
                     Button {
+                        controlsVisibility.registerInteraction()
                         playerService.skip(seconds: -10)
                     } label: {
                         Image(systemName: "gobackward.10")
                             .font(.system(size: 28))
                             .foregroundStyle(.white)
                     }
+                    .accessibilityLabel("Skip back 10 seconds")
 
                     Button {
+                        controlsVisibility.registerInteraction()
                         playerService.togglePlayPause()
                     } label: {
                         Image(systemName: playerService.isPlaying ? "pause.circle.fill" : "play.circle.fill")
@@ -169,14 +216,18 @@ public struct AutomotiveVideoPlayerView: View {
                             .foregroundStyle(Color.dashYellow)
                             .shadow(color: Color.dashYellow.opacity(0.5), radius: 10)
                     }
+                    .accessibilityLabel(playerService.isPlaying ? Text("Pause") : Text("Play"))
+                    .accessibilityIdentifier("Player_PlayPauseButton")
 
                     Button {
+                        controlsVisibility.registerInteraction()
                         playerService.skip(seconds: 10)
                     } label: {
                         Image(systemName: "goforward.10")
                             .font(.system(size: 28))
                             .foregroundStyle(.white)
                     }
+                    .accessibilityLabel("Skip forward 10 seconds")
                 }
 
                 Spacer()
@@ -185,17 +236,21 @@ public struct AutomotiveVideoPlayerView: View {
                 VStack(spacing: 6) {
                     Slider(
                         value: Binding(
-                            get: { isSeeking ? seekSliderValue : playerService.currentTime },
+                            get: { controlsVisibility.isSeeking ? seekSliderValue : playerService.currentTime },
                             set: { newValue in
                                 seekSliderValue = newValue
-                                isSeeking = true
+                                if !controlsVisibility.isSeeking {
+                                    controlsVisibility.beginSeeking()
+                                }
                             }
                         ),
                         in: 0...max(playerService.duration, 1),
                         onEditingChanged: { editing in
-                            if !editing {
+                            if editing {
+                                controlsVisibility.beginSeeking()
+                            } else {
                                 playerService.seek(to: seekSliderValue)
-                                isSeeking = false
+                                controlsVisibility.endSeeking()
                             }
                         }
                     )

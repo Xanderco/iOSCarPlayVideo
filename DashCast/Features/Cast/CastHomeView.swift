@@ -157,6 +157,18 @@ public struct CastHomeView: View {
                     LifetimePaywallView().environmentObject(appState)
                 }
             }
+            .fullScreenCover(isPresented: $isFullscreenPlayer) {
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
+                }
+                .preferredColorScheme(.dark)
+            }
+            .onChange(of: playerService.currentChannel?.id) { _, newID in
+                if newID == nil && isFullscreenPlayer {
+                    isFullscreenPlayer = false
+                }
+            }
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
                 guard let newItem = newItem else { return }
                 Task {

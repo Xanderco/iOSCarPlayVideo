@@ -8177,6 +8177,91 @@
           }
         }
       }
+    },
+    "Enter fullscreen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter fullscreen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pantalla completa"
+          }
+        }
+      }
+    },
+    "Exit fullscreen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit fullscreen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salir de pantalla completa"
+          }
+        }
+      }
+    },
+    "Play": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir"
+          }
+        }
+      }
+    },
+    "Skip back 10 seconds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip back 10 seconds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retroceder 10 segundos"
+          }
+        }
+      }
+    },
+    "Skip forward 10 seconds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip forward 10 seconds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avanzar 10 segundos"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
