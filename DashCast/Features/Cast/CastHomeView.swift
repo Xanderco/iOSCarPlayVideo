@@ -2,6 +2,223 @@ import SwiftUI
 import PhotosUI
 import UniformTypeIdentifiers
 
+/// Pure URL trimming and validation helpers for `CastHomeView`.
+public enum CastHomeURLInputValidator {
+    nonisolated public static func normalizedInput(_ raw: String) -> String {
+        raw.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    nonisolated public static func isValidStreamInput(_ raw: String) -> Bool {
+        let normalized = normalizedInput(raw)
+        guard !normalized.isEmpty,
+              let url = URL(string: normalized),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https",
+              let host = url.host,
+              !host.isEmpty else {
+            return false
+        }
+        return true
+    }
+
+    nonisolated public static func isSingleHLSStreamURL(_ url: URL) -> Bool {
+        url.pathExtension.lowercased() == "m3u8"
+    }
+}
+
+/// Localized copy keys and formatting helpers for `CastHomeView`.
+public enum CastHomeCopy {
+    nonisolated public static let castTitleString = "Cast"
+    nonisolated public static let proBadgeString = "PRO"
+    nonisolated public static let carDisplayTitleString = "Car Display"
+    nonisolated public static let closeString = "Close"
+    nonisolated public static let couldntImportVideoString = "Couldn't import video"
+    nonisolated public static let okString = "OK"
+    nonisolated public static let mediaSourcesString = "Media Sources"
+    nonisolated public static let mediaSourcesSubtitleString = "Playlists, Jellyfin, Emby & QR"
+    nonisolated public static let localVideosString = "Local Videos"
+    nonisolated public static let importingString = "Importing…"
+    nonisolated public static let importFromPhotosString = "Import from Photos"
+    nonisolated public static let mirrorIPhoneString = "Mirror iPhone"
+    nonisolated public static let shareScreenLiveString = "Share your screen live"
+    nonisolated public static let browserString = "Browser"
+    nonisolated public static let exploreWebsitesString = "Explore websites"
+    nonisolated public static let yourVideosString = "Your Videos"
+    nonisolated public static let deleteVideoFormatString = "Delete %@"
+    nonisolated public static let dashCastBrandString = "DashCast"
+    nonisolated public static let displayConnectedString = "Display Connected"
+    nonisolated public static let carPlayScreenString = "CarPlay Screen"
+    nonisolated public static let externalDisplayConnectedString = "External display connected"
+    nonisolated public static let noExternalDisplayString = "No external display (use AirPlay or a cable)"
+    nonisolated public static let playingOnCarDisplayString = "Playing video & audio on car display while parked."
+    nonisolated public static let connectToWatchInCarString = "Connect to watch in your car. You can still explore on iPhone."
+    nonisolated public static let helpString = "Help"
+    nonisolated public static let mediaServersSectionString = "Media Servers (Jellyfin & Emby)"
+    nonisolated public static let addServerString = "Add Server"
+    nonisolated public static let connectJellyfinEmbyString = "Connect Jellyfin / Emby"
+    nonisolated public static let homeMediaServerSubtitleString = "Stream movies & shows from your home media server"
+    nonisolated public static let manageAllServersString = "Manage All Servers"
+    nonisolated public static let sampleStreamsString = "Sample Streams"
+    nonisolated public static let yourChannelsString = "Your Channels"
+    nonisolated public static let scanQRString = "Scan QR"
+    nonisolated public static let scanQRCodeString = "Scan QR Code"
+    nonisolated public static let fromURLString = "From URL"
+    nonisolated public static let fromFilesString = "From Files"
+    nonisolated public static let refreshAllString = "Refresh All"
+    nonisolated public static let addSourceButtonString = "+ Add Source"
+    nonisolated public static let scanPlaylistQRCodeString = "Scan Playlist QR Code"
+    nonisolated public static let scanQRPromptSubtitleString = "Point camera at an M3U / M3U8 QR code"
+    nonisolated public static let playlistChannelCountFormatString = "%@ · %lld channels"
+    nonisolated public static let importedChannelsFormatString = "Imported %lld channels from %@"
+    nonisolated public static let couldntImportPlaylistString = "Couldn't import playlist"
+    nonisolated public static let doneString = "Done"
+    nonisolated public static let noFavoritesYetString = "No Favorites Yet"
+    nonisolated public static let favoritesEmptySubtitleString = "Save videos and web bookmarks to quickly access them in your car."
+    nonisolated public static let favoritesTitleString = "Favorites"
+    nonisolated public static let addCustomStreamTitleString = "Add Custom M3U / M3U8 Stream"
+    nonisolated public static let playlistURLPlaceholderString = "https://example.com/playlist.m3u"
+    nonisolated public static let importPlaylistString = "Import Playlist"
+    nonisolated public static let pasteStreamURLHintString = "Paste an M3U / M3U8 playlist link or a single HLS stream URL."
+    nonisolated public static let addStreamTitleString = "Add Stream"
+    nonisolated public static let cancelString = "Cancel"
+    nonisolated public static let addedStreamFormatString = "Added stream %@"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        castTitleString,
+        proBadgeString,
+        carDisplayTitleString,
+        closeString,
+        couldntImportVideoString,
+        okString,
+        mediaSourcesString,
+        mediaSourcesSubtitleString,
+        localVideosString,
+        importingString,
+        importFromPhotosString,
+        mirrorIPhoneString,
+        shareScreenLiveString,
+        browserString,
+        exploreWebsitesString,
+        yourVideosString,
+        deleteVideoFormatString,
+        dashCastBrandString,
+        displayConnectedString,
+        carPlayScreenString,
+        externalDisplayConnectedString,
+        noExternalDisplayString,
+        playingOnCarDisplayString,
+        connectToWatchInCarString,
+        helpString,
+        mediaServersSectionString,
+        addServerString,
+        connectJellyfinEmbyString,
+        homeMediaServerSubtitleString,
+        manageAllServersString,
+        sampleStreamsString,
+        yourChannelsString,
+        scanQRString,
+        scanQRCodeString,
+        fromURLString,
+        fromFilesString,
+        refreshAllString,
+        addSourceButtonString,
+        scanPlaylistQRCodeString,
+        scanQRPromptSubtitleString,
+        playlistChannelCountFormatString,
+        importedChannelsFormatString,
+        couldntImportPlaylistString,
+        doneString,
+        noFavoritesYetString,
+        favoritesEmptySubtitleString,
+        favoritesTitleString,
+        addCustomStreamTitleString,
+        playlistURLPlaceholderString,
+        importPlaylistString,
+        pasteStreamURLHintString,
+        addStreamTitleString,
+        cancelString,
+        addedStreamFormatString
+    ]
+
+    @MainActor public static var castTitleKey: LocalizedStringKey { LocalizedStringKey(castTitleString) }
+    @MainActor public static var proBadgeKey: LocalizedStringKey { LocalizedStringKey(proBadgeString) }
+    @MainActor public static var carDisplayTitleKey: LocalizedStringKey { LocalizedStringKey(carDisplayTitleString) }
+    @MainActor public static var closeKey: LocalizedStringKey { LocalizedStringKey(closeString) }
+    @MainActor public static var couldntImportVideoKey: LocalizedStringKey { LocalizedStringKey(couldntImportVideoString) }
+    @MainActor public static var okKey: LocalizedStringKey { LocalizedStringKey(okString) }
+    @MainActor public static var mediaSourcesKey: LocalizedStringKey { LocalizedStringKey(mediaSourcesString) }
+    @MainActor public static var mediaSourcesSubtitleKey: LocalizedStringKey { LocalizedStringKey(mediaSourcesSubtitleString) }
+    @MainActor public static var localVideosKey: LocalizedStringKey { LocalizedStringKey(localVideosString) }
+    @MainActor public static var importingKey: LocalizedStringKey { LocalizedStringKey(importingString) }
+    @MainActor public static var importFromPhotosKey: LocalizedStringKey { LocalizedStringKey(importFromPhotosString) }
+    @MainActor public static var mirrorIPhoneKey: LocalizedStringKey { LocalizedStringKey(mirrorIPhoneString) }
+    @MainActor public static var shareScreenLiveKey: LocalizedStringKey { LocalizedStringKey(shareScreenLiveString) }
+    @MainActor public static var browserKey: LocalizedStringKey { LocalizedStringKey(browserString) }
+    @MainActor public static var exploreWebsitesKey: LocalizedStringKey { LocalizedStringKey(exploreWebsitesString) }
+    @MainActor public static var yourVideosKey: LocalizedStringKey { LocalizedStringKey(yourVideosString) }
+    @MainActor public static var dashCastBrandKey: LocalizedStringKey { LocalizedStringKey(dashCastBrandString) }
+    @MainActor public static var displayConnectedKey: LocalizedStringKey { LocalizedStringKey(displayConnectedString) }
+    @MainActor public static var carPlayScreenKey: LocalizedStringKey { LocalizedStringKey(carPlayScreenString) }
+    @MainActor public static var externalDisplayConnectedKey: LocalizedStringKey { LocalizedStringKey(externalDisplayConnectedString) }
+    @MainActor public static var noExternalDisplayKey: LocalizedStringKey { LocalizedStringKey(noExternalDisplayString) }
+    @MainActor public static var playingOnCarDisplayKey: LocalizedStringKey { LocalizedStringKey(playingOnCarDisplayString) }
+    @MainActor public static var connectToWatchInCarKey: LocalizedStringKey { LocalizedStringKey(connectToWatchInCarString) }
+    @MainActor public static var helpKey: LocalizedStringKey { LocalizedStringKey(helpString) }
+    @MainActor public static var mediaServersSectionKey: LocalizedStringKey { LocalizedStringKey(mediaServersSectionString) }
+    @MainActor public static var addServerKey: LocalizedStringKey { LocalizedStringKey(addServerString) }
+    @MainActor public static var connectJellyfinEmbyKey: LocalizedStringKey { LocalizedStringKey(connectJellyfinEmbyString) }
+    @MainActor public static var homeMediaServerSubtitleKey: LocalizedStringKey { LocalizedStringKey(homeMediaServerSubtitleString) }
+    @MainActor public static var manageAllServersKey: LocalizedStringKey { LocalizedStringKey(manageAllServersString) }
+    @MainActor public static var sampleStreamsKey: LocalizedStringKey { LocalizedStringKey(sampleStreamsString) }
+    @MainActor public static var yourChannelsKey: LocalizedStringKey { LocalizedStringKey(yourChannelsString) }
+    @MainActor public static var scanQRKey: LocalizedStringKey { LocalizedStringKey(scanQRString) }
+    @MainActor public static var scanQRCodeKey: LocalizedStringKey { LocalizedStringKey(scanQRCodeString) }
+    @MainActor public static var fromURLKey: LocalizedStringKey { LocalizedStringKey(fromURLString) }
+    @MainActor public static var fromFilesKey: LocalizedStringKey { LocalizedStringKey(fromFilesString) }
+    @MainActor public static var refreshAllKey: LocalizedStringKey { LocalizedStringKey(refreshAllString) }
+    @MainActor public static var addSourceButtonKey: LocalizedStringKey { LocalizedStringKey(addSourceButtonString) }
+    @MainActor public static var scanPlaylistQRCodeKey: LocalizedStringKey { LocalizedStringKey(scanPlaylistQRCodeString) }
+    @MainActor public static var scanQRPromptSubtitleKey: LocalizedStringKey { LocalizedStringKey(scanQRPromptSubtitleString) }
+    @MainActor public static var couldntImportPlaylistKey: LocalizedStringKey { LocalizedStringKey(couldntImportPlaylistString) }
+    @MainActor public static var doneKey: LocalizedStringKey { LocalizedStringKey(doneString) }
+    @MainActor public static var noFavoritesYetKey: LocalizedStringKey { LocalizedStringKey(noFavoritesYetString) }
+    @MainActor public static var favoritesEmptySubtitleKey: LocalizedStringKey { LocalizedStringKey(favoritesEmptySubtitleString) }
+    @MainActor public static var favoritesTitleKey: LocalizedStringKey { LocalizedStringKey(favoritesTitleString) }
+    @MainActor public static var addCustomStreamTitleKey: LocalizedStringKey { LocalizedStringKey(addCustomStreamTitleString) }
+    @MainActor public static var playlistURLPlaceholderKey: LocalizedStringKey { LocalizedStringKey(playlistURLPlaceholderString) }
+    @MainActor public static var importPlaylistKey: LocalizedStringKey { LocalizedStringKey(importPlaylistString) }
+    @MainActor public static var pasteStreamURLHintKey: LocalizedStringKey { LocalizedStringKey(pasteStreamURLHintString) }
+    @MainActor public static var addStreamTitleKey: LocalizedStringKey { LocalizedStringKey(addStreamTitleString) }
+    @MainActor public static var cancelKey: LocalizedStringKey { LocalizedStringKey(cancelString) }
+
+    @MainActor
+    public static func deleteVideoAccessibilityLabel(_ name: String) -> LocalizedStringKey {
+        LocalizedStringKey("Delete \(name)")
+    }
+
+    @MainActor
+    public static func playlistChannelCountKey(title: String, count: Int) -> LocalizedStringKey {
+        LocalizedStringKey("\(title) · \(count) channels")
+    }
+
+    nonisolated public static func importedChannelsMessage(
+        count: Int,
+        title: String,
+        bundle: Bundle = .main
+    ) -> String {
+        let format = String(localized: String.LocalizationValue(importedChannelsFormatString), bundle: bundle)
+        return String(format: format, Int64(count), title)
+    }
+
+    nonisolated public static func addedStreamMessage(
+        name: String,
+        bundle: Bundle = .main
+    ) -> String {
+        let format = String(localized: String.LocalizationValue(addedStreamFormatString), bundle: bundle)
+        return String(format: format, name)
+    }
+}
+
 public struct CastHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var playerService = VideoPlayerService.shared
@@ -60,7 +277,7 @@ public struct CastHomeView: View {
                     .padding(.bottom, 110) // clearance for LiquidCapsuleTabBar
                 }
             }
-            .navigationTitle("Cast")
+            .navigationTitle(CastHomeCopy.castTitleKey)
             .task {
                 // App Store screenshot launch arguments (no effect on normal launches).
                 if ScreenshotLaunch.playDemoVideo, playerService.currentChannel == nil,
@@ -79,7 +296,7 @@ public struct CastHomeView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "crown.fill")
                                         .font(.system(size: 11))
-                                    Text("PRO")
+                                    Text(CastHomeCopy.proBadgeKey)
                                         .font(.system(size: 12, weight: .heavy))
                                 }
                                 .padding(.horizontal, 12)
@@ -143,11 +360,11 @@ public struct CastHomeView: View {
             .sheet(isPresented: $showingBroadcastPicker) {
                 NavigationStack {
                     CarOutputPanelView()
-                        .navigationTitle("Car Display")
+                        .navigationTitle(CastHomeCopy.carDisplayTitleKey)
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
                             ToolbarItem(placement: .topBarLeading) {
-                                Button("Close") { showingBroadcastPicker = false }
+                                Button(CastHomeCopy.closeKey) { showingBroadcastPicker = false }
                                     .foregroundStyle(Color.dashYellow)
                             }
                         }
@@ -170,11 +387,11 @@ public struct CastHomeView: View {
                     selectedPhotoItem = nil
                 }
             }
-            .alert("Couldn't import video", isPresented: Binding(
+            .alert(CastHomeCopy.couldntImportVideoKey, isPresented: Binding(
                 get: { localImportError != nil },
                 set: { if !$0 { localImportError = nil } }
             )) {
-                Button("OK", role: .cancel) { localImportError = nil }
+                Button(CastHomeCopy.okKey, role: .cancel) { localImportError = nil }
             } message: {
                 Text(localImportError ?? "")
             }
@@ -191,8 +408,8 @@ public struct CastHomeView: View {
             } label: {
                 menuRow(
                     icon: "play.tv.fill",
-                    title: "Media Sources",
-                    subtitle: "Playlists, Jellyfin, Emby & QR"
+                    title: CastHomeCopy.mediaSourcesKey,
+                    subtitle: CastHomeCopy.mediaSourcesSubtitleKey
                 )
             }
             .buttonStyle(.plain)
@@ -204,8 +421,8 @@ public struct CastHomeView: View {
             PhotosPicker(selection: $selectedPhotoItem, matching: .videos, preferredItemEncoding: .current) {
                 menuRow(
                     icon: "folder.fill",
-                    title: "Local Videos",
-                    subtitle: localVideoManager.isImporting ? "Importing…" : "Import from Photos"
+                    title: CastHomeCopy.localVideosKey,
+                    subtitle: localVideoManager.isImporting ? CastHomeCopy.importingKey : CastHomeCopy.importFromPhotosKey
                 )
             }
             .buttonStyle(.plain)
@@ -218,8 +435,8 @@ public struct CastHomeView: View {
             } label: {
                 menuRow(
                     icon: "rectangle.on.rectangle.fill",
-                    title: "Mirror iPhone",
-                    subtitle: "Share your screen live"
+                    title: CastHomeCopy.mirrorIPhoneKey,
+                    subtitle: CastHomeCopy.shareScreenLiveKey
                 )
             }
             .buttonStyle(.plain)
@@ -232,8 +449,8 @@ public struct CastHomeView: View {
             } label: {
                 menuRow(
                     icon: "globe",
-                    title: "Browser",
-                    subtitle: "Explore websites"
+                    title: CastHomeCopy.browserKey,
+                    subtitle: CastHomeCopy.exploreWebsitesKey
                 )
             }
             .buttonStyle(.plain)
@@ -253,7 +470,7 @@ public struct CastHomeView: View {
     private var localVideosSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Your Videos")
+                Text(CastHomeCopy.yourVideosKey)
                     .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(Color.dashYellow)
                 Spacer()
@@ -292,7 +509,7 @@ public struct CastHomeView: View {
                                 .foregroundStyle(Color.dashTextMuted)
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel("Delete \(video.name)")
+                        .accessibilityLabel(CastHomeCopy.deleteVideoAccessibilityLabel(video.name))
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
@@ -362,7 +579,7 @@ public struct CastHomeView: View {
                             .font(.system(size: 24))
                             .foregroundStyle(Color.dashYellow)
 
-                        Text("DashCast")
+                        Text(CastHomeCopy.dashCastBrandKey)
                             .font(.system(size: 8, weight: .bold))
                             .foregroundStyle(Color.dashTextSecondary)
                     }
@@ -398,7 +615,7 @@ public struct CastHomeView: View {
                             Image(systemName: "car.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(Color.dashGreen)
-                            Text("Display Connected")
+                            Text(CastHomeCopy.displayConnectedKey)
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(Color.dashGreen)
                         }
@@ -407,7 +624,7 @@ public struct CastHomeView: View {
                             Image(systemName: "car.side.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(Color.dashYellow.opacity(0.8))
-                            Text("CarPlay Screen")
+                            Text(CastHomeCopy.carPlayScreenKey)
                                 .font(.system(size: 10, weight: .semibold))
                                 .foregroundStyle(Color.dashTextMuted)
                         }
@@ -419,13 +636,13 @@ public struct CastHomeView: View {
 
             // Status Text
             VStack(spacing: 6) {
-                Text(externalDisplay.isExternalDisplayConnected ? "External display connected" : "No external display (use AirPlay or a cable)")
+                Text(externalDisplay.isExternalDisplayConnected ? CastHomeCopy.externalDisplayConnectedKey : CastHomeCopy.noExternalDisplayKey)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(Color.dashTextPrimary)
 
                 Text(externalDisplay.isExternalDisplayConnected
-                     ? "Playing video & audio on car display while parked."
-                     : "Connect to watch in your car. You can still explore on iPhone.")
+                     ? CastHomeCopy.playingOnCarDisplayKey
+                     : CastHomeCopy.connectToWatchInCarKey)
                     .font(.system(size: 13))
                     .foregroundStyle(Color.dashTextSecondary)
                     .multilineTextAlignment(.center)
@@ -439,7 +656,7 @@ public struct CastHomeView: View {
                 } label: {
                     HStack(spacing: 5) {
                         Image(systemName: "info.circle")
-                        Text("Help")
+                        Text(CastHomeCopy.helpKey)
                     }
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(Color.dashYellow)
@@ -472,14 +689,14 @@ public struct CastHomeView: View {
                         // MARK: Section 1 - Media Servers (Jellyfin & Emby)
                         VStack(spacing: 10) {
                             HStack {
-                                Text("Media Servers (Jellyfin & Emby)")
+                                Text(CastHomeCopy.mediaServersSectionKey)
                                     .font(.system(size: 13, weight: .bold))
                                     .foregroundStyle(Color.dashYellow)
                                 Spacer()
                                 Button {
                                     showingAddServer = true
                                 } label: {
-                                    Label("Add Server", systemImage: "plus")
+                                    Label(CastHomeCopy.addServerKey, systemImage: "plus")
                                         .font(.system(size: 12, weight: .semibold))
                                         .foregroundStyle(Color.dashYellow)
                                 }
@@ -504,11 +721,11 @@ public struct CastHomeView: View {
                                         }
 
                                         VStack(alignment: .leading, spacing: 3) {
-                                            Text("Connect Jellyfin / Emby")
+                                            Text(CastHomeCopy.connectJellyfinEmbyKey)
                                                 .font(.system(size: 15, weight: .semibold))
                                                 .foregroundStyle(Color.dashTextPrimary)
 
-                                            Text("Stream movies & shows from your home media server")
+                                            Text(CastHomeCopy.homeMediaServerSubtitleKey)
                                                 .font(.system(size: 12))
                                                 .foregroundStyle(Color.dashTextSecondary)
                                                 .lineLimit(2)
@@ -573,7 +790,7 @@ public struct CastHomeView: View {
                                 } label: {
                                     HStack {
                                         Spacer()
-                                        Text("Manage All Servers")
+                                        Text(CastHomeCopy.manageAllServersKey)
                                             .font(.system(size: 12, weight: .semibold))
                                             .foregroundStyle(Color.dashTextSecondary)
                                         Image(systemName: "chevron.right")
@@ -588,7 +805,7 @@ public struct CastHomeView: View {
 
                         // MARK: Section 2 - Playlists & Channels (with QR Entry)
                         HStack {
-                            Text(playlistStore.playlists.isEmpty ? "Sample Streams" : "Your Channels")
+                            Text(playlistStore.playlists.isEmpty ? CastHomeCopy.sampleStreamsKey : CastHomeCopy.yourChannelsKey)
                                 .font(.system(size: 13, weight: .bold))
                                 .foregroundStyle(Color.dashYellow)
                             Spacer()
@@ -596,7 +813,7 @@ public struct CastHomeView: View {
                             Button {
                                 showingQRScanner = true
                             } label: {
-                                Label("Scan QR", systemImage: "qrcode.viewfinder")
+                                Label(CastHomeCopy.scanQRKey, systemImage: "qrcode.viewfinder")
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundStyle(Color.dashYellow)
                             }
@@ -606,28 +823,28 @@ public struct CastHomeView: View {
                                 Button {
                                     showingQRScanner = true
                                 } label: {
-                                    Label("Scan QR Code", systemImage: "qrcode.viewfinder")
+                                    Label(CastHomeCopy.scanQRCodeKey, systemImage: "qrcode.viewfinder")
                                 }
                                 .accessibilityIdentifier("MediaSources_ScanQRMenu")
 
                                 Button {
                                     showingAddM3UDialog = true
                                 } label: {
-                                    Label("From URL", systemImage: "link")
+                                    Label(CastHomeCopy.fromURLKey, systemImage: "link")
                                 }
                                 .accessibilityIdentifier("MediaSources_FromURLMenu")
 
                                 Button {
                                     showingPlaylistFileImporter = true
                                 } label: {
-                                    Label("From Files", systemImage: "folder")
+                                    Label(CastHomeCopy.fromFilesKey, systemImage: "folder")
                                 }
                                 .accessibilityIdentifier("MediaSources_FromFilesMenu")
 
                                 Button {
                                     showingAddServer = true
                                 } label: {
-                                    Label("Connect Jellyfin / Emby", systemImage: "server.rack")
+                                    Label(CastHomeCopy.connectJellyfinEmbyKey, systemImage: "server.rack")
                                 }
                                 .accessibilityIdentifier("MediaSources_AddServerMenu")
 
@@ -635,11 +852,11 @@ public struct CastHomeView: View {
                                     Button {
                                         Task { await playlistStore.refreshAll() }
                                     } label: {
-                                        Label("Refresh All", systemImage: "arrow.clockwise")
+                                        Label(CastHomeCopy.refreshAllKey, systemImage: "arrow.clockwise")
                                     }
                                 }
                             } label: {
-                                Text("+ Add Source")
+                                Text(CastHomeCopy.addSourceButtonKey)
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundStyle(Color.dashYellow)
                             }
@@ -671,11 +888,11 @@ public struct CastHomeView: View {
                                     }
 
                                     VStack(alignment: .leading, spacing: 3) {
-                                        Text("Scan Playlist QR Code")
+                                        Text(CastHomeCopy.scanPlaylistQRCodeKey)
                                             .font(.system(size: 15, weight: .semibold))
                                             .foregroundStyle(Color.dashTextPrimary)
 
-                                        Text("Point camera at an M3U / M3U8 QR code")
+                                        Text(CastHomeCopy.scanQRPromptSubtitleKey)
                                             .font(.system(size: 12))
                                             .foregroundStyle(Color.dashTextSecondary)
                                     }
@@ -699,7 +916,7 @@ public struct CastHomeView: View {
                             HStack {
                                 Image(systemName: "list.bullet.rectangle")
                                     .foregroundStyle(Color.dashYellow)
-                                Text("\(playlist.title) · \(playlist.channels.count) channels")
+                                Text(CastHomeCopy.playlistChannelCountKey(title: playlist.title, count: playlist.channels.count))
                                     .font(.system(size: 12, weight: .semibold))
                                     .foregroundStyle(Color.dashTextSecondary)
                                 Spacer()
@@ -785,7 +1002,7 @@ public struct CastHomeView: View {
                     guard let url = urls.first else { return }
                     do {
                         let playlist = try playlistStore.importPlaylist(fileURL: url)
-                        importSuccessMessage = "Imported \(playlist.channels.count) channels from \(playlist.title)"
+                        importSuccessMessage = CastHomeCopy.importedChannelsMessage(count: playlist.channels.count, title: playlist.title)
                     } catch {
                         importErrorMessage = error.localizedDescription
                     }
@@ -793,19 +1010,19 @@ public struct CastHomeView: View {
                     importErrorMessage = error.localizedDescription
                 }
             }
-            .alert("Couldn't import playlist", isPresented: Binding(
+            .alert(CastHomeCopy.couldntImportPlaylistKey, isPresented: Binding(
                 get: { importErrorMessage != nil },
                 set: { if !$0 { importErrorMessage = nil } }
             )) {
-                Button("OK", role: .cancel) { importErrorMessage = nil }
+                Button(CastHomeCopy.okKey, role: .cancel) { importErrorMessage = nil }
             } message: {
                 Text(importErrorMessage ?? "")
             }
-            .navigationTitle("Media Sources")
+            .navigationTitle(CastHomeCopy.mediaSourcesKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") { showingPlaylistsSheet = false }
+                    Button(CastHomeCopy.doneKey) { showingPlaylistsSheet = false }
                         .foregroundStyle(Color.dashYellow)
                 }
             }
@@ -820,21 +1037,21 @@ public struct CastHomeView: View {
                     Image(systemName: "heart.slash")
                         .font(.system(size: 40))
                         .foregroundStyle(Color.dashTextMuted)
-                    Text("No Favorites Yet")
+                    Text(CastHomeCopy.noFavoritesYetKey)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Color.dashTextPrimary)
-                    Text("Save videos and web bookmarks to quickly access them in your car.")
+                    Text(CastHomeCopy.favoritesEmptySubtitleKey)
                         .font(.system(size: 13))
                         .foregroundStyle(Color.dashTextSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
                 }
             }
-            .navigationTitle("Favorites")
+            .navigationTitle(CastHomeCopy.favoritesTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") { showingFavorites = false }
+                    Button(CastHomeCopy.closeKey) { showingFavorites = false }
                         .foregroundStyle(Color.dashYellow)
                 }
             }
@@ -846,11 +1063,11 @@ public struct CastHomeView: View {
             ZStack {
                 Color.dashBackground.ignoresSafeArea()
                 VStack(spacing: 20) {
-                    Text("Add Custom M3U / M3U8 Stream")
+                    Text(CastHomeCopy.addCustomStreamTitleKey)
                         .font(.system(size: 17, weight: .bold))
                         .foregroundStyle(Color.dashTextPrimary)
 
-                    TextField("https://example.com/playlist.m3u", text: $m3uURLInput)
+                    TextField(CastHomeCopy.playlistURLPlaceholderKey, text: $m3uURLInput)
                         .padding()
                         .background(Color.dashSurface)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -862,7 +1079,7 @@ public struct CastHomeView: View {
                     Button {
                         loadM3UFromURL()
                     } label: {
-                        Text(isImportingPlaylist ? "Importing…" : "Import Playlist")
+                        Text(isImportingPlaylist ? CastHomeCopy.importingKey : CastHomeCopy.importPlaylistKey)
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(Color.black)
                             .frame(maxWidth: .infinity)
@@ -872,9 +1089,9 @@ public struct CastHomeView: View {
                             .padding(.horizontal)
                     }
 
-                    .disabled(isImportingPlaylist || m3uURLInput.isEmpty)
+                    .disabled(isImportingPlaylist || CastHomeURLInputValidator.normalizedInput(m3uURLInput).isEmpty)
 
-                    Text("Paste an M3U / M3U8 playlist link or a single HLS stream URL.")
+                    Text(CastHomeCopy.pasteStreamURLHintKey)
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextSecondary)
                         .padding(.horizontal)
@@ -883,11 +1100,11 @@ public struct CastHomeView: View {
                 }
                 .padding(.top, 30)
             }
-            .navigationTitle("Add Stream")
+            .navigationTitle(CastHomeCopy.addStreamTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { showingAddM3UDialog = false }
+                    Button(CastHomeCopy.cancelKey) { showingAddM3UDialog = false }
                         .foregroundStyle(Color.dashYellow)
                 }
             }
@@ -895,13 +1112,13 @@ public struct CastHomeView: View {
     }
 
     private func loadM3UFromURL() {
-        let input = m3uURLInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        let input = CastHomeURLInputValidator.normalizedInput(m3uURLInput)
         isImportingPlaylist = true
         Task {
             defer { isImportingPlaylist = false }
             do {
                 // A bare .m3u8 HLS stream is a single channel, not a channel list.
-                if let url = URL(string: input), url.pathExtension.lowercased() == "m3u8",
+                if let url = URL(string: input), CastHomeURLInputValidator.isSingleHLSStreamURL(url),
                    let data = try? await URLSession.shared.data(from: url).0,
                    let text = IPTVParser.decode(data), text.contains("#EXT-X-") {
                     let channel = ChannelModel(name: url.deletingPathExtension().lastPathComponent,
@@ -909,10 +1126,10 @@ public struct CastHomeView: View {
                     let m3u = "#EXTM3U\n#EXTINF:-1 group-title=\"Streams\",\(channel.name)\n\(url.absoluteString)\n"
                     try playlistStore.addPlaylist(data: Data(m3u.utf8), sourceURL: nil, title: channel.name)
                     playerService.load(channel: channel)
-                    importSuccessMessage = "Added stream \(channel.name)"
+                    importSuccessMessage = CastHomeCopy.addedStreamMessage(name: channel.name)
                 } else {
                     let playlist = try await playlistStore.importPlaylist(from: input)
-                    importSuccessMessage = "Imported \(playlist.channels.count) channels from \(playlist.title)"
+                    importSuccessMessage = CastHomeCopy.importedChannelsMessage(count: playlist.channels.count, title: playlist.title)
                 }
                 m3uURLInput = ""
                 showingAddM3UDialog = false
