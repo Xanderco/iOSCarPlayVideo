@@ -8177,6 +8177,176 @@
           }
         }
       }
+    },
+    "Car Display Guide": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Car Display Guide"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guía de pantalla del auto"
+          }
+        }
+      }
+    },
+    "Data & Privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Data & Privacy"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datos y privacidad"
+          }
+        }
+      }
+    },
+    "All trips and playlists stay on your device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All trips and playlists stay on your device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los viajes y listas se guardan en tu dispositivo."
+          }
+        }
+      }
+    },
+    "Clear Trip History": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Trip History"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar historial de viajes"
+          }
+        }
+      }
+    },
+    "Clear Playlists": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear Playlists"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Borrar listas de reproducción"
+          }
+        }
+      }
+    },
+    "%lld saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld guardados"
+          }
+        }
+      }
+    },
+    "Clear all saved trips?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear all saved trips?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Borrar todos los viajes guardados?"
+          }
+        }
+      }
+    },
+    "This removes your saved drive routes and trip history from this device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This removes your saved drive routes and trip history from this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esto elimina tus rutas guardadas e historial de viajes de este dispositivo."
+          }
+        }
+      }
+    },
+    "Clear all imported playlists?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear all imported playlists?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Borrar todas las listas importadas?"
+          }
+        }
+      }
+    },
+    "This removes your imported playlists from this device. Built-in demo videos remain available.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This removes your imported playlists from this device. Built-in demo videos remain available."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esto elimina tus listas importadas de este dispositivo. Los videos de demostración integrados seguirán disponibles."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

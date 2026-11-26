@@ -5,6 +5,7 @@ public struct MeHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var metricsManager = UsageMetricsManager.shared
     @StateObject private var storeKit = StoreKitManager.shared
+    @StateObject private var playlistStore = PlaylistStore.shared
     @Environment(\.requestReview) private var requestReview
     @AppStorage(PassengerSafetyNotice.acceptedKey) private var passengerNoticeAccepted = false
 
@@ -14,7 +15,18 @@ public struct MeHomeView: View {
     @State private var restoreMessage: String?
     @State private var showingDriveDetails: Bool = false
     @State private var showingMediaServers: Bool = false
+    @State private var showingCarDisplayGuide: Bool = false
+    @State private var showingSettingsCarDisplayGuide: Bool = false
+    @State private var pendingClearConfirmation: ClearDataConfirmation?
+    @State private var savedTripsCount: Int = 0
     @State private var selectedVehicleIndex: Int = 0
+
+    private enum ClearDataConfirmation: Identifiable {
+        case trips
+        case playlists
+
+        var id: Self { self }
+    }
 
     private let vehicles = VehicleCatalogService.shared.vehicles
 
@@ -72,6 +84,9 @@ public struct MeHomeView: View {
             }
             .sheet(isPresented: $showingMediaServers) {
                 MediaServersHomeView()
+            }
+            .sheet(isPresented: $showingCarDisplayGuide) {
+                CarCastGuideModalView()
             }
         }
     }
@@ -232,9 +247,17 @@ public struct MeHomeView: View {
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
+            menuItemRow(icon: "display", title: "Car Display Guide") {
+                showingCarDisplayGuide = true
+            }
+            .accessibilityIdentifier("Me_CarDisplayGuideRow")
+
+            Divider().background(Color.dashBorder.opacity(0.5))
+
             menuItemRow(icon: "gearshape.fill", title: "Settings") {
                 showingSettings = true
             }
+            .accessibilityIdentifier("Me_SettingsRow")
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
@@ -400,14 +423,54 @@ public struct MeHomeView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.dashBorder, lineWidth: 1))
 
+                        dataAndPrivacySection
+
                         legalSection
                     }
                     .padding(.horizontal, 16)
                     .padding(.top, 14)
+                    .padding(.bottom, 24)
                 }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                savedTripsCount = PersistenceController.shared.loadTrips().count
+            }
+            .sheet(isPresented: $showingSettingsCarDisplayGuide) {
+                CarCastGuideModalView()
+            }
+            .confirmationDialog(
+                pendingClearConfirmation == .trips
+                    ? LocalizedStringKey("Clear all saved trips?")
+                    : LocalizedStringKey("Clear all imported playlists?"),
+                isPresented: Binding(
+                    get: { pendingClearConfirmation != nil },
+                    set: { if !$0 { pendingClearConfirmation = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: pendingClearConfirmation
+            ) { target in
+                switch target {
+                case .trips:
+                    Button("Clear Trip History", role: .destructive) {
+                        PersistenceController.shared.clearTrips()
+                        savedTripsCount = 0
+                    }
+                case .playlists:
+                    Button("Clear Playlists", role: .destructive) {
+                        playlistStore.clearPlaylists()
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: { target in
+                switch target {
+                case .trips:
+                    Text("This removes your saved drive routes and trip history from this device.")
+                case .playlists:
+                    Text("This removes your imported playlists from this device. Built-in demo videos remain available.")
+                }
+            }
             .alert("Restore Purchases", isPresented: Binding(
                 get: { restoreMessage != nil },
                 set: { if !$0 { restoreMessage = nil } }
@@ -492,6 +555,78 @@ public struct MeHomeView: View {
         .buttonStyle(.plain)
     }
 
+    // MARK: - Data & Privacy (Settings)
+
+    private var dataAndPrivacySection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Data & Privacy")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.dashYellow)
+                Text("All trips and playlists stay on your device.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.dashTextSecondary)
+            }
+            .padding(.horizontal, 4)
+
+            VStack(spacing: 1) {
+                Button {
+                    pendingClearConfirmation = .trips
+                } label: {
+                    clearDataRow(
+                        icon: "road.lanes",
+                        title: "Clear Trip History",
+                        count: savedTripsCount
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("Me_Settings_ClearTripsButton")
+
+                Divider().background(Color.dashBorder.opacity(0.5))
+
+                Button {
+                    pendingClearConfirmation = .playlists
+                } label: {
+                    clearDataRow(
+                        icon: "play.square.stack",
+                        title: "Clear Playlists",
+                        count: playlistStore.playlists.count
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("Me_Settings_ClearPlaylistsButton")
+            }
+            .background(Color.dashSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.dashBorder, lineWidth: 1))
+        }
+    }
+
+    private func clearDataRow(icon: String, title: LocalizedStringKey, count: Int) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 15))
+                .foregroundStyle(Color.dashYellow)
+
+            Text(title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(Color.dashTextPrimary)
+
+            Spacer()
+
+            Text("\(count) saved")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(Color.dashTextSecondary)
+
+            Image(systemName: "trash")
+                .font(.system(size: 12))
+                .foregroundStyle(Color.dashRed)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
+    }
+
     // MARK: - Legal & Safety (Settings)
 
     private var legalSection: some View {
@@ -501,6 +636,14 @@ public struct MeHomeView: View {
             aboutLinkRow(icon: "doc.text.fill", title: "Terms of Use (EULA)", url: LegalLinks.termsOfUse)
             Divider().background(Color.dashBorder.opacity(0.5))
             aboutLinkRow(icon: "questionmark.circle.fill", title: "Support", url: LegalLinks.support)
+            Divider().background(Color.dashBorder.opacity(0.5))
+            Button {
+                showingSettingsCarDisplayGuide = true
+            } label: {
+                aboutLinkLabel(icon: "display", title: "Car Display Guide")
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("Me_Settings_CarDisplayGuideRow")
             Divider().background(Color.dashBorder.opacity(0.5))
             Button {
                 showingSettings = false

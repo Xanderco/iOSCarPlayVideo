@@ -29,6 +29,10 @@ public final class PersistenceController {
         return trips
     }
 
+    public func clearTrips() {
+        saveTrips([])
+    }
+
     // Playlists Persistence
     public func savePlaylists(_ playlists: [IPTVPlaylist]) {
         if let data = try? JSONEncoder().encode(playlists) {
@@ -42,6 +46,10 @@ public final class PersistenceController {
             return []
         }
         return playlists
+    }
+
+    public func clearPlaylists() {
+        savePlaylists([])
     }
 
     // Widgets Persistence
