@@ -42,6 +42,7 @@ public struct CastHomeView: View {
                                 .frame(height: 220)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 .padding(.horizontal, 16)
+                                .accessibilityHidden(isFullscreenPlayer)
                         }
 
                         // Main 4-Row Source Menu Card
@@ -155,6 +156,18 @@ public struct CastHomeView: View {
                 // The tab-level paywall can't present over this sheet, so present it here too.
                 .sheet(isPresented: $appState.showPaywall) {
                     LifetimePaywallView().environmentObject(appState)
+                }
+            }
+            .fullScreenCover(isPresented: $isFullscreenPlayer) {
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    AutomotiveVideoPlayerView(isFullscreen: $isFullscreenPlayer)
+                }
+                .preferredColorScheme(.dark)
+            }
+            .onChange(of: playerService.currentChannel?.id) { _, newID in
+                if newID == nil && isFullscreenPlayer {
+                    isFullscreenPlayer = false
                 }
             }
             .onChange(of: selectedPhotoItem) { (newItem: PhotosPickerItem?) in
