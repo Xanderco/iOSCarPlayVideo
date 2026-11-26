@@ -4,6 +4,8 @@ public struct WidgetEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var config: WidgetConfigModel
     @State private var selectedPositionTarget: String = "Car"
+    @State private var showingFullPreview: Bool = false
+    private let isEditingExisting: Bool
     public var onSave: (WidgetConfigModel) -> Void
 
     private let catalog = VehicleCatalogService.shared
@@ -25,8 +27,13 @@ public struct WidgetEditorView: View {
         "BEBAS"
     ]
 
-    public init(config: WidgetConfigModel = WidgetConfigModel(), onSave: @escaping (WidgetConfigModel) -> Void) {
+    public init(
+        config: WidgetConfigModel = WidgetConfigModel(),
+        isEditingExisting: Bool = false,
+        onSave: @escaping (WidgetConfigModel) -> Void
+    ) {
         self._config = State(initialValue: config)
+        self.isEditingExisting = isEditingExisting
         self.onSave = onSave
     }
 
@@ -42,6 +49,9 @@ public struct WidgetEditorView: View {
 
                         // Adjust Position Section with Sliders
                         adjustPositionSection
+
+                        // Widget Caption / Greeting Field
+                        driverGreetingSection
 
                         // License Plate Text Field
                         licensePlateSection
@@ -72,6 +82,29 @@ public struct WidgetEditorView: View {
             }
             .navigationTitle("Edit widget")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingFullPreview) {
+                NavigationStack {
+                    ZStack {
+                        Color.dcBackground.ignoresSafeArea()
+                        VStack(spacing: 16) {
+                            CarPlayDashboardMockupView(config: config)
+                                .padding(.horizontal)
+                            Text("Car Display Preview")
+                                .font(.caption)
+                                .foregroundStyle(Color.dcTextSecondary)
+                        }
+                    }
+                    .navigationTitle("Widget Preview")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Done") { showingFullPreview = false }
+                                .foregroundStyle(Color.dcAccent)
+                        }
+                    }
+                }
+                .presentationDetents([.medium])
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -203,7 +236,9 @@ public struct WidgetEditorView: View {
             }
             .frame(width: 260, height: 260)
 
-            Button("Preview") {}
+            Button("Preview") {
+                showingFullPreview = true
+            }
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Color.dashYellow)
         }
@@ -281,6 +316,37 @@ public struct WidgetEditorView: View {
                     .foregroundStyle(Color.dashTextMuted)
                     .frame(width: 14)
             }
+        }
+    }
+
+    // MARK: - Widget Caption / Driver Greeting Section
+
+    private var driverGreetingSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Widget Caption")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(Color.dashTextPrimary)
+                .padding(.horizontal, 16)
+
+            HStack {
+                TextField("Welcome, Driver", text: $config.driverGreeting)
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundStyle(Color.dashTextPrimary)
+
+                if !config.driverGreeting.isEmpty {
+                    Button {
+                        config.driverGreeting = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.system(size: 16))
+                            .foregroundStyle(Color.dashTextMuted)
+                    }
+                }
+            }
+            .padding(14)
+            .background(Color.dashSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(.horizontal, 16)
         }
     }
 
@@ -518,7 +584,7 @@ public struct WidgetEditorView: View {
             onSave(config)
             dismiss()
         } label: {
-            Text("Add to My Widgets")
+            Text(isEditingExisting ? "Save Changes" : "Add to My Widgets")
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Color.black)
                 .frame(maxWidth: .infinity)
@@ -527,6 +593,7 @@ public struct WidgetEditorView: View {
                 .clipShape(Capsule())
                 .shadow(color: Color.dashYellow.opacity(0.35), radius: 10, y: 4)
         }
+        .accessibilityIdentifier("WidgetEditor_SaveButton")
         .padding(.horizontal, 20)
         .padding(.bottom, 16)
     }

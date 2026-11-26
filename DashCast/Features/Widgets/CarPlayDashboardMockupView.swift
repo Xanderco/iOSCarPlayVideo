@@ -182,6 +182,9 @@ public struct CarPlayDashboardMockupView: View {
                 Text(config.countdownTitle ?? "10")
                     .font(.system(size: 44, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.35)
+                    .padding(.horizontal, 6)
 
                 Text("DAYS LEFT")
                     .font(.system(size: 11, weight: .bold))
