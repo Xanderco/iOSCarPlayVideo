@@ -5,11 +5,22 @@ public struct TripDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
     public let trip: TripModel
+    private let onTripUpdated: ((TripModel) -> Void)?
 
     @State private var mapMode: TripMapMode = .replay
+    @State private var selectedCategory: TripCategory?
+    @State private var savedCategory: TripCategory?
+    @State private var noteText: String
+    @State private var savedNote: String?
+    @FocusState private var isNoteFocused: Bool
 
-    public init(trip: TripModel) {
+    public init(trip: TripModel, onTripUpdated: ((TripModel) -> Void)? = nil) {
         self.trip = trip
+        self.onTripUpdated = onTripUpdated
+        _selectedCategory = State(initialValue: trip.category)
+        _savedCategory = State(initialValue: trip.category)
+        _noteText = State(initialValue: trip.note ?? "")
+        _savedNote = State(initialValue: TripModel.normalizedNote(trip.note))
     }
 
     private var coordinates: [CLLocationCoordinate2D] {
@@ -108,6 +119,10 @@ public struct TripDetailView: View {
                             .foregroundStyle(scoreColor)
                     }
 
+                    // Purpose & Notes Card
+                    purposeAndNotesCard
+                        .padding(.horizontal)
+
                     // Stats Grid
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
                         statCard(title: "DISTANCE", value: formattedDistance, icon: "road.lanes")
@@ -157,6 +172,126 @@ public struct TripDetailView: View {
         }
         .navigationTitle(trip.startTime.formatted(date: .abbreviated, time: .shortened))
         .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: isNoteFocused) { _, focused in
+            if !focused {
+                persistEdits()
+            }
+        }
+        .onDisappear {
+            persistEdits()
+        }
+    }
+
+    private var purposeAndNotesCard: some View {
+        let pendingNote = TripModel.normalizedNote(noteText)
+        let hasUnsavedNote = pendingNote != savedNote
+
+        return AutomotiveCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("TRIP PURPOSE")
+                        .font(ThemeFonts.hudCaption(size: 12))
+                        .foregroundStyle(Color.dcTextTertiary)
+                        .tracking(1.2)
+
+                    Spacer()
+
+                    if selectedCategory != nil {
+                        Button("Clear") {
+                            selectedCategory = nil
+                            persistEdits()
+                        }
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.dcTextSecondary)
+                        .accessibilityIdentifier("TripDetail_ClearCategoryButton")
+                    }
+                }
+
+                HStack(spacing: 8) {
+                    ForEach(TripCategory.allCases) { category in
+                        let isSelected = selectedCategory == category
+                        Button {
+                            selectedCategory = isSelected ? nil : category
+                            persistEdits()
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: category.systemImage)
+                                    .font(.system(size: 12, weight: .semibold))
+                                Text(LocalizedStringKey(category.displayName))
+                                    .font(.system(size: 13, weight: .semibold))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                            .foregroundStyle(isSelected ? Color.dcOnAccent : Color.dcTextSecondary)
+                            .background(
+                                RoundedRectangle(cornerRadius: DSRadius.sm, style: .continuous)
+                                    .fill(isSelected ? Color.dcAccent : Color.dcSurfaceRaised)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: DSRadius.sm, style: .continuous)
+                                    .strokeBorder(isSelected ? Color.clear : Color.dcStroke, lineWidth: DSStroke.regular)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityIdentifier("TripDetail_Category_\(category.rawValue)")
+                    }
+                }
+
+                Divider().background(Color.dcSeparator)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack {
+                        Text("NOTES")
+                            .font(ThemeFonts.hudCaption(size: 11))
+                            .foregroundStyle(Color.dcTextTertiary)
+                            .tracking(1.1)
+
+                        Spacer()
+
+                        if hasUnsavedNote {
+                            Button("Save Note") {
+                                isNoteFocused = false
+                                persistEdits()
+                            }
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.dcAccent)
+                            .accessibilityIdentifier("TripDetail_SaveNoteButton")
+                        }
+                    }
+
+                    TextField("Add a trip note (optional)", text: $noteText, axis: .vertical)
+                        .lineLimit(1...3)
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color.dcTextPrimary)
+                        .padding(10)
+                        .background(
+                            RoundedRectangle(cornerRadius: DSRadius.sm, style: .continuous)
+                                .fill(Color.dcSurfaceRaised)
+                        )
+                        .focused($isNoteFocused)
+                        .submitLabel(.done)
+                        .onSubmit {
+                            isNoteFocused = false
+                            persistEdits()
+                        }
+                        .accessibilityIdentifier("TripDetail_NoteField")
+                }
+            }
+        }
+    }
+
+    private func persistEdits() {
+        let normalized = TripModel.normalizedNote(noteText)
+        guard selectedCategory != savedCategory || normalized != savedNote else {
+            return
+        }
+        var updated = trip
+        updated.category = selectedCategory
+        updated.note = normalized
+        savedCategory = selectedCategory
+        savedNote = normalized
+        PersistenceController.shared.updateTrip(updated)
+        onTripUpdated?(updated)
     }
 
     private var scoreColor: Color {

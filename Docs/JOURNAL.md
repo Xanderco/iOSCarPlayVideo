@@ -92,6 +92,12 @@
 
 ## Log
 
+### 2026-11-25 21:50 (Bogotá) — Trip Purpose Tagging & Mileage Summary Totals [DI-82] (branch `feature/DI-82-trip-purpose-tagging`)
+- Added `TripCategory` (`personal`, `business`, `commute`) plus optional `category` and `note` to `TripModel` (`DashCast/Core/Models/TripModel.swift`) with backward- and forward-compatible `Codable` decoding, note normalization, and `TripCategorySummary` filtering/totals calculation.
+- Added `PersistenceController.updateTrip(_:)` (`DashCast/Core/Persistence/PersistenceController.swift`) to persist in-place trip tag/note updates and refresh widgets.
+- Updated `TripHistoryView` with category filter chips (`All`, `Personal`, `Business`, `Commute`), filtered summary totals (drive count, distance, avg score), category/note row badges, and index-safe deletion across filtered results.
+- Updated `TripDetailView` with a Trip Purpose & Notes card for selecting/clearing category and editing/saving trip notes, plus EN/ES translations in `Localizable.xcstrings` and unit tests in `DashCastTests/TripPurposeTaggingTests.swift`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
