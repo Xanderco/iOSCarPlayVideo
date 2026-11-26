@@ -15,8 +15,11 @@ public final class PlaylistStore: ObservableObject {
     /// Receives the current number of sources. `nil` (tests, previews) means unrestricted.
     public var canAddSource: (@MainActor (Int) -> Bool)?
 
-    /// Posted whenever playlists or favorites change (CarPlay listens to rebuild its templates).
+    /// Posted whenever playlists, favorites, or recents change (CarPlay listens to rebuild its templates).
     public static let didChangeNotification = Notification.Name("PlaylistStoreDidChange")
+
+    /// Maximum number of recently watched channels persisted on device.
+    public static let maxRecentChannels = 10
 
     public enum ImportError: LocalizedError, Equatable {
         case invalidURL
@@ -38,10 +41,12 @@ public final class PlaylistStore: ObservableObject {
 
     @Published public private(set) var playlists: [IPTVPlaylist]
     @Published public private(set) var favoriteIDs: Set<String>
+    @Published public private(set) var recentChannels: [ChannelModel]
 
     private let persistence: PersistenceController
     private let session: URLSession
     private let favoritesKey = "dashcast_favorite_channel_ids"
+    private let recentsKey = "dashcast_recent_channels"
     private let defaults: UserDefaults
 
     public init(persistence: PersistenceController = .shared,
@@ -52,6 +57,7 @@ public final class PlaylistStore: ObservableObject {
         self.session = session
         self.playlists = persistence.loadPlaylists()
         self.favoriteIDs = Set(defaults.stringArray(forKey: favoritesKey) ?? [])
+        self.recentChannels = Self.loadRecents(from: defaults, key: recentsKey)
     }
 
     // MARK: - Read
@@ -66,7 +72,26 @@ public final class PlaylistStore: ObservableObject {
     public var allChannels: [ChannelModel] { importedChannels + sampleChannels }
 
     public var favoriteChannels: [ChannelModel] {
-        allChannels.filter { favoriteIDs.contains(favoriteKey(for: $0)) }
+        let fromAll = allChannels.filter { favoriteIDs.contains(favoriteKey(for: $0)) }
+        let seen = Set(fromAll.map(favoriteKey(for:)))
+        let fromRecent = recentChannels.filter {
+            let key = favoriteKey(for: $0)
+            return favoriteIDs.contains(key) && !seen.contains(key)
+        }
+        return fromAll + fromRecent
+    }
+
+    /// Favorites pinned first, followed by recently watched channels not already listed, deduplicated by stream URL.
+    public var quickPlayChannels: [ChannelModel] {
+        var seen = Set<String>()
+        var result: [ChannelModel] = []
+        for channel in favoriteChannels + recentChannels {
+            let key = favoriteKey(for: channel)
+            if seen.insert(key).inserted {
+                result.append(channel)
+            }
+        }
+        return result
     }
 
     /// Channels grouped by `group-title`, preserving first-seen order.
@@ -82,6 +107,11 @@ public final class PlaylistStore: ObservableObject {
 
     public func isFavorite(_ channel: ChannelModel) -> Bool {
         favoriteIDs.contains(favoriteKey(for: channel))
+    }
+
+    public func isRecent(_ channel: ChannelModel) -> Bool {
+        let key = favoriteKey(for: channel)
+        return recentChannels.contains { favoriteKey(for: $0) == key }
     }
 
     // MARK: - Write
@@ -161,6 +191,36 @@ public final class PlaylistStore: ObservableObject {
         NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
     }
 
+    /// Records a channel as recently watched (deduplicated by stream URL, most recent first, capped at `maxRecentChannels`).
+    public func recordRecent(_ channel: ChannelModel, at date: Date = Date()) {
+        guard channel.id != CarPlayMirrorPlayback.channelID else { return }
+        let key = favoriteKey(for: channel)
+        var updated = recentChannels.filter { favoriteKey(for: $0) != key }
+        var recorded = channel
+        recorded.lastWatched = date
+        updated.insert(recorded, at: 0)
+        if updated.count > Self.maxRecentChannels {
+            updated = Array(updated.prefix(Self.maxRecentChannels))
+        }
+        recentChannels = updated
+        saveRecents()
+    }
+
+    public func removeRecent(_ channel: ChannelModel) {
+        let key = favoriteKey(for: channel)
+        let updated = recentChannels.filter { favoriteKey(for: $0) != key }
+        guard updated.count != recentChannels.count else { return }
+        recentChannels = updated
+        saveRecents()
+    }
+
+    public func clearRecents() {
+        guard !recentChannels.isEmpty else { return }
+        recentChannels = []
+        defaults.removeObject(forKey: recentsKey)
+        NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
+    }
+
     // MARK: - Private
 
     /// Channel IDs are regenerated on every import, so favorites are keyed by stream URL.
@@ -171,6 +231,21 @@ public final class PlaylistStore: ObservableObject {
     private func save() {
         persistence.savePlaylists(playlists)
         NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
+    }
+
+    private func saveRecents() {
+        if let data = try? JSONEncoder().encode(recentChannels) {
+            defaults.set(data, forKey: recentsKey)
+        }
+        NotificationCenter.default.post(name: Self.didChangeNotification, object: self)
+    }
+
+    private static func loadRecents(from defaults: UserDefaults, key: String) -> [ChannelModel] {
+        guard let data = defaults.data(forKey: key),
+              let decoded = try? JSONDecoder().decode([ChannelModel].self, from: data) else {
+            return []
+        }
+        return Array(decoded.prefix(maxRecentChannels))
     }
 }
 

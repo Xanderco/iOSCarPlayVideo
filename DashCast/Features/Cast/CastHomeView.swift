@@ -44,6 +44,11 @@ public struct CastHomeView: View {
                                 .padding(.horizontal, 16)
                         }
 
+                        // 1-Tap Favorites & Recently Watched Quick-Play Strip
+                        if !playlistStore.quickPlayChannels.isEmpty {
+                            quickPlayStripSection
+                        }
+
                         // Main 4-Row Source Menu Card
                         mainSourceMenuCard
 
@@ -177,6 +182,137 @@ public struct CastHomeView: View {
                 Button("OK", role: .cancel) { localImportError = nil }
             } message: {
                 Text(localImportError ?? "")
+            }
+        }
+    }
+
+    // MARK: - Favorites & Recent Quick-Play Strip
+
+    private var quickPlayStripSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Favorites & Recent")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(Color.dashYellow)
+                Spacer()
+                if !playlistStore.recentChannels.isEmpty {
+                    Button {
+                        playlistStore.clearRecents()
+                    } label: {
+                        Text("Clear Recents")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.dashTextSecondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("Cast_ClearRecentsButton")
+                }
+            }
+            .padding(.horizontal, 20)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 12) {
+                    ForEach(playlistStore.quickPlayChannels, id: \.streamURL) { channel in
+                        quickPlayTile(for: channel)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("Cast_QuickPlaySection")
+    }
+
+    private func quickPlayTile(for channel: ChannelModel) -> some View {
+        let isPlaying = playerService.currentChannel?.streamURL == channel.streamURL
+        let isFavorite = playlistStore.isFavorite(channel)
+        let isRecent = playlistStore.isRecent(channel)
+
+        return Button {
+            playerService.load(channel: channel)
+        } label: {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 6) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(isPlaying ? Color.dashYellow.opacity(0.18) : Color.dashSurfaceHighlight)
+                            .frame(width: 30, height: 30)
+
+                        Image(systemName: isPlaying ? "waveform" : (isFavorite ? "heart.fill" : "clock.fill"))
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(isPlaying || isFavorite ? Color.dashYellow : Color.dashTextSecondary)
+                    }
+
+                    Spacer()
+
+                    if isPlaying {
+                        Text("Playing")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(Color.black)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
+                            .background(Color.dashYellow)
+                            .clipShape(Capsule())
+                    } else {
+                        Image(systemName: "play.fill")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.dashYellow)
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(channel.name)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(Color.dashTextPrimary)
+                        .lineLimit(1)
+
+                    Text(channel.groupTitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.dashTextSecondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(width: 152, alignment: .leading)
+            .padding(12)
+            .background(Color.dashSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(isPlaying ? Color.dashYellow : Color.dashBorder, lineWidth: isPlaying ? 1.5 : 1)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("Cast_QuickPlayTile")
+        .contextMenu {
+            Button {
+                playerService.load(channel: channel)
+            } label: {
+                Label("Play Now", systemImage: "play.fill")
+            }
+
+            Button {
+                playlistStore.toggleFavorite(channel)
+            } label: {
+                Label(
+                    isFavorite ? "Remove from Favorites" : "Add to Favorites",
+                    systemImage: isFavorite ? "heart.slash" : "heart"
+                )
+            }
+
+            if isRecent {
+                Button {
+                    playlistStore.removeRecent(channel)
+                } label: {
+                    Label("Remove from Recent", systemImage: "clock.badge.xmark")
+                }
+            }
+
+            if !playlistStore.recentChannels.isEmpty {
+                Button(role: .destructive) {
+                    playlistStore.clearRecents()
+                } label: {
+                    Label("Clear Recents", systemImage: "trash")
+                }
             }
         }
     }
@@ -816,18 +952,75 @@ public struct CastHomeView: View {
         NavigationStack {
             ZStack {
                 Color.dashBackground.ignoresSafeArea()
-                VStack(spacing: 16) {
-                    Image(systemName: "heart.slash")
-                        .font(.system(size: 40))
-                        .foregroundStyle(Color.dashTextMuted)
-                    Text("No Favorites Yet")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(Color.dashTextPrimary)
-                    Text("Save videos and web bookmarks to quickly access them in your car.")
-                        .font(.system(size: 13))
-                        .foregroundStyle(Color.dashTextSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 32)
+                if playlistStore.favoriteChannels.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "heart.slash")
+                            .font(.system(size: 40))
+                            .foregroundStyle(Color.dashTextMuted)
+                        Text("No Favorites Yet")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color.dashTextPrimary)
+                        Text("Save videos and web bookmarks to quickly access them in your car.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color.dashTextSecondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 32)
+                    }
+                } else {
+                    ScrollView {
+                        VStack(spacing: 10) {
+                            ForEach(playlistStore.favoriteChannels) { channel in
+                                HStack(spacing: 14) {
+                                    Button {
+                                        playerService.load(channel: channel)
+                                        showingFavorites = false
+                                    } label: {
+                                        HStack(spacing: 14) {
+                                            ZStack {
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .fill(Color.dashSurfaceHighlight)
+                                                    .frame(width: 44, height: 44)
+
+                                                Image(systemName: playerService.currentChannel?.streamURL == channel.streamURL ? "waveform" : "tv.fill")
+                                                    .foregroundStyle(Color.dashYellow)
+                                            }
+
+                                            VStack(alignment: .leading, spacing: 3) {
+                                                Text(channel.name)
+                                                    .font(.system(size: 15, weight: .semibold))
+                                                    .foregroundStyle(Color.dashTextPrimary)
+                                                    .lineLimit(1)
+
+                                                Text(channel.groupTitle)
+                                                    .font(.system(size: 12))
+                                                    .foregroundStyle(Color.dashTextSecondary)
+                                                    .lineLimit(1)
+                                            }
+
+                                            Spacer()
+                                        }
+                                        .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    Button {
+                                        playlistStore.toggleFavorite(channel)
+                                    } label: {
+                                        Image(systemName: "heart.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundStyle(Color.dashYellow)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel("Remove from Favorites")
+                                }
+                                .padding()
+                                .background(Color.dashSurface)
+                                .clipShape(RoundedRectangle(cornerRadius: 14))
+                                .padding(.horizontal)
+                            }
+                        }
+                        .padding(.vertical, 12)
+                    }
                 }
             }
             .navigationTitle("Favorites")
