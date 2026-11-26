@@ -139,6 +139,37 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testDriveSettingsOpensCountryPickerAndPermissions() throws {
+        let driveTab = tabButton("Drive")
+        XCTAssertTrue(driveTab.waitForExistence(timeout: 15), "Drive tab button missing")
+        driveTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Drive"].waitForExistence(timeout: 10), "Drive screen did not appear")
+
+        let settingsButton = app.buttons["Drive_SettingsButton"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 10), "Drive Settings button missing")
+        tapCenter(of: settingsButton)
+        if !app.navigationBars["Drive"].waitForExistence(timeout: 4) {
+            app.tap()
+            tapCenter(of: settingsButton)
+        }
+
+        XCTAssertTrue(app.navigationBars["Drive"].waitForExistence(timeout: 10), "Drive Settings sheet did not open")
+        XCTAssertTrue(app.buttons["DriveSettings_LocationPermission"].waitForExistence(timeout: 5), "Location permission row missing")
+        XCTAssertTrue(app.buttons["DriveSettings_MotionPermission"].exists, "Motion permission row missing")
+        XCTAssertTrue(app.buttons["DriveSettings_NotificationsPermission"].exists, "Notifications permission row missing")
+
+        let countryButton = app.buttons["DriveSettings_CountryButton"]
+        XCTAssertTrue(countryButton.exists, "Country picker button missing")
+        countryButton.tap()
+
+        XCTAssertTrue(app.navigationBars["Select Country"].waitForExistence(timeout: 10), "Country picker sheet did not open")
+        snapshot("05-drive-country-picker")
+        app.navigationBars["Select Country"].buttons["Cancel"].tap()
+
+        XCTAssertTrue(app.navigationBars["Drive"].waitForExistence(timeout: 10), "Did not return to Drive Settings")
+        snapshot("05-drive-settings")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

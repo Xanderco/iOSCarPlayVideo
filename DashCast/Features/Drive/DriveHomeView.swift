@@ -104,6 +104,8 @@ public struct DriveHomeView: View {
                                     .background(Color.dashSurface.opacity(0.85))
                                     .clipShape(Circle())
                             }
+                            .accessibilityLabel("Drive Settings")
+                            .accessibilityIdentifier("Drive_SettingsButton")
                         }
                         .padding()
                     }
@@ -234,7 +236,10 @@ public struct DriveHomeView: View {
                 if !locationService.isTracking {
                     GlowButton(title: "Start Drive", iconName: "play.fill", gradient: .dashAccentGradient) {
                         locationService.startTrip()
-                        DriveNotificationService.shared.sendDriveRecordingNotification(distanceKm: 0)
+                        let prefs = PersistenceController.shared.loadUserPreferences()
+                        if prefs.driveNotificationsEnabled {
+                            DriveNotificationService.shared.sendDriveRecordingNotification(distanceKm: 0)
+                        }
                     }
 
                     Button {
@@ -274,7 +279,13 @@ public struct DriveHomeView: View {
                     Button {
                         let trip = locationService.endTrip()
                         self.completedTrip = trip
-                        DriveNotificationService.shared.sendTripSavedNotification(trip: trip)
+                        let prefs = PersistenceController.shared.loadUserPreferences()
+                        if prefs.driveNotificationsEnabled {
+                            DriveNotificationService.shared.sendTripSavedNotification(
+                                trip: trip,
+                                useMiles: appState.useMilesPerHour
+                            )
+                        }
                         self.showingTripSummary = true
                     } label: {
                         HStack {

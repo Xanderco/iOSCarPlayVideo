@@ -183,8 +183,14 @@ final class AutoTripService: NSObject, ObservableObject, CLLocationManagerDelega
     private func finishAutomaticTrip() {
         guard currentTripIsAutomatic, recorder.isTracking else { return }
         currentTripIsAutomatic = false
-        let trip = recorder.endTrip()
         let prefs = PersistenceController.shared.loadUserPreferences()
+        let trip = recorder.endTrip(minimumDistanceMeters: prefs.minimumDriveMeters)
+        guard DriveLocationService.shouldSaveTrip(
+            distanceMeters: trip.distanceMeters,
+            minimumDriveMeters: prefs.minimumDriveMeters
+        ) else {
+            return
+        }
         if prefs.driveNotificationsEnabled {
             DriveNotificationService.shared.sendTripSavedNotification(trip: trip, useMiles: prefs.useMilesPerHour)
         }
