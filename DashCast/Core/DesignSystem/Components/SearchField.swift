@@ -1,10 +1,35 @@
 import SwiftUI
 
+/// Localized copy keys for `SearchField`.
+public enum SearchFieldCopy {
+    nonisolated public static let defaultPromptString = "Search channels"
+    nonisolated public static let sourcesPromptString = "Search sources"
+    nonisolated public static let clearSearchString = "Clear search"
+    nonisolated public static let cancelString = "Cancel"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        defaultPromptString,
+        sourcesPromptString,
+        clearSearchString,
+        cancelString
+    ]
+
+    @MainActor
+    public static var clearSearchKey: LocalizedStringKey {
+        LocalizedStringKey(clearSearchString)
+    }
+
+    @MainActor
+    public static var cancelKey: LocalizedStringKey {
+        LocalizedStringKey(cancelString)
+    }
+}
+
 /// Rounded search field with clear and (when focused) Cancel buttons.
 /// Use for searching channels, groups and sources.
 public struct SearchField: View {
     @Binding private var text: String
-    private let prompt: String
+    private let promptKey: LocalizedStringKey
     private let showsCancel: Bool
     private let onSubmit: (() -> Void)?
 
@@ -14,12 +39,24 @@ public struct SearchField: View {
 
     public init(
         text: Binding<String>,
-        prompt: String = "Search channels",
+        prompt: String = SearchFieldCopy.defaultPromptString,
         showsCancel: Bool = true,
         onSubmit: (() -> Void)? = nil
     ) {
         self._text = text
-        self.prompt = prompt
+        self.promptKey = LocalizedStringKey(prompt)
+        self.showsCancel = showsCancel
+        self.onSubmit = onSubmit
+    }
+
+    public init(
+        text: Binding<String>,
+        promptKey: LocalizedStringKey,
+        showsCancel: Bool = true,
+        onSubmit: (() -> Void)? = nil
+    ) {
+        self._text = text
+        self.promptKey = promptKey
         self.showsCancel = showsCancel
         self.onSubmit = onSubmit
     }
@@ -30,7 +67,7 @@ public struct SearchField: View {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(Color.dcTextTertiary)
                     .accessibilityHidden(true)
-                TextField(prompt, text: $text)
+                TextField(promptKey, text: $text)
                     .font(DSTypography.body)
                     .foregroundStyle(Color.dcTextPrimary)
                     .focused($isFocused)
@@ -38,7 +75,7 @@ public struct SearchField: View {
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
                     .onSubmit { onSubmit?() }
-                    .accessibilityLabel(Text(prompt))
+                    .accessibilityLabel(Text(promptKey))
                 if !text.isEmpty {
                     Button {
                         text = ""
@@ -49,7 +86,7 @@ public struct SearchField: View {
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel(Text("Clear search"))
+                    .accessibilityLabel(Text(SearchFieldCopy.clearSearchKey))
                 }
             }
             .padding(.horizontal, DSSpacing.md)
@@ -61,7 +98,7 @@ public struct SearchField: View {
             )
 
             if showsCancel && isFocused {
-                Button("Cancel") {
+                Button(SearchFieldCopy.cancelKey) {
                     text = ""
                     isFocused = false
                 }

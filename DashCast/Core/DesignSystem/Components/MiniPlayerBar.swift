@@ -1,5 +1,49 @@
 import SwiftUI
 
+/// Localized copy keys for `MiniPlayerBar`.
+public enum MiniPlayerCopy {
+    nonisolated public static let nowPlayingFormatString = "Now playing: %@"
+    nonisolated public static let opensFullPlayerHintString = "Opens the full player"
+    nonisolated public static let pauseString = "Pause"
+    nonisolated public static let playString = "Play"
+    nonisolated public static let stopPlaybackString = "Stop playback"
+    nonisolated public static let miniPlayerString = "Mini player"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        nowPlayingFormatString,
+        opensFullPlayerHintString,
+        pauseString,
+        playString,
+        stopPlaybackString,
+        miniPlayerString
+    ]
+
+    @MainActor
+    public static func nowPlayingKey(title: String) -> LocalizedStringKey {
+        LocalizedStringKey("Now playing: \(title)")
+    }
+
+    @MainActor
+    public static var opensFullPlayerHintKey: LocalizedStringKey {
+        LocalizedStringKey(opensFullPlayerHintString)
+    }
+
+    @MainActor
+    public static func playPauseKey(isPlaying: Bool) -> LocalizedStringKey {
+        LocalizedStringKey(isPlaying ? pauseString : playString)
+    }
+
+    @MainActor
+    public static var stopPlaybackKey: LocalizedStringKey {
+        LocalizedStringKey(stopPlaybackString)
+    }
+
+    @MainActor
+    public static var miniPlayerKey: LocalizedStringKey {
+        LocalizedStringKey(miniPlayerString)
+    }
+}
+
 /// Floating "now playing" bar shown above the tab bar while playback continues
 /// in the background of browsing. Tapping the bar expands to the full player.
 ///
@@ -70,9 +114,9 @@ public struct MiniPlayerBar: View {
             }
             .buttonStyle(.plain)
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Text("Now playing: \(title)"))
+            .accessibilityLabel(Text(MiniPlayerCopy.nowPlayingKey(title: title)))
             .accessibilityValue(Text(subtitle ?? ""))
-            .accessibilityHint(Text("Opens the full player"))
+            .accessibilityHint(Text(MiniPlayerCopy.opensFullPlayerHintKey))
 
             Button(action: onPlayPause) {
                 ZStack {
@@ -89,7 +133,7 @@ public struct MiniPlayerBar: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(Text(isPlaying ? "Pause" : "Play"))
+            .accessibilityLabel(Text(MiniPlayerCopy.playPauseKey(isPlaying: isPlaying)))
 
             if let onClose {
                 Button(action: onClose) {
@@ -100,7 +144,7 @@ public struct MiniPlayerBar: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("Stop playback"))
+                .accessibilityLabel(Text(MiniPlayerCopy.stopPlaybackKey))
             }
         }
         .padding(.leading, DSSpacing.sm)
@@ -113,7 +157,7 @@ public struct MiniPlayerBar: View {
         .dsShadow(.floating)
         .padding(.horizontal, DSSpacing.sm)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Mini player"))
+        .accessibilityLabel(Text(MiniPlayerCopy.miniPlayerKey))
     }
 
     @ViewBuilder
