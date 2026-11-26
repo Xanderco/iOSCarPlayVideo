@@ -101,7 +101,12 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         locationManager.startUpdatingLocation()
     }
 
-    public func endTrip() -> TripModel {
+    /// Returns whether a finished trip meets the configured minimum distance threshold.
+    nonisolated public static func shouldSaveTrip(distanceMeters: Double, minimumDriveMeters: Double) -> Bool {
+        distanceMeters >= max(0, minimumDriveMeters)
+    }
+
+    public func endTrip(minimumDistanceMeters: Double = 0) -> TripModel {
         isTracking = false
         isPaused = false
         locationManager.stopUpdatingLocation()
@@ -124,13 +129,15 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
             harshCorneringCount: DrivingScorer.shared.harshCorneringCount
         )
 
-        // Save trip
-        var trips = PersistenceController.shared.loadTrips()
-        trips.insert(trip, at: 0)
-        PersistenceController.shared.saveTrips(trips)
+        if Self.shouldSaveTrip(distanceMeters: distanceMeters, minimumDriveMeters: minimumDistanceMeters) {
+            // Save trip
+            var trips = PersistenceController.shared.loadTrips()
+            trips.insert(trip, at: 0)
+            PersistenceController.shared.saveTrips(trips)
 
-        // Record on-device local usage metrics
-        UsageMetricsManager.shared.recordTrip(trip: trip)
+            // Record on-device local usage metrics
+            UsageMetricsManager.shared.recordTrip(trip: trip)
+        }
 
         DrivingScorer.shared.reset()
         return trip

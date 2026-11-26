@@ -1,13 +1,20 @@
 import SwiftUI
 import CoreLocation
+import CoreMotion
+import UserNotifications
 
 public struct DriveSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
+    @StateObject private var locationService = DriveLocationService.shared
 
     @State private var preferences: UserPreferences = PersistenceController.shared.loadUserPreferences()
     @State private var showingPermissionsSheet: Bool = false
     @State private var showingVehiclePicker: Bool = false
+    @State private var showingCountryPicker: Bool = false
+    @State private var countrySearchText: String = ""
+    @State private var motionAuthorizationStatus: CMAuthorizationStatus = CMMotionActivityManager.authorizationStatus()
+    @State private var notificationAuthorizationStatus: UNAuthorizationStatus = .notDetermined
 
     private let minimumDriveOptions: [Double] = [50, 100, 250, 500, 1000]
 
@@ -61,6 +68,20 @@ public struct DriveSettingsView: View {
             }
             .sheet(isPresented: $showingVehiclePicker) {
                 vehiclePickerSheet
+            }
+            .sheet(isPresented: $showingCountryPicker) {
+                countryPickerSheet
+            }
+            .task {
+                await refreshPermissionStatuses()
+            }
+            .onChange(of: showingPermissionsSheet) { _, isPresented in
+                if !isPresented {
+                    Task { await refreshPermissionStatuses() }
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                Task { await refreshPermissionStatuses() }
             }
         }
     }
@@ -128,7 +149,7 @@ public struct DriveSettingsView: View {
                 }
                 .tint(Color.dashYellow)
                 .padding(14)
-                .onChange(of: preferences.autoDetectDrives) { _ in
+                .onChange(of: preferences.autoDetectDrives) { _, _ in
                     preferences.autoTripDetectionEnabled = preferences.autoDetectDrives
                     savePreferences()
                     // Drives the real detector (CoreMotion + significant location changes).
@@ -224,24 +245,32 @@ public struct DriveSettingsView: View {
                 .foregroundStyle(Color.dashTextMuted)
                 .padding(.horizontal, 4)
 
-            HStack {
-                Text("Country")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(Color.dashTextPrimary)
+            Button {
+                countrySearchText = ""
+                showingCountryPicker = true
+            } label: {
+                HStack {
+                    Text("Country")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(Color.dashTextPrimary)
 
-                Spacer()
+                    Spacer()
 
-                HStack(spacing: 6) {
-                    Text(preferences.driveCountry)
-                        .font(.system(size: 14))
-                        .foregroundStyle(Color.dashTextMuted)
+                    HStack(spacing: 6) {
+                        Text(preferences.driveCountry)
+                            .font(.system(size: 14))
+                            .foregroundStyle(Color.dashTextMuted)
 
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Color.dashTextMuted)
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12))
+                            .foregroundStyle(Color.dashTextMuted)
+                    }
                 }
+                .padding(14)
+                .contentShape(Rectangle())
             }
-            .padding(14)
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("DriveSettings_CountryButton")
             .background(Color.dashSurface)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
@@ -270,13 +299,14 @@ public struct DriveSettingsView: View {
             .padding(14)
             .background(Color.dashSurface)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .onChange(of: preferences.driveNotificationsEnabled) { enabled in
+            .onChange(of: preferences.driveNotificationsEnabled) { _, enabled in
                 savePreferences()
-                if enabled {
-                    Task {
+                Task {
+                    if enabled {
                         _ = await DriveNotificationService.shared.requestAuthorization()
                         DriveNotificationService.shared.scheduleFeatureTips()
                     }
+                    await refreshPermissionStatuses()
                 }
             }
         }
@@ -285,32 +315,69 @@ public struct DriveSettingsView: View {
     // MARK: - Permissions Section
 
     private var permissionsSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        let locationDisplay = DrivePermissionStatusMapper.locationDisplay(for: locationService.authorizationStatus)
+        let motionDisplay = DrivePermissionStatusMapper.motionDisplay(for: motionAuthorizationStatus)
+        let notificationDisplay = DrivePermissionStatusMapper.notificationDisplay(
+            isEnabledInApp: preferences.driveNotificationsEnabled,
+            systemStatus: notificationAuthorizationStatus
+        )
+
+        return VStack(alignment: .leading, spacing: 10) {
             Text("PERMISSIONS")
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Color.dashTextMuted)
                 .padding(.horizontal, 4)
 
             VStack(spacing: 0) {
-                permissionRow(title: "Location", statusText: "While using", color: .dashOrange) {
+                permissionRow(
+                    title: "Location",
+                    statusText: LocalizedStringKey(locationDisplay.statusKey),
+                    color: color(for: locationDisplay.tone)
+                ) {
                     showingPermissionsSheet = true
                 }
+                .accessibilityIdentifier("DriveSettings_LocationPermission")
 
                 Divider().background(Color.dashBorder)
 
-                permissionRow(title: "Motion & Fitness", statusText: "On", color: .dashGreen) {
+                permissionRow(
+                    title: "Motion & Fitness",
+                    statusText: LocalizedStringKey(motionDisplay.statusKey),
+                    color: color(for: motionDisplay.tone)
+                ) {
                     showingPermissionsSheet = true
                 }
+                .accessibilityIdentifier("DriveSettings_MotionPermission")
 
                 Divider().background(Color.dashBorder)
 
-                permissionRow(title: "Notifications", statusText: preferences.driveNotificationsEnabled ? "On" : "Off", color: preferences.driveNotificationsEnabled ? .dashGreen : .dashTextMuted) {
+                permissionRow(
+                    title: "Notifications",
+                    statusText: LocalizedStringKey(notificationDisplay.statusKey),
+                    color: color(for: notificationDisplay.tone)
+                ) {
                     showingPermissionsSheet = true
                 }
+                .accessibilityIdentifier("DriveSettings_NotificationsPermission")
             }
             .background(Color.dashSurface)
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
+    }
+
+    private func color(for tone: DrivePermissionTone) -> Color {
+        switch tone {
+        case .green: return .dashGreen
+        case .orange: return .dashOrange
+        case .red: return .dashRed
+        case .muted: return .dashTextMuted
+        }
+    }
+
+    @MainActor
+    private func refreshPermissionStatuses() async {
+        motionAuthorizationStatus = CMMotionActivityManager.authorizationStatus()
+        notificationAuthorizationStatus = await DriveNotificationService.shared.checkAuthorizationStatus()
     }
 
     private func permissionRow(title: LocalizedStringKey, statusText: LocalizedStringKey, color: Color, action: @escaping () -> Void) -> some View {
@@ -391,6 +458,58 @@ public struct DriveSettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { showingVehiclePicker = false }
+                        .foregroundStyle(Color.dashYellow)
+                }
+            }
+        }
+    }
+
+    // MARK: - Country Picker Sheet
+
+    private var countryPickerSheet: some View {
+        let filtered = DriveCountryCatalog.filteredCountries(matching: countrySearchText)
+
+        return NavigationStack {
+            List {
+                if filtered.isEmpty {
+                    Text("No Countries Found")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Color.dashTextMuted)
+                        .listRowBackground(Color.dashSurface)
+                } else {
+                    ForEach(filtered, id: \.self) { country in
+                        Button {
+                            preferences.driveCountry = country
+                            savePreferences()
+                            showingCountryPicker = false
+                        } label: {
+                            HStack {
+                                Text(country)
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundStyle(Color.dashTextPrimary)
+
+                                Spacer()
+
+                                if preferences.driveCountry == country {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(Color.dashYellow)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .listRowBackground(Color.dashSurface)
+                    }
+                }
+            }
+            .scrollContentBackground(.hidden)
+            .background(Color.dashBackground)
+            .searchable(text: $countrySearchText, prompt: Text("Search countries"))
+            .navigationTitle("Select Country")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { showingCountryPicker = false }
                         .foregroundStyle(Color.dashYellow)
                 }
             }

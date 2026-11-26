@@ -1,4 +1,7 @@
 import XCTest
+import CoreLocation
+import CoreMotion
+import UserNotifications
 @testable import DashCast
 
 final class DriveSettingsAndNotificationTests: XCTestCase {
@@ -54,5 +57,90 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         service.scheduleFeatureTips()
         // If no crash occurred, notifications requests dispatched to UNUserNotificationCenter
         XCTAssertTrue(true)
+    }
+
+    func testLocationPermissionStatusMapping() {
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.locationDisplay(for: .authorizedAlways),
+            DrivePermissionDisplay(statusKey: "Always", tone: .green)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.locationDisplay(for: .authorizedWhenInUse),
+            DrivePermissionDisplay(statusKey: "While using", tone: .orange)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.locationDisplay(for: .denied),
+            DrivePermissionDisplay(statusKey: "Denied", tone: .red)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.locationDisplay(for: .restricted),
+            DrivePermissionDisplay(statusKey: "Restricted", tone: .red)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.locationDisplay(for: .notDetermined),
+            DrivePermissionDisplay(statusKey: "Not set", tone: .muted)
+        )
+    }
+
+    func testMotionPermissionStatusMapping() {
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.motionDisplay(for: .authorized),
+            DrivePermissionDisplay(statusKey: "On", tone: .green)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.motionDisplay(for: .denied),
+            DrivePermissionDisplay(statusKey: "Denied", tone: .red)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.motionDisplay(for: .restricted),
+            DrivePermissionDisplay(statusKey: "Restricted", tone: .red)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.motionDisplay(for: .notDetermined),
+            DrivePermissionDisplay(statusKey: "Not set", tone: .muted)
+        )
+    }
+
+    func testNotificationPermissionStatusMapping() {
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.notificationDisplay(isEnabledInApp: false, systemStatus: .authorized),
+            DrivePermissionDisplay(statusKey: "Off", tone: .muted)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.notificationDisplay(isEnabledInApp: true, systemStatus: .authorized),
+            DrivePermissionDisplay(statusKey: "On", tone: .green)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.notificationDisplay(isEnabledInApp: true, systemStatus: .provisional),
+            DrivePermissionDisplay(statusKey: "On", tone: .green)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.notificationDisplay(isEnabledInApp: true, systemStatus: .denied),
+            DrivePermissionDisplay(statusKey: "Denied", tone: .red)
+        )
+        XCTAssertEqual(
+            DrivePermissionStatusMapper.notificationDisplay(isEnabledInApp: true, systemStatus: .notDetermined),
+            DrivePermissionDisplay(statusKey: "Not set", tone: .muted)
+        )
+    }
+
+    func testMinimumDriveThresholdFiltering() {
+        XCTAssertFalse(DriveLocationService.shouldSaveTrip(distanceMeters: 49.9, minimumDriveMeters: 50.0))
+        XCTAssertTrue(DriveLocationService.shouldSaveTrip(distanceMeters: 50.0, minimumDriveMeters: 50.0))
+        XCTAssertTrue(DriveLocationService.shouldSaveTrip(distanceMeters: 1200.0, minimumDriveMeters: 500.0))
+        XCTAssertFalse(DriveLocationService.shouldSaveTrip(distanceMeters: 250.0, minimumDriveMeters: 500.0))
+        XCTAssertTrue(DriveLocationService.shouldSaveTrip(distanceMeters: 0.0, minimumDriveMeters: 0.0))
+    }
+
+    func testCountryCatalogContainsDefaultsAndFilters() {
+        let all = DriveCountryCatalog.allCountries
+        XCTAssertTrue(all.contains("Colombia"))
+        XCTAssertTrue(all.contains("United States"))
+
+        let filtered = DriveCountryCatalog.filteredCountries(matching: "  colom ")
+        XCTAssertTrue(filtered.contains("Colombia"))
+        XCTAssertFalse(filtered.contains("United States"))
+
+        XCTAssertEqual(DriveCountryCatalog.filteredCountries(matching: "   ").count, all.count)
     }
 }
