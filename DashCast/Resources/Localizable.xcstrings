@@ -8177,6 +8177,142 @@
           }
         }
       }
+    },
+    "Show your iPhone on this screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show your iPhone on this screen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra tu iPhone en esta pantalla"
+          }
+        }
+      }
+    },
+    "Parked only · starts after Start Broadcast on iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parked only · starts after Start Broadcast on iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo aparcado · comienza tras Iniciar transmisión en el iPhone"
+          }
+        }
+      }
+    },
+    "Open DashCast on your iPhone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open DashCast on your iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre DashCast en tu iPhone"
+          }
+        }
+      }
+    },
+    "Go to Cast → Car Display.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Go to Cast → Car Display."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ve a Transmitir → Pantalla del coche."
+          }
+        }
+      }
+    },
+    "Turn on “Mirror to CarPlay screen”": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on “Mirror to CarPlay screen”"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa “Duplicar en pantalla de CarPlay”"
+          }
+        }
+      }
+    },
+    "Then tap the broadcast button and choose Start Broadcast.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Then tap the broadcast button and choose Start Broadcast."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luego toca el botón de transmisión y elige Iniciar transmisión."
+          }
+        }
+      }
+    },
+    "Parked only": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parked only"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo aparcado"
+          }
+        }
+      }
+    },
+    "Mirroring stops automatically as soon as the vehicle moves.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirroring stops automatically as soon as the vehicle moves."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La duplicación se detiene automáticamente en cuanto el vehículo se mueve."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

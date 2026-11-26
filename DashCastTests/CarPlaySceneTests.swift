@@ -44,4 +44,50 @@ final class CarPlaySceneTests: XCTestCase {
         action?.handler?(action!) {}
         XCTAssertTrue(tapped)
     }
+
+    func testCarPlaySceneCopyGroupTitleAndChannelCountPluralization() {
+        XCTAssertEqual(CarPlaySceneCopy.groupTitle(""), CarPlaySceneCopy.otherGroupTitle)
+        XCTAssertEqual(CarPlaySceneCopy.groupTitle("Sports"), "Sports")
+
+        XCTAssertEqual(CarPlaySceneCopy.channelCountText(1), String(localized: "1 channel"))
+        XCTAssertEqual(CarPlaySceneCopy.channelCountText(0), String(localized: "\(0) channels"))
+        XCTAssertEqual(CarPlaySceneCopy.channelCountText(5), String(localized: "\(5) channels"))
+        XCTAssertEqual(CarPlaySceneCopy.channelCountText(-3), String(localized: "\(0) channels"))
+    }
+
+    func testCarPlaySceneCopyInfoAndMirrorStrings() {
+        XCTAssertEqual(CarPlaySceneCopy.infoRows.count, 2)
+        XCTAssertFalse(CarPlaySceneCopy.infoRows[0].title.isEmpty)
+        XCTAssertFalse(CarPlaySceneCopy.infoRows[0].detail.isEmpty)
+        XCTAssertFalse(CarPlaySceneCopy.infoRows[1].title.isEmpty)
+        XCTAssertFalse(CarPlaySceneCopy.infoRows[1].detail.isEmpty)
+
+        XCTAssertEqual(CarPlaySceneCopy.mirrorInstructionSteps.count, 3)
+        XCTAssertEqual(CarPlaySceneDelegate.mirrorActionTitle, CarPlaySceneCopy.mirrorActionTitle)
+        XCTAssertEqual(CarPlaySceneDelegate.mirrorInstructionSteps.count, CarPlaySceneCopy.mirrorInstructionSteps.count)
+    }
+
+    func testCarPlayLocalizationKeysExistInCatalog() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = Bundle(for: CarPlaySceneTests.self).url(forResource: "Localizable", withExtension: "xcstrings")
+            ?? projectDir
+                .appendingPathComponent("DashCast")
+                .appendingPathComponent("Resources")
+                .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in CarPlaySceneCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing key in Localizable.xcstrings: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
+            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing EN for \(key)")
+            XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing ES for \(key)")
+        }
+    }
 }
