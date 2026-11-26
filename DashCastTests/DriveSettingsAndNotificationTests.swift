@@ -92,6 +92,8 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         XCTAssertNil(restricted?.button)
 
         XCTAssertNil(LocationPermissionCardCopy.descriptor(for: .authorizedAlways))
+        XCTAssertEqual(LocationPermissionCardCopy.descriptor(forKind: .denied)?.titleKeyName, "Location is off for DashCast")
+        XCTAssertNil(LocationPermissionCardCopy.descriptor(forKind: .none))
     }
 
     func testDriveLiveMapAndPermissionLocalizationKeysExistInCatalog() throws {

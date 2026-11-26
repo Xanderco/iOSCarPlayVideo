@@ -33,7 +33,7 @@ enum LocationPermissionCardCopy {
         "Location Services are limited on this device (for example by Screen Time or a device profile), so DashCast can't show your position."
     ]
 
-    nonisolated static func descriptor(for kind: LocationPermissionCard.Kind) -> Descriptor? {
+    nonisolated static func descriptor(forKind kind: LocationPermissionCard.Kind) -> Descriptor? {
         switch kind {
         case .askWhenInUse:
             return Descriptor(
@@ -69,7 +69,7 @@ enum LocationPermissionCardCopy {
     }
 
     nonisolated static func descriptor(for status: CLAuthorizationStatus) -> Descriptor? {
-        descriptor(for: LocationPermissionCard.kind(for: status))
+        descriptor(forKind: LocationPermissionCard.kind(for: status))
     }
 }
 
@@ -144,7 +144,7 @@ struct LocationPermissionCard: View {
 
     var body: some View {
         let kind = Self.kind(for: location.authorizationStatus)
-        if let copy = LocationPermissionCardCopy.descriptor(for: kind) {
+        if let copy = LocationPermissionCardCopy.descriptor(forKind: kind) {
             card(
                 icon: copy.icon,
                 title: copy.title,
