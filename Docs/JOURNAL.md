@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 (CarDash Worker) — Interactive CarPlay Dashboard Shortcuts & Quick-Resume [DI-93]
+- Added `CarPlayDashboardShortcutProvider` (`DashCast/CarPlay/CarPlayDashboardShortcutProvider.swift`) generating up to 2 dynamic `CPDashboardButton` specs (`togglePlayPause` when active/paused + `playChannel` quick-resume prioritizing favorites, or fallback when empty) and executing shortcut actions on `VideoPlayerService`.
+- Updated `CarPlayDashboardSceneDelegate` to observe `VideoPlayerService.shared` (`$currentChannel`, `$isPlaying`) and `PlaylistStore.didChangeNotification`, refresh `dashboardController.shortcutButtons`, and clean up observers on disconnect.
+- Added 9 unit tests in `DashCastTests/CarPlayDashboardShortcutTests.swift` and EN/ES translations in `Localizable.xcstrings`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
