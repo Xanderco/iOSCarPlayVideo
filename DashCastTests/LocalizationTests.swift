@@ -140,4 +140,58 @@ final class LocalizationTests: XCTestCase {
             XCTAssertNotNil(tab.localizedTitle)
         }
     }
+
+    func testSourceTileCopyAccessibilityFormatting() {
+        XCTAssertEqual(
+            SourceTileCopy.accessibilityValue(status: .loading, subtitle: "Movies · Shows", badge: "M3U"),
+            "Movies · Shows, Loading"
+        )
+        XCTAssertEqual(
+            SourceTileCopy.accessibilityValue(status: .loading, subtitle: nil, badge: nil),
+            "Loading"
+        )
+        XCTAssertEqual(
+            SourceTileCopy.accessibilityValue(status: .error("Couldn't reach server"), subtitle: "Movies", badge: "M3U"),
+            "Error: Couldn't reach server"
+        )
+        XCTAssertEqual(
+            SourceTileCopy.accessibilityValue(status: .ready, subtitle: "1,284 channels", badge: "M3U"),
+            "1,284 channels, M3U"
+        )
+        XCTAssertEqual(
+            SourceTileCopy.accessibilityValue(status: .ready, subtitle: nil, badge: nil),
+            ""
+        )
+    }
+
+    @MainActor
+    func testSourceTileCopySwiftUIKeys() {
+        XCTAssertEqual(SourceTileCopy.addTitleKey, LocalizedStringKey(SourceTileCopy.addSourceString))
+        XCTAssertEqual(SourceTileCopy.accessibilityHintKey(style: .add), LocalizedStringKey(SourceTileCopy.addHintString))
+        XCTAssertEqual(SourceTileCopy.accessibilityHintKey(style: .standard), LocalizedStringKey(SourceTileCopy.openHintString))
+    }
+
+    func testSourceTileCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in SourceTileCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
