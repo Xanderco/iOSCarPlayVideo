@@ -1,5 +1,74 @@
 import SwiftUI
 
+/// Localized copy and VoiceOver formatting helpers for `ChannelRow` and `LiveBadge`.
+public enum ChannelRowCopy {
+    nonisolated public static let liveString = "Live"
+    nonisolated public static let nowPlayingString = "Now playing"
+    nonisolated public static let favoriteString = "Favorite"
+    nonisolated public static let percentWatchedFormatString = "%d percent watched"
+    nonisolated public static let unavailableString = "Unavailable"
+    nonisolated public static let removeFromFavoritesString = "Remove from Favorites"
+    nonisolated public static let addToFavoritesString = "Add to Favorites"
+    nonisolated public static let liveBadgeString = "LIVE"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        liveString,
+        nowPlayingString,
+        favoriteString,
+        percentWatchedFormatString,
+        unavailableString,
+        removeFromFavoritesString,
+        addToFavoritesString,
+        liveBadgeString
+    ]
+
+    @MainActor public static var liveBadgeKey: LocalizedStringKey {
+        LocalizedStringKey(liveBadgeString)
+    }
+
+    @MainActor public static func favoriteActionKey(isFavorite: Bool) -> LocalizedStringKey {
+        LocalizedStringKey(isFavorite ? removeFromFavoritesString : addToFavoritesString)
+    }
+
+    nonisolated public static func accessibilityLabel(
+        title: String,
+        subtitle: String?,
+        isLive: Bool,
+        bundle: Bundle = .main
+    ) -> String {
+        let liveText = isLive ? bundle.localizedString(forKey: liveString, value: liveString, table: nil) : nil
+        let trimmedSubtitle = subtitle?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let validSubtitle = (trimmedSubtitle?.isEmpty == false) ? trimmedSubtitle : nil
+        return [title, liveText, validSubtitle].compactMap { $0 }.joined(separator: ", ")
+    }
+
+    nonisolated public static func accessibilityValue(
+        isPlaying: Bool,
+        isFavorite: Bool,
+        progress: Double?,
+        isUnavailable: Bool,
+        bundle: Bundle = .main
+    ) -> String {
+        var parts: [String] = []
+        if isPlaying {
+            parts.append(bundle.localizedString(forKey: nowPlayingString, value: nowPlayingString, table: nil))
+        }
+        if isFavorite {
+            parts.append(bundle.localizedString(forKey: favoriteString, value: favoriteString, table: nil))
+        }
+        if let progress {
+            let clamped = min(max(progress.isFinite ? progress : 0, 0), 1)
+            let percent = Int((clamped * 100).rounded())
+            let format = bundle.localizedString(forKey: percentWatchedFormatString, value: percentWatchedFormatString, table: nil)
+            parts.append(String(format: format, percent))
+        }
+        if isUnavailable {
+            parts.append(bundle.localizedString(forKey: unavailableString, value: unavailableString, table: nil))
+        }
+        return parts.joined(separator: ", ")
+    }
+}
+
 /// Rounded channel / item logo with async loading and a monogram fallback.
 public struct ChannelLogo: View {
     private let url: URL?
@@ -162,27 +231,27 @@ public struct ChannelRow: View {
         .opacity(isUnavailable ? 0.45 : 1)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(accessibilityLabelText))
-        .accessibilityValue(Text(accessibilityValueText))
+        .accessibilityLabel(Text(verbatim: accessibilityLabelText))
+        .accessibilityValue(Text(verbatim: accessibilityValueText))
         .accessibilityAddTraits(isPlaying ? .isSelected : [])
         .accessibilityActions {
             if let onToggleFavorite {
-                Button(isFavorite ? "Remove from Favorites" : "Add to Favorites", action: onToggleFavorite)
+                Button(ChannelRowCopy.favoriteActionKey(isFavorite: isFavorite), action: onToggleFavorite)
             }
         }
     }
 
     private var accessibilityLabelText: String {
-        [title, isLive ? "Live" : nil, subtitle].compactMap { $0 }.joined(separator: ", ")
+        ChannelRowCopy.accessibilityLabel(title: title, subtitle: subtitle, isLive: isLive)
     }
 
     private var accessibilityValueText: String {
-        var parts: [String] = []
-        if isPlaying { parts.append("Now playing") }
-        if isFavorite { parts.append("Favorite") }
-        if let progress { parts.append("\(Int((progress * 100).rounded())) percent watched") }
-        if isUnavailable { parts.append("Unavailable") }
-        return parts.joined(separator: ", ")
+        ChannelRowCopy.accessibilityValue(
+            isPlaying: isPlaying,
+            isFavorite: isFavorite,
+            progress: progress,
+            isUnavailable: isUnavailable
+        )
     }
 }
 
@@ -191,7 +260,7 @@ public struct LiveBadge: View {
     public init() {}
 
     public var body: some View {
-        Text("LIVE")
+        Text(ChannelRowCopy.liveBadgeKey)
             .font(DSTypography.badge)
             .tracking(0.6)
             .foregroundStyle(.white)
