@@ -1,5 +1,119 @@
 import SwiftUI
 import MapKit
+import CoreLocation
+
+/// Testable formatting and localization helpers for `DriveHomeView`.
+public enum DriveHomeHUDFormatter {
+    nonisolated public static let allLocalizationKeys: [String] = [
+        "Enable Location",
+        "Location Off",
+        "Paused",
+        "Tracking",
+        "Ready",
+        "MPH",
+        "KM/H",
+        "Trip History",
+        "Location needed",
+        "Open Settings",
+        "OK",
+        "SPEED",
+        "MAX SPEED",
+        "DISTANCE",
+        "ELAPSED",
+        "AVG",
+        "TOP",
+        "ALT",
+        "STOP",
+        "Start Drive",
+        "Trips",
+        "Resume",
+        "Pause",
+        "End Trip",
+        "duration"
+    ]
+
+    nonisolated public static func trackingChipKeyName(
+        isAuthorized: Bool,
+        authorizationStatus: CLAuthorizationStatus,
+        isTracking: Bool,
+        isPaused: Bool
+    ) -> String {
+        if !isAuthorized {
+            return authorizationStatus == .notDetermined ? "Enable Location" : "Location Off"
+        }
+        return isTracking ? (isPaused ? "Paused" : "Tracking") : "Ready"
+    }
+
+    @MainActor
+    public static func trackingChipTitle(
+        isAuthorized: Bool,
+        authorizationStatus: CLAuthorizationStatus,
+        isTracking: Bool,
+        isPaused: Bool
+    ) -> LocalizedStringKey {
+        LocalizedStringKey(
+            trackingChipKeyName(
+                isAuthorized: isAuthorized,
+                authorizationStatus: authorizationStatus,
+                isTracking: isTracking,
+                isPaused: isPaused
+            )
+        )
+    }
+
+    nonisolated public static func speedUnit(useMilesPerHour: Bool) -> String {
+        useMilesPerHour ? "MPH" : "KM/H"
+    }
+
+    nonisolated public static func localizedSpeedUnit(useMilesPerHour: Bool) -> String {
+        useMilesPerHour ? String(localized: "MPH") : String(localized: "KM/H")
+    }
+
+    nonisolated public static func speedValue(kmh: Double, useMilesPerHour: Bool) -> Double {
+        let safeKmh = kmh.isFinite ? max(kmh, 0) : 0
+        return useMilesPerHour ? safeKmh * 0.621371 : safeKmh
+    }
+
+    nonisolated public static func speedText(kmh: Double, useMilesPerHour: Bool) -> String {
+        let value = speedValue(kmh: kmh, useMilesPerHour: useMilesPerHour)
+        let unit = localizedSpeedUnit(useMilesPerHour: useMilesPerHour)
+        return String(format: "%.0f %@", value, unit)
+    }
+
+    nonisolated public static func distanceText(meters: Double, useMilesPerHour: Bool) -> String {
+        let safeMeters = meters.isFinite ? max(meters, 0) : 0
+        if useMilesPerHour {
+            let miles = safeMeters * 0.000621371
+            return String(format: "%.2f mi", miles)
+        } else {
+            let km = safeMeters / 1000.0
+            return String(format: "%.2f km", km)
+        }
+    }
+
+    nonisolated public static func durationText(seconds: TimeInterval) -> String {
+        let safeSeconds = seconds.isFinite ? max(Int(seconds), 0) : 0
+        let mins = safeSeconds / 60
+        let secs = safeSeconds % 60
+        return String(format: "%02dm %02ds", mins, secs)
+    }
+
+    nonisolated public static func altitudeText(meters: Double) -> String {
+        let safeMeters = meters.isFinite ? meters : 0
+        return String(format: "%.0f m", safeMeters)
+    }
+
+    nonisolated public static func pastTripSummaryText(
+        distanceMeters: Double,
+        durationSeconds: TimeInterval,
+        useMilesPerHour: Bool
+    ) -> String {
+        let distance = distanceText(meters: distanceMeters, useMilesPerHour: useMilesPerHour)
+        let safeMinutes = durationSeconds.isFinite ? max(Int(durationSeconds) / 60, 0) : 0
+        let durationWord = String(localized: "duration")
+        return "\(distance) · \(safeMinutes)m \(durationWord)"
+    }
+}
 
 public struct DriveHomeView: View {
     @EnvironmentObject private var appState: AppState
@@ -16,22 +130,23 @@ public struct DriveHomeView: View {
     public init() {}
 
     private var displaySpeed: Double {
-        if appState.useMilesPerHour {
-            return locationService.currentSpeedKmh * 0.621371
-        } else {
-            return locationService.currentSpeedKmh
-        }
+        DriveHomeHUDFormatter.speedValue(
+            kmh: locationService.currentSpeedKmh,
+            useMilesPerHour: appState.useMilesPerHour
+        )
     }
 
     private var trackingChipTitle: LocalizedStringKey {
-        if !locationService.isAuthorized {
-            return locationService.authorizationStatus == .notDetermined ? "Enable Location" : "Location Off"
-        }
-        return locationService.isTracking ? (locationService.isPaused ? "Paused" : "Tracking") : "Ready"
+        DriveHomeHUDFormatter.trackingChipTitle(
+            isAuthorized: locationService.isAuthorized,
+            authorizationStatus: locationService.authorizationStatus,
+            isTracking: locationService.isTracking,
+            isPaused: locationService.isPaused
+        )
     }
 
     private var speedUnit: String {
-        appState.useMilesPerHour ? "MPH" : "KM/H"
+        DriveHomeHUDFormatter.speedUnit(useMilesPerHour: appState.useMilesPerHour)
     }
 
     public var body: some View {
@@ -73,7 +188,7 @@ public struct DriveHomeView: View {
                             Button {
                                 appState.setSpeedUnit(milesPerHour: !appState.useMilesPerHour)
                             } label: {
-                                Text(speedUnit)
+                                Text(LocalizedStringKey(speedUnit))
                                     .font(.system(size: 11, weight: .bold))
                                     .foregroundStyle(Color.dashYellow)
                                     .padding(.horizontal, 10)
@@ -173,7 +288,7 @@ public struct DriveHomeView: View {
                         Text("MAX SPEED")
                             .font(ThemeFonts.hudCaption(size: 11))
                             .foregroundStyle(Color.dashTextMuted)
-                        Text(String(format: "%.0f %@", appState.useMilesPerHour ? locationService.topSpeedKmh * 0.621371 : locationService.topSpeedKmh, speedUnit))
+                        Text(DriveHomeHUDFormatter.speedText(kmh: locationService.topSpeedKmh, useMilesPerHour: appState.useMilesPerHour))
                             .font(ThemeFonts.hudStat(size: 24))
                             .foregroundStyle(Color.dashYellow)
                     }
@@ -205,17 +320,17 @@ public struct DriveHomeView: View {
             HStack {
                 statColumn(
                     title: "AVG",
-                    value: String(format: "%.0f %@", appState.useMilesPerHour ? locationService.averageSpeedKmh * 0.621371 : locationService.averageSpeedKmh, speedUnit)
+                    value: DriveHomeHUDFormatter.speedText(kmh: locationService.averageSpeedKmh, useMilesPerHour: appState.useMilesPerHour)
                 )
                 Spacer()
                 statColumn(
                     title: "TOP",
-                    value: String(format: "%.0f %@", appState.useMilesPerHour ? locationService.topSpeedKmh * 0.621371 : locationService.topSpeedKmh, speedUnit)
+                    value: DriveHomeHUDFormatter.speedText(kmh: locationService.topSpeedKmh, useMilesPerHour: appState.useMilesPerHour)
                 )
                 Spacer()
                 statColumn(
                     title: "ALT",
-                    value: String(format: "%.0f m", locationService.currentAltitudeMeters)
+                    value: DriveHomeHUDFormatter.altitudeText(meters: locationService.currentAltitudeMeters)
                 )
                 Spacer()
                 statColumn(
@@ -309,18 +424,10 @@ public struct DriveHomeView: View {
     }
 
     private func formatDistance(_ meters: Double) -> String {
-        if appState.useMilesPerHour {
-            let miles = meters * 0.000621371
-            return String(format: "%.2f mi", miles)
-        } else {
-            let km = meters / 1000.0
-            return String(format: "%.2f km", km)
-        }
+        DriveHomeHUDFormatter.distanceText(meters: meters, useMilesPerHour: appState.useMilesPerHour)
     }
 
     private func formatDuration(_ seconds: TimeInterval) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        return String(format: "%02dm %02ds", mins, secs)
+        DriveHomeHUDFormatter.durationText(seconds: seconds)
     }
 }
