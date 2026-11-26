@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import DashCast
 
 final class LocalizationTests: XCTestCase {
@@ -138,6 +139,60 @@ final class LocalizationTests: XCTestCase {
     func testTabItemLocalizations() {
         for tab in AppState.TabItem.allCases {
             XCTAssertNotNil(tab.localizedTitle)
+        }
+    }
+
+    func testChannelRowCopyAccessibilityFormatting() {
+        XCTAssertEqual(
+            ChannelRowCopy.accessibilityLabel(title: "Metro News 24", subtitle: "News", isLive: true),
+            "Metro News 24, Live, News"
+        )
+        XCTAssertEqual(
+            ChannelRowCopy.accessibilityLabel(title: "Road Trip Vlog", subtitle: "   ", isLive: false),
+            "Road Trip Vlog"
+        )
+        XCTAssertEqual(
+            ChannelRowCopy.accessibilityValue(isPlaying: true, isFavorite: true, progress: 0.624, isUnavailable: true),
+            "Now playing, Favorite, 62 percent watched, Unavailable"
+        )
+        XCTAssertEqual(
+            ChannelRowCopy.accessibilityValue(isPlaying: false, isFavorite: false, progress: 1.5, isUnavailable: false),
+            "100 percent watched"
+        )
+        XCTAssertEqual(
+            ChannelRowCopy.accessibilityValue(isPlaying: false, isFavorite: false, progress: nil, isUnavailable: false),
+            ""
+        )
+    }
+
+    @MainActor
+    func testChannelRowCopySwiftUIKeys() {
+        XCTAssertEqual(ChannelRowCopy.liveBadgeKey, LocalizedStringKey(ChannelRowCopy.liveBadgeString))
+        XCTAssertEqual(ChannelRowCopy.favoriteActionKey(isFavorite: true), LocalizedStringKey(ChannelRowCopy.removeFromFavoritesString))
+        XCTAssertEqual(ChannelRowCopy.favoriteActionKey(isFavorite: false), LocalizedStringKey(ChannelRowCopy.addToFavoritesString))
+    }
+
+    func testChannelRowCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in ChannelRowCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
         }
     }
 }
