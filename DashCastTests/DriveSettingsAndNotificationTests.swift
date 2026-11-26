@@ -1,3 +1,5 @@
+import CoreLocation
+import CoreMotion
 import XCTest
 @testable import DashCast
 
@@ -54,5 +56,62 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         service.scheduleFeatureTips()
         // If no crash occurred, notifications requests dispatched to UNUserNotificationCenter
         XCTAssertTrue(true)
+    }
+
+    func testTripSummaryDistanceFormattingMetricAndImperial() {
+        XCTAssertEqual(TripSummaryFormatter.formatDistance(meters: 0, useMilesPerHour: false), "0.00 km")
+        XCTAssertEqual(TripSummaryFormatter.formatDistance(meters: 0, useMilesPerHour: true), "0.00 mi")
+        XCTAssertEqual(TripSummaryFormatter.formatDistance(meters: 2500, useMilesPerHour: false), "2.50 km")
+        XCTAssertEqual(TripSummaryFormatter.formatDistance(meters: 1609.344, useMilesPerHour: true), "1.00 mi")
+    }
+
+    func testTripSummarySpeedFormattingMetricAndImperial() {
+        XCTAssertEqual(TripSummaryFormatter.formatSpeed(kmh: 0, useMilesPerHour: false), "0 km/h")
+        XCTAssertEqual(TripSummaryFormatter.formatSpeed(kmh: 0, useMilesPerHour: true), "0 mph")
+        XCTAssertEqual(TripSummaryFormatter.formatSpeed(kmh: 100, useMilesPerHour: false), "100 km/h")
+        XCTAssertEqual(TripSummaryFormatter.formatSpeed(kmh: 100, useMilesPerHour: true), "62 mph")
+    }
+
+    func testTripSummaryScoreMessageKeys() {
+        XCTAssertEqual(TripSummaryFormatter.scoreMessageKey(for: 100), "Flawless Driving!")
+        XCTAssertEqual(TripSummaryFormatter.scoreMessageKey(for: 90), "Flawless Driving!")
+        XCTAssertEqual(TripSummaryFormatter.scoreMessageKey(for: 89), "Smooth & Safe Drive")
+        XCTAssertEqual(TripSummaryFormatter.scoreMessageKey(for: 80), "Smooth & Safe Drive")
+        XCTAssertEqual(TripSummaryFormatter.scoreMessageKey(for: 79), "Moderate Ride")
+        XCTAssertEqual(TripSummaryFormatter.scoreMessageKey(for: 70), "Moderate Ride")
+        XCTAssertEqual(TripSummaryFormatter.scoreMessageKey(for: 69), "Aggressive Driving Detected")
+    }
+
+    func testDriveTrackingPermissionMapperCopyKeys() {
+        XCTAssertEqual(DriveTrackingPermissionMapper.locationSubtitleKey(for: .authorizedAlways), "Always allowed.")
+        XCTAssertEqual(
+            DriveTrackingPermissionMapper.locationSubtitleKey(for: .authorizedWhenInUse),
+            "Allowed while using DashCast; trips keep recording when the screen locks."
+        )
+        XCTAssertEqual(
+            DriveTrackingPermissionMapper.locationSubtitleKey(for: .denied),
+            "Off. Turn it on in Settings to record trips."
+        )
+        XCTAssertEqual(
+            DriveTrackingPermissionMapper.locationSubtitleKey(for: .notDetermined),
+            "Needed to measure speed, distance and your route."
+        )
+
+        XCTAssertEqual(
+            DriveTrackingPermissionMapper.motionSubtitleKey(for: .authorized),
+            "Allowed for automatic drive detection and harsh-braking scoring."
+        )
+        XCTAssertEqual(
+            DriveTrackingPermissionMapper.motionSubtitleKey(for: .denied),
+            "Off. Turn it on in Settings for automatic drive detection."
+        )
+        XCTAssertEqual(
+            DriveTrackingPermissionMapper.motionSubtitleKey(for: .restricted),
+            "Off. Turn it on in Settings for automatic drive detection."
+        )
+        XCTAssertEqual(
+            DriveTrackingPermissionMapper.motionSubtitleKey(for: .notDetermined),
+            "Used for automatic drive detection and driving smoothness."
+        )
     }
 }

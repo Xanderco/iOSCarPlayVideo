@@ -57,6 +57,10 @@ public final class DriveLocationService: NSObject, ObservableObject, CLLocationM
         locationManager.requestWhenInUseAuthorization()
     }
 
+    public func refreshAuthorizationStatus() {
+        authorizationStatus = locationManager.authorizationStatus
+    }
+
     public func requestAlwaysAuthorization() {
         locationManager.requestAlwaysAuthorization()
     }
