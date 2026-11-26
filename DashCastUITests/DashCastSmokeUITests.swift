@@ -147,15 +147,18 @@ final class DashCastSmokeUITests: XCTestCase {
 
         let guideRow = app.buttons["Me_CarDisplayGuideRow"]
         XCTAssertTrue(guideRow.waitForExistence(timeout: 10), "Car Display Guide row missing on Me tab")
+        scrollUntilVisible(guideRow, maxY: 520)
         tapCenter(of: guideRow)
 
         let guideNav = app.navigationBars["Car Display Setup"]
         XCTAssertTrue(guideNav.waitForExistence(timeout: 10), "Car Display Setup sheet did not open from Me tab")
         snapshot("06-car-display-guide")
         guideNav.buttons["Done"].tap()
+        waitForDisappearance(of: guideNav, timeout: 5)
 
         let settingsRow = app.buttons["Me_SettingsRow"]
         XCTAssertTrue(settingsRow.waitForExistence(timeout: 10), "Settings row missing on Me tab")
+        scrollUntilVisible(settingsRow, maxY: 520)
         tapCenter(of: settingsRow)
 
         let settingsNav = app.navigationBars["Settings"]
@@ -165,8 +168,10 @@ final class DashCastSmokeUITests: XCTestCase {
         let clearPlaylists = app.buttons["Me_Settings_ClearPlaylistsButton"]
         XCTAssertTrue(clearTrips.waitForExistence(timeout: 10), "Clear Trip History button missing")
         XCTAssertTrue(clearPlaylists.waitForExistence(timeout: 10), "Clear Playlists button missing")
+        scrollUntilVisible(clearPlaylists, maxY: 610)
         snapshot("06b-settings-data-privacy")
 
+        scrollUntilVisible(clearTrips, maxY: 610)
         tapCenter(of: clearTrips)
         let cancelAction = app.buttons["Cancel"]
         XCTAssertTrue(cancelAction.waitForExistence(timeout: 5), "Clear Trip History confirmation dialog did not open")
@@ -174,15 +179,39 @@ final class DashCastSmokeUITests: XCTestCase {
 
         let settingsGuideRow = app.buttons["Me_Settings_CarDisplayGuideRow"]
         XCTAssertTrue(settingsGuideRow.waitForExistence(timeout: 10), "Car Display Guide row missing in Settings")
+        scrollUntilVisible(settingsGuideRow, maxY: 610)
         tapCenter(of: settingsGuideRow)
         XCTAssertTrue(guideNav.waitForExistence(timeout: 10), "Car Display Setup sheet did not open from Settings")
         guideNav.buttons["Done"].tap()
+        waitForDisappearance(of: guideNav, timeout: 5)
 
         XCTAssertTrue(settingsNav.waitForExistence(timeout: 10), "Settings did not reappear")
         settingsNav.buttons["Done"].tap()
     }
 
     // MARK: - Helpers
+
+    /// Scrolls the frontmost scroll view up until `element` sits comfortably above the floating tab bar / bottom edge.
+    private func scrollUntilVisible(_ element: XCUIElement, maxY: CGFloat, maxSwipes: Int = 5) {
+        for _ in 0..<maxSwipes {
+            if element.exists && element.frame.height > 0 && element.frame.minY >= 60 && element.frame.maxY <= maxY {
+                return
+            }
+            let scrollView = app.scrollViews.allElementsBoundByIndex.last(where: { $0.exists && $0.frame.height > 100 })
+                ?? app.scrollViews.firstMatch
+            guard scrollView.exists else { return }
+            let start = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.65))
+            let end = scrollView.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.25))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
+    }
+
+    private func waitForDisappearance(of element: XCUIElement, timeout: TimeInterval) {
+        guard element.exists else { return }
+        let predicate = NSPredicate(format: "exists == false")
+        let exp = expectation(for: predicate, evaluatedWith: element)
+        _ = XCTWaiter.wait(for: [exp], timeout: timeout)
+    }
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers
     /// (for `Screen_*` identifiers), which makes XCUITest report their children as
