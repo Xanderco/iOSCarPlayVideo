@@ -8177,6 +8177,23 @@
           }
         }
       }
+    },
+    "Trips are recorded while you press Start Drive (also with the screen locked). Your trips stay on this device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trips are recorded while you press Start Drive (also with the screen locked). Your trips stay on this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los viajes se registran mientras pulsas Iniciar viaje (también con la pantalla bloqueada). Tus viajes permanecen en este dispositivo."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
