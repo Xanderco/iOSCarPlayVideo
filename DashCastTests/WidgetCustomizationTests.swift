@@ -65,4 +65,29 @@ final class WidgetCustomizationTests: XCTestCase {
         XCTAssertEqual(first?.textColorHex, "#FF9500")
         XCTAssertEqual(first?.fontName, "Mono")
     }
+
+    func testDashCastCastWidgetLocalizationCatalogComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCastCastWidget")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any], "DashCastCastWidget/Localizable.xcstrings must be valid JSON")
+        XCTAssertEqual(json["sourceLanguage"] as? String, "en")
+        XCTAssertEqual(json["version"] as? String, "1.0")
+
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+        for key in CarCastLiveActivityCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing DashCastCastWidget catalog entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String, "Missing \(lang) string value for: \(key)")
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }

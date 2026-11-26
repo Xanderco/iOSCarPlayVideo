@@ -36,7 +36,7 @@ struct CarCastLiveActivityWidget: Widget {
                         .lineLimit(1)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    Text(context.state.detail)
+                    Text(CarCastLiveActivityCopy.detailKey(context.state.detail))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
@@ -45,7 +45,7 @@ struct CarCastLiveActivityWidget: Widget {
                 Image(systemName: icon(for: context.state))
                     .foregroundStyle(context.state.isPausedForMotion ? Color.orange : castYellow)
             } compactTrailing: {
-                Text(context.state.mode)
+                Text(CarCastLiveActivityCopy.modeKey(context.state.mode))
                     .font(.caption2.weight(.semibold))
                     .lineLimit(1)
                     .frame(maxWidth: 64)
@@ -59,13 +59,15 @@ struct CarCastLiveActivityWidget: Widget {
 
 private func icon(for state: CarCastActivityAttributes.ContentState) -> String {
     if state.isPausedForMotion { return "pause.circle.fill" }
-    return state.mode == "Mirroring" ? "rectangle.on.rectangle" : "airplayvideo"
+    return state.mode == CarCastLiveActivityCopy.mirroringModeString ? "rectangle.on.rectangle" : "airplayvideo"
 }
 
 struct CarCastLockScreenView: View {
     let state: CarCastActivityAttributes.ContentState
 
     var body: some View {
+        let localizedMode = CarCastLiveActivityCopy.localizedMode(state.mode)
+
         HStack(spacing: 14) {
             Image(systemName: icon(for: state))
                 .font(.system(size: 28, weight: .semibold))
@@ -73,14 +75,14 @@ struct CarCastLockScreenView: View {
                 .frame(width: 44)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("DashCast · \(state.mode)")
+                Text("DashCast · \(localizedMode)")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(castYellow)
                 Text(state.title)
                     .font(.headline)
                     .foregroundStyle(.white)
                     .lineLimit(1)
-                Text(state.detail)
+                Text(CarCastLiveActivityCopy.detailKey(state.detail))
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.7))
                     .lineLimit(2)
