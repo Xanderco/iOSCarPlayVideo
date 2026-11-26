@@ -57,7 +57,8 @@ final class LocalVideoManagerTests: XCTestCase {
         XCTAssertEqual(initialMeta.fileSizeBytes, expectedVideoSize)
         XCTAssertGreaterThanOrEqual(manager.totalStorageBytes, expectedVideoSize)
 
-        let enrichedMeta = try XCTUnwrap(await manager.refreshMetadata(for: channel))
+        let refreshed = await manager.refreshMetadata(for: channel)
+        let enrichedMeta = try XCTUnwrap(refreshed)
         XCTAssertEqual(enrichedMeta.fileSizeBytes, expectedVideoSize)
         XCTAssertGreaterThan(enrichedMeta.durationSeconds ?? 0, 0)
 
