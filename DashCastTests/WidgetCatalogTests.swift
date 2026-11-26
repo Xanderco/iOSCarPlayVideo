@@ -48,4 +48,41 @@ final class WidgetCatalogTests: XCTestCase {
         XCTAssertEqual(loaded.first?.carModelName, "911 GT3 RS")
         XCTAssertEqual(loaded.first?.driverGreeting, "Apex Hunter")
     }
+
+    func testCarPlayDashboardMockupFormatter() throws {
+        let utc = try XCTUnwrap(TimeZone(identifier: "UTC"))
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = utc
+
+        let date = try XCTUnwrap(calendar.date(from: DateComponents(
+            timeZone: utc,
+            year: 2026,
+            month: 8,
+            day: 3,
+            hour: 9,
+            minute: 41
+        )))
+
+        let enLocale = Locale(identifier: "en_US_POSIX")
+        let esLocale = Locale(identifier: "es_ES")
+
+        XCTAssertEqual(
+            CarPlayDashboardMockupFormatter.monthName(for: date, locale: enLocale, calendar: calendar),
+            "August"
+        )
+        XCTAssertEqual(
+            CarPlayDashboardMockupFormatter.monthName(for: date, locale: esLocale, calendar: calendar),
+            "Agosto"
+        )
+        XCTAssertEqual(
+            CarPlayDashboardMockupFormatter.dayNumber(for: date, calendar: calendar),
+            "03"
+        )
+        XCTAssertFalse(
+            CarPlayDashboardMockupFormatter.timeString(for: date, locale: enLocale, timeZone: utc).isEmpty
+        )
+        XCTAssertEqual(CarPlayDashboardMockupFormatter.countdownDisplayValue(for: nil), "10")
+        XCTAssertEqual(CarPlayDashboardMockupFormatter.countdownDisplayValue(for: "   "), "10")
+        XCTAssertEqual(CarPlayDashboardMockupFormatter.countdownDisplayValue(for: " 25 "), "25")
+    }
 }
