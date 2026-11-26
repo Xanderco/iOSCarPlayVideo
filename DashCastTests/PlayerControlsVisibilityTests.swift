@@ -14,8 +14,8 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         func wait(delay: TimeInterval) async throws {
             try Task.checkCancellation()
             let id = UUID()
-            try await withTaskCancellationHandler {
-                try await withCheckedThrowingContinuation { continuation in
+            try await withTaskCancellationHandler(operation: {
+                try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
                     if cancelledIDs.remove(id) != nil {
                         cancelledCount += 1
                         continuation.resume(throwing: CancellationError())
@@ -23,9 +23,9 @@ final class PlayerControlsVisibilityTests: XCTestCase {
                         continuations.append((id: id, delay: delay, continuation: continuation))
                     }
                 }
-            } onCancel: {
+            }, onCancel: {
                 Task { await self.cancel(id: id) }
-            }
+            })
         }
 
         func fireOldest() {
