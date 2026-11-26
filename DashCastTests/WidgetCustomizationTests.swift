@@ -1,3 +1,4 @@
+import SwiftUI
 import XCTest
 @testable import DashCast
 
@@ -61,8 +62,67 @@ final class WidgetCustomizationTests: XCTestCase {
         let first = loaded.first
         XCTAssertEqual(first?.carBrand, "Chevrolet")
         XCTAssertEqual(first?.carModelName, "Corvette Stingray")
+        // Verify persistence
         XCTAssertEqual(first?.plateText, "CORVETTE-1")
         XCTAssertEqual(first?.textColorHex, "#FF9500")
         XCTAssertEqual(first?.fontName, "Mono")
+    }
+
+    func testDoodleEditorCaptionNormalization() {
+        XCTAssertNil(DoodleEditorLogic.normalizedCaption(""))
+        XCTAssertNil(DoodleEditorLogic.normalizedCaption("   \n\t  "))
+        XCTAssertEqual(DoodleEditorLogic.normalizedCaption("  Road Trip  "), "Road Trip")
+
+        let exact24 = "123456789012345678901234"
+        XCTAssertEqual(DoodleEditorLogic.normalizedCaption(exact24), exact24)
+
+        let over24 = "123456789012345678901234567890"
+        XCTAssertEqual(DoodleEditorLogic.normalizedCaption("  \(over24)  "), exact24)
+    }
+
+    func testDoodleEditorCanvasPointClamping() {
+        XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: -25, y: 450), canvasSide: 300), CGPoint(x: 0, y: 300))
+        XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: 120, y: 180), canvasSide: 300), CGPoint(x: 120, y: 180))
+        XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: CGFloat.nan, y: CGFloat.infinity), canvasSide: 300), .zero)
+        XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: 50, y: 50), canvasSide: 0), .zero)
+        XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: 50, y: 50), canvasSide: -10), .zero)
+    }
+
+    func testDoodleEditorCanSaveValidation() {
+        XCTAssertFalse(DoodleEditorLogic.canSave(mode: .doodle, strokeCount: 0, hasPhoto: false))
+        XCTAssertFalse(DoodleEditorLogic.canSave(mode: .doodle, strokeCount: 0, hasPhoto: true))
+        XCTAssertTrue(DoodleEditorLogic.canSave(mode: .doodle, strokeCount: 1, hasPhoto: false))
+
+        XCTAssertFalse(DoodleEditorLogic.canSave(mode: .photo, strokeCount: 3, hasPhoto: false))
+        XCTAssertTrue(DoodleEditorLogic.canSave(mode: .photo, strokeCount: 0, hasPhoto: true))
+    }
+
+    @MainActor
+    func testDoodleEditorLocalizationKeysInCatalog() throws {
+        for mode in DoodleEditorLogic.Mode.allCases {
+            XCTAssertNotNil(mode.titleKey)
+        }
+
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in DoodleEditorLogic.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing catalog entry for key: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String, "Missing \(lang) string value for: \(key)")
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
     }
 }
