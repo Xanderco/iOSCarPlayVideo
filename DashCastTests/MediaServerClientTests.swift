@@ -458,4 +458,51 @@ final class MediaServerStoreTests: XCTestCase {
         XCTAssertNil(PlaylistQRPayload.playlistURL(from: "ftp://x.y/p.m3u"))
         XCTAssertNil(PlaylistQRPayload.playlistURL(from: ""))
     }
+
+    func testMediaServerErrorLocalizedDescriptions() {
+        XCTAssertEqual(
+            MediaServerError.invalidServerURL.errorDescription,
+            "That doesn't look like a valid server address."
+        )
+        XCTAssertEqual(
+            MediaServerError.notAuthenticated.errorDescription,
+            "Sign in to this server again."
+        )
+        XCTAssertEqual(
+            MediaServerError.invalidCredentials.errorDescription,
+            "Wrong username or password."
+        )
+        XCTAssertEqual(
+            MediaServerError.httpStatus(503).errorDescription,
+            "The server answered with HTTP 503."
+        )
+        XCTAssertEqual(
+            MediaServerError.decoding("MediaItem").errorDescription,
+            "Unexpected server response (MediaItem)."
+        )
+    }
+
+    func testMediaServerErrorCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in MediaServerErrorCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
