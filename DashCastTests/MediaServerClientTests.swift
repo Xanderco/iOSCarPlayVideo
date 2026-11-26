@@ -208,6 +208,135 @@ final class MediaServerClientTests: XCTestCase {
         XCTAssertTrue(q["Fields"]?.contains("UserData") ?? false)
     }
 
+    func testFetchResumeItemsJellyfinPathAndDecoding() async throws {
+        MediaServerStubURLProtocol.handler = { _, _ in
+            (200, Data(#"""
+            {"Items":[
+              {"Id":"ep-1","Name":"Pilot","Type":"Episode","SeriesName":"Drive Show",
+               "ParentIndexNumber":1,"IndexNumber":1,"RunTimeTicks":27000000000,
+               "UserData":{"PlaybackPositionTicks":9000000000,"Played":false}}
+            ],"TotalRecordCount":1}
+            """#.utf8))
+        }
+
+        let items = try await makeClient().fetchResumeItems(userId: "user1", limit: 12)
+
+        XCTAssertEqual(items.count, 1)
+        let episode = try XCTUnwrap(items.first)
+        XCTAssertEqual(episode.id, "ep-1")
+        XCTAssertEqual(episode.seriesName, "Drive Show")
+        XCTAssertEqual(episode.episodeLabel, "S1E1")
+        XCTAssertEqual(episode.resumePositionSeconds, 900, accuracy: 0.001)
+        XCTAssertEqual(episode.runtimeSeconds ?? 0, 2_700, accuracy: 0.001)
+
+        let request = try XCTUnwrap(MediaServerStubURLProtocol.recorded.first?.request)
+        XCTAssertEqual(request.httpMethod, "GET")
+        XCTAssertEqual(request.url?.path, "/Users/user1/Items/Resume")
+        let q = query(request.url)
+        XCTAssertEqual(q["Limit"], "12")
+        XCTAssertEqual(q["MediaTypes"], "Video")
+        XCTAssertTrue(q["Fields"]?.contains("UserData") ?? false)
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-Emby-Token"), "TOKEN123")
+    }
+
+    func testFetchResumeItemsEmbyPathUsesPrefixAndExplicitUserId() async throws {
+        MediaServerStubURLProtocol.handler = { _, _ in
+            (200, Data(#"{"Items":[{"Id":"m-emby","Name":"Le Mans","Type":"Movie"}]}"#.utf8))
+        }
+
+        let client = makeClient(kind: .emby, base: "https://emby.example.com", token: "EMBYTOK", userId: nil)
+        let items = try await client.fetchResumeItems(userId: "emby-u2", limit: 8)
+
+        XCTAssertEqual(items.map(\.id), ["m-emby"])
+        let request = try XCTUnwrap(MediaServerStubURLProtocol.recorded.first?.request)
+        XCTAssertEqual(request.url?.path, "/emby/Users/emby-u2/Items/Resume")
+        XCTAssertEqual(query(request.url)["Limit"], "8")
+        XCTAssertNotNil(request.value(forHTTPHeaderField: "X-Emby-Authorization"))
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-Emby-Token"), "EMBYTOK")
+    }
+
+    func testFetchResumeItemsRequiresAuthentication() async {
+        let client = makeClient(token: nil, userId: "user1")
+        do {
+            _ = try await client.fetchResumeItems(userId: "user1", limit: 10)
+            XCTFail("Expected notAuthenticated")
+        } catch {
+            XCTAssertEqual(error as? MediaServerError, .notAuthenticated)
+        }
+        XCTAssertTrue(MediaServerStubURLProtocol.recorded.isEmpty)
+    }
+
+    func testSearchItemsJellyfinQueryAndDecoding() async throws {
+        MediaServerStubURLProtocol.handler = { _, _ in
+            (200, Data(#"""
+            {"Items":[
+              {"Id":"m1","Name":"Heat","Type":"Movie","ProductionYear":1995,"Container":"mp4"},
+              {"Id":"s1","Name":"Top Gear","Type":"Series","ProductionYear":2002}
+            ],"TotalRecordCount":2}
+            """#.utf8))
+        }
+
+        let results = try await makeClient().searchItems(userId: "user1", query: "  Heat  ", limit: 25)
+
+        XCTAssertEqual(results.map(\.name), ["Heat", "Top Gear"])
+        XCTAssertTrue(results.first?.isPlayable == true)
+        XCTAssertTrue(results.last?.isSeries == true)
+
+        let request = try XCTUnwrap(MediaServerStubURLProtocol.recorded.first?.request)
+        XCTAssertEqual(request.url?.path, "/Users/user1/Items")
+        let q = query(request.url)
+        XCTAssertEqual(q["SearchTerm"], "Heat")
+        XCTAssertEqual(q["Recursive"], "true")
+        XCTAssertEqual(q["SortBy"], "SortName")
+        XCTAssertEqual(q["SortOrder"], "Ascending")
+        XCTAssertEqual(q["Limit"], "25")
+        XCTAssertTrue(q["IncludeItemTypes"]?.contains("Episode") ?? false)
+        XCTAssertTrue(q["Fields"]?.contains("MediaSources") ?? false)
+    }
+
+    func testSearchItemsEmbyPathAndBlankQueryGuard() async throws {
+        MediaServerStubURLProtocol.handler = { _, _ in
+            (200, Data(#"{"Items":[{"Id":"e1","Name":"Matrix","Type":"Movie"}]}"#.utf8))
+        }
+
+        let client = makeClient(kind: .emby, base: "http://10.0.0.8:8096", token: "TOK", userId: "u-default")
+        let blank = try await client.searchItems(userId: "u-custom", query: "   \n ")
+        XCTAssertTrue(blank.isEmpty)
+        XCTAssertTrue(MediaServerStubURLProtocol.recorded.isEmpty)
+
+        let results = try await client.searchItems(userId: "u-custom", query: "Matrix")
+        XCTAssertEqual(results.map(\.id), ["e1"])
+
+        let request = try XCTUnwrap(MediaServerStubURLProtocol.recorded.first?.request)
+        XCTAssertEqual(request.url?.path, "/emby/Users/u-custom/Items")
+        XCTAssertEqual(query(request.url)["SearchTerm"], "Matrix")
+        XCTAssertNotNil(request.value(forHTTPHeaderField: "X-Emby-Authorization"))
+    }
+
+    func testSearchItemsRequiresAuthentication() async {
+        let client = makeClient(token: nil, userId: "user1")
+        do {
+            _ = try await client.searchItems(userId: "user1", query: "Heat")
+            XCTFail("Expected notAuthenticated")
+        } catch {
+            XCTAssertEqual(error as? MediaServerError, .notAuthenticated)
+        }
+        XCTAssertTrue(MediaServerStubURLProtocol.recorded.isEmpty)
+    }
+
+    func testMediaLibrariesFilterItemsMatchesNameAndSeriesName() {
+        let items = [
+            MediaItem(id: "1", name: "Movies", type: "CollectionFolder"),
+            MediaItem(id: "2", name: "Pilot", type: "Episode", seriesName: "Grand Tour"),
+            MediaItem(id: "3", name: "Documentary", type: "Movie")
+        ]
+
+        XCTAssertEqual(MediaLibrariesView.filterItems(items, matching: "").map(\.id), ["1", "2", "3"])
+        XCTAssertEqual(MediaLibrariesView.filterItems(items, matching: "grand").map(\.id), ["2"])
+        XCTAssertEqual(MediaLibrariesView.filterItems(items, matching: "mov").map(\.id), ["1"])
+        XCTAssertTrue(MediaLibrariesView.filterItems(items, matching: "zzz").isEmpty)
+    }
+
     // MARK: Series / seasons / episodes
 
     func testEpisodesAreSortedBySeasonThenEpisode() async throws {
