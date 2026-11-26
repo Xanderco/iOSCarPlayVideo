@@ -51,6 +51,25 @@ enum CarCastShared {
     }
 }
 
+/// Shared localized copy helpers for the `DashCastBroadcast` upload extension.
+enum DashCastBroadcastCopy {
+    nonisolated static let stoppedForMotionKey = "DashCast stopped screen mirroring because your vehicle is moving. Mirroring to the car is only available while parked."
+    nonisolated static let parkedMirroringStatusKey = "DashCast · Parked mirroring"
+
+    nonisolated static let allLocalizationKeys: [String] = [
+        stoppedForMotionKey,
+        parkedMirroringStatusKey
+    ]
+
+    nonisolated static func stoppedForMotionMessage(bundle: Bundle = .main) -> String {
+        String(localized: String.LocalizationValue(stoppedForMotionKey), bundle: bundle)
+    }
+
+    nonisolated static func parkedMirroringStatus(bundle: Bundle = .main) -> String {
+        String(localized: String.LocalizationValue(parkedMirroringStatusKey), bundle: bundle)
+    }
+}
+
 // MARK: - Broadcast status (extension -> app)
 
 struct BroadcastStatus: Codable, Equatable {

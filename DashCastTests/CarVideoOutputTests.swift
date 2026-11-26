@@ -142,4 +142,36 @@ final class CarVideoOutputTests: XCTestCase {
         XCTAssertTrue(player.usesExternalPlaybackWhileExternalScreenIsActive)
         XCTAssertTrue(CarVideoOutputController.shared.canStartVideoOutput())
     }
+
+    // MARK: Broadcast extension localization
+
+    func testDashCastBroadcastLocalizationCatalogComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCastBroadcast")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: catalogURL.path), "Missing DashCastBroadcast/Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        XCTAssertEqual(json["sourceLanguage"] as? String, "en")
+        XCTAssertEqual(json["version"] as? String, "1.0")
+
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+        for key in DashCastBroadcastCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing DashCastBroadcast catalog entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String, "Missing \(lang) string value for: \(key)")
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+
+        XCTAssertFalse(DashCastBroadcastCopy.stoppedForMotionMessage().trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        XCTAssertFalse(DashCastBroadcastCopy.parkedMirroringStatus().trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+    }
 }

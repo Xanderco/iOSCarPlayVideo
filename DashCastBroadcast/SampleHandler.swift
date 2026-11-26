@@ -145,7 +145,7 @@ final class SampleHandler: RPBroadcastSampleHandler {
 
         server.stop()
         hlsEncoder?.stop()
-        let message = "DashCast stopped screen mirroring because your vehicle is moving. Mirroring to the car is only available while parked."
+        let message = DashCastBroadcastCopy.stoppedForMotionMessage(bundle: Bundle(for: SampleHandler.self))
         updateStatus {
             $0.state = .stoppedForMotion
             $0.viewerCount = 0
