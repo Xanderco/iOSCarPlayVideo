@@ -132,7 +132,7 @@ struct TripStatsView: View {
                         .foregroundStyle(ctx.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)
-                    Text(miles ? "mi" : "km")
+                    Text(LocalizedStringKey(miles ? "mi" : "km"))
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(ctx.isFullColor ? WidgetPalette.signal : ctx.secondary)
                 }
@@ -157,7 +157,7 @@ struct TripStatsView: View {
                     Text(distance(trip))
                         .font(.system(size: 32, weight: .heavy, design: .rounded))
                         .foregroundStyle(.white)
-                    Text(miles ? "mi" : "km")
+                    Text(LocalizedStringKey(miles ? "mi" : "km"))
                         .font(.caption.weight(.bold))
                         .foregroundStyle(WidgetPalette.signal)
                 }
