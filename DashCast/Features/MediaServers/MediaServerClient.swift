@@ -159,6 +159,16 @@ public final class MediaServerClient: @unchecked Sendable {
         return userId
     }
 
+    private func resolveUserId(_ explicitUserId: String?) throws -> String {
+        guard accessToken != nil else { throw MediaServerError.notAuthenticated }
+        if let explicitUserId {
+            let trimmed = explicitUserId.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        guard let userId else { throw MediaServerError.notAuthenticated }
+        return userId
+    }
+
     // MARK: - Auth
 
     public func publicSystemInfo() async throws -> MediaPublicSystemInfo {
@@ -222,11 +232,37 @@ public final class MediaServerClient: @unchecked Sendable {
 
     /// Items the user started but didn't finish.
     public func resumeItems(limit: Int = 20) async throws -> [MediaItem] {
-        let user = try requireUser()
+        try await fetchResumeItems(userId: nil, limit: limit)
+    }
+
+    /// Items the user started but didn't finish for an explicit or authenticated user.
+    public func fetchResumeItems(userId: String? = nil, limit: Int = 20) async throws -> [MediaItem] {
+        let user = try resolveUserId(userId)
         let url = endpoint("/Users/\(user)/Items/Resume", query: [
             URLQueryItem(name: "Limit", value: String(limit)),
             URLQueryItem(name: "MediaTypes", value: "Video"),
             URLQueryItem(name: "Fields", value: Self.itemFields)
+        ])
+        let data = try await send(request(url))
+        return try decode(MediaItemsResponse.self, from: data).items
+    }
+
+    /// Searches movies, series, episodes, and videos across the user's libraries.
+    public func searchItems(userId: String? = nil,
+                            query: String,
+                            includeItemTypes: [String] = ["Movie", "Series", "Episode", "Video", "MusicVideo"],
+                            limit: Int = 50) async throws -> [MediaItem] {
+        let user = try resolveUserId(userId)
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return [] }
+        let url = endpoint("/Users/\(user)/Items", query: [
+            URLQueryItem(name: "SearchTerm", value: trimmed),
+            URLQueryItem(name: "Recursive", value: "true"),
+            URLQueryItem(name: "IncludeItemTypes", value: includeItemTypes.joined(separator: ",")),
+            URLQueryItem(name: "SortBy", value: "SortName"),
+            URLQueryItem(name: "SortOrder", value: "Ascending"),
+            URLQueryItem(name: "Fields", value: Self.itemFields),
+            URLQueryItem(name: "Limit", value: String(limit))
         ])
         let data = try await send(request(url))
         return try decode(MediaItemsResponse.self, from: data).items

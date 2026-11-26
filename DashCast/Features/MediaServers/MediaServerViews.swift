@@ -186,9 +186,38 @@ struct MediaLibrariesView: View {
     @State private var client: MediaServerClient?
     @State private var libraries: [MediaItem] = []
     @State private var resume: [MediaItem] = []
+    @State private var searchText = ""
+    @State private var searchResults: [MediaItem] = []
+    @State private var isSearching = false
+    @State private var searchError: String?
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var playRequest: MediaItem?
+
+    private var trimmedSearch: String {
+        searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var isSearchActive: Bool {
+        !trimmedSearch.isEmpty
+    }
+
+    private var filteredLibraries: [MediaItem] {
+        Self.filterItems(libraries, matching: trimmedSearch)
+    }
+
+    private var filteredResume: [MediaItem] {
+        Self.filterItems(resume, matching: trimmedSearch)
+    }
+
+    nonisolated static func filterItems(_ items: [MediaItem], matching query: String) -> [MediaItem] {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return items }
+        return items.filter { item in
+            item.name.localizedCaseInsensitiveContains(trimmed)
+                || (item.seriesName?.localizedCaseInsensitiveContains(trimmed) ?? false)
+        }
+    }
 
     var body: some View {
         List {
@@ -196,21 +225,45 @@ struct MediaLibrariesView: View {
                 Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
                     .foregroundStyle(.red)
             }
-            if let client, !resume.isEmpty {
+            if let client, !filteredResume.isEmpty {
                 Section("Continue Watching") {
-                    ForEach(resume) { item in
+                    ForEach(filteredResume) { item in
                         Button {
                             playRequest = item
                         } label: {
                             MediaItemRow(item: item, client: client)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityIdentifier("mediaContinueWatching_\(item.id)")
+                    }
+                }
+                .accessibilityIdentifier("mediaContinueWatchingSection")
+            }
+            if let client, isSearchActive {
+                Section("Search Results") {
+                    if isSearching && searchResults.isEmpty {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("Searching...")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if let searchError {
+                        Label(searchError, systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.red)
+                    } else if searchResults.isEmpty {
+                        Text("No matching movies or shows found.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(searchResults) { item in
+                            searchResultRow(for: item, client: client)
+                        }
                     }
                 }
             }
-            if let client {
+            if let client, !filteredLibraries.isEmpty {
                 Section("Libraries") {
-                    ForEach(libraries) { library in
+                    ForEach(filteredLibraries) { library in
                         NavigationLink {
                             MediaItemGridView(account: account, client: client, parent: library)
                         } label: {
@@ -222,9 +275,42 @@ struct MediaLibrariesView: View {
         }
         .overlay { if isLoading && libraries.isEmpty { ProgressView() } }
         .navigationTitle(account.serverName)
+        .searchable(text: $searchText,
+                    placement: .navigationBarDrawer(displayMode: .automatic),
+                    prompt: "Search movies, shows & libraries")
         .task { await load() }
-        .refreshable { await load() }
+        .task(id: trimmedSearch) { await performSearch(for: trimmedSearch) }
+        .refreshable {
+            await load()
+            if !trimmedSearch.isEmpty {
+                await performSearch(for: trimmedSearch, debounce: false)
+            }
+        }
         .modifier(MediaPlayLauncher(account: account, client: client, request: $playRequest))
+    }
+
+    @ViewBuilder
+    private func searchResultRow(for item: MediaItem, client: MediaServerClient) -> some View {
+        if item.isSeries {
+            NavigationLink {
+                MediaSeriesView(account: account, client: client, series: item)
+            } label: {
+                MediaItemRow(item: item, client: client)
+            }
+        } else if item.isFolder {
+            NavigationLink {
+                MediaItemGridView(account: account, client: client, parent: item)
+            } label: {
+                MediaItemRow(item: item, client: client)
+            }
+        } else {
+            Button {
+                playRequest = item
+            } label: {
+                MediaItemRow(item: item, client: client)
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     static func icon(for collectionType: String?) -> String {
@@ -244,10 +330,38 @@ struct MediaLibrariesView: View {
         defer { isLoading = false }
         do {
             libraries = try await client.libraries()
-            resume = (try? await client.resumeItems()) ?? []
+            resume = (try? await client.fetchResumeItems(userId: account.userId)) ?? []
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    private func performSearch(for query: String, debounce: Bool = true) async {
+        guard !query.isEmpty else {
+            searchResults = []
+            searchError = nil
+            isSearching = false
+            return
+        }
+        let client = self.client ?? MediaServerStore.shared.client(for: account)
+        self.client = client
+        isSearching = true
+        searchError = nil
+        defer { isSearching = false }
+        do {
+            if debounce {
+                try await Task.sleep(nanoseconds: 250_000_000)
+            }
+            let results = try await client.searchItems(userId: account.userId, query: query)
+            guard !Task.isCancelled else { return }
+            searchResults = results
+        } catch is CancellationError {
+            return
+        } catch {
+            guard !Task.isCancelled else { return }
+            searchResults = []
+            searchError = error.localizedDescription
         }
     }
 }
@@ -260,11 +374,16 @@ struct MediaItemGridView: View {
     let parent: MediaItem
 
     @State private var items: [MediaItem] = []
+    @State private var searchText = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var playRequest: MediaItem?
 
     private let columns = [GridItem(.adaptive(minimum: 110), spacing: 12)]
+
+    private var filteredItems: [MediaItem] {
+        MediaLibrariesView.filterItems(items, matching: searchText)
+    }
 
     var body: some View {
         ScrollView {
@@ -274,7 +393,7 @@ struct MediaItemGridView: View {
                     .padding()
             }
             LazyVGrid(columns: columns, spacing: 16) {
-                ForEach(items) { item in
+                ForEach(filteredItems) { item in
                     if item.isSeries {
                         NavigationLink {
                             MediaSeriesView(account: account, client: client, series: item)
@@ -304,11 +423,12 @@ struct MediaItemGridView: View {
         .overlay {
             if isLoading && items.isEmpty {
                 ProgressView()
-            } else if !isLoading && items.isEmpty && errorMessage == nil {
+            } else if !isLoading && filteredItems.isEmpty && errorMessage == nil {
                 Text("Nothing here yet").foregroundStyle(.secondary)
             }
         }
         .navigationTitle(parent.name)
+        .searchable(text: $searchText, prompt: "Filter items")
         .task { await load() }
         .refreshable { await load() }
         .modifier(MediaPlayLauncher(account: account, client: client, request: $playRequest))
