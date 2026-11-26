@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 08:20 (Bogotá) — VideoTrimmerView Bounds Guard & Localized Live Loop Copy [DI-107]
+- Extracted `VideoTrimmerLogic` in `DashCast/Features/Widgets/VideoTrimmerView.swift` (`effectiveWindowDuration`, `draggableDuration`, `normalizedOffset`, `trimStartTime(forLocationX:containerWidth:windowWidth:duration:maxTrimDuration:)`, `durationBadgeText`, `titleKey`, `allLocalizationKeys`) to prevent division-by-zero `NaN` and negative `trimStartTime` on narrow layouts or clips shorter than `maxTrimDuration`.
+- Updated `VideoTrimmerView` to use `VideoTrimmerLogic` with `LocalizedStringKey` and dynamic duration badge formatting, and added `"%.1fs"` EN/ES catalog entry in `DashCast/Resources/Localizable.xcstrings`.
+- Added unit tests in `DashCastTests/WidgetCustomizationTests.swift` covering zero-width, short-clip clamping, drag bounds, invalid/NaN inputs, and EN/ES String Catalog keys.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
