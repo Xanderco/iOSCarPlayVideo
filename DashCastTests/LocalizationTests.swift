@@ -140,4 +140,40 @@ final class LocalizationTests: XCTestCase {
             XCTAssertNotNil(tab.localizedTitle)
         }
     }
+
+    func testMeProfileMetricsFormatter() {
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedDistance(km: 42.34, miles: 26.31, useMilesPerHour: false), "42.3 km")
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedDistance(km: 42.34, miles: 26.31, useMilesPerHour: true), "26.3 mi")
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedDistance(km: -5, miles: -1, useMilesPerHour: false), "0.0 km")
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedDistance(km: .nan, miles: .infinity, useMilesPerHour: true), "0.0 mi")
+
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedAverageScore(averageScore: 94.6, tripsCount: 3), "95")
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedAverageScore(averageScore: 88, tripsCount: 0), "–")
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedAverageScore(averageScore: .nan, tripsCount: 2), "–")
+        XCTAssertEqual(MeProfileMetricsFormatter.formattedAverageScore(averageScore: -10, tripsCount: 1), "0")
+    }
+
+    func testMeHomeCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in MeHomeCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }

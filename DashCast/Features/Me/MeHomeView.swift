@@ -1,6 +1,152 @@
 import SwiftUI
 import StoreKit
 
+/// Localized copy keys for `MeHomeView`.
+public enum MeHomeCopy {
+    nonisolated public static let navigationTitleString = "DashCast"
+    nonisolated public static let proLifetimeBadgeString = "PRO · LIFETIME"
+    nonisolated public static let freeBadgeString = "FREE"
+    nonisolated public static let drivenLabelString = "driven"
+    nonisolated public static let drivesLabelString = "drives"
+    nonisolated public static let avgScoreLabelString = "avg score"
+    nonisolated public static let proBannerActiveTitleString = "DashCast PRO Active"
+    nonisolated public static let proBannerTitleString = "DashCast PRO"
+    nonisolated public static let proBannerActiveSubtitleString = "All features unlocked forever"
+    nonisolated public static let proBannerSubtitleString = "Unlock everything on your car screen"
+    nonisolated public static let managePassButtonString = "Manage Pass"
+    nonisolated public static let upgradeNowButtonString = "Upgrade Now"
+    nonisolated public static let menuDriveString = "Drive"
+    nonisolated public static let menuMediaServersString = "Media Servers"
+    nonisolated public static let menuSettingsString = "Settings"
+    nonisolated public static let menuAboutString = "About"
+    nonisolated public static let menuFeedbackString = "Feedback"
+    nonisolated public static let menuRateUsString = "Rate Us"
+    nonisolated public static let menuShareString = "Share DashCast"
+    nonisolated public static let shareMessageString = "DashCast – play your own videos on the car display (passengers & parked only)."
+    nonisolated public static let languageLabelString = "Language"
+    nonisolated public static let systemLanguageString = "System"
+    nonisolated public static let englishLanguageString = "English"
+    nonisolated public static let spanishLanguageString = "Español"
+    nonisolated public static let speedUnitsLabelString = "Speed Units"
+    nonisolated public static let unitsPickerTitleString = "Units"
+    nonisolated public static let kmhUnitString = "KM/H"
+    nonisolated public static let mphUnitString = "MPH"
+    nonisolated public static let restoringPurchasesString = "Restoring…"
+    nonisolated public static let restorePurchasesString = "Restore Purchases"
+    nonisolated public static let restoreSuccessString = "Your DashCast Pro purchase has been restored."
+    nonisolated public static let restoreNotFoundString = "No previous DashCast Pro purchase was found for this Apple Account."
+    nonisolated public static let okButtonString = "OK"
+    nonisolated public static let doneButtonString = "Done"
+    nonisolated public static let versionFormatString = "Version %@"
+    nonisolated public static let privacyPolicyString = "Privacy Policy"
+    nonisolated public static let termsOfUseString = "Terms of Use (EULA)"
+    nonisolated public static let supportString = "Support"
+    nonisolated public static let passengerSafetyNoticeString = "Passenger Safety Notice"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        navigationTitleString,
+        proLifetimeBadgeString,
+        freeBadgeString,
+        drivenLabelString,
+        drivesLabelString,
+        avgScoreLabelString,
+        proBannerActiveTitleString,
+        proBannerTitleString,
+        proBannerActiveSubtitleString,
+        proBannerSubtitleString,
+        managePassButtonString,
+        upgradeNowButtonString,
+        menuDriveString,
+        menuMediaServersString,
+        menuSettingsString,
+        menuAboutString,
+        menuFeedbackString,
+        menuRateUsString,
+        menuShareString,
+        shareMessageString,
+        languageLabelString,
+        systemLanguageString,
+        englishLanguageString,
+        spanishLanguageString,
+        speedUnitsLabelString,
+        unitsPickerTitleString,
+        kmhUnitString,
+        mphUnitString,
+        restoringPurchasesString,
+        restorePurchasesString,
+        restoreSuccessString,
+        restoreNotFoundString,
+        okButtonString,
+        doneButtonString,
+        versionFormatString,
+        privacyPolicyString,
+        termsOfUseString,
+        supportString,
+        passengerSafetyNoticeString
+    ]
+
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var proLifetimeBadgeKey: LocalizedStringKey { LocalizedStringKey(proLifetimeBadgeString) }
+    @MainActor public static var freeBadgeKey: LocalizedStringKey { LocalizedStringKey(freeBadgeString) }
+    @MainActor public static var drivenLabelKey: LocalizedStringKey { LocalizedStringKey(drivenLabelString) }
+    @MainActor public static var drivesLabelKey: LocalizedStringKey { LocalizedStringKey(drivesLabelString) }
+    @MainActor public static var avgScoreLabelKey: LocalizedStringKey { LocalizedStringKey(avgScoreLabelString) }
+    @MainActor public static var proBannerActiveTitleKey: LocalizedStringKey { LocalizedStringKey(proBannerActiveTitleString) }
+    @MainActor public static var proBannerTitleKey: LocalizedStringKey { LocalizedStringKey(proBannerTitleString) }
+    @MainActor public static var proBannerActiveSubtitleKey: LocalizedStringKey { LocalizedStringKey(proBannerActiveSubtitleString) }
+    @MainActor public static var proBannerSubtitleKey: LocalizedStringKey { LocalizedStringKey(proBannerSubtitleString) }
+    @MainActor public static var managePassButtonKey: LocalizedStringKey { LocalizedStringKey(managePassButtonString) }
+    @MainActor public static var upgradeNowButtonKey: LocalizedStringKey { LocalizedStringKey(upgradeNowButtonString) }
+    @MainActor public static var menuDriveKey: LocalizedStringKey { LocalizedStringKey(menuDriveString) }
+    @MainActor public static var menuMediaServersKey: LocalizedStringKey { LocalizedStringKey(menuMediaServersString) }
+    @MainActor public static var menuSettingsKey: LocalizedStringKey { LocalizedStringKey(menuSettingsString) }
+    @MainActor public static var menuAboutKey: LocalizedStringKey { LocalizedStringKey(menuAboutString) }
+    @MainActor public static var menuFeedbackKey: LocalizedStringKey { LocalizedStringKey(menuFeedbackString) }
+    @MainActor public static var menuRateUsKey: LocalizedStringKey { LocalizedStringKey(menuRateUsString) }
+    @MainActor public static var menuShareKey: LocalizedStringKey { LocalizedStringKey(menuShareString) }
+    @MainActor public static var shareMessageKey: LocalizedStringKey { LocalizedStringKey(shareMessageString) }
+    @MainActor public static var languageLabelKey: LocalizedStringKey { LocalizedStringKey(languageLabelString) }
+    @MainActor public static var systemLanguageKey: LocalizedStringKey { LocalizedStringKey(systemLanguageString) }
+    @MainActor public static var englishLanguageKey: LocalizedStringKey { LocalizedStringKey(englishLanguageString) }
+    @MainActor public static var spanishLanguageKey: LocalizedStringKey { LocalizedStringKey(spanishLanguageString) }
+    @MainActor public static var speedUnitsLabelKey: LocalizedStringKey { LocalizedStringKey(speedUnitsLabelString) }
+    @MainActor public static var unitsPickerTitleKey: LocalizedStringKey { LocalizedStringKey(unitsPickerTitleString) }
+    @MainActor public static var kmhUnitKey: LocalizedStringKey { LocalizedStringKey(kmhUnitString) }
+    @MainActor public static var mphUnitKey: LocalizedStringKey { LocalizedStringKey(mphUnitString) }
+    @MainActor public static var restoringPurchasesKey: LocalizedStringKey { LocalizedStringKey(restoringPurchasesString) }
+    @MainActor public static var restorePurchasesKey: LocalizedStringKey { LocalizedStringKey(restorePurchasesString) }
+    @MainActor public static var okButtonKey: LocalizedStringKey { LocalizedStringKey(okButtonString) }
+    @MainActor public static var doneButtonKey: LocalizedStringKey { LocalizedStringKey(doneButtonString) }
+    @MainActor public static var privacyPolicyKey: LocalizedStringKey { LocalizedStringKey(privacyPolicyString) }
+    @MainActor public static var termsOfUseKey: LocalizedStringKey { LocalizedStringKey(termsOfUseString) }
+    @MainActor public static var supportKey: LocalizedStringKey { LocalizedStringKey(supportString) }
+    @MainActor public static var passengerSafetyNoticeKey: LocalizedStringKey { LocalizedStringKey(passengerSafetyNoticeString) }
+}
+
+/// Pure formatting helpers for profile distance and average driving score in `MeHomeView`.
+public enum MeProfileMetricsFormatter {
+    nonisolated public static func formattedDistance(km: Double, miles: Double, useMilesPerHour: Bool) -> String {
+        if useMilesPerHour {
+            let safeMiles = (miles.isFinite && miles >= 0) ? miles : 0
+            return String(format: "%.1f mi", safeMiles)
+        } else {
+            let safeKm = (km.isFinite && km >= 0) ? km : 0
+            return String(format: "%.1f km", safeKm)
+        }
+    }
+
+    nonisolated public static func formattedAverageScore(averageScore: Double, tripsCount: Int) -> String {
+        guard tripsCount > 0, averageScore.isFinite else { return "–" }
+        let clamped = max(0, averageScore)
+        return String(format: "%.0f", clamped)
+    }
+}
+
+private enum MeRestoreAlertContent: Equatable {
+    case localized(String)
+    case raw(String)
+}
+
 public struct MeHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var metricsManager = UsageMetricsManager.shared
@@ -11,7 +157,7 @@ public struct MeHomeView: View {
     @State private var showingSettings: Bool = false
     @State private var showingAbout: Bool = false
     @State private var showingFeedback: Bool = false
-    @State private var restoreMessage: String?
+    @State private var restoreMessage: MeRestoreAlertContent?
     @State private var showingDriveDetails: Bool = false
     @State private var showingMediaServers: Bool = false
     @State private var selectedVehicleIndex: Int = 0
@@ -56,7 +202,7 @@ public struct MeHomeView: View {
                     .padding(.bottom, 110) // clearance for LiquidCapsuleTabBar
                 }
             }
-            .navigationTitle("DashCast")
+            .navigationTitle(MeHomeCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showingSettings) {
                 settingsSheet
@@ -80,10 +226,16 @@ public struct MeHomeView: View {
 
     private var topVehicleProfileCard: some View {
         let metrics = metricsManager.metrics
-        let distanceStr = appState.useMilesPerHour
-            ? String(format: "%.1f mi", metrics.totalDistanceMiles)
-            : String(format: "%.1f km", metrics.totalDistanceKm)
+        let distanceStr = MeProfileMetricsFormatter.formattedDistance(
+            km: metrics.totalDistanceKm,
+            miles: metrics.totalDistanceMiles,
+            useMilesPerHour: appState.useMilesPerHour
+        )
         let tripsCount = metrics.totalTripsRecorded
+        let avgScoreStr = MeProfileMetricsFormatter.formattedAverageScore(
+            averageScore: metrics.averageDrivingScore,
+            tripsCount: tripsCount
+        )
 
         return VStack(spacing: 16) {
             // Vehicle & Name Row
@@ -126,7 +278,7 @@ public struct MeHomeView: View {
                     HStack(spacing: 4) {
                         Image(systemName: appState.isProLifetimeUnlocked ? "crown.fill" : "person.fill")
                             .font(.system(size: 10))
-                        Text(appState.isProLifetimeUnlocked ? "PRO · LIFETIME" : "FREE")
+                        Text(appState.isProLifetimeUnlocked ? MeHomeCopy.proLifetimeBadgeKey : MeHomeCopy.freeBadgeKey)
                             .font(.system(size: 10, weight: .heavy))
                     }
                     .padding(.horizontal, 10)
@@ -141,11 +293,11 @@ public struct MeHomeView: View {
 
             // 3-Column Stats Row
             HStack {
-                statColumn(value: distanceStr, label: "driven")
+                statColumn(value: distanceStr, label: MeHomeCopy.drivenLabelKey)
                 Divider().frame(height: 28).background(Color.dashBorder)
-                statColumn(value: "\(tripsCount)", label: "drives")
+                statColumn(value: "\(tripsCount)", label: MeHomeCopy.drivesLabelKey)
                 Divider().frame(height: 28).background(Color.dashBorder)
-                statColumn(value: tripsCount > 0 ? String(format: "%.0f", metrics.averageDrivingScore) : "–", label: "avg score")
+                statColumn(value: avgScoreStr, label: MeHomeCopy.avgScoreLabelKey)
             }
         }
         .padding(16)
@@ -190,11 +342,11 @@ public struct MeHomeView: View {
                 .offset(x: 230, y: 10)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(appState.isProLifetimeUnlocked ? "DashCast PRO Active" : "DashCast PRO")
+                Text(appState.isProLifetimeUnlocked ? MeHomeCopy.proBannerActiveTitleKey : MeHomeCopy.proBannerTitleKey)
                     .font(.system(size: 20, weight: .heavy))
                     .foregroundStyle(Color.black)
 
-                Text(appState.isProLifetimeUnlocked ? "All features unlocked forever" : "Unlock everything on your car screen")
+                Text(appState.isProLifetimeUnlocked ? MeHomeCopy.proBannerActiveSubtitleKey : MeHomeCopy.proBannerSubtitleKey)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(Color.black.opacity(0.85))
 
@@ -203,7 +355,7 @@ public struct MeHomeView: View {
                 Button {
                     appState.showPaywall = true
                 } label: {
-                    Text(appState.isProLifetimeUnlocked ? "Manage Pass" : "Upgrade Now")
+                    Text(appState.isProLifetimeUnlocked ? MeHomeCopy.managePassButtonKey : MeHomeCopy.upgradeNowButtonKey)
                         .font(.system(size: 13, weight: .bold))
                         .foregroundStyle(Color.black)
                         .padding(.horizontal, 18)
@@ -220,46 +372,46 @@ public struct MeHomeView: View {
 
     private var navigationMenuSection: some View {
         VStack(spacing: 1) {
-            menuItemRow(icon: "car.fill", title: "Drive") {
+            menuItemRow(icon: "car.fill", title: MeHomeCopy.menuDriveKey) {
                 showingDriveDetails = true
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
-            menuItemRow(icon: "server.rack", title: "Media Servers") {
+            menuItemRow(icon: "server.rack", title: MeHomeCopy.menuMediaServersKey) {
                 showingMediaServers = true
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
-            menuItemRow(icon: "gearshape.fill", title: "Settings") {
+            menuItemRow(icon: "gearshape.fill", title: MeHomeCopy.menuSettingsKey) {
                 showingSettings = true
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
-            menuItemRow(icon: "info.circle.fill", title: "About") {
+            menuItemRow(icon: "info.circle.fill", title: MeHomeCopy.menuAboutKey) {
                 showingAbout = true
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
-            menuItemRow(icon: "bubble.left.and.bubble.right.fill", title: "Feedback") {
+            menuItemRow(icon: "bubble.left.and.bubble.right.fill", title: MeHomeCopy.menuFeedbackKey) {
                 showingFeedback = true
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
-            menuItemRow(icon: "star.fill", title: "Rate Us") {
+            menuItemRow(icon: "star.fill", title: MeHomeCopy.menuRateUsKey) {
                 requestReview()
             }
 
             Divider().background(Color.dashBorder.opacity(0.5))
 
             ShareLink(item: LegalLinks.support,
-                      subject: Text("DashCast"),
-                      message: Text("DashCast – play your own videos on the car display (passengers & parked only).")) {
-                menuItemLabel(icon: "arrow.up.right.circle.fill", title: "Share DashCast")
+                      subject: Text(MeHomeCopy.navigationTitleKey),
+                      message: Text(MeHomeCopy.shareMessageKey)) {
+                menuItemLabel(icon: "arrow.up.right.circle.fill", title: MeHomeCopy.menuShareKey)
             }
             .buttonStyle(.plain)
         }
@@ -315,20 +467,20 @@ public struct MeHomeView: View {
                                 HStack(spacing: 12) {
                                     Image(systemName: "globe")
                                         .foregroundStyle(Color.dashYellow)
-                                    Text("Language")
+                                    Text(MeHomeCopy.languageLabelKey)
                                         .font(.system(size: 15, weight: .medium))
                                         .foregroundStyle(Color.dashTextPrimary)
                                 }
 
                                 Spacer()
 
-                                Picker("Language", selection: Binding(
+                                Picker(MeHomeCopy.languageLabelKey, selection: Binding(
                                     get: { appState.appLanguage },
                                     set: { appState.setLanguage($0) }
                                 )) {
-                                    Text("System").tag("system")
-                                    Text("English").tag("en")
-                                    Text("Español").tag("es")
+                                    Text(MeHomeCopy.systemLanguageKey).tag("system")
+                                    Text(MeHomeCopy.englishLanguageKey).tag("en")
+                                    Text(MeHomeCopy.spanishLanguageKey).tag("es")
                                 }
                                 .pickerStyle(.menu)
                                 .tint(Color.dashYellow)
@@ -343,19 +495,19 @@ public struct MeHomeView: View {
                                 HStack(spacing: 12) {
                                     Image(systemName: "gauge.with.dots.needle.bottom.50percent")
                                         .foregroundStyle(Color.dashYellow)
-                                    Text("Speed Units")
+                                    Text(MeHomeCopy.speedUnitsLabelKey)
                                         .font(.system(size: 15, weight: .medium))
                                         .foregroundStyle(Color.dashTextPrimary)
                                 }
 
                                 Spacer()
 
-                                Picker("Units", selection: Binding(
+                                Picker(MeHomeCopy.unitsPickerTitleKey, selection: Binding(
                                     get: { appState.useMilesPerHour },
                                     set: { appState.setSpeedUnit(milesPerHour: $0) }
                                 )) {
-                                    Text("KM/H").tag(false)
-                                    Text("MPH").tag(true)
+                                    Text(MeHomeCopy.kmhUnitKey).tag(false)
+                                    Text(MeHomeCopy.mphUnitKey).tag(true)
                                 }
                                 .pickerStyle(.segmented)
                                 .frame(width: 130)
@@ -371,19 +523,19 @@ public struct MeHomeView: View {
                                     do {
                                         // StoreKitManager mirrors the entitlement into AppState itself.
                                         if try await storeKit.restorePurchases() {
-                                            restoreMessage = "Your DashCast Pro purchase has been restored."
+                                            restoreMessage = .localized(MeHomeCopy.restoreSuccessString)
                                         } else {
-                                            restoreMessage = "No previous DashCast Pro purchase was found for this Apple Account."
+                                            restoreMessage = .localized(MeHomeCopy.restoreNotFoundString)
                                         }
                                     } catch {
-                                        restoreMessage = error.localizedDescription
+                                        restoreMessage = .raw(error.localizedDescription)
                                     }
                                 }
                             } label: {
                                 HStack(spacing: 12) {
                                     Image(systemName: "arrow.clockwise")
                                         .foregroundStyle(Color.dashYellow)
-                                    Text(storeKit.isRestoring ? "Restoring…" : "Restore Purchases")
+                                    Text(storeKit.isRestoring ? MeHomeCopy.restoringPurchasesKey : MeHomeCopy.restorePurchasesKey)
                                         .font(.system(size: 15, weight: .medium))
                                         .foregroundStyle(Color.dashTextPrimary)
                                     Spacer()
@@ -406,19 +558,26 @@ public struct MeHomeView: View {
                     .padding(.top, 14)
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(MeHomeCopy.menuSettingsKey)
             .navigationBarTitleDisplayMode(.inline)
-            .alert("Restore Purchases", isPresented: Binding(
+            .alert(MeHomeCopy.restorePurchasesKey, isPresented: Binding(
                 get: { restoreMessage != nil },
                 set: { if !$0 { restoreMessage = nil } }
             )) {
-                Button("OK", role: .cancel) {}
+                Button(MeHomeCopy.okButtonKey, role: .cancel) {}
             } message: {
-                Text(restoreMessage ?? "")
+                switch restoreMessage {
+                case .localized(let key):
+                    Text(LocalizedStringKey(key))
+                case .raw(let text):
+                    Text(verbatim: text)
+                case nil:
+                    Text(verbatim: "")
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") { showingSettings = false }
+                    Button(MeHomeCopy.doneButtonKey) { showingSettings = false }
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Color.dashYellow)
                 }
@@ -449,7 +608,7 @@ public struct MeHomeView: View {
                     .padding(.top, 20)
 
                     VStack(spacing: 4) {
-                        Text("DashCast")
+                        Text(MeHomeCopy.navigationTitleKey)
                             .font(.system(size: 22, weight: .bold))
                             .foregroundStyle(Color.dashTextPrimary)
                         Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")")
@@ -459,11 +618,11 @@ public struct MeHomeView: View {
 
                     // Links Card
                     VStack(spacing: 1) {
-                        aboutLinkRow(icon: "lock.shield.fill", title: "Privacy Policy", url: LegalLinks.privacyPolicy)
+                        aboutLinkRow(icon: "lock.shield.fill", title: MeHomeCopy.privacyPolicyKey, url: LegalLinks.privacyPolicy)
                         Divider().background(Color.dashBorder.opacity(0.5))
-                        aboutLinkRow(icon: "doc.text.fill", title: "Terms of Use (EULA)", url: LegalLinks.termsOfUse)
+                        aboutLinkRow(icon: "doc.text.fill", title: MeHomeCopy.termsOfUseKey, url: LegalLinks.termsOfUse)
                         Divider().background(Color.dashBorder.opacity(0.5))
-                        aboutLinkRow(icon: "questionmark.circle.fill", title: "Support", url: LegalLinks.support)
+                        aboutLinkRow(icon: "questionmark.circle.fill", title: MeHomeCopy.supportKey, url: LegalLinks.support)
                     }
                     .background(Color.dashSurface)
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -473,11 +632,11 @@ public struct MeHomeView: View {
                     Spacer()
                 }
             }
-            .navigationTitle("About")
+            .navigationTitle(MeHomeCopy.menuAboutKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") { showingAbout = false }
+                    Button(MeHomeCopy.doneButtonKey) { showingAbout = false }
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(Color.dashYellow)
                 }
@@ -496,17 +655,17 @@ public struct MeHomeView: View {
 
     private var legalSection: some View {
         VStack(spacing: 1) {
-            aboutLinkRow(icon: "lock.shield.fill", title: "Privacy Policy", url: LegalLinks.privacyPolicy)
+            aboutLinkRow(icon: "lock.shield.fill", title: MeHomeCopy.privacyPolicyKey, url: LegalLinks.privacyPolicy)
             Divider().background(Color.dashBorder.opacity(0.5))
-            aboutLinkRow(icon: "doc.text.fill", title: "Terms of Use (EULA)", url: LegalLinks.termsOfUse)
+            aboutLinkRow(icon: "doc.text.fill", title: MeHomeCopy.termsOfUseKey, url: LegalLinks.termsOfUse)
             Divider().background(Color.dashBorder.opacity(0.5))
-            aboutLinkRow(icon: "questionmark.circle.fill", title: "Support", url: LegalLinks.support)
+            aboutLinkRow(icon: "questionmark.circle.fill", title: MeHomeCopy.supportKey, url: LegalLinks.support)
             Divider().background(Color.dashBorder.opacity(0.5))
             Button {
                 showingSettings = false
                 passengerNoticeAccepted = false
             } label: {
-                aboutLinkLabel(icon: "car.side.and.exclamationmark", title: "Passenger Safety Notice")
+                aboutLinkLabel(icon: "car.side.and.exclamationmark", title: MeHomeCopy.passengerSafetyNoticeKey)
             }
             .buttonStyle(.plain)
         }
