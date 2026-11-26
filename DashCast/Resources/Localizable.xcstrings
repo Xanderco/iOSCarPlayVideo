@@ -8177,6 +8177,23 @@
           }
         }
       }
+    },
+    "Web video": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web video"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video web"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -38,6 +38,23 @@ public struct WebVideoReport: Equatable {
     }
 }
 
+/// Localized copy keys and resolvers for extracted web video playback.
+public enum WebVideoCopy {
+    nonisolated public static let defaultVideoTitleString = "Web video"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        defaultVideoTitleString
+    ]
+
+    nonisolated public static func localizedDefaultTitle(bundle: Bundle = .main) -> String {
+        NSLocalizedString(
+            defaultVideoTitleString,
+            bundle: bundle,
+            comment: "Fallback title when an extracted web video has no page title"
+        )
+    }
+}
+
 /// Outcome of a "Send to car" request.
 public enum WebVideoExtractionResult: Equatable {
     case found(url: URL, title: String)
@@ -104,13 +121,13 @@ public final class WebVideoExtractor: NSObject, ObservableObject, WKScriptMessag
     }
 
     /// Decides what to do based on the main-frame and iframe reports.
-    nonisolated public static func resolve(main: WebVideoReport?, frame: WebVideoReport?, pageTitle: String) -> WebVideoExtractionResult {
+    nonisolated public static func resolve(main: WebVideoReport?, frame: WebVideoReport?, pageTitle: String, bundle: Bundle = .main) -> WebVideoExtractionResult {
         let reports = [main, frame].compactMap { $0 }
         if reports.contains(where: { $0.hasEME }) {
             return .drmProtected
         }
         if let withURL = reports.first(where: { $0.url != nil }), let url = withURL.url {
-            let title = !pageTitle.isEmpty ? pageTitle : (withURL.title.isEmpty ? "Web video" : withURL.title)
+            let title = !pageTitle.isEmpty ? pageTitle : (withURL.title.isEmpty ? WebVideoCopy.localizedDefaultTitle(bundle: bundle) : withURL.title)
             return .found(url: url, title: title)
         }
         if reports.contains(where: { $0.isBlob || $0.hasVideo }) {
