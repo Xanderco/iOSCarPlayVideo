@@ -139,6 +139,43 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testWidgetsSavedSwitcherSeeAllAndTemplateEditor() throws {
+        let widgetsTab = tabButton("Widgets")
+        XCTAssertTrue(widgetsTab.waitForExistence(timeout: 15), "Widgets tab missing")
+        widgetsTab.tap()
+
+        XCTAssertTrue(app.otherElements["Screen_Widgets"].waitForExistence(timeout: 10), "Widgets screen missing")
+        XCTAssertTrue(app.otherElements["Widgets_MyWidgetsSection"].waitForExistence(timeout: 10), "My Widgets section missing")
+
+        // Tap "See all" for Plate to open interactive catalog sheet.
+        // Swipe from the upper mockup area so we scroll the vertical ScrollView
+        // rather than the horizontal My Widgets carousel.
+        let seeAllPlate = app.buttons["Widgets_SeeAll_plate"]
+        XCTAssertTrue(seeAllPlate.waitForExistence(timeout: 10), "Plate See all button missing")
+        for _ in 0..<4 where seeAllPlate.frame.maxY > app.frame.height - 110 {
+            let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.42))
+            let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15))
+            start.press(forDuration: 0.05, thenDragTo: end)
+        }
+        tapCenter(of: seeAllPlate)
+
+        XCTAssertTrue(app.navigationBars["Plate"].waitForExistence(timeout: 10), "Plate catalog sheet did not open")
+        snapshot("05-widgets-plate-sheet")
+
+        let presetButton = app.buttons["WidgetPreset_plate_custom_car"]
+        XCTAssertTrue(presetButton.waitForExistence(timeout: 5), "Plate preset missing in sheet")
+        tapCenter(of: presetButton)
+
+        XCTAssertTrue(app.navigationBars["Edit widget"].waitForExistence(timeout: 10), "WidgetEditorView did not open from preset")
+        snapshot("06-widget-editor-from-preset")
+
+        let saveButton = app.buttons["WidgetEditor_SaveButton"]
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 5), "WidgetEditor save button missing")
+        tapCenter(of: saveButton)
+
+        XCTAssertTrue(app.otherElements["Widgets_MyWidgetsSection"].waitForExistence(timeout: 10), "Did not return to Widgets tab")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

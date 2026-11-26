@@ -1,6 +1,6 @@
 import Foundation
 
-public struct WidgetConfigModel: Codable, Identifiable {
+public struct WidgetConfigModel: Codable, Identifiable, Equatable {
     public var id: UUID
     public var carBrand: String
     public var carModelName: String

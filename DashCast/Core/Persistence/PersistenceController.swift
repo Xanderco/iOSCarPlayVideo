@@ -45,6 +45,10 @@ public final class PersistenceController {
     }
 
     // Widgets Persistence
+    public var hasStoredWidgets: Bool {
+        userDefaults.data(forKey: widgetsKey) != nil
+    }
+
     public func saveWidgets(_ widgets: [WidgetConfigModel]) {
         if let data = try? JSONEncoder().encode(widgets) {
             userDefaults.set(data, forKey: widgetsKey)
