@@ -173,9 +173,20 @@ final class DashCastSmokeUITests: XCTestCase {
 
         scrollUntilVisible(clearTrips, maxY: 610)
         tapCenter(of: clearTrips)
+        let clearTripsDialogButton = app.sheets["Clear all saved trips?"].buttons["Clear Trip History"]
         let cancelAction = app.buttons["Cancel"]
-        XCTAssertTrue(cancelAction.waitForExistence(timeout: 5), "Clear Trip History confirmation dialog did not open")
-        cancelAction.tap()
+        XCTAssertTrue(
+            clearTripsDialogButton.waitForExistence(timeout: 5) || cancelAction.waitForExistence(timeout: 1),
+            "Clear Trip History confirmation dialog did not open"
+        )
+        if cancelAction.exists {
+            cancelAction.tap()
+        } else {
+            let dismissRegion = app.otherElements["PopoverDismissRegion"]
+            XCTAssertTrue(dismissRegion.exists, "Expected PopoverDismissRegion to dismiss confirmation dialog")
+            dismissRegion.coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.5)).tap()
+        }
+        waitForDisappearance(of: clearTripsDialogButton, timeout: 5)
 
         let settingsGuideRow = app.buttons["Me_Settings_CarDisplayGuideRow"]
         XCTAssertTrue(settingsGuideRow.waitForExistence(timeout: 10), "Car Display Guide row missing in Settings")
