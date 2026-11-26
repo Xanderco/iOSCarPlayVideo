@@ -1,51 +1,144 @@
 import Foundation
 import AVFoundation
 
+public protocol SoundAudioSessionControlling: AnyObject {
+    func setCategory(
+        _ category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
+        options: AVAudioSession.CategoryOptions
+    ) throws
+    func setActive(_ active: Bool, options: AVAudioSession.SetActiveOptions) throws
+}
+
+public final class SystemSoundAudioSession: SoundAudioSessionControlling {
+    private let session: AVAudioSession
+
+    public init(session: AVAudioSession = .sharedInstance()) {
+        self.session = session
+    }
+
+    public func setCategory(
+        _ category: AVAudioSession.Category,
+        mode: AVAudioSession.Mode,
+        options: AVAudioSession.CategoryOptions
+    ) throws {
+        try session.setCategory(category, mode: mode, options: options)
+    }
+
+    public func setActive(_ active: Bool, options: AVAudioSession.SetActiveOptions) throws {
+        try session.setActive(active, options: options)
+    }
+}
+
 @MainActor
 public final class SoundPlayerEngine: ObservableObject {
     public static let shared = SoundPlayerEngine()
 
     @Published public private(set) var currentlyPlayingId: String?
+    public private(set) var isAudioSessionActive: Bool = false
+
+    private let audioSession: SoundAudioSessionControlling
+    private let durationSeconds: Double
+    private let completionDelayNanoseconds: UInt64
+    private let sleepHandler: @Sendable (UInt64) async throws -> Void
+    private let toneSynthesizer: ((Double, Double) -> Void)?
+    private let recordPlaybackMetric: () -> Void
 
     private var audioEngine: AVAudioEngine?
     private var tonePlayer: AVAudioPlayerNode?
+    private var completionTask: Task<Void, Never>?
+    private var activePlaybackToken: UUID?
 
-    public init() {
-        configureAudioSession()
-    }
-
-    private func configureAudioSession() {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playback, mode: .default, options: [.duckOthers])
-            try session.setActive(true)
-        } catch {
-            print("Audio session error: \(error)")
+    public init(
+        audioSession: SoundAudioSessionControlling? = nil,
+        durationSeconds: Double = 0.8,
+        completionDelayNanoseconds: UInt64 = 900_000_000,
+        sleepHandler: (@Sendable (UInt64) async throws -> Void)? = nil,
+        toneSynthesizer: ((Double, Double) -> Void)? = nil,
+        recordPlaybackMetric: (() -> Void)? = nil
+    ) {
+        self.audioSession = audioSession ?? SystemSoundAudioSession()
+        self.durationSeconds = durationSeconds
+        self.completionDelayNanoseconds = completionDelayNanoseconds
+        self.sleepHandler = sleepHandler ?? { nanoseconds in
+            try await Task.sleep(nanoseconds: nanoseconds)
+        }
+        self.toneSynthesizer = toneSynthesizer
+        self.recordPlaybackMetric = recordPlaybackMetric ?? {
+            UsageMetricsManager.shared.recordSoundPlayed()
         }
     }
 
     public func play(sound: SoundEffectItem) {
-        stop()
+        cancelActivePlayback(deactivateSession: false)
+        activateAudioSessionIfNeeded()
 
+        let token = UUID()
+        activePlaybackToken = token
         currentlyPlayingId = sound.id
-        UsageMetricsManager.shared.recordSoundPlayed()
+        recordPlaybackMetric()
 
-        // Synthesize acoustic automotive tone
-        playTone(frequency: sound.frequencyHz, durationSeconds: 0.8)
+        if let toneSynthesizer {
+            toneSynthesizer(sound.frequencyHz, durationSeconds)
+        } else {
+            playTone(frequency: sound.frequencyHz, durationSeconds: durationSeconds)
+        }
 
-        // Reset state after duration
-        Task {
-            try? await Task.sleep(nanoseconds: 900_000_000)
-            if self.currentlyPlayingId == sound.id {
-                self.currentlyPlayingId = nil
+        let delay = completionDelayNanoseconds
+        let sleep = sleepHandler
+        completionTask = Task { [weak self] in
+            do {
+                try await sleep(delay)
+            } catch {
+                return
             }
+            guard !Task.isCancelled else { return }
+            self?.finishPlaybackIfMatching(token: token)
         }
     }
 
     public func stop() {
+        cancelActivePlayback(deactivateSession: true)
+        currentlyPlayingId = nil
+    }
+
+    private func finishPlaybackIfMatching(token: UUID) {
+        guard activePlaybackToken == token else { return }
+        stop()
+    }
+
+    private func cancelActivePlayback(deactivateSession: Bool) {
+        activePlaybackToken = nil
+        completionTask?.cancel()
+        completionTask = nil
         tonePlayer?.stop()
         audioEngine?.stop()
-        currentlyPlayingId = nil
+        tonePlayer = nil
+        audioEngine = nil
+        if deactivateSession {
+            deactivateAudioSessionIfNeeded()
+        }
+    }
+
+    private func activateAudioSessionIfNeeded() {
+        guard !isAudioSessionActive else { return }
+        do {
+            try audioSession.setCategory(.playback, mode: .default, options: [.duckOthers])
+            try audioSession.setActive(true, options: [])
+            isAudioSessionActive = true
+        } catch {
+            print("Audio session activation error: \(error)")
+        }
+    }
+
+    private func deactivateAudioSessionIfNeeded() {
+        guard isAudioSessionActive else { return }
+        isAudioSessionActive = false
+        do {
+            try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Audio session deactivation error: \(error)")
+        }
     }
 
     private func playTone(frequency: Double, durationSeconds: Double) {
