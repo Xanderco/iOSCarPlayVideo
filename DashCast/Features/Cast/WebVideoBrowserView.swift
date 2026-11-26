@@ -1,6 +1,92 @@
 import SwiftUI
 import WebKit
 
+/// Testable localization copy & Send-to-Car alert mapping for `WebVideoBrowserView`.
+public enum WebBrowserAlertCopy {
+    public enum Outcome: Equatable {
+        case streamFound
+        case drmProtected
+        case unsupportedStream
+        case noPlayableVideo
+        case invalidURL
+
+        public init(extractionResult: WebVideoExtractionResult) {
+            switch extractionResult {
+            case .found: self = .streamFound
+            case .drmProtected: self = .drmProtected
+            case .unsupportedStream: self = .unsupportedStream
+            case .noVideo: self = .noPlayableVideo
+            }
+        }
+    }
+
+    public struct Descriptor: Equatable {
+        public let titleKeyName: String
+        public let messageKeyName: String
+
+        @MainActor public var title: LocalizedStringKey { LocalizedStringKey(titleKeyName) }
+        @MainActor public var message: LocalizedStringKey { LocalizedStringKey(messageKeyName) }
+    }
+
+    public static let allLocalizationKeys: [String] = [
+        "OK",
+        "Exit",
+        "Search or website",
+        "Bookmarks",
+        "Send to car",
+        "Sent to DashCast",
+        "Playing on DashCast player — use AirPlay to send it to your car display.",
+        "Protected Video",
+        "This video is DRM-protected and can't be sent to the car.",
+        "Can't Hand Off",
+        "This site streams in a way that can't be handed off.",
+        "No Video Found",
+        "Start playing a video on the page, then tap Send to car again.",
+        "Invalid URL",
+        "Enter a valid website address to load.",
+        "Back",
+        "Forward",
+        "Home",
+        "Go",
+        "Device mode",
+        "Options"
+    ]
+
+    nonisolated public static func descriptor(for outcome: Outcome) -> Descriptor {
+        switch outcome {
+        case .streamFound:
+            return Descriptor(
+                titleKeyName: "Sent to DashCast",
+                messageKeyName: "Playing on DashCast player — use AirPlay to send it to your car display."
+            )
+        case .drmProtected:
+            return Descriptor(
+                titleKeyName: "Protected Video",
+                messageKeyName: "This video is DRM-protected and can't be sent to the car."
+            )
+        case .unsupportedStream:
+            return Descriptor(
+                titleKeyName: "Can't Hand Off",
+                messageKeyName: "This site streams in a way that can't be handed off."
+            )
+        case .noPlayableVideo:
+            return Descriptor(
+                titleKeyName: "No Video Found",
+                messageKeyName: "Start playing a video on the page, then tap Send to car again."
+            )
+        case .invalidURL:
+            return Descriptor(
+                titleKeyName: "Invalid URL",
+                messageKeyName: "Enter a valid website address to load."
+            )
+        }
+    }
+
+    nonisolated public static func descriptor(for result: WebVideoExtractionResult) -> Descriptor {
+        descriptor(for: Outcome(extractionResult: result))
+    }
+}
+
 public struct StreamingSource: Identifiable {
     public let id: String
     public let name: String
@@ -28,8 +114,7 @@ public struct WebVideoBrowserView: View {
     @State private var canGoForward: Bool = false
     @State private var currentTitle: String = "Browser"
     @State private var showingSendToCarAlert: Bool = false
-    @State private var sendToCarAlertTitle: String = ""
-    @State private var sendToCarAlertMessage: String = ""
+    @State private var sendToCarAlert: WebBrowserAlertCopy.Descriptor = WebBrowserAlertCopy.descriptor(for: .noPlayableVideo)
     @State private var isExtracting: Bool = false
 
     private var webView: WKWebView { extractor.webView }
@@ -79,10 +164,10 @@ public struct WebVideoBrowserView: View {
             }
             .background(Color.dashBackground)
             .navigationBarHidden(true)
-            .alert(sendToCarAlertTitle, isPresented: $showingSendToCarAlert) {
-                Button("OK", role: .cancel) {}
+            .alert(sendToCarAlert.title, isPresented: $showingSendToCarAlert) {
+                Button(LocalizedStringKey("OK"), role: .cancel) {}
             } message: {
-                Text(sendToCarAlertMessage)
+                Text(sendToCarAlert.message)
             }
         }
     }
@@ -91,7 +176,7 @@ public struct WebVideoBrowserView: View {
 
     private var topAddressBar: some View {
         HStack(spacing: 10) {
-            Button("Exit") {
+            Button(LocalizedStringKey("Exit")) {
                 dismiss()
             }
             .font(.system(size: 15, weight: .semibold))
@@ -102,7 +187,7 @@ public struct WebVideoBrowserView: View {
                     .font(.system(size: 13))
                     .foregroundStyle(Color.dashTextMuted)
 
-                TextField("Search or website", text: $urlString)
+                TextField(LocalizedStringKey("Search or website"), text: $urlString)
                     .font(.system(size: 14))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
@@ -118,6 +203,7 @@ public struct WebVideoBrowserView: View {
                             .font(.system(size: 16))
                             .foregroundStyle(Color.dashYellow)
                     }
+                    .accessibilityLabel(Text("Go"))
                 }
             }
             .padding(.horizontal, 10)
@@ -132,6 +218,7 @@ public struct WebVideoBrowserView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(Color.dashYellow)
             }
+            .accessibilityLabel(Text("Device mode"))
 
             Button {
                 // Options menu
@@ -140,6 +227,7 @@ public struct WebVideoBrowserView: View {
                     .font(.system(size: 18))
                     .foregroundStyle(Color.dashYellow)
             }
+            .accessibilityLabel(Text("Options"))
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
@@ -177,13 +265,13 @@ public struct WebVideoBrowserView: View {
                                             .font(.system(size: 24))
                                             .foregroundStyle(Color.white)
 
-                                        Text(source.badgeLetter)
+                                        Text(verbatim: source.badgeLetter)
                                             .font(.system(size: 9, weight: .heavy))
                                             .foregroundStyle(Color.white.opacity(0.85))
                                     }
                                 }
 
-                                Text(source.name)
+                                Text(verbatim: source.name)
                                     .font(.system(size: 11, weight: .medium))
                                     .foregroundStyle(Color.dashTextPrimary)
                                     .lineLimit(1)
@@ -233,6 +321,7 @@ public struct WebVideoBrowserView: View {
                     .frame(maxWidth: .infinity)
             }
             .disabled(!canGoBack)
+            .accessibilityLabel(Text("Back"))
 
             Button {
                 webView.goForward()
@@ -243,6 +332,7 @@ public struct WebVideoBrowserView: View {
                     .frame(maxWidth: .infinity)
             }
             .disabled(!canGoForward)
+            .accessibilityLabel(Text("Forward"))
 
             Button {
                 isShowingHomeGrid = true
@@ -253,6 +343,7 @@ public struct WebVideoBrowserView: View {
                     .foregroundStyle(isShowingHomeGrid ? Color.dashYellow : Color.dashTextSecondary)
                     .frame(maxWidth: .infinity)
             }
+            .accessibilityLabel(Text("Home"))
 
             Button {
                 // Bookmarks
@@ -262,6 +353,7 @@ public struct WebVideoBrowserView: View {
                     .foregroundStyle(Color.dashTextSecondary)
                     .frame(maxWidth: .infinity)
             }
+            .accessibilityLabel(Text("Bookmarks"))
 
             Button {
                 sendCurrentVideoToCar()
@@ -269,7 +361,7 @@ public struct WebVideoBrowserView: View {
                 HStack(spacing: 4) {
                     Image(systemName: "car.side.fill")
                         .font(.system(size: 14))
-                    Text("Send to car")
+                    Text(LocalizedStringKey("Send to car"))
                         .font(.system(size: 11, weight: .bold))
                 }
                 .foregroundStyle(Color.dashYellow)
@@ -305,26 +397,18 @@ public struct WebVideoBrowserView: View {
     }
 
     private func presentSendResult(_ result: WebVideoExtractionResult) {
-        switch result {
-        case .found:
-            sendToCarAlertTitle = "Sent to DashCast"
-            sendToCarAlertMessage = "Playing on DashCast player — use AirPlay to send it to your car display."
-        case .drmProtected:
-            sendToCarAlertTitle = "Protected Video"
-            sendToCarAlertMessage = "This video is DRM-protected and can't be sent to the car."
-        case .unsupportedStream:
-            sendToCarAlertTitle = "Can't Hand Off"
-            sendToCarAlertMessage = "This site streams in a way that can't be handed off."
-        case .noVideo:
-            sendToCarAlertTitle = "No Video Found"
-            sendToCarAlertMessage = "Start playing a video on the page, then tap Send to car again."
-        }
+        presentAlert(WebBrowserAlertCopy.Outcome(extractionResult: result))
+    }
+
+    private func presentAlert(_ outcome: WebBrowserAlertCopy.Outcome) {
+        sendToCarAlert = WebBrowserAlertCopy.descriptor(for: outcome)
         showingSendToCarAlert = true
     }
 
     private func navigateToInput() {
-        guard !urlString.isEmpty else { return }
-        var fullURL = urlString
+        let trimmed = urlString.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        var fullURL = trimmed
         if !fullURL.lowercased().hasPrefix("http://") && !fullURL.lowercased().hasPrefix("https://") {
             if fullURL.contains(".") && !fullURL.contains(" ") {
                 fullURL = "https://" + fullURL
@@ -333,11 +417,16 @@ public struct WebVideoBrowserView: View {
                 fullURL = "https://www.google.com/search?q=\(encoded)"
             }
         }
+        guard let url = URL(string: fullURL),
+              let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https",
+              url.host != nil else {
+            presentAlert(.invalidURL)
+            return
+        }
         isShowingHomeGrid = false
         extractor.resetReports()
-        if let url = URL(string: fullURL) {
-            webView.load(URLRequest(url: url))
-        }
+        webView.load(URLRequest(url: url))
     }
 }
 
