@@ -55,4 +55,69 @@ final class DriveSettingsAndNotificationTests: XCTestCase {
         // If no crash occurred, notifications requests dispatched to UNUserNotificationCenter
         XCTAssertTrue(true)
     }
+
+    func testDriveNotificationContentBuilderRecordingAndTripSaved() {
+        let recording = DriveNotificationContentBuilder.recordingContent(distanceKm: 3.45)
+        XCTAssertEqual(recording.identifier, "dashcast.drive.recording")
+        XCTAssertEqual(recording.title, "Recording your drive")
+        XCTAssertEqual(recording.body, "3.5 km so far · DashCast is tracking this trip.")
+        XCTAssertEqual(recording.delay, 1)
+
+        let clampedRecording = DriveNotificationContentBuilder.recordingContent(distanceKm: -2.0)
+        XCTAssertEqual(clampedRecording.body, "0.0 km so far · DashCast is tracking this trip.")
+
+        let start = Date(timeIntervalSince1970: 1000)
+        let trip = TripModel(
+            startTime: start,
+            endTime: start.addingTimeInterval(900),
+            distanceMeters: 16093.44,
+            averageSpeedKmh: 64.0,
+            maxSpeedKmh: 100.0,
+            drivingScore: 91
+        )
+
+        let kmPayload = DriveNotificationContentBuilder.tripSavedContent(trip: trip, useMiles: false)
+        XCTAssertEqual(kmPayload.identifier, "dashcast.trip.saved")
+        XCTAssertEqual(kmPayload.title, "Trip saved")
+        XCTAssertEqual(kmPayload.body, "16.1 km · 15 min · top 100 km/h\n🏁 Score 91/100")
+
+        let milesPayload = DriveNotificationContentBuilder.tripSavedContent(trip: trip, useMiles: true)
+        XCTAssertEqual(milesPayload.identifier, "dashcast.trip.saved")
+        XCTAssertEqual(milesPayload.title, "Trip saved")
+        XCTAssertEqual(milesPayload.body, "10.0 mi · 15 min · top 62 mph\n🏁 Score 91/100")
+    }
+
+    func testDriveNotificationContentBuilderFeatureTips() {
+        let tips = DriveNotificationContentBuilder.featureTipContents()
+        XCTAssertEqual(tips.count, 4)
+        XCTAssertEqual(tips.map(\.identifier), ["dashcast.tip.0", "dashcast.tip.1", "dashcast.tip.2", "dashcast.tip.3"])
+        XCTAssertEqual(tips.map(\.delay), [3600, 7200, 14400, 21600])
+        XCTAssertEqual(tips[0].title, "Every detail, yours")
+        XCTAssertEqual(tips[3].title, "Two taps, done")
+    }
+
+    func testDriveNotificationCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        XCTAssertEqual(DriveNotificationCopy.allLocalizationKeys.count, 13)
+        for key in DriveNotificationCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
