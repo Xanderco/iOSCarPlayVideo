@@ -139,6 +139,35 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testCastQuickPlayStripAppearsOnPlaybackAndClearsRecents() throws {
+        let row = app.buttons["Cast_MediaSourceRow"]
+        XCTAssertTrue(row.waitForExistence(timeout: 15), "Media Source row missing")
+        tapCenter(of: row)
+
+        XCTAssertTrue(
+            app.navigationBars["Media Sources"].waitForExistence(timeout: 10),
+            "Media Sources sheet did not open"
+        )
+        let firstChannel = app.buttons.matching(identifier: "MediaSources_Channel").firstMatch
+        XCTAssertTrue(firstChannel.waitForExistence(timeout: 10), "No channels listed")
+        firstChannel.tap()
+
+        let quickTile = app.buttons.matching(identifier: "Cast_QuickPlayTile").firstMatch
+        XCTAssertTrue(quickTile.waitForExistence(timeout: 10), "Quick-play tile did not appear after playback")
+        tapCenter(of: quickTile)
+        snapshot("05-cast-quick-play")
+
+        let clearButton = app.buttons["Cast_ClearRecentsButton"]
+        XCTAssertTrue(clearButton.waitForExistence(timeout: 5), "Clear Recents button missing")
+        tapCenter(of: clearButton)
+
+        let gone = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "exists == false"),
+            object: quickTile
+        )
+        wait(for: [gone], timeout: 5)
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

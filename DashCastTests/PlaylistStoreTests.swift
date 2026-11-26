@@ -358,4 +358,98 @@ final class PlaylistStoreTests: XCTestCase {
         XCTAssertEqual(store.playlists.map(\.title), ["Mine", "Local"])
         XCTAssertEqual(store.playlists[0].channels.map(\.name), ["Movie A", "News Two", "Movie B"])
     }
+
+    // MARK: - Recently Watched & Quick-Play
+
+    func testRecentChannelsRecordDeduplicateCapAndPersist() throws {
+        let env = makeEnv()
+        let store = makeStore(env)
+        XCTAssertTrue(store.recentChannels.isEmpty)
+        XCTAssertTrue(store.quickPlayChannels.isEmpty)
+
+        let base = Date(timeIntervalSince1970: 1_700_000_000)
+        for index in 1...12 {
+            let channel = ChannelModel(
+                name: "Channel \(index)",
+                streamURL: URL(string: "https://stream.example.com/ch\(index).m3u8")!,
+                groupTitle: "Live"
+            )
+            store.recordRecent(channel, at: base.addingTimeInterval(Double(index)))
+        }
+
+        XCTAssertEqual(store.recentChannels.count, PlaylistStore.maxRecentChannels)
+        XCTAssertEqual(store.recentChannels.first?.name, "Channel 12")
+        XCTAssertEqual(store.recentChannels.last?.name, "Channel 3", "oldest entries beyond 10 are evicted")
+
+        // Re-playing an existing channel moves it to front without duplicating.
+        let replay = ChannelModel(
+            name: "Channel 5",
+            streamURL: URL(string: "https://stream.example.com/ch5.m3u8")!,
+            groupTitle: "Live"
+        )
+        let replayDate = base.addingTimeInterval(100)
+        store.recordRecent(replay, at: replayDate)
+        XCTAssertEqual(store.recentChannels.count, PlaylistStore.maxRecentChannels)
+        XCTAssertEqual(store.recentChannels.first?.name, "Channel 5")
+        XCTAssertEqual(store.recentChannels.first?.lastWatched, replayDate)
+
+        let reloaded = makeStore(env)
+        XCTAssertEqual(reloaded.recentChannels.map(\.name), store.recentChannels.map(\.name))
+    }
+
+    func testRecentChannelsIgnoreMirrorAndSupportRemoveAndClear() {
+        let env = makeEnv()
+        let store = makeStore(env)
+
+        store.recordRecent(CarPlayMirrorPlayback.mirrorChannel)
+        XCTAssertTrue(store.recentChannels.isEmpty)
+
+        let ch1 = ChannelModel(name: "One", streamURL: URL(string: "https://stream.example.com/1.m3u8")!)
+        let ch2 = ChannelModel(name: "Two", streamURL: URL(string: "https://stream.example.com/2.m3u8")!)
+
+        let exp = expectation(forNotification: PlaylistStore.didChangeNotification, object: store)
+        store.recordRecent(ch1)
+        wait(for: [exp], timeout: 1)
+        store.recordRecent(ch2)
+        XCTAssertTrue(store.isRecent(ch1))
+        XCTAssertTrue(store.isRecent(ch2))
+
+        store.removeRecent(ch1)
+        XCTAssertFalse(store.isRecent(ch1))
+        XCTAssertEqual(store.recentChannels.map(\.name), ["Two"])
+
+        store.clearRecents()
+        XCTAssertTrue(store.recentChannels.isEmpty)
+        XCTAssertTrue(makeStore(env).recentChannels.isEmpty)
+    }
+
+    func testQuickPlayChannelsPinFavoritesBeforeRecentsWithoutDuplicates() throws {
+        let store = makeStore(makeEnv())
+        try store.addPlaylist(data: data(Self.twoChannels), sourceURL: nil, title: "List")
+        let news = store.importedChannels[0]
+        let sports = store.importedChannels[1]
+
+        store.toggleFavorite(sports)
+        store.recordRecent(news, at: Date(timeIntervalSince1970: 100))
+        store.recordRecent(sports, at: Date(timeIntervalSince1970: 200))
+
+        XCTAssertEqual(store.quickPlayChannels.map(\.name), ["Sports One", "News One"],
+                       "favorites appear first and deduplicate against recents")
+
+        store.toggleFavorite(sports)
+        XCTAssertEqual(store.quickPlayChannels.map(\.name), ["Sports One", "News One"],
+                       "unfavorited channel remains in recents order")
+    }
+
+    func testVideoPlayerServiceInvokesOnChannelLoadedForRecents() {
+        let store = makeStore(makeEnv())
+        let service = VideoPlayerService(handlesRemoteCommands: false)
+        service.onChannelLoaded = { [weak store] channel in
+            store?.recordRecent(channel)
+        }
+        let channel = ChannelModel(name: "Road Stream", streamURL: URL(string: "https://stream.example.com/road.m3u8")!)
+        service.load(channel: channel)
+        XCTAssertEqual(store.recentChannels.map(\.streamURL), [channel.streamURL])
+        service.stop()
+    }
 }
