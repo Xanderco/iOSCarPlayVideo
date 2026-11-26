@@ -8177,6 +8177,227 @@
           }
         }
       }
+    },
+    "Recording your drive": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recording your drive"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grabando tu recorrido"
+          }
+        }
+      }
+    },
+    "%.1f km so far · DashCast is tracking this trip.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f km so far · DashCast is tracking this trip."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f km hasta ahora · DashCast está registrando este viaje."
+          }
+        }
+      }
+    },
+    "Trip saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trip saved"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Viaje guardado"
+          }
+        }
+      }
+    },
+    "%.1f mi · %d min · top %.0f mph\n🏁 Score %d/100": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f mi · %d min · top %.0f mph\n🏁 Score %d/100"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f mi · %d min · máx. %.0f mph\n🏁 Puntuación %d/100"
+          }
+        }
+      }
+    },
+    "%.1f km · %d min · top %.0f km/h\n🏁 Score %d/100": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f km · %d min · top %.0f km/h\n🏁 Score %d/100"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f km · %d min · máx. %.0f km/h\n🏁 Puntuación %d/100"
+          }
+        }
+      }
+    },
+    "Every detail, yours": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Every detail, yours"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cada detalle, a tu manera"
+          }
+        }
+      }
+    },
+    "🔧 Fine-tune your widget — size, colors, layout": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔧 Fine-tune your widget — size, colors, layout"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "🔧 Ajusta tu widget — tamaño, colores y diseño"
+          }
+        }
+      }
+    },
+    "30 seconds to wow": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 seconds to wow"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 segundos para sorprender"
+          }
+        }
+      }
+    },
+    "⭐ Make your CarPlay screen yours in 30 seconds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⭐ Make your CarPlay screen yours in 30 seconds"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⭐ Personaliza tu pantalla de CarPlay en 30 segundos"
+          }
+        }
+      }
+    },
+    "Show off your car": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show off your car"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Presume tu auto"
+          }
+        }
+      }
+    },
+    "📸 That photo of your car deserves a spot on your dashboard": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "📸 That photo of your car deserves a spot on your dashboard"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "📸 Esa foto de tu auto merece un lugar en tu tablero"
+          }
+        }
+      }
+    },
+    "Two taps, done": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Two taps, done"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dos toques y listo"
+          }
+        }
+      }
+    },
+    "⚡ Two taps to set your CarPlay startup sound": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚡ Two taps to set your CarPlay startup sound"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "⚡ Dos toques para configurar tu sonido de inicio en CarPlay"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
