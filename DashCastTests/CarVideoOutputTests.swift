@@ -142,4 +142,99 @@ final class CarVideoOutputTests: XCTestCase {
         XCTAssertTrue(player.usesExternalPlaybackWhileExternalScreenIsActive)
         XCTAssertTrue(CarVideoOutputController.shared.canStartVideoOutput())
     }
+
+    // MARK: Live Activity builder & localization
+
+    func testCarVideoOutputActivityBuilderStates() {
+        let t0 = Date(timeIntervalSince1970: 1_700_000_000)
+
+        let mirroringWithURL = CarVideoOutputActivityBuilder.buildState(
+            isBroadcasting: true,
+            viewerURL: "http://172.20.10.1:8088",
+            isExternalPlaybackActive: false,
+            airPlayRouteName: nil,
+            channelName: "News 24",
+            pausedForMotion: false,
+            startedAt: t0
+        )
+        XCTAssertEqual(mirroringWithURL.mode, "Mirroring")
+        XCTAssertEqual(mirroringWithURL.title, "News 24")
+        XCTAssertEqual(mirroringWithURL.detail, "Open http://172.20.10.1:8088 in the car browser")
+        XCTAssertFalse(mirroringWithURL.isPausedForMotion)
+        XCTAssertEqual(mirroringWithURL.startedAt, t0)
+
+        let mirroringNoURL = CarVideoOutputActivityBuilder.buildState(
+            isBroadcasting: true,
+            viewerURL: nil,
+            isExternalPlaybackActive: false,
+            airPlayRouteName: nil,
+            channelName: nil,
+            pausedForMotion: false,
+            startedAt: t0
+        )
+        XCTAssertEqual(mirroringNoURL.mode, "Mirroring")
+        XCTAssertEqual(mirroringNoURL.title, "DashCast")
+        XCTAssertEqual(mirroringNoURL.detail, "Screen mirroring is live")
+
+        let airPlayNamed = CarVideoOutputActivityBuilder.buildState(
+            isBroadcasting: false,
+            viewerURL: nil,
+            isExternalPlaybackActive: true,
+            airPlayRouteName: "Living Room TV",
+            channelName: "Sports",
+            pausedForMotion: false,
+            startedAt: t0
+        )
+        XCTAssertEqual(airPlayNamed.mode, "AirPlay")
+        XCTAssertEqual(airPlayNamed.detail, "Playing on Living Room TV")
+
+        let airPlayFallback = CarVideoOutputActivityBuilder.buildState(
+            isBroadcasting: false,
+            viewerURL: nil,
+            isExternalPlaybackActive: true,
+            airPlayRouteName: nil,
+            channelName: "Sports",
+            pausedForMotion: false,
+            startedAt: t0
+        )
+        XCTAssertEqual(airPlayFallback.detail, "Playing on car display")
+
+        let externalPaused = CarVideoOutputActivityBuilder.buildState(
+            isBroadcasting: false,
+            viewerURL: nil,
+            isExternalPlaybackActive: false,
+            airPlayRouteName: nil,
+            channelName: nil,
+            pausedForMotion: true,
+            startedAt: t0
+        )
+        XCTAssertEqual(externalPaused.mode, "External display")
+        XCTAssertEqual(externalPaused.title, "DashCast")
+        XCTAssertEqual(externalPaused.detail, "Paused while the vehicle is moving")
+        XCTAssertTrue(externalPaused.isPausedForMotion)
+    }
+
+    func testCarVideoOutputCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in CarVideoOutputCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }

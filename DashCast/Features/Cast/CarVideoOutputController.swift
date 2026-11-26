@@ -12,6 +12,83 @@ private let broadcastStatusDarwinCallback: CFNotificationCallback = { _, observe
     Task { @MainActor in controller.reloadBroadcastStatus() }
 }
 
+/// Localized copy keys for `CarVideoOutputController` Live Activity state.
+enum CarVideoOutputCopy {
+    nonisolated static let mirroringModeString = "Mirroring"
+    nonisolated static let mirroringViewerURLFormatString = "Open %@ in the car browser"
+    nonisolated static let mirroringLiveString = "Screen mirroring is live"
+    nonisolated static let airPlayModeString = "AirPlay"
+    nonisolated static let playingOnFormatString = "Playing on %@"
+    nonisolated static let carDisplayFallbackString = "car display"
+    nonisolated static let externalDisplayModeString = "External display"
+    nonisolated static let externalDisplayPlayingString = "Playing on connected display"
+    nonisolated static let pausedForMotionString = "Paused while the vehicle is moving"
+
+    nonisolated static let allLocalizationKeys: [String] = [
+        mirroringModeString,
+        mirroringViewerURLFormatString,
+        mirroringLiveString,
+        airPlayModeString,
+        playingOnFormatString,
+        carDisplayFallbackString,
+        externalDisplayModeString,
+        externalDisplayPlayingString,
+        pausedForMotionString
+    ]
+}
+
+/// Pure Live Activity content state builder for `CarVideoOutputController`.
+enum CarVideoOutputActivityBuilder {
+    nonisolated static func buildState(
+        isBroadcasting: Bool,
+        viewerURL: String?,
+        isExternalPlaybackActive: Bool,
+        airPlayRouteName: String?,
+        channelName: String?,
+        pausedForMotion: Bool,
+        startedAt: Date,
+        bundle: Bundle = .main
+    ) -> CarCastActivityAttributes.ContentState {
+        let mode: String
+        let baseDetail: String
+
+        if isBroadcasting {
+            mode = localized(CarVideoOutputCopy.mirroringModeString, bundle: bundle)
+            if let viewerURL {
+                let format = localized(CarVideoOutputCopy.mirroringViewerURLFormatString, bundle: bundle)
+                baseDetail = String(format: format, viewerURL)
+            } else {
+                baseDetail = localized(CarVideoOutputCopy.mirroringLiveString, bundle: bundle)
+            }
+        } else if isExternalPlaybackActive {
+            mode = localized(CarVideoOutputCopy.airPlayModeString, bundle: bundle)
+            let route = airPlayRouteName ?? localized(CarVideoOutputCopy.carDisplayFallbackString, bundle: bundle)
+            let format = localized(CarVideoOutputCopy.playingOnFormatString, bundle: bundle)
+            baseDetail = String(format: format, route)
+        } else {
+            mode = localized(CarVideoOutputCopy.externalDisplayModeString, bundle: bundle)
+            baseDetail = localized(CarVideoOutputCopy.externalDisplayPlayingString, bundle: bundle)
+        }
+
+        let detail = pausedForMotion
+            ? localized(CarVideoOutputCopy.pausedForMotionString, bundle: bundle)
+            : baseDetail
+        let title = channelName ?? "DashCast"
+
+        return CarCastActivityAttributes.ContentState(
+            mode: mode,
+            title: title,
+            detail: detail,
+            isPausedForMotion: pausedForMotion,
+            startedAt: startedAt
+        )
+    }
+
+    nonisolated private static func localized(_ key: String, bundle: Bundle) -> String {
+        bundle.localizedString(forKey: key, value: key, table: nil)
+    }
+}
+
 /// Coordinates every way DashCast puts video on a car display:
 ///  1. AVPlayer external playback over AirPlay (iOS 26 "AirPlay video in the car",
 ///     AirPlay TVs/receivers, wireless adapters that act as AirPlay receivers),
@@ -206,29 +283,16 @@ final class CarVideoOutputController: ObservableObject {
         }
         if outputStartedAt == nil { outputStartedAt = Date() }
 
-        let mode: String
-        let detail: String
-        if isBroadcasting {
-            mode = "Mirroring"
-            detail = broadcastStatus.viewerURL.map { "Open \($0) in the car browser" } ?? "Screen mirroring is live"
-        } else if isExternalPlaybackActive {
-            mode = "AirPlay"
-            detail = "Playing on \(airPlayRouteName ?? "car display")"
-        } else {
-            mode = "External display"
-            detail = "Playing on connected display"
-        }
-
-        let title = VideoPlayerService.shared.currentChannel?.name ?? "DashCast"
         let startedAt = (isBroadcasting ? broadcastStatus.startedAt : nil) ?? outputStartedAt ?? Date()
-        CarCastLiveActivityManager.shared.startOrUpdate(
-            CarCastActivityAttributes.ContentState(
-                mode: mode,
-                title: title,
-                detail: pausedForMotion ? "Paused while the vehicle is moving" : detail,
-                isPausedForMotion: pausedForMotion,
-                startedAt: startedAt
-            )
+        let state = CarVideoOutputActivityBuilder.buildState(
+            isBroadcasting: isBroadcasting,
+            viewerURL: broadcastStatus.viewerURL,
+            isExternalPlaybackActive: isExternalPlaybackActive,
+            airPlayRouteName: airPlayRouteName,
+            channelName: VideoPlayerService.shared.currentChannel?.name,
+            pausedForMotion: pausedForMotion,
+            startedAt: startedAt
         )
+        CarCastLiveActivityManager.shared.startOrUpdate(state)
     }
 }
