@@ -66,8 +66,48 @@ final class WebVideoExtractorTests: XCTestCase {
         let service = VideoPlayerService()
         service.playWebVideo(url: URL(string: "https://example.com/a.m3u8")!, title: "")
         XCTAssertTrue(service.player.allowsExternalPlayback)
-        XCTAssertEqual(service.currentChannel?.name, "Web video")
+        XCTAssertEqual(service.currentChannel?.name, WebVideoCopy.localizedDefaultTitle())
         XCTAssertEqual(service.currentChannel?.groupTitle, "Web")
         service.pause()
+    }
+
+    func testResolveEmptyTitleUsesLocalizedFallback() {
+        let url = URL(string: "https://example.com/a.mp4")!
+        let untitledReport = WebVideoReport(
+            url: url,
+            title: "",
+            isBlob: false,
+            hasEME: false,
+            hasVideo: true,
+            isMainFrame: true
+        )
+        let testBundle = Bundle(for: WebVideoExtractorTests.self)
+        let result = WebVideoExtractor.resolve(main: untitledReport, frame: nil, pageTitle: "", bundle: testBundle)
+        XCTAssertEqual(result, .found(url: url, title: WebVideoCopy.localizedDefaultTitle(bundle: testBundle)))
+        XCTAssertEqual(WebVideoCopy.localizedDefaultTitle(bundle: testBundle), WebVideoCopy.defaultVideoTitleString)
+    }
+
+    func testWebVideoCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in WebVideoCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
     }
 }

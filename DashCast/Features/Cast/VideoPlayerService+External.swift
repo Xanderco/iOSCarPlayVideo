@@ -12,7 +12,7 @@ extension VideoPlayerService {
     public func playWebVideo(url: URL, title: String) {
         enableExternalPlayback()
         let channel = ChannelModel(
-            name: title.isEmpty ? "Web video" : title,
+            name: title.isEmpty ? WebVideoCopy.localizedDefaultTitle() : title,
             streamURL: url,
             groupTitle: "Web"
         )
