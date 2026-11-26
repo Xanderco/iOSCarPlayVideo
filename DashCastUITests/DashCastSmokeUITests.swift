@@ -155,6 +155,16 @@ final class DashCastSmokeUITests: XCTestCase {
         let surface = app.otherElements["Player_VideoSurface"].firstMatch
         XCTAssertTrue(surface.waitForExistence(timeout: 10), "Inline video player did not appear")
 
+        // Pause playback if active so the 4s auto-hide timer stays disarmed while driving fullscreen controls.
+        let playPause = app.buttons["Player_PlayPauseButton"].firstMatch
+        if !playPause.waitForExistence(timeout: 5) {
+            tapCenter(of: surface)
+        }
+        if playPause.waitForExistence(timeout: 5), playPause.label == "Pause" {
+            tapCenter(of: playPause)
+            _ = app.buttons["Play"].firstMatch.waitForExistence(timeout: 3)
+        }
+
         let enterFullscreen = app.buttons["Player_FullscreenButton"].firstMatch
         if !enterFullscreen.waitForExistence(timeout: 5) {
             tapCenter(of: surface)
