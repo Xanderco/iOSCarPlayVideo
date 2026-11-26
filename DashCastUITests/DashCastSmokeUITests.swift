@@ -139,6 +139,37 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testFreeCastingAllowanceBannerAndUpgradePrompt() throws {
+        let castBanner = app.buttons["Cast_FreeAllowanceBanner"]
+        XCTAssertTrue(castBanner.waitForExistence(timeout: 15), "Free casting allowance banner missing on Cast tab")
+        snapshot("05-cast-allowance-banner")
+
+        tapCenter(of: castBanner)
+
+        let paywallClose = app.buttons["paywall.close"]
+        XCTAssertTrue(paywallClose.waitForExistence(timeout: 10), "Paywall did not open from Cast allowance banner")
+        snapshot("05b-allowance-paywall")
+        paywallClose.tap()
+
+        let mirrorRow = app.buttons["Cast_MirrorRow"]
+        XCTAssertTrue(mirrorRow.waitForExistence(timeout: 10), "Mirror iPhone row missing")
+        tapCenter(of: mirrorRow)
+
+        let carDisplayNav = app.navigationBars["Car Display"]
+        XCTAssertTrue(carDisplayNav.waitForExistence(timeout: 10), "Car Display sheet did not open")
+
+        let carDisplayBanner = app.buttons["CarDisplay_FreeAllowanceBanner"]
+        XCTAssertTrue(carDisplayBanner.waitForExistence(timeout: 10), "Free casting allowance banner missing on Car Display sheet")
+        snapshot("06-car-display-allowance-banner")
+
+        tapCenter(of: carDisplayBanner)
+        XCTAssertTrue(paywallClose.waitForExistence(timeout: 10), "Paywall did not open from Car Display allowance banner")
+        paywallClose.tap()
+
+        carDisplayNav.buttons["Close"].tap()
+        XCTAssertTrue(castBanner.waitForExistence(timeout: 10), "Did not return to Cast tab")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers

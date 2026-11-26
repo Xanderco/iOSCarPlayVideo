@@ -3,8 +3,10 @@ import SwiftUI
 /// "Car Display" panel: the two supported ways to get video onto the car's
 /// screen, plus the parked-only status.
 struct CarOutputPanelView: View {
+    @EnvironmentObject private var appState: AppState
     @ObservedObject private var output = CarVideoOutputController.shared
     @ObservedObject private var parkedGuard = CarVideoOutputController.shared.parkedGuard
+    @ObservedObject private var entitlementGate = EntitlementGate.shared
     @State private var copiedURL = false
     @State private var mirrorToCarPlay = CarMirrorFeature.isEnabled()
 
@@ -12,6 +14,14 @@ struct CarOutputPanelView: View {
         ScrollView {
             VStack(spacing: 16) {
                 parkedStatusCard
+                if !appState.isProLifetimeUnlocked {
+                    FreeCastingAllowanceBanner(
+                        gate: entitlementGate,
+                        accessibilityIdentifier: "CarDisplay_FreeAllowanceBanner"
+                    ) {
+                        appState.showPaywall = true
+                    }
+                }
                 airPlayCard
                 mirroringCard
                 Text("Video on the car display is for passengers and parked use only. DashCast pauses video and stops mirroring automatically when the vehicle starts moving.")

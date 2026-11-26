@@ -92,6 +92,12 @@
 
 ## Log
 
+### 2026-11-26 03:25 (Bogotá) — Free-Tier Casting Allowance Meter & 1-Tap Upgrade Prompt [DI-89]
+- **Added `CastingAllowanceStatus` & `FreeCastingAllowanceBanner`** (`DashCast/Features/Cast/FreeCastingAllowanceBanner.swift`): compact free-tier daily casting allowance meter with `m:ss` countdown formatting, progress bar, 4 visual states (`full`, `normal`, `low` <5 min, `exhausted`), foreground/midnight usage refresh, and 1-tap Pro upgrade trigger.
+- **Wired into `CastHomeView` and `CarOutputPanelView`**: displayed above `mainSourceMenuCard` (`Cast_FreeAllowanceBanner`) and below `parkedStatusCard` (`CarDisplay_FreeAllowanceBanner`) whenever `!appState.isProLifetimeUnlocked`, opening `LifetimePaywallView` on tap; added `Cast_MirrorRow` identifier for deterministic UI testing.
+- **Localization & Tests**: added EN/ES strings in `DashCast/Resources/Localizable.xcstrings`, 4 unit tests in `DashCastTests/CastingAllowanceStatusTests.swift`, and UI test `testFreeCastingAllowanceBannerAndUpgradePrompt` in `DashCastUITests/DashCastSmokeUITests.swift`.
+- **Verification**: pending GitHub Actions CI run on `feature/DI-89-free-casting-allowance-meter`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
