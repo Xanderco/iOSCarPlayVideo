@@ -1,5 +1,91 @@
 import SwiftUI
 
+/// Pure validation helpers for `FeedbackView`.
+public enum FeedbackFormValidator {
+    nonisolated public static let minimumMessageLength: Int = 10
+
+    nonisolated public static func trimmedLength(_ message: String) -> Int {
+        message.trimmingCharacters(in: .whitespacesAndNewlines).count
+    }
+
+    nonisolated public static func isMessageValid(_ message: String) -> Bool {
+        trimmedLength(message) >= minimumMessageLength
+    }
+
+    nonisolated public static func clampedCharacterCount(_ message: String) -> Int {
+        min(message.count, minimumMessageLength)
+    }
+}
+
+/// Localized copy keys for `FeedbackView`.
+public enum FeedbackCopy {
+    nonisolated public static let headerTitleString = "Tell us what's wrong"
+    nonisolated public static let headerSubtitleString = "Bugs, missing widgets, sound requests — we read every message."
+    nonisolated public static let yourMessageString = "Your message"
+    nonisolated public static let messagePlaceholderString = "Describe what happened, and what you expected."
+    nonisolated public static let minimumCharactersFormatString = "At least 10 characters (%lld/10)"
+    nonisolated public static let contactHeaderString = "How to reach you"
+    nonisolated public static let contactPlaceholderString = "Email or phone number"
+    nonisolated public static let screenshotsHeaderString = "Screenshots"
+    nonisolated public static let screenshotsCountZeroString = "0/9"
+    nonisolated public static let addString = "Add"
+    nonisolated public static let sendFeedbackString = "Send Feedback"
+    nonisolated public static let navigationTitleString = "Feedback"
+    nonisolated public static let cancelString = "Cancel"
+    nonisolated public static let feedbackSentTitleString = "Feedback Sent"
+    nonisolated public static let doneString = "Done"
+    nonisolated public static let feedbackSentMessageString = "Thank you! Your feedback helps us improve DashCast."
+    nonisolated public static let feedbackPolicyTitleString = "Feedback Policy"
+    nonisolated public static let gotItString = "Got it"
+    nonisolated public static let feedbackPolicyMessageString = "We never collect telemetry without consent. Diagnostics sent with feedback are strictly anonymous."
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        headerTitleString,
+        headerSubtitleString,
+        yourMessageString,
+        messagePlaceholderString,
+        minimumCharactersFormatString,
+        contactHeaderString,
+        contactPlaceholderString,
+        screenshotsHeaderString,
+        screenshotsCountZeroString,
+        addString,
+        sendFeedbackString,
+        navigationTitleString,
+        cancelString,
+        feedbackSentTitleString,
+        doneString,
+        feedbackSentMessageString,
+        feedbackPolicyTitleString,
+        gotItString,
+        feedbackPolicyMessageString
+    ]
+
+    @MainActor public static var headerTitleKey: LocalizedStringKey { LocalizedStringKey(headerTitleString) }
+    @MainActor public static var headerSubtitleKey: LocalizedStringKey { LocalizedStringKey(headerSubtitleString) }
+    @MainActor public static var yourMessageKey: LocalizedStringKey { LocalizedStringKey(yourMessageString) }
+    @MainActor public static var messagePlaceholderKey: LocalizedStringKey { LocalizedStringKey(messagePlaceholderString) }
+    @MainActor public static var contactHeaderKey: LocalizedStringKey { LocalizedStringKey(contactHeaderString) }
+    @MainActor public static var contactPlaceholderKey: LocalizedStringKey { LocalizedStringKey(contactPlaceholderString) }
+    @MainActor public static var screenshotsHeaderKey: LocalizedStringKey { LocalizedStringKey(screenshotsHeaderString) }
+    @MainActor public static var screenshotsCountZeroKey: LocalizedStringKey { LocalizedStringKey(screenshotsCountZeroString) }
+    @MainActor public static var addKey: LocalizedStringKey { LocalizedStringKey(addString) }
+    @MainActor public static var sendFeedbackKey: LocalizedStringKey { LocalizedStringKey(sendFeedbackString) }
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var cancelKey: LocalizedStringKey { LocalizedStringKey(cancelString) }
+    @MainActor public static var feedbackSentTitleKey: LocalizedStringKey { LocalizedStringKey(feedbackSentTitleString) }
+    @MainActor public static var doneKey: LocalizedStringKey { LocalizedStringKey(doneString) }
+    @MainActor public static var feedbackSentMessageKey: LocalizedStringKey { LocalizedStringKey(feedbackSentMessageString) }
+    @MainActor public static var feedbackPolicyTitleKey: LocalizedStringKey { LocalizedStringKey(feedbackPolicyTitleString) }
+    @MainActor public static var gotItKey: LocalizedStringKey { LocalizedStringKey(gotItString) }
+    @MainActor public static var feedbackPolicyMessageKey: LocalizedStringKey { LocalizedStringKey(feedbackPolicyMessageString) }
+
+    @MainActor
+    public static func minimumCharactersKey(clampedCount: Int) -> LocalizedStringKey {
+        LocalizedStringKey("At least 10 characters (\(clampedCount)/10)")
+    }
+}
+
 public struct FeedbackView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var messageText: String = ""
@@ -10,7 +96,7 @@ public struct FeedbackView: View {
     public init() {}
 
     private var isMessageValid: Bool {
-        messageText.trimmingCharacters(in: .whitespacesAndNewlines).count >= 10
+        FeedbackFormValidator.isMessageValid(messageText)
     }
 
     public var body: some View {
@@ -22,11 +108,11 @@ public struct FeedbackView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         // Header
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Tell us what's wrong")
+                            Text(FeedbackCopy.headerTitleKey)
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundStyle(Color.dashTextPrimary)
 
-                            Text("Bugs, missing widgets, sound requests — we read every message.")
+                            Text(FeedbackCopy.headerSubtitleKey)
                                 .font(.system(size: 13))
                                 .foregroundStyle(Color.dashTextSecondary)
                         }
@@ -35,7 +121,7 @@ public struct FeedbackView: View {
                         // Message Section
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 2) {
-                                Text("Your message")
+                                Text(FeedbackCopy.yourMessageKey)
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundStyle(Color.dashTextPrimary)
                                 Text("*")
@@ -45,7 +131,7 @@ public struct FeedbackView: View {
 
                             ZStack(alignment: .topLeading) {
                                 if messageText.isEmpty {
-                                    Text("Describe what happened, and what you expected.")
+                                    Text(FeedbackCopy.messagePlaceholderKey)
                                         .font(.system(size: 14))
                                         .foregroundStyle(Color.dashTextMuted)
                                         .padding(.horizontal, 16)
@@ -63,7 +149,7 @@ public struct FeedbackView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 16))
                             .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.dashBorder, lineWidth: 1))
 
-                            Text("At least 10 characters (\(min(messageText.count, 10))/10)")
+                            Text(FeedbackCopy.minimumCharactersKey(clampedCount: FeedbackFormValidator.clampedCharacterCount(messageText)))
                                 .font(.system(size: 11, weight: .medium))
                                 .foregroundStyle(isMessageValid ? Color.dashGreen : Color.dashOrange)
                         }
@@ -71,7 +157,7 @@ public struct FeedbackView: View {
                         // Contact Section
                         VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 2) {
-                                Text("How to reach you")
+                                Text(FeedbackCopy.contactHeaderKey)
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundStyle(Color.dashTextPrimary)
                                 Text("*")
@@ -79,7 +165,7 @@ public struct FeedbackView: View {
                                     .foregroundStyle(Color.dashRed)
                             }
 
-                            TextField("Email or phone number", text: $contactInfo)
+                            TextField(FeedbackCopy.contactPlaceholderKey, text: $contactInfo)
                                 .font(.system(size: 14))
                                 .padding(14)
                                 .background(Color.dashSurface)
@@ -92,11 +178,11 @@ public struct FeedbackView: View {
                         // Screenshots Section
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
-                                Text("Screenshots")
+                                Text(FeedbackCopy.screenshotsHeaderKey)
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundStyle(Color.dashTextPrimary)
                                 Spacer()
-                                Text("0/9")
+                                Text(FeedbackCopy.screenshotsCountZeroKey)
                                     .font(.system(size: 12))
                                     .foregroundStyle(Color.dashTextMuted)
                             }
@@ -106,7 +192,7 @@ public struct FeedbackView: View {
                                     Image(systemName: "plus")
                                         .font(.system(size: 18))
                                         .foregroundStyle(Color.dashYellow)
-                                    Text("Add")
+                                    Text(FeedbackCopy.addKey)
                                         .font(.system(size: 11, weight: .medium))
                                         .foregroundStyle(Color.dashYellow)
                                 }
@@ -130,7 +216,7 @@ public struct FeedbackView: View {
                     showingSuccessAlert = true
                 } label: {
                     HStack(spacing: 6) {
-                        Text("Send Feedback")
+                        Text(FeedbackCopy.sendFeedbackKey)
                             .font(.system(size: 16, weight: .bold))
                         Image(systemName: "paperplane.fill")
                             .font(.system(size: 14))
@@ -146,11 +232,11 @@ public struct FeedbackView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
             }
-            .navigationTitle("Feedback")
+            .navigationTitle(FeedbackCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button(FeedbackCopy.cancelKey) { dismiss() }
                         .foregroundStyle(Color.dashYellow)
                 }
 
@@ -164,15 +250,15 @@ public struct FeedbackView: View {
                     }
                 }
             }
-            .alert("Feedback Sent", isPresented: $showingSuccessAlert) {
-                Button("Done", role: .cancel) { dismiss() }
+            .alert(FeedbackCopy.feedbackSentTitleKey, isPresented: $showingSuccessAlert) {
+                Button(FeedbackCopy.doneKey, role: .cancel) { dismiss() }
             } message: {
-                Text("Thank you! Your feedback helps us improve DashCast.")
+                Text(FeedbackCopy.feedbackSentMessageKey)
             }
-            .alert("Feedback Policy", isPresented: $showingInfoAlert) {
-                Button("Got it", role: .cancel) {}
+            .alert(FeedbackCopy.feedbackPolicyTitleKey, isPresented: $showingInfoAlert) {
+                Button(FeedbackCopy.gotItKey, role: .cancel) {}
             } message: {
-                Text("We never collect telemetry without consent. Diagnostics sent with feedback are strictly anonymous.")
+                Text(FeedbackCopy.feedbackPolicyMessageKey)
             }
         }
     }

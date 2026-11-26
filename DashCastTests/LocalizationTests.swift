@@ -140,4 +140,42 @@ final class LocalizationTests: XCTestCase {
             XCTAssertNotNil(tab.localizedTitle)
         }
     }
+
+    func testFeedbackFormValidator() {
+        XCTAssertFalse(FeedbackFormValidator.isMessageValid(""))
+        XCTAssertFalse(FeedbackFormValidator.isMessageValid("               "))
+        XCTAssertFalse(FeedbackFormValidator.isMessageValid("  123456789  "))
+        XCTAssertTrue(FeedbackFormValidator.isMessageValid("1234567890"))
+        XCTAssertTrue(FeedbackFormValidator.isMessageValid("  1234567890  "))
+        XCTAssertTrue(FeedbackFormValidator.isMessageValid("CarPlay screen freezes after pause"))
+
+        XCTAssertEqual(FeedbackFormValidator.trimmedLength("  hello  "), 5)
+        XCTAssertEqual(FeedbackFormValidator.clampedCharacterCount(""), 0)
+        XCTAssertEqual(FeedbackFormValidator.clampedCharacterCount("abc"), 3)
+        XCTAssertEqual(FeedbackFormValidator.clampedCharacterCount("123456789012345"), 10)
+    }
+
+    func testFeedbackCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in FeedbackCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
