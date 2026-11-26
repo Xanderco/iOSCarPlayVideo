@@ -154,6 +154,11 @@ public final class PlaylistStore: ObservableObject {
         save()
     }
 
+    public func clearPlaylists() {
+        playlists = []
+        save()
+    }
+
     public func toggleFavorite(_ channel: ChannelModel) {
         let key = favoriteKey(for: channel)
         if favoriteIDs.contains(key) { favoriteIDs.remove(key) } else { favoriteIDs.insert(key) }

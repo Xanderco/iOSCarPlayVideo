@@ -139,6 +139,49 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testMeSettingsDataPrivacyAndCarDisplayGuide() throws {
+        let meTab = tabButton("Me")
+        XCTAssertTrue(meTab.waitForExistence(timeout: 15), "Me tab button missing")
+        meTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Me"].waitForExistence(timeout: 10), "Me screen did not appear")
+
+        let guideRow = app.buttons["Me_CarDisplayGuideRow"]
+        XCTAssertTrue(guideRow.waitForExistence(timeout: 10), "Car Display Guide row missing on Me tab")
+        tapCenter(of: guideRow)
+
+        let guideNav = app.navigationBars["Car Display Setup"]
+        XCTAssertTrue(guideNav.waitForExistence(timeout: 10), "Car Display Setup sheet did not open from Me tab")
+        snapshot("06-car-display-guide")
+        guideNav.buttons["Done"].tap()
+
+        let settingsRow = app.buttons["Me_SettingsRow"]
+        XCTAssertTrue(settingsRow.waitForExistence(timeout: 10), "Settings row missing on Me tab")
+        tapCenter(of: settingsRow)
+
+        let settingsNav = app.navigationBars["Settings"]
+        XCTAssertTrue(settingsNav.waitForExistence(timeout: 10), "Settings sheet did not open")
+
+        let clearTrips = app.buttons["Me_Settings_ClearTripsButton"]
+        let clearPlaylists = app.buttons["Me_Settings_ClearPlaylistsButton"]
+        XCTAssertTrue(clearTrips.waitForExistence(timeout: 10), "Clear Trip History button missing")
+        XCTAssertTrue(clearPlaylists.waitForExistence(timeout: 10), "Clear Playlists button missing")
+        snapshot("06b-settings-data-privacy")
+
+        tapCenter(of: clearTrips)
+        let cancelAction = app.buttons["Cancel"]
+        XCTAssertTrue(cancelAction.waitForExistence(timeout: 5), "Clear Trip History confirmation dialog did not open")
+        cancelAction.tap()
+
+        let settingsGuideRow = app.buttons["Me_Settings_CarDisplayGuideRow"]
+        XCTAssertTrue(settingsGuideRow.waitForExistence(timeout: 10), "Car Display Guide row missing in Settings")
+        tapCenter(of: settingsGuideRow)
+        XCTAssertTrue(guideNav.waitForExistence(timeout: 10), "Car Display Setup sheet did not open from Settings")
+        guideNav.buttons["Done"].tap()
+
+        XCTAssertTrue(settingsNav.waitForExistence(timeout: 10), "Settings did not reappear")
+        settingsNav.buttons["Done"].tap()
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers
