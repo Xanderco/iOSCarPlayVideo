@@ -42,6 +42,7 @@ public struct CastHomeView: View {
                                 .frame(height: 220)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 .padding(.horizontal, 16)
+                                .accessibilityHidden(isFullscreenPlayer)
                         }
 
                         // Main 4-Row Source Menu Card

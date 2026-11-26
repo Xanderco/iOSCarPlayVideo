@@ -152,38 +152,37 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(firstChannel.waitForExistence(timeout: 10), "Sample channel missing")
         firstChannel.tap()
 
-        let enterFullscreen = app.buttons["Player_FullscreenButton"]
-        if !enterFullscreen.waitForExistence(timeout: 10) {
-            let surface = app.otherElements["Player_VideoSurface"]
-            if surface.exists { tapCenter(of: surface) }
+        let surface = app.otherElements["Player_VideoSurface"].firstMatch
+        XCTAssertTrue(surface.waitForExistence(timeout: 10), "Inline video player did not appear")
+
+        let enterFullscreen = app.buttons["Player_FullscreenButton"].firstMatch
+        if !enterFullscreen.waitForExistence(timeout: 5) {
+            tapCenter(of: surface)
         }
         XCTAssertTrue(enterFullscreen.waitForExistence(timeout: 10), "Inline player fullscreen button did not appear")
-        enterFullscreen.tap()
+        tapCenter(of: enterFullscreen)
 
-        let exitFullscreen = app.buttons["Player_ExitFullscreenButton"]
-        if !exitFullscreen.waitForExistence(timeout: 10) {
-            let surface = app.otherElements["Player_VideoSurface"]
-            if surface.exists { tapCenter(of: surface) }
+        let exitFullscreen = app.buttons["Player_ExitFullscreenButton"].firstMatch
+        if !exitFullscreen.waitForExistence(timeout: 5) {
+            tapCenter(of: surface)
         }
         XCTAssertTrue(exitFullscreen.waitForExistence(timeout: 10), "Fullscreen player modal did not open")
         snapshot("05b-fullscreen-player")
 
         if !exitFullscreen.exists {
-            let surface = app.otherElements["Player_VideoSurface"]
-            if surface.exists { tapCenter(of: surface) }
+            tapCenter(of: surface)
         }
         XCTAssertTrue(exitFullscreen.waitForExistence(timeout: 5), "Exit fullscreen button not reachable")
-        exitFullscreen.tap()
+        tapCenter(of: exitFullscreen)
 
-        if !enterFullscreen.waitForExistence(timeout: 10) {
-            let surface = app.otherElements["Player_VideoSurface"]
-            if surface.exists { tapCenter(of: surface) }
+        if !enterFullscreen.waitForExistence(timeout: 5) {
+            tapCenter(of: surface)
         }
         XCTAssertTrue(enterFullscreen.waitForExistence(timeout: 10), "Inline player did not reappear after exiting fullscreen")
 
-        let closePlayer = app.buttons["Player_CloseButton"]
+        let closePlayer = app.buttons["Player_CloseButton"].firstMatch
         if closePlayer.exists {
-            closePlayer.tap()
+            tapCenter(of: closePlayer)
         }
     }
 
