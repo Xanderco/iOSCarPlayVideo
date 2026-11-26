@@ -147,11 +147,15 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(app.otherElements["Screen_Widgets"].waitForExistence(timeout: 10), "Widgets screen missing")
         XCTAssertTrue(app.otherElements["Widgets_MyWidgetsSection"].waitForExistence(timeout: 10), "My Widgets section missing")
 
-        // Tap "See all" for Plate to open interactive catalog sheet
+        // Tap "See all" for Plate to open interactive catalog sheet.
+        // Swipe from the upper mockup area so we scroll the vertical ScrollView
+        // rather than the horizontal My Widgets carousel.
         let seeAllPlate = app.buttons["Widgets_SeeAll_plate"]
         XCTAssertTrue(seeAllPlate.waitForExistence(timeout: 10), "Plate See all button missing")
-        if seeAllPlate.frame.maxY > app.frame.height - 90 {
-            app.swipeUp()
+        for _ in 0..<4 where seeAllPlate.frame.maxY > app.frame.height - 110 {
+            let start = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.42))
+            let end = app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15))
+            start.press(forDuration: 0.05, thenDragTo: end)
         }
         tapCenter(of: seeAllPlate)
 
