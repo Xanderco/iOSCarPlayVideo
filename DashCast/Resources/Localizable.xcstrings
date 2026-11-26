@@ -8177,6 +8177,40 @@
           }
         }
       }
+    },
+    "Mirror your iPhone here\n\n1. On iPhone, open DashCast → Cast → Car Display.\n2. Turn on “Mirror to CarPlay screen”, then Start Broadcast.\n\nMirroring works only while the car is parked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirror your iPhone here\n\n1. On iPhone, open DashCast → Cast → Car Display.\n2. Turn on “Mirror to CarPlay screen”, then Start Broadcast.\n\nMirroring works only while the car is parked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplica tu iPhone aquí\n\n1. En el iPhone, abre DashCast → Transmitir → Pantalla del auto.\n2. Activa “Duplicar en pantalla de CarPlay” y luego toca Iniciar transmisión.\n\nLa duplicación funciona solo con el auto estacionado."
+          }
+        }
+      }
+    },
+    "Mirroring paused\n\nYour vehicle is moving. The picture comes back when you are parked.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mirroring paused\n\nYour vehicle is moving. The picture comes back when you are parked."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicación en pausa\n\nTu vehículo está en movimiento. La imagen volverá cuando estés estacionado."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

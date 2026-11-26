@@ -142,4 +142,49 @@ final class CarVideoOutputTests: XCTestCase {
         XCTAssertTrue(player.usesExternalPlaybackWhileExternalScreenIsActive)
         XCTAssertTrue(CarVideoOutputController.shared.canStartVideoOutput())
     }
+
+    // MARK: CarPlay Mirror Display State & Localization
+
+    func testCarMirrorDisplayStateResolution() {
+        XCTAssertEqual(CarMirrorDisplayState.resolve(featureEnabled: false, vehicleMoving: false, lastFrameAge: 0.1), .instructions)
+        XCTAssertEqual(CarMirrorDisplayState.resolve(featureEnabled: false, vehicleMoving: true, lastFrameAge: 0.1), .instructions)
+        XCTAssertEqual(CarMirrorDisplayState.resolve(featureEnabled: true, vehicleMoving: true, lastFrameAge: 0.1), .pausedWhileMoving)
+        XCTAssertEqual(CarMirrorDisplayState.resolve(featureEnabled: true, vehicleMoving: false, lastFrameAge: nil), .instructions)
+        XCTAssertEqual(CarMirrorDisplayState.resolve(featureEnabled: true, vehicleMoving: false, lastFrameAge: CarMirrorDisplayState.staleFrameInterval), .instructions)
+        XCTAssertEqual(CarMirrorDisplayState.resolve(featureEnabled: true, vehicleMoving: false, lastFrameAge: 0.5), .mirroring)
+    }
+
+    func testCarPlayMirrorCopyLocalizedFallbacks() {
+        let testBundle = Bundle(for: CarVideoOutputTests.self)
+        XCTAssertEqual(CarPlayMirrorCopy.localizedInstructions(bundle: testBundle), CarPlayMirrorCopy.instructionsKey)
+        XCTAssertEqual(CarPlayMirrorCopy.localizedMoving(bundle: testBundle), CarPlayMirrorCopy.movingKey)
+        XCTAssertEqual(CarPlayMirrorCopy.allLocalizationKeys, [
+            CarPlayMirrorCopy.instructionsKey,
+            CarPlayMirrorCopy.movingKey
+        ])
+    }
+
+    func testCarPlayMirrorCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in CarPlayMirrorCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
