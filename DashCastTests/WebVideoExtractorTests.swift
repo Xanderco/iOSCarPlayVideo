@@ -70,4 +70,64 @@ final class WebVideoExtractorTests: XCTestCase {
         XCTAssertEqual(service.currentChannel?.groupTitle, "Web")
         service.pause()
     }
+
+    // MARK: WebBrowserAlertCopy
+
+    @MainActor
+    func testWebBrowserAlertCopyOutcomes() {
+        let url = URL(string: "https://example.com/clip.m3u8")!
+        let found = WebBrowserAlertCopy.descriptor(forExtractionResult: .found(url: url, title: "Clip"))
+        XCTAssertEqual(found.titleKeyName, "Sent to DashCast")
+        XCTAssertEqual(found.messageKeyName, "Playing on DashCast player — use AirPlay to send it to your car display.")
+        _ = found.title
+        _ = found.message
+
+        let drm = WebBrowserAlertCopy.descriptor(forExtractionResult: .drmProtected)
+        XCTAssertEqual(drm.titleKeyName, "Protected Video")
+        XCTAssertEqual(drm.messageKeyName, "This video is DRM-protected and can't be sent to the car.")
+        _ = drm.title
+        _ = drm.message
+
+        let unsupported = WebBrowserAlertCopy.descriptor(forExtractionResult: .unsupportedStream)
+        XCTAssertEqual(unsupported.titleKeyName, "Can't Hand Off")
+        XCTAssertEqual(unsupported.messageKeyName, "This site streams in a way that can't be handed off.")
+        _ = unsupported.title
+        _ = unsupported.message
+
+        let noVideo = WebBrowserAlertCopy.descriptor(forExtractionResult: .noVideo)
+        XCTAssertEqual(noVideo.titleKeyName, "No Video Found")
+        XCTAssertEqual(noVideo.messageKeyName, "Start playing a video on the page, then tap Send to car again.")
+        _ = noVideo.title
+        _ = noVideo.message
+
+        let invalidURL = WebBrowserAlertCopy.descriptor(for: .invalidURL)
+        XCTAssertEqual(invalidURL.titleKeyName, "Invalid URL")
+        XCTAssertEqual(invalidURL.messageKeyName, "Enter a valid website address to load.")
+        _ = invalidURL.title
+        _ = invalidURL.message
+    }
+
+    func testWebBrowserLocalizationKeysExistInCatalog() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = Bundle(for: WebVideoExtractorTests.self).url(forResource: "Localizable", withExtension: "xcstrings")
+            ?? projectDir
+                .appendingPathComponent("DashCast")
+                .appendingPathComponent("Resources")
+                .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in WebBrowserAlertCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing key in Localizable.xcstrings: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
+            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing EN for \(key)")
+            XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing ES for \(key)")
+        }
+    }
 }
