@@ -83,7 +83,7 @@ final class WidgetCustomizationTests: XCTestCase {
     func testDoodleEditorCanvasPointClamping() {
         XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: -25, y: 450), canvasSide: 300), CGPoint(x: 0, y: 300))
         XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: 120, y: 180), canvasSide: 300), CGPoint(x: 120, y: 180))
-        XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: .nan, y: .infinity), canvasSide: 300), .zero)
+        XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: CGFloat.nan, y: CGFloat.infinity), canvasSide: 300), .zero)
         XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: 50, y: 50), canvasSide: 0), .zero)
         XCTAssertEqual(DoodleEditorLogic.clampedPoint(CGPoint(x: 50, y: 50), canvasSide: -10), .zero)
     }
