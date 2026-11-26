@@ -8177,6 +8177,176 @@
           }
         }
       }
+    },
+    "Unlock Pro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlock Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desbloquear Pro"
+          }
+        }
+      }
+    },
+    "Free casting · %@ daily": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free casting · %@ daily"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transmisión gratis · %@ diarios"
+          }
+        }
+      }
+    },
+    "Free casting · %@ left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free casting · %@ left"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transmisión gratis · quedan %@"
+          }
+        }
+      }
+    },
+    "Low casting time · %@ left": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low casting time · %@ left"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Poco tiempo gratis · quedan %@"
+          }
+        }
+      }
+    },
+    "Daily free casting limit reached": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daily free casting limit reached"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Límite diario gratuito alcanzado"
+          }
+        }
+      }
+    },
+    "Upgrade to Pro for unlimited car casting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Upgrade to Pro for unlimited car casting"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pásate a Pro para transmitir sin límites"
+          }
+        }
+      }
+    },
+    "Resets at midnight · Tap for Pro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resets at midnight · Tap for Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se reinicia a medianoche · Toca para Pro"
+          }
+        }
+      }
+    },
+    "Less than 5 min left today · Tap for Pro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Less than 5 min left today · Tap for Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quedan menos de 5 min hoy · Toca para Pro"
+          }
+        }
+      }
+    },
+    "Resets at midnight · Unlock unlimited Pro": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resets at midnight · Unlock unlimited Pro"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se reinicia a medianoche · Desbloquea Pro ilimitado"
+          }
+        }
+      }
+    },
+    "Opens DashCast Pro upgrade options": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens DashCast Pro upgrade options"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre las opciones para mejorar a DashCast Pro"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

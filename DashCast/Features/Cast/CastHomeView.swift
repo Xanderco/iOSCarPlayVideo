@@ -7,6 +7,7 @@ public struct CastHomeView: View {
     @StateObject private var playerService = VideoPlayerService.shared
     @StateObject private var localVideoManager = LocalVideoManager.shared
     @StateObject private var externalDisplay = ExternalDisplayManager.shared
+    @StateObject private var entitlementGate = EntitlementGate.shared
 
     @State private var showingAddM3UDialog: Bool = false
     @State private var showingPlaylistsSheet: Bool = false
@@ -42,6 +43,16 @@ public struct CastHomeView: View {
                                 .frame(height: 220)
                                 .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 .padding(.horizontal, 16)
+                        }
+
+                        if !appState.isProLifetimeUnlocked {
+                            FreeCastingAllowanceBanner(
+                                gate: entitlementGate,
+                                accessibilityIdentifier: "Cast_FreeAllowanceBanner"
+                            ) {
+                                appState.showPaywall = true
+                            }
+                            .padding(.horizontal, 16)
                         }
 
                         // Main 4-Row Source Menu Card
@@ -223,6 +234,7 @@ public struct CastHomeView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("Cast_MirrorRow")
 
             Divider().background(Color.dashBorder.opacity(0.6))
 
