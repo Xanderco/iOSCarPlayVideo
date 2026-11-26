@@ -8177,6 +8177,57 @@
           }
         }
       }
+    },
+    "No Route Recorded": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Route Recorded"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin ruta registrada"
+          }
+        }
+      }
+    },
+    "The trip was too short or location was unavailable.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The trip was too short or location was unavailable."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El viaje fue demasiado corto o la ubicación no estuvo disponible."
+          }
+        }
+      }
+    },
+    "Replay position slider": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Replay position slider"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control deslizante de posición de reproducción"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

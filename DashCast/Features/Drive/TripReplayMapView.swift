@@ -1,6 +1,52 @@
 import SwiftUI
 import MapKit
 
+/// Localized copy keys for `TripReplayMapView`.
+public enum TripReplayCopy {
+    nonisolated public static let emptyTitleString = "No Route Recorded"
+    nonisolated public static let emptyMessageString = "The trip was too short or location was unavailable."
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        "No Route Recorded",
+        "The trip was too short or location was unavailable.",
+        "Route map",
+        "Pause replay",
+        "Replay route",
+        "Replay position",
+        "Replay position slider"
+    ]
+
+    @MainActor
+    public static var emptyTitleKey: LocalizedStringKey {
+        LocalizedStringKey(emptyTitleString)
+    }
+
+    @MainActor
+    public static var emptyMessageKey: LocalizedStringKey {
+        LocalizedStringKey(emptyMessageString)
+    }
+
+    @MainActor
+    public static var routeMapAccessibilityKey: LocalizedStringKey {
+        LocalizedStringKey("Route map")
+    }
+
+    @MainActor
+    public static func playPauseAccessibilityKey(isPlaying: Bool) -> LocalizedStringKey {
+        LocalizedStringKey(isPlaying ? "Pause replay" : "Replay route")
+    }
+
+    @MainActor
+    public static var sliderLabelKey: LocalizedStringKey {
+        LocalizedStringKey("Replay position")
+    }
+
+    @MainActor
+    public static var sliderAccessibilityKey: LocalizedStringKey {
+        LocalizedStringKey("Replay position slider")
+    }
+}
+
 /// Route replay for a saved trip: the full route in a muted colour, the travelled part in the
 /// accent colour, and a car marker moved by Play or by scrubbing.
 public struct TripReplayMapView: View {
@@ -28,8 +74,8 @@ public struct TripReplayMapView: View {
             if coordinates.isEmpty {
                 EmptyStateView(
                     systemImage: "map",
-                    title: "No Route Recorded",
-                    message: "The trip was too short or location was unavailable."
+                    title: TripReplayCopy.emptyTitleString,
+                    message: TripReplayCopy.emptyMessageString
                 )
                 .frame(height: 260)
             } else {
@@ -51,7 +97,7 @@ public struct TripReplayMapView: View {
                 }
                 .frame(height: 260)
                 .clipShape(RoundedRectangle(cornerRadius: DSRadius.md, style: .continuous))
-                .accessibilityLabel(Text("Route map"))
+                .accessibilityLabel(Text(TripReplayCopy.routeMapAccessibilityKey))
 
                 if coordinates.count > 1 {
                     HStack(spacing: DSSpacing.sm) {
@@ -64,11 +110,11 @@ public struct TripReplayMapView: View {
                                 .frame(width: DSLayout.minTapTarget, height: DSLayout.minTapTarget)
                         }
                         .buttonStyle(.borderless)
-                        .accessibilityLabel(Text(isPlaying ? "Pause replay" : "Replay route"))
+                        .accessibilityLabel(Text(TripReplayCopy.playPauseAccessibilityKey(isPlaying: isPlaying)))
 
-                        Slider(value: $progress, in: 0...1) { Text("Replay position") }
+                        Slider(value: $progress, in: 0...1) { Text(TripReplayCopy.sliderLabelKey) }
                             .tint(Color.dcAccent)
-                            .accessibilityLabel(Text("Replay position slider"))
+                            .accessibilityLabel(Text(TripReplayCopy.sliderAccessibilityKey))
                     }
                     .padding(.horizontal, DSSpacing.sm)
                 }

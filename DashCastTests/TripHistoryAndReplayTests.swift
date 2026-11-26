@@ -1,5 +1,6 @@
-import XCTest
 import CoreLocation
+import SwiftUI
+import XCTest
 @testable import DashCast
 
 final class TripHistoryAndReplayTests: XCTestCase {
@@ -127,5 +128,63 @@ final class TripHistoryAndReplayTests: XCTestCase {
         let cleaned = loaded.filter { $0.id != testTrip.id }
         PersistenceController.shared.saveTrips(cleaned)
         XCTAssertEqual(PersistenceController.shared.loadTrips().count, initialCount)
+    }
+
+    func testSpeedGradientTierThresholds() {
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: -5), .slow)
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 0), .slow)
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 14.99), .slow)
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: .nan), .slow)
+
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 15.0), .moderate)
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 39.99), .moderate)
+
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 40.0), .cruising)
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 79.99), .cruising)
+
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 80.0), .highway)
+        XCTAssertEqual(SpeedGradientTier.tier(forSpeedKmh: 140.0), .highway)
+
+        XCTAssertEqual(SpeedGradientTier.slow.color, .dashRed)
+        XCTAssertEqual(SpeedGradientTier.moderate.color, .dashOrange)
+        XCTAssertEqual(SpeedGradientTier.cruising.color, .dashGreen)
+        XCTAssertEqual(SpeedGradientTier.highway.color, .dashCyan)
+    }
+
+    @MainActor
+    func testTripReplayMapLocalizationKeysInCatalog() throws {
+        XCTAssertNotNil(TripReplayCopy.emptyTitleKey)
+        XCTAssertNotNil(TripReplayCopy.emptyMessageKey)
+        XCTAssertNotNil(TripReplayCopy.playPauseAccessibilityKey(isPlaying: true))
+        XCTAssertNotNil(TripReplayCopy.playPauseAccessibilityKey(isPlaying: false))
+        XCTAssertNotNil(SpeedGradientTier.startAnnotationKey)
+        XCTAssertNotNil(SpeedGradientTier.endAnnotationKey)
+
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        let requiredKeys = TripReplayCopy.allLocalizationKeys + [
+            SpeedGradientTier.startAnnotationString,
+            SpeedGradientTier.endAnnotationString
+        ]
+
+        for key in requiredKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing catalog entry for key: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String, "Missing \(lang) string value for: \(key)")
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
     }
 }
