@@ -1,6 +1,74 @@
 import SwiftUI
 import AVKit
 
+/// Pure time formatting helper for `AutomotiveVideoPlayerView`.
+public enum AutomotivePlayerTimeFormatter {
+    nonisolated public static func format(seconds: Double) -> String {
+        guard seconds.isFinite && seconds >= 0 else { return "00:00" }
+        let secs = Int(seconds)
+        let hours = secs / 3600
+        let minutes = (secs % 3600) / 60
+        let remainingSeconds = secs % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, remainingSeconds)
+        } else {
+            return String(format: "%02d:%02d", minutes, remainingSeconds)
+        }
+    }
+}
+
+/// Localized copy keys and helpers for `AutomotiveVideoPlayerView`.
+public enum AutomotivePlayerCopy {
+    nonisolated public static let selectVideoPromptString = "Select a video or stream below to play"
+    nonisolated public static let cantPlayFormatString = "Can't play %@"
+    nonisolated public static let fallbackVideoNameString = "this video"
+    nonisolated public static let retryButtonString = "Retry"
+    nonisolated public static let closeButtonString = "Close"
+    nonisolated public static let defaultPlayerTitleString = "Video Player"
+    nonisolated public static let externalDisplayStatusString = "Showing on external display"
+    nonisolated public static let parkedAudioStatusString = "Parked Video · AirPlay / CarPlay audio"
+    nonisolated public static let closePlayerAccessibilityString = "Close player"
+    nonisolated public static let enterFullscreenAccessibilityString = "Fullscreen"
+    nonisolated public static let exitFullscreenAccessibilityString = "Exit fullscreen"
+    nonisolated public static let liveBadgeString = "LIVE"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        selectVideoPromptString,
+        cantPlayFormatString,
+        fallbackVideoNameString,
+        retryButtonString,
+        closeButtonString,
+        defaultPlayerTitleString,
+        externalDisplayStatusString,
+        parkedAudioStatusString,
+        closePlayerAccessibilityString,
+        enterFullscreenAccessibilityString,
+        exitFullscreenAccessibilityString,
+        liveBadgeString
+    ]
+
+    @MainActor public static var selectVideoPromptKey: LocalizedStringKey { LocalizedStringKey(selectVideoPromptString) }
+    @MainActor public static var retryButtonKey: LocalizedStringKey { LocalizedStringKey(retryButtonString) }
+    @MainActor public static var closeButtonKey: LocalizedStringKey { LocalizedStringKey(closeButtonString) }
+    @MainActor public static var defaultPlayerTitleKey: LocalizedStringKey { LocalizedStringKey(defaultPlayerTitleString) }
+    @MainActor public static var externalDisplayStatusKey: LocalizedStringKey { LocalizedStringKey(externalDisplayStatusString) }
+    @MainActor public static var parkedAudioStatusKey: LocalizedStringKey { LocalizedStringKey(parkedAudioStatusString) }
+    @MainActor public static var closePlayerAccessibilityKey: LocalizedStringKey { LocalizedStringKey(closePlayerAccessibilityString) }
+    @MainActor public static var enterFullscreenAccessibilityKey: LocalizedStringKey { LocalizedStringKey(enterFullscreenAccessibilityString) }
+    @MainActor public static var exitFullscreenAccessibilityKey: LocalizedStringKey { LocalizedStringKey(exitFullscreenAccessibilityString) }
+    @MainActor public static var liveBadgeKey: LocalizedStringKey { LocalizedStringKey(liveBadgeString) }
+
+    nonisolated public static func localizedFallbackVideoName(bundle: Bundle = .main) -> String {
+        NSLocalizedString(fallbackVideoNameString, bundle: bundle, comment: "Fallback video name when channel title is missing")
+    }
+
+    @MainActor public static func cantPlayMessageKey(channelName: String?, bundle: Bundle = .main) -> LocalizedStringKey {
+        let trimmed = channelName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let displayName = (trimmed?.isEmpty == false) ? trimmed! : localizedFallbackVideoName(bundle: bundle)
+        return LocalizedStringKey("Can't play \(displayName)")
+    }
+}
+
 public struct AutomotiveVideoPlayerView: View {
     @ObservedObject var playerService = VideoPlayerService.shared
     @ObservedObject var externalDisplay = ExternalDisplayManager.shared
@@ -51,7 +119,7 @@ public struct AutomotiveVideoPlayerView: View {
             Image(systemName: "play.tv")
                 .font(.system(size: 44))
                 .foregroundStyle(Color.dashTextMuted)
-            Text("Select a video or stream below to play")
+            Text(AutomotivePlayerCopy.selectVideoPromptKey)
                 .font(ThemeFonts.hudCaption(size: 14))
                 .foregroundStyle(Color.dashTextMuted)
         }
@@ -64,7 +132,7 @@ public struct AutomotiveVideoPlayerView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 32))
                 .foregroundStyle(Color.dashOrange)
-            Text("Can't play \(playerService.currentChannel?.name ?? "this video")")
+            Text(AutomotivePlayerCopy.cantPlayMessageKey(channelName: playerService.currentChannel?.name))
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(.white)
                 .multilineTextAlignment(.center)
@@ -74,7 +142,7 @@ public struct AutomotiveVideoPlayerView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(3)
             HStack(spacing: 12) {
-                Button("Retry") {
+                Button(AutomotivePlayerCopy.retryButtonKey) {
                     if let channel = playerService.currentChannel {
                         playerService.load(channel: channel)
                     }
@@ -83,7 +151,7 @@ public struct AutomotiveVideoPlayerView: View {
                 .tint(.dashYellow)
                 .foregroundStyle(.black)
 
-                Button("Close") { playerService.stop() }
+                Button(AutomotivePlayerCopy.closeButtonKey) { playerService.stop() }
                     .buttonStyle(.bordered)
                     .tint(.white)
             }
@@ -102,16 +170,22 @@ public struct AutomotiveVideoPlayerView: View {
                 // Top bar: title & fullscreen toggle
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(playerService.currentChannel?.name ?? "Video Player")
-                            .font(.system(size: 15, weight: .semibold, design: .rounded))
-                            .foregroundStyle(.white)
-                            .lineLimit(1)
+                        Group {
+                            if let channelName = playerService.currentChannel?.name {
+                                Text(channelName)
+                            } else {
+                                Text(AutomotivePlayerCopy.defaultPlayerTitleKey)
+                            }
+                        }
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
 
                         HStack(spacing: 6) {
                             Circle()
                                 .fill(Color.dashGreen)
                                 .frame(width: 6, height: 6)
-                            Text(externalDisplay.isExternalDisplayConnected ? "Showing on external display" : "Parked Video · AirPlay / CarPlay audio")
+                            Text(externalDisplay.isExternalDisplayConnected ? AutomotivePlayerCopy.externalDisplayStatusKey : AutomotivePlayerCopy.parkedAudioStatusKey)
                                 .font(.system(size: 11))
                                 .foregroundStyle(Color.dashTextSecondary)
                         }
@@ -132,7 +206,7 @@ public struct AutomotiveVideoPlayerView: View {
                             .background(Color.white.opacity(0.2))
                             .clipShape(Circle())
                     }
-                    .accessibilityLabel("Close player")
+                    .accessibilityLabel(AutomotivePlayerCopy.closePlayerAccessibilityKey)
 
                     Button {
                         withAnimation {
@@ -146,6 +220,7 @@ public struct AutomotiveVideoPlayerView: View {
                             .background(Color.white.opacity(0.2))
                             .clipShape(Circle())
                     }
+                    .accessibilityLabel(isFullscreen ? AutomotivePlayerCopy.exitFullscreenAccessibilityKey : AutomotivePlayerCopy.enterFullscreenAccessibilityKey)
                 }
                 .padding()
 
@@ -202,33 +277,26 @@ public struct AutomotiveVideoPlayerView: View {
                     .tint(.dashYellow)
 
                     HStack {
-                        Text(formatTime(playerService.currentTime))
+                        Text(AutomotivePlayerTimeFormatter.format(seconds: playerService.currentTime))
                             .font(ThemeFonts.monospaceDigits(size: 12))
                             .foregroundStyle(Color.dashTextSecondary)
 
                         Spacer()
 
-                        Text(playerService.duration > 0 ? formatTime(playerService.duration) : "LIVE")
-                            .font(ThemeFonts.monospaceDigits(size: 12))
-                            .foregroundStyle(playerService.duration > 0 ? Color.dashTextSecondary : Color.dashRed)
+                        Group {
+                            if playerService.duration > 0 {
+                                Text(AutomotivePlayerTimeFormatter.format(seconds: playerService.duration))
+                            } else {
+                                Text(AutomotivePlayerCopy.liveBadgeKey)
+                            }
+                        }
+                        .font(ThemeFonts.monospaceDigits(size: 12))
+                        .foregroundStyle(playerService.duration > 0 ? Color.dashTextSecondary : Color.dashRed)
                     }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 12)
             }
-        }
-    }
-
-    private func formatTime(_ seconds: Double) -> String {
-        guard seconds.isFinite && seconds >= 0 else { return "00:00" }
-        let secs = Int(seconds)
-        let hours = secs / 3600
-        let minutes = (secs % 3600) / 60
-        let remainingSeconds = secs % 60
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, remainingSeconds)
-        } else {
-            return String(format: "%02d:%02d", minutes, remainingSeconds)
         }
     }
 }
