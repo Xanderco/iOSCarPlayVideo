@@ -65,4 +65,128 @@ final class WidgetCustomizationTests: XCTestCase {
         XCTAssertEqual(first?.textColorHex, "#FF9500")
         XCTAssertEqual(first?.fontName, "Mono")
     }
+
+    // MARK: VideoTrimmerLogic
+
+    func testVideoTrimmerLogicZeroWidthAndInvalidInputs() {
+        XCTAssertEqual(
+            VideoTrimmerLogic.trimStartTime(
+                forLocationX: 50,
+                containerWidth: 0,
+                windowWidth: 0,
+                duration: 10,
+                maxTrimDuration: 3
+            ),
+            0
+        )
+        XCTAssertEqual(
+            VideoTrimmerLogic.trimStartTime(
+                forLocationX: 50,
+                containerWidth: 100,
+                windowWidth: 120,
+                duration: 10,
+                maxTrimDuration: 3
+            ),
+            0
+        )
+        XCTAssertEqual(
+            VideoTrimmerLogic.trimStartTime(
+                forLocationX: .nan,
+                containerWidth: 200,
+                windowWidth: 70,
+                duration: 10,
+                maxTrimDuration: 3
+            ),
+            0
+        )
+        XCTAssertEqual(
+            VideoTrimmerLogic.normalizedOffset(trimStartTime: .nan, duration: 10, maxTrimDuration: 3),
+            0
+        )
+    }
+
+    func testVideoTrimmerLogicShortClipClampsToZero() {
+        XCTAssertEqual(VideoTrimmerLogic.effectiveWindowDuration(duration: 2.0, maxTrimDuration: 3.0), 2.0, accuracy: 0.001)
+        XCTAssertEqual(VideoTrimmerLogic.effectiveWindowDuration(duration: 0.0, maxTrimDuration: 3.0), 0.0, accuracy: 0.001)
+        XCTAssertEqual(VideoTrimmerLogic.effectiveWindowDuration(duration: -1.0, maxTrimDuration: 3.0), 0.0, accuracy: 0.001)
+        XCTAssertEqual(VideoTrimmerLogic.normalizedOffset(trimStartTime: 1.5, duration: 2.5, maxTrimDuration: 3.0), 0.0, accuracy: 0.001)
+        XCTAssertEqual(
+            VideoTrimmerLogic.trimStartTime(
+                forLocationX: 120,
+                containerWidth: 200,
+                windowWidth: 70,
+                duration: 2.5,
+                maxTrimDuration: 3.0
+            ),
+            0.0,
+            accuracy: 0.001
+        )
+    }
+
+    func testVideoTrimmerLogicDragClampingAndNormalizedOffset() {
+        // containerWidth = 200, windowWidth = 70 -> maxOffset = 130, span = 7.0 (10 - 3)
+        let leftEdge = VideoTrimmerLogic.trimStartTime(
+            forLocationX: 0,
+            containerWidth: 200,
+            windowWidth: 70,
+            duration: 10,
+            maxTrimDuration: 3
+        )
+        XCTAssertEqual(leftEdge, 0.0, accuracy: 0.001)
+
+        let midpoint = VideoTrimmerLogic.trimStartTime(
+            forLocationX: 100,
+            containerWidth: 200,
+            windowWidth: 70,
+            duration: 10,
+            maxTrimDuration: 3
+        )
+        XCTAssertEqual(midpoint, 3.5, accuracy: 0.001)
+
+        let rightEdge = VideoTrimmerLogic.trimStartTime(
+            forLocationX: 250,
+            containerWidth: 200,
+            windowWidth: 70,
+            duration: 10,
+            maxTrimDuration: 3
+        )
+        XCTAssertEqual(rightEdge, 7.0, accuracy: 0.001)
+
+        XCTAssertEqual(VideoTrimmerLogic.normalizedOffset(trimStartTime: -2, duration: 10, maxTrimDuration: 3), 0.0, accuracy: 0.001)
+        XCTAssertEqual(VideoTrimmerLogic.normalizedOffset(trimStartTime: 3.5, duration: 10, maxTrimDuration: 3), 0.5, accuracy: 0.001)
+        XCTAssertEqual(VideoTrimmerLogic.normalizedOffset(trimStartTime: 12, duration: 10, maxTrimDuration: 3), 1.0, accuracy: 0.001)
+    }
+
+    func testVideoTrimmerLogicDurationBadgeText() {
+        XCTAssertEqual(VideoTrimmerLogic.durationBadgeText(duration: 10.0, maxTrimDuration: 3.0), "3.0s")
+        XCTAssertEqual(VideoTrimmerLogic.durationBadgeText(duration: 1.8, maxTrimDuration: 3.0), "1.8s")
+        XCTAssertEqual(VideoTrimmerLogic.durationBadgeText(duration: 0.0, maxTrimDuration: 3.0), "0.0s")
+    }
+
+    @MainActor
+    func testVideoTrimmerLocalizationKeysExistInCatalog() throws {
+        _ = VideoTrimmerLogic.titleKey
+
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = Bundle(for: WidgetCustomizationTests.self).url(forResource: "Localizable", withExtension: "xcstrings")
+            ?? projectDir
+                .appendingPathComponent("DashCast")
+                .appendingPathComponent("Resources")
+                .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in VideoTrimmerLogic.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing key in Localizable.xcstrings: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
+            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing EN for \(key)")
+            XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing ES for \(key)")
+        }
+    }
 }

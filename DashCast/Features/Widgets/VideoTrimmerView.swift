@@ -1,5 +1,78 @@
 import SwiftUI
 
+/// Pure bounds-safe math and localization helpers for `VideoTrimmerView`.
+public enum VideoTrimmerLogic {
+    nonisolated public static let allLocalizationKeys: [String] = [
+        "Trim Live Video Loop",
+        "%.1fs"
+    ]
+
+    @MainActor
+    public static var titleKey: LocalizedStringKey {
+        LocalizedStringKey("Trim Live Video Loop")
+    }
+
+    nonisolated public static func effectiveWindowDuration(
+        duration: Double,
+        maxTrimDuration: Double
+    ) -> Double {
+        guard duration.isFinite, duration > 0, maxTrimDuration.isFinite, maxTrimDuration > 0 else {
+            return 0
+        }
+        return min(duration, maxTrimDuration)
+    }
+
+    nonisolated public static func draggableDuration(
+        duration: Double,
+        maxTrimDuration: Double
+    ) -> Double {
+        guard duration.isFinite, duration > 0, maxTrimDuration.isFinite, maxTrimDuration >= 0 else {
+            return 0
+        }
+        return max(duration - maxTrimDuration, 0)
+    }
+
+    nonisolated public static func normalizedOffset(
+        trimStartTime: Double,
+        duration: Double,
+        maxTrimDuration: Double
+    ) -> Double {
+        let span = draggableDuration(duration: duration, maxTrimDuration: maxTrimDuration)
+        guard span > 0, trimStartTime.isFinite else {
+            return 0
+        }
+        return min(max(trimStartTime / span, 0.0), 1.0)
+    }
+
+    nonisolated public static func trimStartTime(
+        forLocationX locationX: Double,
+        containerWidth: Double,
+        windowWidth: Double,
+        duration: Double,
+        maxTrimDuration: Double
+    ) -> Double {
+        guard locationX.isFinite, containerWidth.isFinite, windowWidth.isFinite else {
+            return 0
+        }
+        let maxOffset = containerWidth - windowWidth
+        let span = draggableDuration(duration: duration, maxTrimDuration: maxTrimDuration)
+        guard maxOffset > 0, span > 0 else {
+            return 0
+        }
+        let clampedX = min(max(locationX - (windowWidth / 2.0), 0.0), maxOffset)
+        let fraction = clampedX / maxOffset
+        return fraction * span
+    }
+
+    nonisolated public static func durationBadgeText(
+        duration: Double,
+        maxTrimDuration: Double
+    ) -> String {
+        let effective = effectiveWindowDuration(duration: duration, maxTrimDuration: maxTrimDuration)
+        return String(format: String(localized: "%.1fs"), effective)
+    }
+}
+
 public struct VideoTrimmerView: View {
     @Binding public var trimStartTime: Double
     public let duration: Double
@@ -13,14 +86,14 @@ public struct VideoTrimmerView: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Trim Live Video Loop")
+                Text(VideoTrimmerLogic.titleKey)
                     .font(ThemeFonts.hudCaption(size: 13))
                     .foregroundStyle(Color.dashTextPrimary)
                     .fontWeight(.semibold)
 
                 Spacer()
 
-                Text("3.0s")
+                Text(VideoTrimmerLogic.durationBadgeText(duration: duration, maxTrimDuration: maxTrimDuration))
                     .font(ThemeFonts.monospaceDigits(size: 12))
                     .foregroundStyle(Color.dashYellow)
                     .padding(.horizontal, 8)
@@ -47,11 +120,15 @@ public struct VideoTrimmerView: View {
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                // Active 3.0s Trim Window Box
+                // Active Trim Window Box
                 GeometryReader { geo in
-                    let windowWidth = geo.size.width * 0.35
-                    let maxOffset = geo.size.width - windowWidth
-                    let normalizedOffset = min(max(trimStartTime / max(duration - maxTrimDuration, 1.0), 0.0), 1.0)
+                    let windowWidth = max(geo.size.width * 0.35, 0)
+                    let maxOffset = max(geo.size.width - windowWidth, 0)
+                    let normalizedOffset = VideoTrimmerLogic.normalizedOffset(
+                        trimStartTime: trimStartTime,
+                        duration: duration,
+                        maxTrimDuration: maxTrimDuration
+                    )
                     let currentX = normalizedOffset * maxOffset
 
                     RoundedRectangle(cornerRadius: 8)
@@ -62,9 +139,13 @@ public struct VideoTrimmerView: View {
                         .gesture(
                             DragGesture()
                                 .onChanged { value in
-                                    let newX = min(max(value.location.x - (windowWidth / 2), 0), maxOffset)
-                                    let fraction = newX / maxOffset
-                                    self.trimStartTime = fraction * (duration - maxTrimDuration)
+                                    self.trimStartTime = VideoTrimmerLogic.trimStartTime(
+                                        forLocationX: value.location.x,
+                                        containerWidth: geo.size.width,
+                                        windowWidth: windowWidth,
+                                        duration: duration,
+                                        maxTrimDuration: maxTrimDuration
+                                    )
                                 }
                         )
                 }
