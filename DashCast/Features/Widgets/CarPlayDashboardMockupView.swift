@@ -1,5 +1,46 @@
 import SwiftUI
 
+/// Formats live date, clock, and countdown preview values for `CarPlayDashboardMockupView`.
+public enum CarPlayDashboardMockupFormatter {
+    public static func monthName(
+        for date: Date = Date(),
+        locale: Locale = .current,
+        calendar: Calendar = .current
+    ) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.calendar = calendar
+        formatter.timeZone = calendar.timeZone
+        formatter.setLocalizedDateFormatFromTemplate("MMMM")
+        return formatter.string(from: date).capitalized(with: locale)
+    }
+
+    public static func dayNumber(
+        for date: Date = Date(),
+        calendar: Calendar = .current
+    ) -> String {
+        String(format: "%02d", calendar.component(.day, from: date))
+    }
+
+    public static func timeString(
+        for date: Date = Date(),
+        locale: Locale = .current,
+        timeZone: TimeZone = .current
+    ) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = locale
+        formatter.timeZone = timeZone
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+
+    public static func countdownDisplayValue(for countdownTitle: String?) -> String {
+        let trimmed = countdownTitle?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? "10" : trimmed
+    }
+}
+
 public struct CarPlayDashboardMockupView: View {
     public let config: WidgetConfigModel
 
@@ -8,6 +49,12 @@ public struct CarPlayDashboardMockupView: View {
     }
 
     public var body: some View {
+        TimelineView(.periodic(from: .now, by: 30)) { context in
+            mockupContent(at: context.date)
+        }
+    }
+
+    private func mockupContent(at date: Date) -> some View {
         ZStack {
             // Dashboard Display Bezel (Curved automotive car screen)
             RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -22,9 +69,11 @@ public struct CarPlayDashboardMockupView: View {
                 // CarPlay Left Sidebar
                 VStack(spacing: 12) {
                     VStack(spacing: 2) {
-                        Text("9:41")
+                        Text(CarPlayDashboardMockupFormatter.timeString(for: date))
                             .font(.system(size: 11, weight: .bold))
                             .foregroundStyle(.white)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                         HStack(spacing: 2) {
                             Image(systemName: "cellularbars")
                             Image(systemName: "wifi")
@@ -69,7 +118,7 @@ public struct CarPlayDashboardMockupView: View {
                 // CarPlay Screen Content: Dual widgets
                 HStack(spacing: 10) {
                     // Widget 1: Car Widget Card
-                    carWidgetTile
+                    carWidgetTile(at: date)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                     // Widget 2: Countdown / Info Card
@@ -82,7 +131,7 @@ public struct CarPlayDashboardMockupView: View {
         .frame(height: 180)
     }
 
-    private var carWidgetTile: some View {
+    private func carWidgetTile(at date: Date) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: 14)
                 .fill(
@@ -105,10 +154,10 @@ public struct CarPlayDashboardMockupView: View {
             VStack(spacing: 4) {
                 HStack {
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("August")
+                        Text(CarPlayDashboardMockupFormatter.monthName(for: date))
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(Color.dashTextSecondary)
-                        Text("03")
+                        Text(CarPlayDashboardMockupFormatter.dayNumber(for: date))
                             .font(.system(size: 18, weight: .bold, design: .rounded))
                             .foregroundStyle(Color.dashTextPrimary)
                     }
@@ -179,7 +228,7 @@ public struct CarPlayDashboardMockupView: View {
                 )
 
             VStack(spacing: 2) {
-                Text(config.countdownTitle ?? "10")
+                Text(CarPlayDashboardMockupFormatter.countdownDisplayValue(for: config.countdownTitle))
                     .font(.system(size: 44, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
 

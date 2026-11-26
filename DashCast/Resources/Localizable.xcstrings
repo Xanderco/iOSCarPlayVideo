@@ -8177,6 +8177,23 @@
           }
         }
       }
+    },
+    "DAYS LEFT": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAYS LEFT"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DÍAS RESTANTES"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

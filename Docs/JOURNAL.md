@@ -92,6 +92,10 @@
 
 ## Log
 
+### 2026-11-26 06:12 (Bogotá) — Live Date/Clock Preview in CarPlayDashboardMockupView [DI-99]
+- **Added `CarPlayDashboardMockupFormatter`** (`DashCast/Features/Widgets/CarPlayDashboardMockupView.swift`): replaced hardcoded `"August"`, `"03"`, and `"9:41"` with locale-aware live `TimelineView(.periodic(from: .now, by: 30))` date/time formatting and trimmed countdown fallback handling.
+- **Localization & Tests**: added `"DAYS LEFT"` EN/ES translation in `DashCast/Resources/Localizable.xcstrings`, added `testCarPlayDashboardMockupFormatter` in `DashCastTests/WidgetCatalogTests.swift`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
