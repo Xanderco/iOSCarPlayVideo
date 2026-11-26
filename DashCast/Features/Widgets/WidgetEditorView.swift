@@ -1,5 +1,98 @@
 import SwiftUI
 
+/// Localized copy keys for `WidgetEditorView`.
+public enum WidgetEditorCopy {
+    nonisolated public static let navigationTitleString = "Edit widget"
+    nonisolated public static let previewButtonString = "Preview"
+    nonisolated public static let previewLocationWeatherString = "Barranquilla · 33°, Cloudy"
+    nonisolated public static let adjustPositionHeadingString = "Adjust Position"
+    nonisolated public static let targetLabelString = "Target"
+    nonisolated public static let logoOptionString = "Logo"
+    nonisolated public static let carOptionString = "Car"
+    nonisolated public static let sizeLabelString = "Size"
+    nonisolated public static let verticalLabelString = "Vertical"
+    nonisolated public static let horizontalLabelString = "Horizontal"
+    nonisolated public static let plateTextHeadingString = "Plate Text"
+    nonisolated public static let platePlaceholderString = "ABC-1234"
+    nonisolated public static let selectVehicleHeadingString = "Select Vehicle"
+    nonisolated public static let brandWatermarkString = "Brand Watermark"
+    nonisolated public static let addBadgeStickerString = "Add Badge Sticker"
+    nonisolated public static let textColorHeadingString = "Text Color"
+    nonisolated public static let fontHeadingString = "Font"
+    nonisolated public static let saveButtonString = "Add to My Widgets"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        navigationTitleString,
+        previewButtonString,
+        previewLocationWeatherString,
+        adjustPositionHeadingString,
+        targetLabelString,
+        logoOptionString,
+        carOptionString,
+        sizeLabelString,
+        verticalLabelString,
+        horizontalLabelString,
+        plateTextHeadingString,
+        platePlaceholderString,
+        selectVehicleHeadingString,
+        brandWatermarkString,
+        addBadgeStickerString,
+        textColorHeadingString,
+        fontHeadingString,
+        saveButtonString
+    ]
+
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var previewButtonKey: LocalizedStringKey { LocalizedStringKey(previewButtonString) }
+    @MainActor public static var previewLocationWeatherKey: LocalizedStringKey { LocalizedStringKey(previewLocationWeatherString) }
+    @MainActor public static var adjustPositionHeadingKey: LocalizedStringKey { LocalizedStringKey(adjustPositionHeadingString) }
+    @MainActor public static var targetLabelKey: LocalizedStringKey { LocalizedStringKey(targetLabelString) }
+    @MainActor public static var logoOptionKey: LocalizedStringKey { LocalizedStringKey(logoOptionString) }
+    @MainActor public static var carOptionKey: LocalizedStringKey { LocalizedStringKey(carOptionString) }
+    @MainActor public static var sizeLabelKey: LocalizedStringKey { LocalizedStringKey(sizeLabelString) }
+    @MainActor public static var verticalLabelKey: LocalizedStringKey { LocalizedStringKey(verticalLabelString) }
+    @MainActor public static var horizontalLabelKey: LocalizedStringKey { LocalizedStringKey(horizontalLabelString) }
+    @MainActor public static var plateTextHeadingKey: LocalizedStringKey { LocalizedStringKey(plateTextHeadingString) }
+    @MainActor public static var platePlaceholderKey: LocalizedStringKey { LocalizedStringKey(platePlaceholderString) }
+    @MainActor public static var selectVehicleHeadingKey: LocalizedStringKey { LocalizedStringKey(selectVehicleHeadingString) }
+    @MainActor public static var brandWatermarkKey: LocalizedStringKey { LocalizedStringKey(brandWatermarkString) }
+    @MainActor public static var addBadgeStickerKey: LocalizedStringKey { LocalizedStringKey(addBadgeStickerString) }
+    @MainActor public static var textColorHeadingKey: LocalizedStringKey { LocalizedStringKey(textColorHeadingString) }
+    @MainActor public static var fontHeadingKey: LocalizedStringKey { LocalizedStringKey(fontHeadingString) }
+    @MainActor public static var saveButtonKey: LocalizedStringKey { LocalizedStringKey(saveButtonString) }
+}
+
+/// Pure normalization and bounds validation helpers for `WidgetEditorView`.
+public enum WidgetEditorConfigValidator {
+    nonisolated public static let scaleRange: ClosedRange<Double> = 0.6...1.6
+    nonisolated public static let offsetRange: ClosedRange<Double> = -50...50
+
+    nonisolated public static func normalizePlate(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed.uppercased()
+    }
+
+    nonisolated public static func clampScale(_ value: Double) -> Double {
+        guard value.isFinite else { return 1.0 }
+        return min(max(value, scaleRange.lowerBound), scaleRange.upperBound)
+    }
+
+    nonisolated public static func clampOffset(_ value: Double) -> Double {
+        guard value.isFinite else { return 0.0 }
+        return min(max(value, offsetRange.lowerBound), offsetRange.upperBound)
+    }
+
+    nonisolated public static func sanitizedConfig(_ config: WidgetConfigModel) -> WidgetConfigModel {
+        var copy = config
+        copy.plateText = normalizePlate(config.plateText)
+        copy.carScale = clampScale(config.carScale)
+        copy.carVerticalOffset = clampOffset(config.carVerticalOffset)
+        copy.carHorizontalOffset = clampOffset(config.carHorizontalOffset)
+        return copy
+    }
+}
+
 public struct WidgetEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var config: WidgetConfigModel
@@ -70,7 +163,7 @@ public struct WidgetEditorView: View {
                 // Sticky "Add to My Widgets" Button
                 addToMyWidgetsButton
             }
-            .navigationTitle("Edit widget")
+            .navigationTitle(WidgetEditorCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -194,7 +287,7 @@ public struct WidgetEditorView: View {
                     HStack(spacing: 4) {
                         Image(systemName: "location.fill")
                             .font(.system(size: 9))
-                        Text("Barranquilla · 33°, Cloudy")
+                        Text(WidgetEditorCopy.previewLocationWeatherKey)
                             .font(fontForSelection(config.fontName, size: 11, weight: .regular))
                     }
                     .foregroundStyle(Color.dashTextSecondary)
@@ -203,7 +296,7 @@ public struct WidgetEditorView: View {
             }
             .frame(width: 260, height: 260)
 
-            Button("Preview") {}
+            Button(WidgetEditorCopy.previewButtonKey) {}
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(Color.dashYellow)
         }
@@ -213,15 +306,15 @@ public struct WidgetEditorView: View {
 
     private var adjustPositionSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Adjust Position")
+            Text(WidgetEditorCopy.adjustPositionHeadingKey)
                 .font(.system(size: 17, weight: .bold))
                 .foregroundStyle(Color.dashTextPrimary)
                 .padding(.horizontal, 16)
 
             // Segmented Target Picker (Logo vs Car)
-            Picker("Target", selection: $selectedPositionTarget) {
-                Text("Logo").tag("Logo")
-                Text("Car").tag("Car")
+            Picker(WidgetEditorCopy.targetLabelKey, selection: $selectedPositionTarget) {
+                Text(WidgetEditorCopy.logoOptionKey).tag("Logo")
+                Text(WidgetEditorCopy.carOptionKey).tag("Car")
             }
             .pickerStyle(.segmented)
             .padding(.horizontal, 16)
@@ -229,27 +322,27 @@ public struct WidgetEditorView: View {
             VStack(spacing: 12) {
                 // Size Slider
                 sliderRow(
-                    title: "Size",
+                    title: WidgetEditorCopy.sizeLabelKey,
                     value: $config.carScale,
-                    range: 0.6...1.6,
+                    range: WidgetEditorConfigValidator.scaleRange,
                     leadingIcon: "minus",
                     trailingIcon: "plus"
                 )
 
                 // Vertical Slider
                 sliderRow(
-                    title: "Vertical",
+                    title: WidgetEditorCopy.verticalLabelKey,
                     value: $config.carVerticalOffset,
-                    range: -50...50,
+                    range: WidgetEditorConfigValidator.offsetRange,
                     leadingIcon: "arrow.up",
                     trailingIcon: "arrow.down"
                 )
 
                 // Horizontal Slider
                 sliderRow(
-                    title: "Horizontal",
+                    title: WidgetEditorCopy.horizontalLabelKey,
                     value: $config.carHorizontalOffset,
-                    range: -50...50,
+                    range: WidgetEditorConfigValidator.offsetRange,
                     leadingIcon: "arrow.left",
                     trailingIcon: "arrow.right"
                 )
@@ -288,15 +381,15 @@ public struct WidgetEditorView: View {
 
     private var licensePlateSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Plate Text")
+            Text(WidgetEditorCopy.plateTextHeadingKey)
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Color.dashTextPrimary)
                 .padding(.horizontal, 16)
 
             HStack {
-                TextField("ABC-1234", text: Binding(
+                TextField(WidgetEditorCopy.platePlaceholderKey, text: Binding(
                     get: { config.plateText ?? "" },
-                    set: { config.plateText = $0.isEmpty ? nil : $0 }
+                    set: { config.plateText = WidgetEditorConfigValidator.normalizePlate($0) }
                 ))
                 .font(.system(size: 15, weight: .bold, design: .monospaced))
                 .foregroundStyle(Color.dashTextPrimary)
@@ -324,7 +417,7 @@ public struct WidgetEditorView: View {
 
     private var vehicleModelSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Select Vehicle")
+            Text(WidgetEditorCopy.selectVehicleHeadingKey)
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Color.dashTextPrimary)
                 .padding(.horizontal, 16)
@@ -372,7 +465,7 @@ public struct WidgetEditorView: View {
 
     private var brandWatermarkSection: some View {
         Toggle(isOn: $config.showWatermark) {
-            Text("Brand Watermark")
+            Text(WidgetEditorCopy.brandWatermarkKey)
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Color.dashTextPrimary)
         }
@@ -387,7 +480,7 @@ public struct WidgetEditorView: View {
 
     private var stickerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Add Badge Sticker")
+            Text(WidgetEditorCopy.addBadgeStickerKey)
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Color.dashTextPrimary)
                 .padding(.horizontal, 16)
@@ -435,7 +528,7 @@ public struct WidgetEditorView: View {
 
     private var textColorSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Text Color")
+            Text(WidgetEditorCopy.textColorHeadingKey)
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Color.dashTextPrimary)
                 .padding(.horizontal, 16)
@@ -465,7 +558,7 @@ public struct WidgetEditorView: View {
 
     private var fontSelectorSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Font")
+            Text(WidgetEditorCopy.fontHeadingKey)
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Color.dashTextPrimary)
                 .padding(.horizontal, 16)
@@ -515,10 +608,10 @@ public struct WidgetEditorView: View {
 
     private var addToMyWidgetsButton: some View {
         Button {
-            onSave(config)
+            onSave(WidgetEditorConfigValidator.sanitizedConfig(config))
             dismiss()
         } label: {
-            Text("Add to My Widgets")
+            Text(WidgetEditorCopy.saveButtonKey)
                 .font(.system(size: 16, weight: .bold))
                 .foregroundStyle(Color.black)
                 .frame(maxWidth: .infinity)
