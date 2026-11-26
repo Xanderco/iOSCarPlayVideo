@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 07:22 (Bogotá) — DI-103: Localized DriveLiveMapView & LocationPermissionCard Copy + Unit Tests
+- Extracted `LocationPermissionCardCopy` in `DashCast/Features/Drive/DriveLiveMapView.swift` mapping `CLAuthorizationStatus` / `LocationPermissionCard.Kind` to `LocalizedStringKey` titles, messages, and button labels, and converted `LocationPermissionCard.card` and `DriveLiveMapView` recenter label to `LocalizedStringKey`.
+- Added EN/ES translations for all 12 missing `DriveLiveMapView` and `LocationPermissionCard` keys in `DashCast/Resources/Localizable.xcstrings`.
+- Added unit tests in `DashCastTests/DriveSettingsAndNotificationTests.swift` covering all `CLAuthorizationStatus` permission card states and EN/ES String Catalog coverage.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

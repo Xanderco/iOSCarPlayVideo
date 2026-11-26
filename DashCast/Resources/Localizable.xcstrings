@@ -8177,6 +8177,210 @@
           }
         }
       }
+    },
+    "Centres the map on your location": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centres the map on your location"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centra el mapa en tu ubicación"
+          }
+        }
+      }
+    },
+    "Map of your current location": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map of your current location"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mapa de tu ubicación actual"
+          }
+        }
+      }
+    },
+    "Show where you are": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show where you are"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muestra dónde estás"
+          }
+        }
+      }
+    },
+    "DashCast uses your location to centre the map on you and to record the route of a trip. Trips stay on this iPhone and are never uploaded.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast uses your location to centre the map on you and to record the route of a trip. Trips stay on this iPhone and are never uploaded."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DashCast usa tu ubicación para centrar el mapa en ti y registrar la ruta de un viaje. Los viajes permanecen en este iPhone y nunca se suben."
+          }
+        }
+      }
+    },
+    "Allow Location": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow Location"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir ubicación"
+          }
+        }
+      }
+    },
+    "Record trips automatically": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Record trips automatically"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrar viajes automáticamente"
+          }
+        }
+      }
+    },
+    "Choose “Change to Always Allow” so DashCast can notice when you start driving and save the trip on its own, even with the app closed. You can turn this off any time.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose “Change to Always Allow” so DashCast can notice when you start driving and save the trip on its own, even with the app closed. You can turn this off any time."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige «Cambiar a Permitir siempre» para que DashCast detecte cuando empiezas a conducir y guarde el viaje automáticamente, incluso con la app cerrada. Puedes desactivarlo en cualquier momento."
+          }
+        }
+      }
+    },
+    "Allow All the Time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allow All the Time"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitir todo el tiempo"
+          }
+        }
+      }
+    },
+    "Location is off for DashCast": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location is off for DashCast"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La ubicación está desactivada para DashCast"
+          }
+        }
+      }
+    },
+    "Turn on location in Settings › DashCast › Location to see yourself on the map and record trips.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on location in Settings › DashCast › Location to see yourself on the map and record trips."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa la ubicación en Ajustes › DashCast › Ubicación para verte en el mapa y registrar viajes."
+          }
+        }
+      }
+    },
+    "Location is restricted": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location is restricted"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La ubicación está restringida"
+          }
+        }
+      }
+    },
+    "Location Services are limited on this device (for example by Screen Time or a device profile), so DashCast can't show your position.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location Services are limited on this device (for example by Screen Time or a device profile), so DashCast can't show your position."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los servicios de localización están limitados en este dispositivo (por ejemplo, por Tiempo en pantalla o un perfil del dispositivo), por lo que DashCast no puede mostrar tu posición."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
