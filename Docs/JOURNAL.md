@@ -92,6 +92,10 @@
 
 ## Log
 
+### 2026-11-26 06:10 (Bogotá) — Live External Display Status & Localization in CarCastGuideModalView [DI-98]
+- **Added `CarCastGuideStatusFormatter`** (`DashCast/Features/Cast/CarCastGuideModalView.swift`): wired `CarCastGuideModalView` to `ExternalDisplayManager.shared` (calling `checkForExistingExternalDisplay()` on appear) to render live connected status/resolution (`Connected (1920×1080)` / `External display connected`) or localized ready status (`Ready · Tap AirPlay to connect`).
+- **Localization & Tests**: converted `stepRow(num:text:)` to `LocalizedStringKey`, added missing EN/ES entries for `CarCastGuideModalView` in `DashCast/Resources/Localizable.xcstrings`, and added `testCarCastGuideStatusFormatter` in `DashCastTests/CastEngineTests.swift`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

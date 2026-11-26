@@ -1,8 +1,32 @@
 import SwiftUI
 import AVKit
 
+/// Formats live external display connection state for `CarCastGuideModalView`.
+public enum CarCastGuideStatusFormatter {
+    public struct DisplayStatus: Equatable, Sendable {
+        public let isConnected: Bool
+        public let resolutionText: String?
+
+        public init(isConnected: Bool, resolutionText: String?) {
+            self.isConnected = isConnected
+            self.resolutionText = resolutionText
+        }
+    }
+
+    public static func status(isConnected: Bool, resolution: CGSize) -> DisplayStatus {
+        guard isConnected else {
+            return DisplayStatus(isConnected: false, resolutionText: nil)
+        }
+        let width = Int(resolution.width.rounded())
+        let height = Int(resolution.height.rounded())
+        let resText = (width > 0 && height > 0) ? "\(width)×\(height)" : nil
+        return DisplayStatus(isConnected: true, resolutionText: resText)
+    }
+}
+
 public struct CarCastGuideModalView: View {
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var externalDisplay = ExternalDisplayManager.shared
 
     public init() {}
 
@@ -63,9 +87,7 @@ public struct CarCastGuideModalView: View {
 
                                     Spacer()
 
-                                    Text("Detecting displays...")
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(Color.dashTextMuted)
+                                    displayStatusBadge
                                 }
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
@@ -163,6 +185,9 @@ public struct CarCastGuideModalView: View {
             }
             .navigationTitle("Car Display Setup")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                externalDisplay.checkForExistingExternalDisplay()
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Done") {
@@ -175,7 +200,36 @@ public struct CarCastGuideModalView: View {
         }
     }
 
-    private func stepRow(num: String, text: String) -> some View {
+    @ViewBuilder
+    private var displayStatusBadge: some View {
+        let status = CarCastGuideStatusFormatter.status(
+            isConnected: externalDisplay.isExternalDisplayConnected,
+            resolution: externalDisplay.externalDisplayResolution
+        )
+        HStack(spacing: 6) {
+            Circle()
+                .fill(status.isConnected ? Color.dashGreen : Color.dashTextMuted)
+                .frame(width: 7, height: 7)
+
+            if status.isConnected {
+                if let res = status.resolutionText {
+                    Text("Connected (\(res))")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.dashGreen)
+                } else {
+                    Text("External display connected")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(Color.dashGreen)
+                }
+            } else {
+                Text("Ready · Tap AirPlay to connect")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.dashTextMuted)
+            }
+        }
+    }
+
+    private func stepRow(num: String, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Text(num)
                 .font(.system(size: 12, weight: .bold))

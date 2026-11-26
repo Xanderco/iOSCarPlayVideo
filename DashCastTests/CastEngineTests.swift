@@ -63,4 +63,27 @@ final class CastEngineTests: XCTestCase {
         // Stable ids so favorites/recents survive re-reads.
         XCTAssertEqual(IPTVParser.samplePlaylist.map(\.id), playlist.map(\.id))
     }
+
+    func testCarCastGuideStatusFormatter() {
+        let disconnected = CarCastGuideStatusFormatter.status(
+            isConnected: false,
+            resolution: CGSize(width: 1920, height: 1080)
+        )
+        XCTAssertFalse(disconnected.isConnected)
+        XCTAssertNil(disconnected.resolutionText)
+
+        let connectedWithRes = CarCastGuideStatusFormatter.status(
+            isConnected: true,
+            resolution: CGSize(width: 1920, height: 1080)
+        )
+        XCTAssertTrue(connectedWithRes.isConnected)
+        XCTAssertEqual(connectedWithRes.resolutionText, "1920×1080")
+
+        let connectedZeroRes = CarCastGuideStatusFormatter.status(
+            isConnected: true,
+            resolution: .zero
+        )
+        XCTAssertTrue(connectedZeroRes.isConnected)
+        XCTAssertNil(connectedZeroRes.resolutionText)
+    }
 }
