@@ -17,10 +17,16 @@ public struct MeHomeView: View {
     @State private var showingMediaServers: Bool = false
     @State private var showingCarDisplayGuide: Bool = false
     @State private var showingSettingsCarDisplayGuide: Bool = false
-    @State private var showingClearTripsConfirm: Bool = false
-    @State private var showingClearPlaylistsConfirm: Bool = false
+    @State private var pendingClearConfirmation: ClearDataConfirmation?
     @State private var savedTripsCount: Int = 0
     @State private var selectedVehicleIndex: Int = 0
+
+    private enum ClearDataConfirmation: Identifiable {
+        case trips
+        case playlists
+
+        var id: Self { self }
+    }
 
     private let vehicles = VehicleCatalogService.shared.vehicles
 
@@ -435,29 +441,35 @@ public struct MeHomeView: View {
                 CarCastGuideModalView()
             }
             .confirmationDialog(
-                "Clear all saved trips?",
-                isPresented: $showingClearTripsConfirm,
-                titleVisibility: .visible
-            ) {
-                Button("Clear Trip History", role: .destructive) {
-                    PersistenceController.shared.clearTrips()
-                    savedTripsCount = 0
+                pendingClearConfirmation == .trips
+                    ? LocalizedStringKey("Clear all saved trips?")
+                    : LocalizedStringKey("Clear all imported playlists?"),
+                isPresented: Binding(
+                    get: { pendingClearConfirmation != nil },
+                    set: { if !$0 { pendingClearConfirmation = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: pendingClearConfirmation
+            ) { target in
+                switch target {
+                case .trips:
+                    Button("Clear Trip History", role: .destructive) {
+                        PersistenceController.shared.clearTrips()
+                        savedTripsCount = 0
+                    }
+                case .playlists:
+                    Button("Clear Playlists", role: .destructive) {
+                        playlistStore.clearPlaylists()
+                    }
                 }
                 Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This removes your saved drive routes and trip history from this device.")
-            }
-            .confirmationDialog(
-                "Clear all imported playlists?",
-                isPresented: $showingClearPlaylistsConfirm,
-                titleVisibility: .visible
-            ) {
-                Button("Clear Playlists", role: .destructive) {
-                    playlistStore.clearPlaylists()
+            } message: { target in
+                switch target {
+                case .trips:
+                    Text("This removes your saved drive routes and trip history from this device.")
+                case .playlists:
+                    Text("This removes your imported playlists from this device. Built-in demo videos remain available.")
                 }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This removes your imported playlists from this device. Built-in demo videos remain available.")
             }
             .alert("Restore Purchases", isPresented: Binding(
                 get: { restoreMessage != nil },
@@ -559,7 +571,7 @@ public struct MeHomeView: View {
 
             VStack(spacing: 1) {
                 Button {
-                    showingClearTripsConfirm = true
+                    pendingClearConfirmation = .trips
                 } label: {
                     clearDataRow(
                         icon: "road.lanes",
@@ -573,7 +585,7 @@ public struct MeHomeView: View {
                 Divider().background(Color.dashBorder.opacity(0.5))
 
                 Button {
-                    showingClearPlaylistsConfirm = true
+                    pendingClearConfirmation = .playlists
                 } label: {
                     clearDataRow(
                         icon: "play.square.stack",
