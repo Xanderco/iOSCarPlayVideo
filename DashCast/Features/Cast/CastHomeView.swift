@@ -26,6 +26,7 @@ public struct CastHomeView: View {
     @State private var importErrorMessage: String?
     @State private var importSuccessMessage: String?
     @State private var localImportError: String?
+    @State private var showingClearLocalVideosConfirm: Bool = false
 
     public init() {}
 
@@ -252,30 +253,72 @@ public struct CastHomeView: View {
 
     private var localVideosSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            HStack(spacing: 8) {
                 Text("Your Videos")
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(Color.dashYellow)
+                    .foregroundStyle(Color.dcAccent)
+
+                if !localVideoManager.localVideos.isEmpty {
+                    Text("\(localVideoManager.localVideos.count) · \(LocalVideoManager.formatByteCount(localVideoManager.totalStorageBytes))")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Color.dcTextSecondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.dcSurfaceRaised)
+                        .clipShape(Capsule())
+                        .accessibilityIdentifier("Cast_LocalVideosStorage")
+                }
+
                 Spacer()
+
                 if localVideoManager.isImporting {
-                    ProgressView().tint(.dashYellow)
+                    ProgressView().tint(.dcAccent)
+                } else if !localVideoManager.localVideos.isEmpty {
+                    Button(role: .destructive) {
+                        showingClearLocalVideosConfirm = true
+                    } label: {
+                        Text("Clear All")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(Color.dcTextSecondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("Cast_ClearLocalVideosButton")
                 }
             }
             .padding(.horizontal, 20)
 
             VStack(spacing: 1) {
                 ForEach(localVideoManager.localVideos) { video in
+                    let meta = localVideoManager.metadata(for: video)
+                    let isCurrent = playerService.currentChannel?.id == video.id
+
                     HStack(spacing: 12) {
                         Button {
                             playerService.load(channel: video)
                         } label: {
                             HStack(spacing: 12) {
-                                Image(systemName: playerService.currentChannel?.id == video.id ? "speaker.wave.2.fill" : "play.rectangle.fill")
-                                    .foregroundStyle(Color.dashYellow)
-                                Text(video.name)
-                                    .font(.system(size: 14, weight: .semibold))
-                                    .foregroundStyle(Color.dashTextPrimary)
-                                    .lineLimit(1)
+                                localVideoThumbnail(for: video, metadata: meta, isCurrent: isCurrent)
+
+                                VStack(alignment: .leading, spacing: 3) {
+                                    Text(video.name)
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(Color.dcTextPrimary)
+                                        .lineLimit(1)
+
+                                    HStack(spacing: 6) {
+                                        if let meta, meta.fileSizeBytes > 0 {
+                                            Text(LocalVideoManager.formatByteCount(meta.fileSizeBytes))
+                                                .font(.system(size: 11, weight: .medium))
+                                                .foregroundStyle(Color.dcTextSecondary)
+                                        }
+                                        if isCurrent {
+                                            Text("Playing")
+                                                .font(.system(size: 10, weight: .bold))
+                                                .foregroundStyle(Color.dcAccent)
+                                        }
+                                    }
+                                }
+
                                 Spacer()
                             }
                             .contentShape(Rectangle())
@@ -283,24 +326,91 @@ public struct CastHomeView: View {
                         .buttonStyle(.plain)
 
                         Button(role: .destructive) {
-                            if playerService.currentChannel?.id == video.id {
+                            if isCurrent {
                                 playerService.stop()
                             }
                             localVideoManager.deleteVideo(video)
                         } label: {
                             Image(systemName: "trash")
-                                .foregroundStyle(Color.dashTextMuted)
+                                .font(.system(size: 14))
+                                .foregroundStyle(Color.dcTextTertiary)
+                                .frame(width: 32, height: 32)
+                                .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
                         .accessibilityLabel("Delete \(video.name)")
+                        .accessibilityIdentifier("LocalVideos_Delete_\(video.id)")
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background(Color.dashSurface)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color.dcSurface)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.dcStroke, lineWidth: 1)
+            )
             .padding(.horizontal, 16)
+        }
+        .accessibilityIdentifier("Cast_LocalVideosSection")
+        .confirmationDialog(
+            "Clear All Local Videos?",
+            isPresented: $showingClearLocalVideosConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Remove All", role: .destructive) {
+                if let currentID = playerService.currentChannel?.id,
+                   localVideoManager.localVideos.contains(where: { $0.id == currentID }) {
+                    playerService.stop()
+                }
+                localVideoManager.deleteAllVideos()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This removes all \(localVideoManager.localVideos.count) imported videos and frees \(LocalVideoManager.formatByteCount(localVideoManager.totalStorageBytes)) of storage.")
+        }
+    }
+
+    @ViewBuilder
+    private func localVideoThumbnail(
+        for video: ChannelModel,
+        metadata: LocalVideoMetadata?,
+        isCurrent: Bool
+    ) -> some View {
+        ZStack(alignment: .bottomTrailing) {
+            Group {
+                if let thumbURL = localVideoManager.thumbnailURL(for: video),
+                   let uiImage = UIImage(contentsOfFile: thumbURL.path) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                } else {
+                    ZStack {
+                        Color.dcSurfaceRaised
+                        Image(systemName: isCurrent ? "speaker.wave.2.fill" : "play.rectangle.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(Color.dcAccent)
+                    }
+                }
+            }
+            .frame(width: 80, height: 46)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(isCurrent ? Color.dcAccent : Color.dcStroke, lineWidth: isCurrent ? 1.5 : 1)
+            )
+
+            if let formattedDuration = LocalVideoManager.formatDuration(metadata?.durationSeconds) {
+                Text(formattedDuration)
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundStyle(Color.white)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(Color.black.opacity(0.78))
+                    .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                    .padding(4)
+            }
         }
     }
 

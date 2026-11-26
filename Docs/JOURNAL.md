@@ -92,6 +92,14 @@
 
 ## Log
 
+### 2026-11-25 21:50 (Bogotá) — Local Video Thumbnails, Duration Badges & Storage Cleanup Manager [DI-83]
+- **Changes**:
+  - `DashCast/Features/Cast/LocalVideoManager.swift`: Added `LocalVideoMetadata` (duration, byte size, thumbnail filename) persisted in `UserDefaults`, synchronous byte-size capture on import, `AVURLAsset.load(.duration)` + `AVAssetImageGenerator.image(at:)` JPEG thumbnail extraction into `Thumbnails/`, automatic thumbnail deletion in `deleteVideo(_:)`, `deleteAllVideos()` storage cleanup, `cleanupOrphanedThumbnails()`, `totalStorageBytes`, and `formatDuration` / `formatByteCount` helpers.
+  - `DashCast/Features/Cast/CastHomeView.swift`: Updated `localVideosSection` to render 16:9 JPEG video thumbnails (with fallback icon), monospaced duration badge overlay, per-video byte size, total storage indicator pill, and a confirmation-gated "Clear All" cleanup action.
+  - `DashCastTests/LocalVideoManagerTests.swift`: Added unit tests verifying metadata/JPEG extraction, persistence across reload, thumbnail cleanup on `deleteVideo` and `deleteAllVideos`, orphaned thumbnail pruning, and formatting helpers.
+  - `DashCast/Resources/Localizable.xcstrings`: Added EN/ES translations for new local video storage/cleanup UI strings.
+- **Verification**: Pushed branch `feature/DI-83-local-video-thumbnails-storage` for GitHub Actions CI (`DashCast CI`).
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
