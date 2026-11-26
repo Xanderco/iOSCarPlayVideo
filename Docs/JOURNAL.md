@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 09:20 (Bogotá) — DashCastWidgets Extension String Catalog (EN/ES) & Widget Copy Tests [DI-110]
+- Added `DashCastWidgets/Localizable.xcstrings` with complete EN/ES translations for `CarWidget`, `TripStatsWidget`, `DoodleWidget`, and `QuickCastWidget` (AppIntents, `DisplayRepresentation`s, configuration metadata, and SwiftUI widget copy).
+- Updated `TripStatsWidget.swift` unit labels (`"mi"` / `"km"`) to pass `LocalizedStringKey` explicitly so SwiftUI resolves widget extension catalog translations.
+- Added `testDashCastWidgetsLocalizationCatalogComplete` in `DashCastTests/WidgetCustomizationTests.swift` verifying valid catalog metadata and EN/ES coverage for all 27 widget keys.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

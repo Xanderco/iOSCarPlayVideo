@@ -65,4 +65,63 @@ final class WidgetCustomizationTests: XCTestCase {
         XCTAssertEqual(first?.textColorHex, "#FF9500")
         XCTAssertEqual(first?.fontName, "Mono")
     }
+
+    func testDashCastWidgetsLocalizationCatalogComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCastWidgets")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any], "DashCastWidgets/Localizable.xcstrings must be valid JSON")
+        XCTAssertEqual(json["sourceLanguage"] as? String, "en")
+        XCTAssertEqual(json["version"] as? String, "1.0")
+
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+        let expectedKeys = [
+            // CarWidget
+            "My Car",
+            "Your car, its name and licence plate.",
+            "Show licence plate",
+            "Your car photo, name and plate.",
+            // TripStatsWidget
+            "Units",
+            "Same as app",
+            "Kilometres",
+            "Miles",
+            "Last Trip",
+            "Distance, score and date of your latest drive.",
+            "Distance, driving score and when you drove.",
+            "No trips yet",
+            "Start a drive in DashCast",
+            "mi",
+            "km",
+            "Score %lld",
+            // DoodleWidget
+            "Photo / Doodle",
+            "A photo or a doodle you drew in DashCast.",
+            "Draw or pick a photo",
+            "Open DashCast to set up",
+            // QuickCastWidget
+            "Quick Cast",
+            "Jump straight to casting to your car.",
+            "DashCast",
+            "Tap to cast",
+            "Cast to car",
+            "Cast",
+            "Video to your car"
+        ]
+
+        for key in expectedKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing DashCastWidgets catalog entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String, "Missing \(lang) string value for: \(key)")
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
