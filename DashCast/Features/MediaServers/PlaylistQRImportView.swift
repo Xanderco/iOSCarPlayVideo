@@ -23,15 +23,53 @@ public enum PlaylistQRPayload {
     }
 }
 
+/// Maps camera authorization, scanning phase, and hardware availability into a display state.
+public enum PlaylistQRCameraDisplayState: Equatable, Sendable {
+    case liveScanner
+    case noCamera
+    case permissionDenied
+    case waiting
+    case inactive
+}
+
+public enum PlaylistQRCameraStatusHelper {
+    public static func displayState(
+        authorizationStatus: AVAuthorizationStatus,
+        isScanning: Bool,
+        hasVideoDevice: Bool
+    ) -> PlaylistQRCameraDisplayState {
+        guard isScanning else { return .inactive }
+        switch authorizationStatus {
+        case .authorized:
+            return hasVideoDevice ? .liveScanner : .noCamera
+        case .denied, .restricted:
+            return .permissionDenied
+        case .notDetermined:
+            return .waiting
+        @unknown default:
+            return .waiting
+        }
+    }
+
+    public static func shouldRequestAccess(for authorizationStatus: AVAuthorizationStatus) -> Bool {
+        authorizationStatus == .notDetermined
+    }
+}
+
 /// Scans a QR code with the camera and imports the playlist it points to via `PlaylistStore`.
 public struct PlaylistQRImportView: View {
     @Environment(\.dismiss) private var dismiss
+
+    private enum FailureReason: Equatable {
+        case invalidPayload
+        case importError(String)
+    }
 
     private enum Phase: Equatable {
         case scanning
         case importing(URL)
         case imported(title: String, channels: Int)
-        case failed(String)
+        case failed(FailureReason)
     }
 
     @State private var phase: Phase = .scanning
@@ -71,13 +109,24 @@ public struct PlaylistQRImportView: View {
                     Button("Close") { dismiss() }
                 }
             }
+            .onAppear {
+                refreshCameraStatus()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+                refreshCameraStatus()
+            }
             .task {
-                if cameraStatus == .notDetermined {
+                refreshCameraStatus()
+                if PlaylistQRCameraStatusHelper.shouldRequestAccess(for: cameraStatus) {
                     _ = await AVCaptureDevice.requestAccess(for: .video)
-                    cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
+                    refreshCameraStatus()
                 }
             }
         }
+    }
+
+    private func refreshCameraStatus() {
+        cameraStatus = AVCaptureDevice.authorizationStatus(for: .video)
     }
 
     private var isImporting: Bool {
@@ -85,36 +134,46 @@ public struct PlaylistQRImportView: View {
         return false
     }
 
+    private var hasScannerHardware: Bool {
+        (DataScannerViewController.isSupported && DataScannerViewController.isAvailable)
+            || AVCaptureDevice.default(for: .video) != nil
+    }
+
     @ViewBuilder
     private var scannerArea: some View {
-        if cameraStatus == .authorized, phase == .scanning {
+        switch PlaylistQRCameraStatusHelper.displayState(
+            authorizationStatus: cameraStatus,
+            isScanning: phase == .scanning,
+            hasVideoDevice: hasScannerHardware
+        ) {
+        case .liveScanner:
             if DataScannerViewController.isSupported && DataScannerViewController.isAvailable {
                 DataScannerQRView { handle(payload: $0) }
-            } else if AVCaptureDevice.default(for: .video) != nil {
-                AVCaptureQRView { handle(payload: $0) }
             } else {
-                placeholder(icon: "camera.fill", text: "No camera available on this device.")
+                AVCaptureQRView { handle(payload: $0) }
             }
-        } else if cameraStatus == .denied || cameraStatus == .restricted {
+        case .noCamera:
+            placeholder(icon: "camera.fill", text: "No camera available on this device.")
+        case .permissionDenied:
             VStack(spacing: 12) {
                 placeholder(icon: "camera.fill", text: "Camera access is off. Enable it in Settings to scan QR codes.")
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     Link("Open Settings", destination: url)
                 }
             }
-        } else if phase == .scanning {
+        case .waiting:
             placeholder(icon: "qrcode.viewfinder", text: "Waiting for camera…")
-        } else {
-            placeholder(icon: "qrcode", text: "")
+        case .inactive:
+            placeholder(icon: "qrcode", text: nil)
         }
     }
 
-    private func placeholder(icon: String, text: String) -> some View {
+    private func placeholder(icon: String, text: LocalizedStringKey?) -> some View {
         ZStack {
             Color.dashSurface
             VStack(spacing: 10) {
                 Image(systemName: icon).font(.system(size: 44)).foregroundStyle(Color.dashTextMuted)
-                if !text.isEmpty {
+                if let text {
                     Text(text).font(.footnote).multilineTextAlignment(.center).foregroundStyle(.secondary)
                 }
             }
@@ -142,11 +201,22 @@ public struct PlaylistQRImportView: View {
                     .accessibilityIdentifier("qrImportSuccess")
                 Button("Done") { dismiss() }.buttonStyle(.borderedProminent)
             }
-        case .failed(let message):
+        case .failed(let reason):
             VStack(spacing: 8) {
-                Label(message, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.red)
-                    .multilineTextAlignment(.center)
+                Group {
+                    switch reason {
+                    case .invalidPayload:
+                        Label("That QR code doesn't contain a playlist link.", systemImage: "exclamationmark.triangle.fill")
+                    case .importError(let message):
+                        Label {
+                            Text(verbatim: message)
+                        } icon: {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                        }
+                    }
+                }
+                .foregroundStyle(.red)
+                .multilineTextAlignment(.center)
                 Button("Scan Again") { phase = .scanning }.buttonStyle(.bordered)
             }
         }
@@ -155,7 +225,7 @@ public struct PlaylistQRImportView: View {
     private func handle(payload: String) {
         guard !isImporting else { return }
         guard let url = PlaylistQRPayload.playlistURL(from: payload) else {
-            phase = .failed("That QR code doesn't contain a playlist link.")
+            phase = .failed(.invalidPayload)
             return
         }
         phase = .importing(url)
@@ -165,7 +235,7 @@ public struct PlaylistQRImportView: View {
                 manualLink = ""
                 phase = .imported(title: playlist.title, channels: playlist.channels.count)
             } catch {
-                phase = .failed(error.localizedDescription)
+                phase = .failed(.importError(error.localizedDescription))
             }
         }
     }
