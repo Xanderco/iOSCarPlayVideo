@@ -50,9 +50,16 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         }
     }
 
-    private func pumpMainRunLoop() async {
-        for _ in 0..<6 {
-            await Task.yield()
+    private func waitUntil(
+        timeoutSeconds: TimeInterval = 2.0,
+        _ condition: () async -> Bool
+    ) async {
+        let deadline = Date().addingTimeInterval(timeoutSeconds)
+        while Date() < deadline {
+            if await condition() {
+                return
+            }
+            try? await Task.sleep(nanoseconds: 5_000_000)
         }
     }
 
@@ -66,7 +73,7 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         XCTAssertFalse(model.isAutoHideScheduled)
 
         model.updatePlaybackState(isPlaying: true, hasError: false)
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
 
         XCTAssertTrue(model.isAutoHideScheduled)
         let delay = await gate.lastRequestedDelay
@@ -74,7 +81,7 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         XCTAssertTrue(model.showControls)
 
         await gate.fireLatest()
-        await pumpMainRunLoop()
+        await waitUntil { !model.isAutoHideScheduled }
 
         XCTAssertFalse(model.showControls)
         XCTAssertFalse(model.isAutoHideScheduled)
@@ -88,14 +95,14 @@ final class PlayerControlsVisibilityTests: XCTestCase {
 
         // Start playing and let controls auto-hide
         model.updatePlaybackState(isPlaying: true, hasError: false)
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
         await gate.fireLatest()
-        await pumpMainRunLoop()
+        await waitUntil { !model.isAutoHideScheduled }
         XCTAssertFalse(model.showControls)
 
         // Pausing restores controls and keeps auto-hide disabled
         model.updatePlaybackState(isPlaying: false, hasError: false)
-        await pumpMainRunLoop()
+        await waitUntil { model.showControls && !model.isAutoHideScheduled }
         XCTAssertTrue(model.showControls)
         XCTAssertFalse(model.isAutoHideScheduled)
     }
@@ -107,12 +114,12 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         }
 
         model.updatePlaybackState(isPlaying: true, hasError: false)
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
         XCTAssertTrue(model.isAutoHideScheduled)
 
         // Playback error cancels timer and keeps controls visible; taps cannot hide it
         model.updatePlaybackState(isPlaying: true, hasError: true)
-        await pumpMainRunLoop()
+        await waitUntil { await gate.cancelledCount == 1 }
         XCTAssertTrue(model.showControls)
         XCTAssertFalse(model.isAutoHideScheduled)
 
@@ -128,24 +135,24 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         }
 
         model.updatePlaybackState(isPlaying: true, hasError: false)
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
         XCTAssertTrue(model.showControls)
         XCTAssertTrue(model.isAutoHideScheduled)
 
         // First tap hides immediately and cancels timer
         model.handleTap()
-        await pumpMainRunLoop()
+        await waitUntil { await gate.cancelledCount == 1 }
         XCTAssertFalse(model.showControls)
         XCTAssertFalse(model.isAutoHideScheduled)
 
         // Second tap shows controls and arms a fresh countdown
         model.handleTap()
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
         XCTAssertTrue(model.showControls)
         XCTAssertTrue(model.isAutoHideScheduled)
 
         await gate.fireLatest()
-        await pumpMainRunLoop()
+        await waitUntil { !model.isAutoHideScheduled }
         XCTAssertFalse(model.showControls)
     }
 
@@ -156,23 +163,23 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         }
 
         model.updatePlaybackState(isPlaying: true, hasError: false)
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
         XCTAssertTrue(model.isAutoHideScheduled)
 
         model.beginSeeking()
-        await pumpMainRunLoop()
+        await waitUntil { await gate.cancelledCount == 1 }
         XCTAssertTrue(model.isSeeking)
         XCTAssertTrue(model.showControls)
         XCTAssertFalse(model.isAutoHideScheduled)
 
         model.endSeeking()
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
         XCTAssertFalse(model.isSeeking)
         XCTAssertTrue(model.showControls)
         XCTAssertTrue(model.isAutoHideScheduled)
 
         await gate.fireLatest()
-        await pumpMainRunLoop()
+        await waitUntil { !model.isAutoHideScheduled }
         XCTAssertFalse(model.showControls)
     }
 
@@ -183,11 +190,15 @@ final class PlayerControlsVisibilityTests: XCTestCase {
         }
 
         model.updatePlaybackState(isPlaying: true, hasError: false)
-        await pumpMainRunLoop()
+        await waitUntil { await gate.pendingCount == 1 }
 
         // User interacts -> previous timer cancelled, new timer armed
         model.registerInteraction()
-        await pumpMainRunLoop()
+        await waitUntil {
+            let cancelled = await gate.cancelledCount
+            let pending = await gate.pendingCount
+            return cancelled == 1 && pending == 1
+        }
         XCTAssertTrue(model.showControls)
         XCTAssertTrue(model.isAutoHideScheduled)
         let pending = await gate.pendingCount
@@ -197,7 +208,7 @@ final class PlayerControlsVisibilityTests: XCTestCase {
 
         // Firing the newly armed timer hides controls
         await gate.fireLatest()
-        await pumpMainRunLoop()
+        await waitUntil { !model.isAutoHideScheduled }
         XCTAssertFalse(model.showControls)
     }
 
