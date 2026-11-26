@@ -29,6 +29,16 @@ public final class PersistenceController {
         return trips
     }
 
+    public func updateTrip(_ updatedTrip: TripModel) {
+        var trips = loadTrips()
+        if let index = trips.firstIndex(where: { $0.id == updatedTrip.id }) {
+            trips[index] = updatedTrip
+        } else {
+            trips.insert(updatedTrip, at: 0)
+        }
+        saveTrips(trips)
+    }
+
     // Playlists Persistence
     public func savePlaylists(_ playlists: [IPTVPlaylist]) {
         if let data = try? JSONEncoder().encode(playlists) {
