@@ -63,4 +63,43 @@ final class CastEngineTests: XCTestCase {
         // Stable ids so favorites/recents survive re-reads.
         XCTAssertEqual(IPTVParser.samplePlaylist.map(\.id), playlist.map(\.id))
     }
+
+    func testCastHomeURLInputValidator() {
+        XCTAssertEqual(CastHomeURLInputValidator.normalizedInput("  https://example.com/list.m3u \n"), "https://example.com/list.m3u")
+        XCTAssertFalse(CastHomeURLInputValidator.isValidStreamInput(""))
+        XCTAssertFalse(CastHomeURLInputValidator.isValidStreamInput("   \n\t "))
+        XCTAssertFalse(CastHomeURLInputValidator.isValidStreamInput("not a url"))
+        XCTAssertFalse(CastHomeURLInputValidator.isValidStreamInput("ftp://example.com/list.m3u"))
+        XCTAssertFalse(CastHomeURLInputValidator.isValidStreamInput("https:///list.m3u"))
+
+        XCTAssertTrue(CastHomeURLInputValidator.isValidStreamInput("  https://example.com/playlist.m3u  "))
+        XCTAssertTrue(CastHomeURLInputValidator.isValidStreamInput("HTTP://192.168.1.10:8080/live.m3u8"))
+
+        XCTAssertTrue(CastHomeURLInputValidator.isSingleHLSStreamURL(URL(string: "https://example.com/stream.M3U8")!))
+        XCTAssertFalse(CastHomeURLInputValidator.isSingleHLSStreamURL(URL(string: "https://example.com/playlist.m3u")!))
+    }
+
+    func testCastHomeCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in CastHomeCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
