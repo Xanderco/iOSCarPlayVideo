@@ -1,5 +1,144 @@
 import SwiftUI
 
+/// Pure filtering and slot-copy resolution helpers for `SoundsHomeView`.
+public enum SoundsHomeCatalogFilter {
+    nonisolated public static let pickerCategories: [String] = [
+        SoundsHomeCopy.recommendCategoryString,
+        SoundsHomeCopy.allCategoryString,
+        SoundsHomeCopy.brandsCategoryString,
+        SoundsHomeCopy.voicesCategoryString,
+        SoundsHomeCopy.engineCategoryString,
+        SoundsHomeCopy.futuristicCategoryString
+    ]
+
+    nonisolated public static func filter(
+        sounds: [SoundEffectItem],
+        category: String,
+        searchText: String
+    ) -> [SoundEffectItem] {
+        let trimmedQuery = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let includeAllCategories = (category == SoundsHomeCopy.allCategoryString || category == SoundsHomeCopy.recommendCategoryString)
+
+        return sounds.filter { sound in
+            let matchesCategory = includeAllCategories
+                || sound.category.rawValue.localizedCaseInsensitiveContains(category)
+            let matchesSearch = trimmedQuery.isEmpty
+                || sound.title.localizedCaseInsensitiveContains(trimmedQuery)
+            return matchesCategory && matchesSearch
+        }
+    }
+
+    nonisolated public static func sheetTitleString(for slotKey: String) -> String {
+        slotKey == "disconnection"
+            ? SoundsHomeCopy.selectDisconnectionSoundString
+            : SoundsHomeCopy.selectConnectionSoundString
+    }
+
+    nonisolated public static func setActionTitleString(for slotKey: String) -> String {
+        switch slotKey {
+        case "disconnection":
+            return SoundsHomeCopy.setAsDisconnectionSoundString
+        case "arrival":
+            return SoundsHomeCopy.setAsArrivalSoundString
+        default:
+            return SoundsHomeCopy.setAsConnectionSoundString
+        }
+    }
+
+    @MainActor
+    public static func sheetTitleKey(for slotKey: String) -> LocalizedStringKey {
+        LocalizedStringKey(sheetTitleString(for: slotKey))
+    }
+
+    @MainActor
+    public static func setActionTitleKey(for slotKey: String) -> LocalizedStringKey {
+        LocalizedStringKey(setActionTitleString(for: slotKey))
+    }
+}
+
+/// Localized copy keys and formatting helpers for `SoundsHomeView`.
+public enum SoundsHomeCopy {
+    nonisolated public static let soundsTitleString = "Sounds"
+    nonisolated public static let proBadgeString = "PRO"
+    nonisolated public static let disconnectionSoundString = "Disconnection Sound"
+    nonisolated public static let disconnectionSubtitleString = "Plays when CarPlay disconnects"
+    nonisolated public static let homeArrivalSoundString = "Home Arrival Sound"
+    nonisolated public static let homeArrivalSubtitleString = "Plays when you arrive home"
+    nonisolated public static let selectedSoundFormatString = "Selected: %@"
+    nonisolated public static let topTrendingString = "Top trending"
+    nonisolated public static let setAsConnectionSoundString = "Set as Connection Sound"
+    nonisolated public static let setAsDisconnectionSoundString = "Set as Disconnection Sound"
+    nonisolated public static let setAsArrivalSoundString = "Set as Arrival Sound"
+    nonisolated public static let howToActivateString = "How to Activate?"
+    nonisolated public static let selectDisconnectionSoundString = "Select Disconnection Sound"
+    nonisolated public static let selectConnectionSoundString = "Select Connection Sound"
+    nonisolated public static let recommendCategoryString = "Recommend"
+    nonisolated public static let allCategoryString = "All"
+    nonisolated public static let brandsCategoryString = "Brands"
+    nonisolated public static let voicesCategoryString = "Voices"
+    nonisolated public static let engineCategoryString = "Engine"
+    nonisolated public static let futuristicCategoryString = "Futuristic"
+    nonisolated public static let chimesCategoryString = "Chimes"
+    nonisolated public static let cinematicCategoryString = "Cinematic"
+    nonisolated public static let searchSoundPlaceholderString = "Search a sound"
+    nonisolated public static let previewGuidanceString = "Tap ▶ to preview, tap the card to select"
+    nonisolated public static let selectASoundString = "Select a sound"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        soundsTitleString,
+        proBadgeString,
+        disconnectionSoundString,
+        disconnectionSubtitleString,
+        homeArrivalSoundString,
+        homeArrivalSubtitleString,
+        selectedSoundFormatString,
+        topTrendingString,
+        setAsConnectionSoundString,
+        setAsDisconnectionSoundString,
+        setAsArrivalSoundString,
+        howToActivateString,
+        selectDisconnectionSoundString,
+        selectConnectionSoundString,
+        recommendCategoryString,
+        allCategoryString,
+        brandsCategoryString,
+        voicesCategoryString,
+        engineCategoryString,
+        futuristicCategoryString,
+        chimesCategoryString,
+        cinematicCategoryString,
+        searchSoundPlaceholderString,
+        previewGuidanceString,
+        selectASoundString
+    ]
+
+    @MainActor public static var soundsTitleKey: LocalizedStringKey { LocalizedStringKey(soundsTitleString) }
+    @MainActor public static var proBadgeKey: LocalizedStringKey { LocalizedStringKey(proBadgeString) }
+    @MainActor public static var disconnectionSoundKey: LocalizedStringKey { LocalizedStringKey(disconnectionSoundString) }
+    @MainActor public static var disconnectionSubtitleKey: LocalizedStringKey { LocalizedStringKey(disconnectionSubtitleString) }
+    @MainActor public static var homeArrivalSoundKey: LocalizedStringKey { LocalizedStringKey(homeArrivalSoundString) }
+    @MainActor public static var homeArrivalSubtitleKey: LocalizedStringKey { LocalizedStringKey(homeArrivalSubtitleString) }
+    @MainActor public static var topTrendingKey: LocalizedStringKey { LocalizedStringKey(topTrendingString) }
+    @MainActor public static var howToActivateKey: LocalizedStringKey { LocalizedStringKey(howToActivateString) }
+    @MainActor public static var searchSoundPlaceholderKey: LocalizedStringKey { LocalizedStringKey(searchSoundPlaceholderString) }
+    @MainActor public static var previewGuidanceKey: LocalizedStringKey { LocalizedStringKey(previewGuidanceString) }
+    @MainActor public static var selectASoundKey: LocalizedStringKey { LocalizedStringKey(selectASoundString) }
+
+    @MainActor
+    public static func selectedSoundKey(_ title: String) -> LocalizedStringKey {
+        LocalizedStringKey("Selected: \(title)")
+    }
+
+    nonisolated public static func categoryDurationText(
+        category: SoundCategory,
+        duration: String,
+        bundle: Bundle = .main
+    ) -> String {
+        let localizedCategory = String(localized: String.LocalizationValue(category.rawValue), bundle: bundle)
+        return "\(localizedCategory) · \(duration)"
+    }
+}
+
 public struct SoundsHomeView: View {
     @EnvironmentObject private var appState: AppState
     @StateObject private var soundPlayer = SoundPlayerEngine.shared
@@ -10,7 +149,7 @@ public struct SoundsHomeView: View {
     @State private var showingShortcutsGuide: Bool = false
     @State private var showingSoundPickerForSlot: String? = nil
     @State private var soundSearchText: String = ""
-    @State private var pickerCategory: String = "Recommend"
+    @State private var pickerCategory: String = SoundsHomeCopy.recommendCategoryString
 
     private let catalog = SoundCatalogService.shared
 
@@ -38,7 +177,7 @@ public struct SoundsHomeView: View {
                 // Sticky "How to Activate? 🪄" Button above the tab bar
                 howToActivateStickyButton
             }
-            .navigationTitle("Sounds")
+            .navigationTitle(SoundsHomeCopy.soundsTitleKey)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {
@@ -49,7 +188,7 @@ public struct SoundsHomeView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "crown.fill")
                                         .font(.system(size: 11))
-                                    Text("PRO")
+                                    Text(SoundsHomeCopy.proBadgeKey)
                                         .font(.system(size: 12, weight: .heavy))
                                 }
                                 .padding(.horizontal, 10)
@@ -97,8 +236,8 @@ public struct SoundsHomeView: View {
             triggerCard(
                 icon: "stop.circle.fill",
                 iconColor: Color(red: 0.85, green: 0.25, blue: 0.25),
-                title: "Disconnection Sound",
-                subtitle: "Plays when CarPlay disconnects",
+                title: SoundsHomeCopy.disconnectionSoundKey,
+                subtitle: SoundsHomeCopy.disconnectionSubtitleKey,
                 currentSoundId: disconnectionSoundId,
                 slotKey: "disconnection"
             )
@@ -107,8 +246,8 @@ public struct SoundsHomeView: View {
             triggerCard(
                 icon: "house.fill",
                 iconColor: Color.dashAmber,
-                title: "Home Arrival Sound",
-                subtitle: "Plays when you arrive home",
+                title: SoundsHomeCopy.homeArrivalSoundKey,
+                subtitle: SoundsHomeCopy.homeArrivalSubtitleKey,
                 currentSoundId: homeArrivalSoundId,
                 slotKey: "arrival"
             )
@@ -154,7 +293,7 @@ public struct SoundsHomeView: View {
                     .foregroundStyle(Color.dashTextSecondary)
 
                 if let sound {
-                    Text("Selected: \(sound.title)")
+                    Text(SoundsHomeCopy.selectedSoundKey(sound.title))
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(Color.dashYellow)
                 }
@@ -186,7 +325,7 @@ public struct SoundsHomeView: View {
 
     private var topTrendingSection: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Top trending")
+            Text(SoundsHomeCopy.topTrendingKey)
                 .font(ThemeFonts.hudTitle(size: 18))
                 .foregroundStyle(Color.dashTextPrimary)
                 .padding(.horizontal, 16)
@@ -229,15 +368,15 @@ public struct SoundsHomeView: View {
                     Spacer()
 
                     Menu {
-                        Button("Set as Connection Sound") {
+                        Button(SoundsHomeCatalogFilter.setActionTitleKey(for: "connection")) {
                             connectionSoundId = sound.id
                             savePreferences()
                         }
-                        Button("Set as Disconnection Sound") {
+                        Button(SoundsHomeCatalogFilter.setActionTitleKey(for: "disconnection")) {
                             disconnectionSoundId = sound.id
                             savePreferences()
                         }
-                        Button("Set as Arrival Sound") {
+                        Button(SoundsHomeCatalogFilter.setActionTitleKey(for: "arrival")) {
                             homeArrivalSoundId = sound.id
                             savePreferences()
                         }
@@ -256,7 +395,7 @@ public struct SoundsHomeView: View {
                         .foregroundStyle(Color.white)
                         .lineLimit(1)
 
-                    Text("\(sound.category.rawValue) · \(sound.durationString)")
+                    Text(SoundsHomeCopy.categoryDurationText(category: sound.category, duration: sound.durationString))
                         .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(Color.white.opacity(0.75))
                 }
@@ -273,7 +412,7 @@ public struct SoundsHomeView: View {
                 showingShortcutsGuide = true
             } label: {
                 HStack(spacing: 8) {
-                    Text("How to Activate?")
+                    Text(SoundsHomeCopy.howToActivateKey)
                         .font(.system(size: 16, weight: .bold))
                     Text("🪄")
                         .font(.system(size: 16))
@@ -294,8 +433,8 @@ public struct SoundsHomeView: View {
     // MARK: - Sound Picker Sheet (Matching Select CarPlay Connection Sound.jpeg)
 
     private func soundPickerSheet(for slot: String) -> some View {
-        let title = slot == "disconnection" ? "Select Disconnection Sound" : "Select Connection Sound"
-        let categories = ["Recommend", "All", "Brands", "Voices", "Engine", "Futuristic"]
+        let titleKey = SoundsHomeCatalogFilter.sheetTitleKey(for: slot)
+        let categories = SoundsHomeCatalogFilter.pickerCategories
 
         return NavigationStack {
             ZStack(alignment: .bottom) {
@@ -307,7 +446,7 @@ public struct SoundsHomeView: View {
                         Image(systemName: "magnifyingglass")
                             .font(.system(size: 14))
                             .foregroundStyle(Color.dashTextMuted)
-                        TextField("Search a sound", text: $soundSearchText)
+                        TextField(SoundsHomeCopy.searchSoundPlaceholderKey, text: $soundSearchText)
                             .font(.system(size: 14))
                             .foregroundStyle(Color.dashTextPrimary)
                     }
@@ -324,7 +463,7 @@ public struct SoundsHomeView: View {
                                 Button {
                                     pickerCategory = cat
                                 } label: {
-                                    Text(cat)
+                                    Text(LocalizedStringKey(cat))
                                         .font(.system(size: 13, weight: pickerCategory == cat ? .bold : .medium))
                                         .foregroundStyle(pickerCategory == cat ? Color.black : Color.dashTextSecondary)
                                         .padding(.horizontal, 16)
@@ -342,7 +481,7 @@ public struct SoundsHomeView: View {
                     }
 
                     // Guidance caption
-                    Text("Tap ▶ to preview, tap the card to select")
+                    Text(SoundsHomeCopy.previewGuidanceKey)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(Color.dashTextMuted)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -351,11 +490,11 @@ public struct SoundsHomeView: View {
                     // Sound List
                     ScrollView {
                         VStack(spacing: 10) {
-                            let list = catalog.sounds.filter { sound in
-                                let matchesCategory = (pickerCategory == "All" || pickerCategory == "Recommend") || sound.category.rawValue.lowercased().contains(pickerCategory.lowercased())
-                                let matchesSearch = soundSearchText.isEmpty || sound.title.localizedCaseInsensitiveContains(soundSearchText)
-                                return matchesCategory && matchesSearch
-                            }
+                            let list = SoundsHomeCatalogFilter.filter(
+                                sounds: catalog.sounds,
+                                category: pickerCategory,
+                                searchText: soundSearchText
+                            )
 
                             ForEach(list) { sound in
                                 Button {
@@ -381,7 +520,7 @@ public struct SoundsHomeView: View {
                                                 .font(.system(size: 15, weight: .semibold))
                                                 .foregroundStyle(Color.dashTextPrimary)
 
-                                            Text("\(sound.category.rawValue) · \(sound.durationString)")
+                                            Text(SoundsHomeCopy.categoryDurationText(category: sound.category, duration: sound.durationString))
                                                 .font(.system(size: 11))
                                                 .foregroundStyle(Color.dashTextSecondary)
                                         }
@@ -415,7 +554,7 @@ public struct SoundsHomeView: View {
                 Button {
                     showingSoundPickerForSlot = nil
                 } label: {
-                    Text("Select a sound")
+                    Text(SoundsHomeCopy.selectASoundKey)
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Color.black)
                         .frame(maxWidth: .infinity)
@@ -427,7 +566,7 @@ public struct SoundsHomeView: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 16)
             }
-            .navigationTitle(title)
+            .navigationTitle(titleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

@@ -44,4 +44,57 @@ final class SoundEngineTests: XCTestCase {
         XCTAssertEqual(decoded?.disconnectionSoundId, "airline_dingy")
         XCTAssertEqual(decoded?.homeArrivalSoundId, "welcome_sir")
     }
+
+    func testSoundsHomeCatalogFilterAndSlotCopy() {
+        let sounds = SoundCatalogService.shared.sounds
+
+        let recommended = SoundsHomeCatalogFilter.filter(sounds: sounds, category: "Recommend", searchText: "")
+        XCTAssertEqual(recommended.count, sounds.count)
+
+        let all = SoundsHomeCatalogFilter.filter(sounds: sounds, category: "All", searchText: "  ")
+        XCTAssertEqual(all.count, sounds.count)
+
+        let engineOnly = SoundsHomeCatalogFilter.filter(sounds: sounds, category: "Engine", searchText: "")
+        XCTAssertFalse(engineOnly.isEmpty)
+        XCTAssertTrue(engineOnly.allSatisfy { $0.category == .engine })
+
+        let searched = SoundsHomeCatalogFilter.filter(sounds: sounds, category: "All", searchText: "  jet ")
+        XCTAssertTrue(searched.contains { $0.id == "jet_startup" })
+        XCTAssertFalse(searched.contains { $0.id == "v8_supercharged" })
+
+        let emptySearch = SoundsHomeCatalogFilter.filter(sounds: sounds, category: "Voices", searchText: "nonexistent_sound_xyz")
+        XCTAssertTrue(emptySearch.isEmpty)
+
+        XCTAssertEqual(SoundsHomeCatalogFilter.sheetTitleString(for: "disconnection"), SoundsHomeCopy.selectDisconnectionSoundString)
+        XCTAssertEqual(SoundsHomeCatalogFilter.sheetTitleString(for: "arrival"), SoundsHomeCopy.selectConnectionSoundString)
+        XCTAssertEqual(SoundsHomeCatalogFilter.sheetTitleString(for: "connection"), SoundsHomeCopy.selectConnectionSoundString)
+
+        XCTAssertEqual(SoundsHomeCatalogFilter.setActionTitleString(for: "connection"), SoundsHomeCopy.setAsConnectionSoundString)
+        XCTAssertEqual(SoundsHomeCatalogFilter.setActionTitleString(for: "disconnection"), SoundsHomeCopy.setAsDisconnectionSoundString)
+        XCTAssertEqual(SoundsHomeCatalogFilter.setActionTitleString(for: "arrival"), SoundsHomeCopy.setAsArrivalSoundString)
+    }
+
+    func testSoundsHomeCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in SoundsHomeCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
+    }
 }
