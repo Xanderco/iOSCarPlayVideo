@@ -3,6 +3,96 @@ import Combine
 import MediaPlayer
 import UIKit
 
+/// Testable localized copy helpers for `CarPlaySceneDelegate`.
+nonisolated public enum CarPlaySceneCopy {
+    public static let allLocalizationKeys: [String] = [
+        "Other",
+        "1 channel",
+        "%lld channels",
+        "No channels",
+        "Library",
+        "Import an M3U playlist on your iPhone",
+        "Favorites",
+        "No Favorites Yet",
+        "Tap the heart on a channel on your iPhone",
+        "Info",
+        "DashCast",
+        "Your channels, on the big screen",
+        "Import IPTV playlists on your iPhone",
+        "Audio while driving",
+        "Video is only shown when parked, via AirPlay",
+        "Mirror iPhone",
+        "Cast",
+        "Show your iPhone on this screen",
+        "Mirror",
+        "Show iPhone screen",
+        "Parked only · starts after Start Broadcast on iPhone",
+        "Open DashCast on your iPhone",
+        "Go to Cast → Car Display.",
+        "Turn on “Mirror to CarPlay screen”",
+        "Then tap the broadcast button and choose Start Broadcast.",
+        "Parked only",
+        "Mirroring stops automatically as soon as the vehicle moves."
+    ]
+
+    public static var otherGroupTitle: String { String(localized: "Other") }
+    public static var noChannelsTitle: String { String(localized: "No channels") }
+    public static var libraryTitle: String { String(localized: "Library") }
+    public static var libraryEmptySubtitle: String { String(localized: "Import an M3U playlist on your iPhone") }
+    public static var favoritesTitle: String { String(localized: "Favorites") }
+    public static var favoritesEmptyTitle: String { String(localized: "No Favorites Yet") }
+    public static var favoritesEmptySubtitle: String { String(localized: "Tap the heart on a channel on your iPhone") }
+    public static var infoTabTitle: String { String(localized: "Info") }
+    public static var infoTemplateTitle: String { String(localized: "DashCast") }
+    public static var mirrorTitle: String { String(localized: "Mirror iPhone") }
+    public static var castTabTitle: String { String(localized: "Cast") }
+    public static var mirrorStepsHeader: String { String(localized: "Show your iPhone on this screen") }
+    public static var mirrorSectionHeader: String { String(localized: "Mirror") }
+    public static var mirrorActionTitle: String { String(localized: "Show iPhone screen") }
+    public static var mirrorActionDetail: String { String(localized: "Parked only · starts after Start Broadcast on iPhone") }
+
+    public static var infoRows: [(title: String, detail: String)] {
+        [
+            (
+                String(localized: "Your channels, on the big screen"),
+                String(localized: "Import IPTV playlists on your iPhone")
+            ),
+            (
+                String(localized: "Audio while driving"),
+                String(localized: "Video is only shown when parked, via AirPlay")
+            )
+        ]
+    }
+
+    public static var mirrorInstructionSteps: [(title: String, detail: String)] {
+        [
+            (
+                String(localized: "Open DashCast on your iPhone"),
+                String(localized: "Go to Cast → Car Display.")
+            ),
+            (
+                String(localized: "Turn on “Mirror to CarPlay screen”"),
+                String(localized: "Then tap the broadcast button and choose Start Broadcast.")
+            ),
+            (
+                String(localized: "Parked only"),
+                String(localized: "Mirroring stops automatically as soon as the vehicle moves.")
+            )
+        ]
+    }
+
+    public static func groupTitle(_ group: String) -> String {
+        group.isEmpty ? otherGroupTitle : group
+    }
+
+    public static func channelCountText(_ count: Int) -> String {
+        let safeCount = max(count, 0)
+        return safeCount == 1
+            ? String(localized: "1 channel")
+            : String(localized: "\(safeCount) channels")
+    }
+}
+
 /// CarPlay scene. Shows the user's imported playlists (from `PlaylistStore.shared`),
 /// their favorites and a short info tab. Selecting a channel starts playback through
 /// `VideoPlayerService.shared` and shows the system Now Playing screen.
@@ -147,14 +237,15 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         let items: [CPListItem] = groups.prefix(maxItems).map { entry in
             let group = entry.group
             let channels = entry.channels
+            let groupTitle = CarPlaySceneCopy.groupTitle(group)
             let item = CPListItem(
-                text: group.isEmpty ? String(localized: "Other") : group,
-                detailText: channels.count == 1 ? String(localized: "1 channel") : String(localized: "\(channels.count) channels"),
+                text: groupTitle,
+                detailText: CarPlaySceneCopy.channelCountText(channels.count),
                 image: UIImage(systemName: "folder.fill")
             )
             item.accessoryType = .disclosureIndicator
             item.handler = { [weak self] _, completion in
-                self?.pushGroup(group, title: group.isEmpty ? String(localized: "Other") : group, channels: channels)
+                self?.pushGroup(group, title: groupTitle, channels: channels)
                 completion()
             }
             return item
@@ -174,7 +265,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             let items = entry.channels.prefix(remaining).map { makeChannelItem($0, showGroup: false) }
             remaining -= items.count
             sections.append(CPListSection(items: Array(items),
-                                          header: entry.group.isEmpty ? "Other" : entry.group,
+                                          header: CarPlaySceneCopy.groupTitle(entry.group),
                                           sectionIndexTitle: nil))
         }
         return sections
@@ -207,7 +298,7 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
         guard let interfaceController, canPush(onto: interfaceController) else { return }
         let template = CPListTemplate(title: title, sections: channelSections(channels, showGroup: false))
         template.userInfo = group
-        template.emptyViewTitleVariants = ["No channels"]
+        template.emptyViewTitleVariants = [CarPlaySceneCopy.noChannelsTitle]
         interfaceController.pushTemplate(template, animated: true, completion: nil)
     }
 
@@ -216,17 +307,13 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
     }
 
     private func makeInfoTemplate() -> CPListTemplate {
-        let items = [
-            CPListItem(text: "Your channels, on the big screen",
-                       detailText: "Import IPTV playlists on your iPhone"),
-            CPListItem(text: "Audio while driving",
-                       detailText: "Video is only shown when parked, via AirPlay")
-        ]
-        for item in items {
+        let items = CarPlaySceneCopy.infoRows.map { row in
+            let item = CPListItem(text: row.title, detailText: row.detail)
             item.handler = { _, completion in completion() }
+            return item
         }
-        let template = CPListTemplate(title: "DashCast", sections: [CPListSection(items: items)])
-        template.tabTitle = String(localized: "Info")
+        let template = CPListTemplate(title: CarPlaySceneCopy.infoTemplateTitle, sections: [CPListSection(items: items)])
+        template.tabTitle = CarPlaySceneCopy.infoTabTitle
         template.tabImage = UIImage(systemName: "info.circle.fill")
         return template
     }
@@ -234,20 +321,20 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
     // MARK: - Tab templates (static so unit tests can build them without a car)
 
     static func libraryTemplate() -> CPListTemplate {
-        let library = CPListTemplate(title: String(localized: "Library"), sections: [])
-        library.tabTitle = String(localized: "Library")
+        let library = CPListTemplate(title: CarPlaySceneCopy.libraryTitle, sections: [])
+        library.tabTitle = CarPlaySceneCopy.libraryTitle
         library.tabImage = UIImage(systemName: "tv.fill")
-        library.emptyViewTitleVariants = [String(localized: "No channels")]
-        library.emptyViewSubtitleVariants = [String(localized: "Import an M3U playlist on your iPhone")]
+        library.emptyViewTitleVariants = [CarPlaySceneCopy.noChannelsTitle]
+        library.emptyViewSubtitleVariants = [CarPlaySceneCopy.libraryEmptySubtitle]
         return library
     }
 
     static func favoritesTemplate() -> CPListTemplate {
-        let favorites = CPListTemplate(title: String(localized: "Favorites"), sections: [])
-        favorites.tabTitle = String(localized: "Favorites")
+        let favorites = CPListTemplate(title: CarPlaySceneCopy.favoritesTitle, sections: [])
+        favorites.tabTitle = CarPlaySceneCopy.favoritesTitle
         favorites.tabImage = UIImage(systemName: "heart.fill")
-        favorites.emptyViewTitleVariants = [String(localized: "No Favorites Yet")]
-        favorites.emptyViewSubtitleVariants = [String(localized: "Tap the heart on a channel on your iPhone")]
+        favorites.emptyViewTitleVariants = [CarPlaySceneCopy.favoritesEmptyTitle]
+        favorites.emptyViewSubtitleVariants = [CarPlaySceneCopy.favoritesEmptySubtitle]
         return favorites
     }
 
@@ -265,33 +352,29 @@ public final class CarPlaySceneDelegate: UIResponder, @preconcurrency CPTemplate
             item.isEnabled = false
             return item
         }
-        var sections = [CPListSection(items: steps, header: "Show your iPhone on this screen", sectionIndexTitle: nil)]
+        var sections = [CPListSection(items: steps, header: CarPlaySceneCopy.mirrorStepsHeader, sectionIndexTitle: nil)]
         if let onMirror {
             let action = CPListItem(
                 text: mirrorActionTitle,
-                detailText: "Parked only · starts after Start Broadcast on iPhone",
+                detailText: CarPlaySceneCopy.mirrorActionDetail,
                 image: UIImage(systemName: "iphone")
             )
             action.handler = { _, completion in
                 onMirror()
                 completion()
             }
-            sections.append(CPListSection(items: [action], header: "Mirror", sectionIndexTitle: nil))
+            sections.append(CPListSection(items: [action], header: CarPlaySceneCopy.mirrorSectionHeader, sectionIndexTitle: nil))
         }
-        let template = CPListTemplate(title: "Mirror iPhone", sections: sections)
-        template.tabTitle = "Cast"
+        let template = CPListTemplate(title: CarPlaySceneCopy.mirrorTitle, sections: sections)
+        template.tabTitle = CarPlaySceneCopy.castTabTitle
         template.tabImage = UIImage(systemName: "rectangle.on.rectangle")
         return template
     }
 
-    static let mirrorActionTitle = "Show iPhone screen"
+    static var mirrorActionTitle: String { CarPlaySceneCopy.mirrorActionTitle }
 
-    /// Original copy; also used by the unit tests.
-    static let mirrorInstructionSteps: [(title: String, detail: String)] = [
-        ("Open DashCast on your iPhone", "Go to Cast → Car Display."),
-        ("Turn on “Mirror to CarPlay screen”", "Then tap the broadcast button and choose Start Broadcast."),
-        ("Parked only", "Mirroring stops automatically as soon as the vehicle moves.")
-    ]
+    /// Localized copy; also used by the unit tests.
+    static var mirrorInstructionSteps: [(title: String, detail: String)] { CarPlaySceneCopy.mirrorInstructionSteps }
 
     // MARK: - Playback
 
