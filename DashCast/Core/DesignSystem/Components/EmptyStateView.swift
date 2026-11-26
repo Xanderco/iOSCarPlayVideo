@@ -1,5 +1,22 @@
 import SwiftUI
 
+/// Localized default copy keys for `EmptyStateView`.
+public enum EmptyStateCopy {
+    nonisolated public static let defaultErrorTitleString = "Something went wrong"
+    nonisolated public static let defaultRetryTitleString = "Try Again"
+    nonisolated public static let defaultLoadingTitleString = "Loading…"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        defaultErrorTitleString,
+        defaultRetryTitleString,
+        defaultLoadingTitleString
+    ]
+
+    @MainActor public static var defaultErrorTitleKey: LocalizedStringKey { LocalizedStringKey(defaultErrorTitleString) }
+    @MainActor public static var defaultRetryTitleKey: LocalizedStringKey { LocalizedStringKey(defaultRetryTitleString) }
+    @MainActor public static var defaultLoadingTitleKey: LocalizedStringKey { LocalizedStringKey(defaultLoadingTitleString) }
+}
+
 /// Centered empty / error / loading placeholder used by every list and grid.
 public struct EmptyStateView: View {
     public enum Kind { case empty, error, loading }
@@ -51,9 +68,9 @@ public struct EmptyStateView: View {
 
     /// Error state with a retry button.
     public static func error(
-        title: String = "Something went wrong",
+        title: String = EmptyStateCopy.defaultErrorTitleString,
         message: String,
-        retryTitle: String = "Try Again",
+        retryTitle: String = EmptyStateCopy.defaultRetryTitleString,
         retry: (() -> Void)? = nil
     ) -> EmptyStateView {
         EmptyStateView(kind: .error, systemImage: "exclamationmark.triangle", title: title, message: message,
@@ -62,7 +79,7 @@ public struct EmptyStateView: View {
     }
 
     /// Loading state (spinner + optional message).
-    public static func loading(_ title: String = "Loading…", message: String? = nil) -> EmptyStateView {
+    public static func loading(_ title: String = EmptyStateCopy.defaultLoadingTitleString, message: String? = nil) -> EmptyStateView {
         EmptyStateView(kind: .loading, systemImage: "", title: title, message: message,
                        actionTitle: nil, action: nil, secondaryActionTitle: nil, secondaryAction: nil)
     }
