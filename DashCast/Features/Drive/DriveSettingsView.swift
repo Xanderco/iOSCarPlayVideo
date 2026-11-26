@@ -1,6 +1,95 @@
 import SwiftUI
 import CoreLocation
 
+/// Localized copy keys for `DriveSettingsView`.
+public enum DriveSettingsCopy {
+    nonisolated public static let navigationTitleString = "Drive"
+    nonisolated public static let vehicleCardSubtitleString = "Used for share cards and your map"
+    nonisolated public static let trackingSectionTitleString = "TRACKING"
+    nonisolated public static let autoDetectDrivesTitleString = "Auto-detect drives"
+    nonisolated public static let autoDetectDrivesSubtitleString = "Starts and stops on its own"
+    nonisolated public static let minimumDriveLabelString = "Minimum drive"
+    nonisolated public static let unitsLabelString = "Units"
+    nonisolated public static let mphUnitString = "mph"
+    nonisolated public static let kmhUnitString = "km/h"
+    nonisolated public static let regionSectionTitleString = "REGION"
+    nonisolated public static let countryLabelString = "Country"
+    nonisolated public static let notificationsSectionTitleString = "NOTIFICATIONS"
+    nonisolated public static let driveNotificationsTitleString = "Drive notifications"
+    nonisolated public static let driveNotificationsSubtitleString = "Trip recaps and your weekly summary"
+    nonisolated public static let permissionsSectionTitleString = "PERMISSIONS"
+    nonisolated public static let locationPermissionTitleString = "Location"
+    nonisolated public static let whileUsingStatusString = "While using"
+    nonisolated public static let motionPermissionTitleString = "Motion & Fitness"
+    nonisolated public static let onStatusString = "On"
+    nonisolated public static let offStatusString = "Off"
+    nonisolated public static let notificationsPermissionTitleString = "Notifications"
+    nonisolated public static let selectVehicleTitleString = "Select Vehicle"
+    nonisolated public static let cancelButtonString = "Cancel"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        navigationTitleString,
+        vehicleCardSubtitleString,
+        trackingSectionTitleString,
+        autoDetectDrivesTitleString,
+        autoDetectDrivesSubtitleString,
+        minimumDriveLabelString,
+        unitsLabelString,
+        mphUnitString,
+        kmhUnitString,
+        regionSectionTitleString,
+        countryLabelString,
+        notificationsSectionTitleString,
+        driveNotificationsTitleString,
+        driveNotificationsSubtitleString,
+        permissionsSectionTitleString,
+        locationPermissionTitleString,
+        whileUsingStatusString,
+        motionPermissionTitleString,
+        onStatusString,
+        offStatusString,
+        notificationsPermissionTitleString,
+        selectVehicleTitleString,
+        cancelButtonString
+    ]
+
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var vehicleCardSubtitleKey: LocalizedStringKey { LocalizedStringKey(vehicleCardSubtitleString) }
+    @MainActor public static var trackingSectionTitleKey: LocalizedStringKey { LocalizedStringKey(trackingSectionTitleString) }
+    @MainActor public static var autoDetectDrivesTitleKey: LocalizedStringKey { LocalizedStringKey(autoDetectDrivesTitleString) }
+    @MainActor public static var autoDetectDrivesSubtitleKey: LocalizedStringKey { LocalizedStringKey(autoDetectDrivesSubtitleString) }
+    @MainActor public static var minimumDriveLabelKey: LocalizedStringKey { LocalizedStringKey(minimumDriveLabelString) }
+    @MainActor public static var unitsLabelKey: LocalizedStringKey { LocalizedStringKey(unitsLabelString) }
+    @MainActor public static var mphUnitKey: LocalizedStringKey { LocalizedStringKey(mphUnitString) }
+    @MainActor public static var kmhUnitKey: LocalizedStringKey { LocalizedStringKey(kmhUnitString) }
+    @MainActor public static var regionSectionTitleKey: LocalizedStringKey { LocalizedStringKey(regionSectionTitleString) }
+    @MainActor public static var countryLabelKey: LocalizedStringKey { LocalizedStringKey(countryLabelString) }
+    @MainActor public static var notificationsSectionTitleKey: LocalizedStringKey { LocalizedStringKey(notificationsSectionTitleString) }
+    @MainActor public static var driveNotificationsTitleKey: LocalizedStringKey { LocalizedStringKey(driveNotificationsTitleString) }
+    @MainActor public static var driveNotificationsSubtitleKey: LocalizedStringKey { LocalizedStringKey(driveNotificationsSubtitleString) }
+    @MainActor public static var permissionsSectionTitleKey: LocalizedStringKey { LocalizedStringKey(permissionsSectionTitleString) }
+    @MainActor public static var locationPermissionTitleKey: LocalizedStringKey { LocalizedStringKey(locationPermissionTitleString) }
+    @MainActor public static var whileUsingStatusKey: LocalizedStringKey { LocalizedStringKey(whileUsingStatusString) }
+    @MainActor public static var motionPermissionTitleKey: LocalizedStringKey { LocalizedStringKey(motionPermissionTitleString) }
+    @MainActor public static var onStatusKey: LocalizedStringKey { LocalizedStringKey(onStatusString) }
+    @MainActor public static var offStatusKey: LocalizedStringKey { LocalizedStringKey(offStatusString) }
+    @MainActor public static var notificationsPermissionTitleKey: LocalizedStringKey { LocalizedStringKey(notificationsPermissionTitleString) }
+    @MainActor public static var selectVehicleTitleKey: LocalizedStringKey { LocalizedStringKey(selectVehicleTitleString) }
+    @MainActor public static var cancelButtonKey: LocalizedStringKey { LocalizedStringKey(cancelButtonString) }
+}
+
+/// Pure distance formatting helper for minimum-drive threshold options.
+public enum DriveSettingsDistanceFormatter {
+    nonisolated public static func format(meters: Double) -> String {
+        let safeMeters = (meters.isFinite && meters > 0) ? meters : 0
+        if safeMeters >= 1000 {
+            return String(format: "%.0f km", safeMeters / 1000.0)
+        } else {
+            return String(format: "%.0f m", safeMeters)
+        }
+    }
+}
+
 public struct DriveSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
@@ -40,7 +129,7 @@ public struct DriveSettingsView: View {
                     .padding(.bottom, 30)
                 }
             }
-            .navigationTitle("Drive")
+            .navigationTitle(DriveSettingsCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -88,7 +177,7 @@ public struct DriveSettingsView: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundStyle(Color.dashTextPrimary)
 
-                    Text("Used for share cards and your map")
+                    Text(DriveSettingsCopy.vehicleCardSubtitleKey)
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextMuted)
                 }
@@ -109,7 +198,7 @@ public struct DriveSettingsView: View {
 
     private var trackingSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("TRACKING")
+            Text(DriveSettingsCopy.trackingSectionTitleKey)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Color.dashTextMuted)
                 .padding(.horizontal, 4)
@@ -118,10 +207,10 @@ public struct DriveSettingsView: View {
                 // Auto-detect drives
                 Toggle(isOn: $preferences.autoDetectDrives) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Auto-detect drives")
+                        Text(DriveSettingsCopy.autoDetectDrivesTitleKey)
                             .font(.system(size: 15, weight: .semibold))
                             .foregroundStyle(Color.dashTextPrimary)
-                        Text("Starts and stops on its own")
+                        Text(DriveSettingsCopy.autoDetectDrivesSubtitleKey)
                             .font(.system(size: 12))
                             .foregroundStyle(Color.dashTextMuted)
                     }
@@ -139,7 +228,7 @@ public struct DriveSettingsView: View {
 
                 // Minimum drive
                 HStack {
-                    Text("Minimum drive")
+                    Text(DriveSettingsCopy.minimumDriveLabelKey)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.dashTextPrimary)
 
@@ -147,14 +236,14 @@ public struct DriveSettingsView: View {
 
                     Menu {
                         ForEach(minimumDriveOptions, id: \.self) { meters in
-                            Button("\(formatMeters(meters))") {
+                            Button(DriveSettingsDistanceFormatter.format(meters: meters)) {
                                 preferences.minimumDriveMeters = meters
                                 savePreferences()
                             }
                         }
                     } label: {
                         HStack(spacing: 4) {
-                            Text(formatMeters(preferences.minimumDriveMeters))
+                            Text(verbatim: DriveSettingsDistanceFormatter.format(meters: preferences.minimumDriveMeters))
                                 .font(.system(size: 14, weight: .medium))
                                 .foregroundStyle(Color.dashTextMuted)
                             Image(systemName: "chevron.up.chevron.down")
@@ -169,7 +258,7 @@ public struct DriveSettingsView: View {
 
                 // Units: mph / km/h
                 HStack {
-                    Text("Units")
+                    Text(DriveSettingsCopy.unitsLabelKey)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.dashTextPrimary)
 
@@ -181,7 +270,7 @@ public struct DriveSettingsView: View {
                             appState.setSpeedUnit(milesPerHour: true)
                             savePreferences()
                         } label: {
-                            Text("mph")
+                            Text(DriveSettingsCopy.mphUnitKey)
                                 .font(.system(size: 13, weight: .bold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -195,7 +284,7 @@ public struct DriveSettingsView: View {
                             appState.setSpeedUnit(milesPerHour: false)
                             savePreferences()
                         } label: {
-                            Text("km/h")
+                            Text(DriveSettingsCopy.kmhUnitKey)
                                 .font(.system(size: 13, weight: .bold))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -219,13 +308,13 @@ public struct DriveSettingsView: View {
 
     private var regionSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("REGION")
+            Text(DriveSettingsCopy.regionSectionTitleKey)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Color.dashTextMuted)
                 .padding(.horizontal, 4)
 
             HStack {
-                Text("Country")
+                Text(DriveSettingsCopy.countryLabelKey)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(Color.dashTextPrimary)
 
@@ -251,17 +340,17 @@ public struct DriveSettingsView: View {
 
     private var notificationsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("NOTIFICATIONS")
+            Text(DriveSettingsCopy.notificationsSectionTitleKey)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Color.dashTextMuted)
                 .padding(.horizontal, 4)
 
             Toggle(isOn: $preferences.driveNotificationsEnabled) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Drive notifications")
+                    Text(DriveSettingsCopy.driveNotificationsTitleKey)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(Color.dashTextPrimary)
-                    Text("Trip recaps and your weekly summary")
+                    Text(DriveSettingsCopy.driveNotificationsSubtitleKey)
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextMuted)
                 }
@@ -286,25 +375,37 @@ public struct DriveSettingsView: View {
 
     private var permissionsSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("PERMISSIONS")
+            Text(DriveSettingsCopy.permissionsSectionTitleKey)
                 .font(.system(size: 11, weight: .bold))
                 .foregroundStyle(Color.dashTextMuted)
                 .padding(.horizontal, 4)
 
             VStack(spacing: 0) {
-                permissionRow(title: "Location", statusText: "While using", color: .dashOrange) {
+                permissionRow(
+                    title: DriveSettingsCopy.locationPermissionTitleKey,
+                    statusText: DriveSettingsCopy.whileUsingStatusKey,
+                    color: .dashOrange
+                ) {
                     showingPermissionsSheet = true
                 }
 
                 Divider().background(Color.dashBorder)
 
-                permissionRow(title: "Motion & Fitness", statusText: "On", color: .dashGreen) {
+                permissionRow(
+                    title: DriveSettingsCopy.motionPermissionTitleKey,
+                    statusText: DriveSettingsCopy.onStatusKey,
+                    color: .dashGreen
+                ) {
                     showingPermissionsSheet = true
                 }
 
                 Divider().background(Color.dashBorder)
 
-                permissionRow(title: "Notifications", statusText: preferences.driveNotificationsEnabled ? "On" : "Off", color: preferences.driveNotificationsEnabled ? .dashGreen : .dashTextMuted) {
+                permissionRow(
+                    title: DriveSettingsCopy.notificationsPermissionTitleKey,
+                    statusText: preferences.driveNotificationsEnabled ? DriveSettingsCopy.onStatusKey : DriveSettingsCopy.offStatusKey,
+                    color: preferences.driveNotificationsEnabled ? .dashGreen : .dashTextMuted
+                ) {
                     showingPermissionsSheet = true
                 }
             }
@@ -333,14 +434,6 @@ public struct DriveSettingsView: View {
                 }
             }
             .padding(14)
-        }
-    }
-
-    private func formatMeters(_ meters: Double) -> String {
-        if meters >= 1000 {
-            return String(format: "%.0f km", meters / 1000.0)
-        } else {
-            return String(format: "%.0f m", meters)
         }
     }
 
@@ -386,11 +479,11 @@ public struct DriveSettingsView: View {
             }
             .scrollContentBackground(.hidden)
             .background(Color.dashBackground)
-            .navigationTitle("Select Vehicle")
+            .navigationTitle(DriveSettingsCopy.selectVehicleTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { showingVehiclePicker = false }
+                    Button(DriveSettingsCopy.cancelButtonKey) { showingVehiclePicker = false }
                         .foregroundStyle(Color.dashYellow)
                 }
             }
