@@ -92,6 +92,15 @@
 
 ## Log
 
+### 2026-11-26 02:22 (Bogotá) — Sounds: Connection Sound Trigger Card & Picker Slot Routing [DI-88]
+- **Problem**: `SoundsHomeView` omitted the **Connection Sound** trigger card from `topTriggerCards`, mislabeled the `"arrival"` picker sheet as `"Select Connection Sound"`, and routed `"connection"` picker selections into `homeArrivalSoundId`.
+- **Changed**:
+  - `DashCast/Features/Sounds/SoundCatalogService.swift`: Added typed `SoundTriggerSlot` enum (`.connection`, `.disconnection`, `.arrival`) with distinct localization keys, play glyphs, and default sound IDs.
+  - `DashCast/Core/Models/UserPreferences.swift` & `DashCast/Core/Persistence/PersistenceController.swift`: Added slot-indexed `soundId(for:)` and `setSoundId(_:for:)` helpers so all three trigger slots map to their respective preference keys without branching drift.
+  - `DashCast/Features/Sounds/SoundsHomeView.swift`: Rendered all three trigger cards (`Connection Sound`, `Disconnection Sound`, `Home Arrival Sound`) in `topTriggerCards` via `SoundTriggerSlot.allCases`, migrated `showingSoundPickerForSlot` and `soundPickerSheet(for:)` to `SoundTriggerSlot` so title, checkmark highlight, and persistence route cleanly per slot, and added accessibility identifiers for XCUITest.
+  - `DashCast/Resources/Localizable.xcstrings`: Added EN/ES translations for the Sounds trigger cards, slot picker titles, menu actions, and guidance copy.
+  - `DashCastTests/SoundEngineTests.swift` & `DashCastUITests/DashCastSmokeUITests.swift`: Added unit tests covering `SoundTriggerSlot` metadata, mutation isolation, and `PersistenceController` round-trip persistence across all 3 slots, plus XCUITest `testSoundsTriggerCardsAndSlotPickers()`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

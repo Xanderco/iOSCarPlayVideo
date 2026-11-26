@@ -73,4 +73,20 @@ public struct UserPreferences: Codable {
         driveVehicleImage = try container.decodeIfPresent(String.self, forKey: .driveVehicleImage) ?? "car_chevrolet_corvette"
         autoTripDetectionEnabled = try container.decodeIfPresent(Bool.self, forKey: .autoTripDetectionEnabled)
     }
+
+    public func soundId(for slot: SoundTriggerSlot) -> String? {
+        switch slot {
+        case .connection: return connectionSoundId
+        case .disconnection: return disconnectionSoundId
+        case .arrival: return homeArrivalSoundId
+        }
+    }
+
+    public mutating func setSoundId(_ soundId: String?, for slot: SoundTriggerSlot) {
+        switch slot {
+        case .connection: connectionSoundId = soundId
+        case .disconnection: disconnectionSoundId = soundId
+        case .arrival: homeArrivalSoundId = soundId
+        }
+    }
 }

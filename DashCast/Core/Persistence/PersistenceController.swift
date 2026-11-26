@@ -76,4 +76,14 @@ public final class PersistenceController {
         }
         return decoded
     }
+
+    public func soundId(for slot: SoundTriggerSlot) -> String {
+        loadUserPreferences().soundId(for: slot) ?? slot.defaultSoundId
+    }
+
+    public func setSoundId(_ soundId: String, for slot: SoundTriggerSlot) {
+        var prefs = loadUserPreferences()
+        prefs.setSoundId(soundId, for: slot)
+        saveUserPreferences(prefs)
+    }
 }

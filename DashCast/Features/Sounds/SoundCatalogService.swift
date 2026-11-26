@@ -1,6 +1,61 @@
 import Foundation
 import SwiftUI
 
+public enum SoundTriggerSlot: String, CaseIterable, Identifiable, Hashable {
+    case connection
+    case disconnection
+    case arrival
+
+    public var id: String { rawValue }
+
+    public var titleKey: LocalizedStringKey {
+        switch self {
+        case .connection: return "Connection Sound"
+        case .disconnection: return "Disconnection Sound"
+        case .arrival: return "Home Arrival Sound"
+        }
+    }
+
+    public var subtitleKey: LocalizedStringKey {
+        switch self {
+        case .connection: return "Plays when CarPlay connects"
+        case .disconnection: return "Plays when CarPlay disconnects"
+        case .arrival: return "Plays when you arrive home"
+        }
+    }
+
+    public var pickerTitleKey: LocalizedStringKey {
+        switch self {
+        case .connection: return "Select Connection Sound"
+        case .disconnection: return "Select Disconnection Sound"
+        case .arrival: return "Select Arrival Sound"
+        }
+    }
+
+    public var menuActionTitleKey: LocalizedStringKey {
+        switch self {
+        case .connection: return "Set as Connection Sound"
+        case .disconnection: return "Set as Disconnection Sound"
+        case .arrival: return "Set as Arrival Sound"
+        }
+    }
+
+    public var playGlyphName: String {
+        switch self {
+        case .connection, .disconnection: return "play.fill"
+        case .arrival: return "house.fill"
+        }
+    }
+
+    public var defaultSoundId: String {
+        switch self {
+        case .connection: return "jet_startup"
+        case .disconnection: return "airline_dingy"
+        case .arrival: return "welcome_sir"
+        }
+    }
+}
+
 public enum SoundCategory: String, CaseIterable, Identifiable {
     case all = "All"
     case voices = "Voices"

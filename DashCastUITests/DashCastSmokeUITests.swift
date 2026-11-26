@@ -139,6 +139,61 @@ final class DashCastSmokeUITests: XCTestCase {
         XCTAssertTrue(row.waitForExistence(timeout: 10), "Did not return to Cast tab")
     }
 
+    func testSoundsTriggerCardsAndSlotPickers() throws {
+        let soundsTab = tabButton("Sounds")
+        XCTAssertTrue(soundsTab.waitForExistence(timeout: 15), "Sounds tab missing")
+        soundsTab.tap()
+        XCTAssertTrue(app.otherElements["Screen_Sounds"].waitForExistence(timeout: 10), "Sounds screen did not appear")
+
+        let connectionPicker = app.buttons["Sounds_PickerButton_connection"]
+        let disconnectionPicker = app.buttons["Sounds_PickerButton_disconnection"]
+        let arrivalPicker = app.buttons["Sounds_PickerButton_arrival"]
+
+        XCTAssertTrue(connectionPicker.waitForExistence(timeout: 5), "Connection Sound card picker missing")
+        XCTAssertTrue(disconnectionPicker.exists, "Disconnection Sound card picker missing")
+        XCTAssertTrue(arrivalPicker.exists, "Home Arrival Sound card picker missing")
+
+        // Open Connection picker, verify title, pick Hyperspace Jump
+        tapCenter(of: connectionPicker)
+        XCTAssertTrue(
+            app.navigationBars["Select Connection Sound"].waitForExistence(timeout: 5),
+            "Connection sound picker did not open with expected title"
+        )
+        let hyperspaceRow = app.buttons["Sounds_PickerRow_hyperspace"]
+        XCTAssertTrue(hyperspaceRow.waitForExistence(timeout: 5), "Hyperspace row missing")
+        tapCenter(of: hyperspaceRow)
+
+        let connectionLabel = app.staticTexts["Sounds_SelectedLabel_connection"]
+        XCTAssertTrue(connectionLabel.waitForExistence(timeout: 5), "Connection selected label missing")
+        XCTAssertTrue(connectionLabel.label.contains("Hyperspace Jump"), "Expected Hyperspace Jump, got: \(connectionLabel.label)")
+        snapshot("05a-sounds-connection-selected")
+
+        // Open Arrival picker, verify distinct title, pick Luxury Sedan Chime
+        tapCenter(of: arrivalPicker)
+        XCTAssertTrue(
+            app.navigationBars["Select Arrival Sound"].waitForExistence(timeout: 5),
+            "Arrival sound picker did not open with expected title"
+        )
+        let luxuryRow = app.buttons["Sounds_PickerRow_luxury_chime"]
+        XCTAssertTrue(luxuryRow.waitForExistence(timeout: 5), "Luxury chime row missing")
+        tapCenter(of: luxuryRow)
+
+        let arrivalLabel = app.staticTexts["Sounds_SelectedLabel_arrival"]
+        XCTAssertTrue(arrivalLabel.waitForExistence(timeout: 5), "Arrival selected label missing")
+        XCTAssertTrue(arrivalLabel.label.contains("Luxury Sedan Chime"), "Expected Luxury Sedan Chime, got: \(arrivalLabel.label)")
+        XCTAssertTrue(connectionLabel.label.contains("Hyperspace Jump"), "Connection selection was overwritten by Arrival picker")
+
+        // Open Disconnection picker, verify title, and close
+        tapCenter(of: disconnectionPicker)
+        XCTAssertTrue(
+            app.navigationBars["Select Disconnection Sound"].waitForExistence(timeout: 5),
+            "Disconnection sound picker did not open with expected title"
+        )
+        snapshot("05b-sounds-disconnection-picker")
+        app.buttons["Sounds_PickerCloseButton"].tap()
+        XCTAssertTrue(connectionPicker.waitForExistence(timeout: 5), "Did not return to Sounds screen")
+    }
+
     // MARK: - Helpers
 
     /// Screens are wrapped in `accessibilityElement(children: .contain)` containers
