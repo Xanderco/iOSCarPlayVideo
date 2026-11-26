@@ -142,4 +142,120 @@ final class CarVideoOutputTests: XCTestCase {
         XCTAssertTrue(player.usesExternalPlaybackWhileExternalScreenIsActive)
         XCTAssertTrue(CarVideoOutputController.shared.canStartVideoOutput())
     }
+
+    // MARK: CarOutputPanelStatusFormatter
+
+    @MainActor
+    func testCarOutputPanelParkedGuardFormatting() {
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedIcon(for: .parked), "parkingsign.circle.fill")
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedTitleKeyName(for: .parked), "Parked · car video available")
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedSubtitleKeyName(for: .parked), "Video resumes only while the car stays parked.")
+        _ = CarOutputPanelStatusFormatter.parkedTitle(for: .parked)
+        _ = CarOutputPanelStatusFormatter.parkedSubtitle(for: .parked)
+
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedIcon(for: .moving), "car.side.fill")
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedTitleKeyName(for: .moving), "Vehicle moving · video paused")
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedSubtitleKeyName(for: .moving), "Pull over and park to continue watching on the car display.")
+        _ = CarOutputPanelStatusFormatter.parkedTitle(for: .moving)
+        _ = CarOutputPanelStatusFormatter.parkedSubtitle(for: .moving)
+
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedIcon(for: .unknown), "location.circle")
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedTitleKeyName(for: .unknown), "Checking vehicle motion…")
+        XCTAssertEqual(CarOutputPanelStatusFormatter.parkedSubtitleKeyName(for: .unknown), "Allow Location and Motion access so DashCast can tell when you're parked.")
+        _ = CarOutputPanelStatusFormatter.parkedTitle(for: .unknown)
+        _ = CarOutputPanelStatusFormatter.parkedSubtitle(for: .unknown)
+    }
+
+    @MainActor
+    func testCarOutputPanelAirPlayAndMirroringFormatting() {
+        XCTAssertEqual(
+            CarOutputPanelStatusFormatter.airPlayStatusKeyName(
+                isExternalPlaybackActive: true,
+                airPlayRouteName: "Car Screen",
+                isCarAudioRoute: false
+            ),
+            "Playing on %@"
+        )
+        XCTAssertEqual(
+            CarOutputPanelStatusFormatter.airPlayStatusKeyName(
+                isExternalPlaybackActive: true,
+                airPlayRouteName: nil,
+                isCarAudioRoute: false
+            ),
+            "Playing on AirPlay display"
+        )
+        XCTAssertEqual(
+            CarOutputPanelStatusFormatter.airPlayStatusKeyName(
+                isExternalPlaybackActive: true,
+                airPlayRouteName: "   ",
+                isCarAudioRoute: true
+            ),
+            "Playing on AirPlay display"
+        )
+        XCTAssertEqual(
+            CarOutputPanelStatusFormatter.airPlayStatusKeyName(
+                isExternalPlaybackActive: false,
+                airPlayRouteName: nil,
+                isCarAudioRoute: true
+            ),
+            "CarPlay audio connected"
+        )
+        XCTAssertEqual(
+            CarOutputPanelStatusFormatter.airPlayStatusKeyName(
+                isExternalPlaybackActive: false,
+                airPlayRouteName: nil,
+                isCarAudioRoute: false
+            ),
+            "Tap to choose a display"
+        )
+        _ = CarOutputPanelStatusFormatter.airPlayStatusTitle(
+            isExternalPlaybackActive: true,
+            airPlayRouteName: "Car Screen",
+            isCarAudioRoute: false
+        )
+
+        XCTAssertEqual(
+            CarOutputPanelStatusFormatter.airPlayDiscoveryKeyName(multipleRoutesDetected: true),
+            "AirPlay displays found nearby"
+        )
+        XCTAssertEqual(
+            CarOutputPanelStatusFormatter.airPlayDiscoveryKeyName(multipleRoutesDetected: false),
+            "No AirPlay display found yet"
+        )
+        _ = CarOutputPanelStatusFormatter.airPlayDiscoverySubtitle(multipleRoutesDetected: true)
+
+        XCTAssertEqual(CarOutputPanelStatusFormatter.mirroringStatusKeyName(isBroadcasting: true), "Mirroring is live")
+        XCTAssertEqual(CarOutputPanelStatusFormatter.mirroringStatusKeyName(isBroadcasting: false), "Tap to start mirroring")
+        _ = CarOutputPanelStatusFormatter.mirroringStatusTitle(isBroadcasting: true)
+        _ = CarOutputPanelStatusFormatter.viewerCountTitle(viewerCount: 2)
+
+        XCTAssertEqual(CarOutputPanelStatusFormatter.cardBadgeKeyName(isActive: true), "LIVE")
+        XCTAssertNil(CarOutputPanelStatusFormatter.cardBadgeKeyName(isActive: false))
+        XCTAssertNotNil(CarOutputPanelStatusFormatter.cardBadge(isActive: true))
+        XCTAssertNil(CarOutputPanelStatusFormatter.cardBadge(isActive: false))
+    }
+
+    func testCarOutputPanelLocalizationKeysExistInCatalog() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = Bundle(for: CarVideoOutputTests.self).url(forResource: "Localizable", withExtension: "xcstrings")
+            ?? projectDir
+                .appendingPathComponent("DashCast")
+                .appendingPathComponent("Resources")
+                .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in CarOutputPanelStatusFormatter.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing key in Localizable.xcstrings: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]])
+            let enValue = ((localizations["en"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            let esValue = ((localizations["es"] as? [String: Any])?["stringUnit"] as? [String: Any])?["value"] as? String
+            XCTAssertFalse(enValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing EN for \(key)")
+            XCTAssertFalse(esValue?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true, "Missing ES for \(key)")
+        }
+    }
 }

@@ -8177,6 +8177,74 @@
           }
         }
       }
+    },
+    "Video on the car display is for passengers and parked use only. DashCast pauses video and stops mirroring automatically when the vehicle starts moving.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video on the car display is for passengers and parked use only. DashCast pauses video and stops mirroring automatically when the vehicle starts moving."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El vídeo en la pantalla del coche es solo para pasajeros y uso aparcado. DashCast pausa el vídeo y detiene la duplicación automáticamente cuando el vehículo empieza a moverse."
+          }
+        }
+      }
+    },
+    "Playing on AirPlay display": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playing on AirPlay display"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduciendo en pantalla AirPlay"
+          }
+        }
+      }
+    },
+    "%lld car display(s) watching": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld car display(s) watching"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld pantalla(s) del coche viendo"
+          }
+        }
+      }
+    },
+    "Turn on Personal Hotspot or join Wi-Fi to get a viewer address.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Personal Hotspot or join Wi-Fi to get a viewer address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activa el Punto de acceso personal o conéctate a Wi-Fi para obtener una dirección de visualización."
+          }
+        }
+      }
     }
   },
   "version": "1.0"
