@@ -82,7 +82,7 @@ public enum WebBrowserAlertCopy {
         }
     }
 
-    nonisolated public static func descriptor(for result: WebVideoExtractionResult) -> Descriptor {
+    nonisolated public static func descriptor(forExtractionResult result: WebVideoExtractionResult) -> Descriptor {
         descriptor(for: Outcome(extractionResult: result))
     }
 }

@@ -76,25 +76,25 @@ final class WebVideoExtractorTests: XCTestCase {
     @MainActor
     func testWebBrowserAlertCopyOutcomes() {
         let url = URL(string: "https://example.com/clip.m3u8")!
-        let found = WebBrowserAlertCopy.descriptor(for: .found(url: url, title: "Clip"))
+        let found = WebBrowserAlertCopy.descriptor(forExtractionResult: .found(url: url, title: "Clip"))
         XCTAssertEqual(found.titleKeyName, "Sent to DashCast")
         XCTAssertEqual(found.messageKeyName, "Playing on DashCast player — use AirPlay to send it to your car display.")
         _ = found.title
         _ = found.message
 
-        let drm = WebBrowserAlertCopy.descriptor(for: .drmProtected)
+        let drm = WebBrowserAlertCopy.descriptor(forExtractionResult: .drmProtected)
         XCTAssertEqual(drm.titleKeyName, "Protected Video")
         XCTAssertEqual(drm.messageKeyName, "This video is DRM-protected and can't be sent to the car.")
         _ = drm.title
         _ = drm.message
 
-        let unsupported = WebBrowserAlertCopy.descriptor(for: .unsupportedStream)
+        let unsupported = WebBrowserAlertCopy.descriptor(forExtractionResult: .unsupportedStream)
         XCTAssertEqual(unsupported.titleKeyName, "Can't Hand Off")
         XCTAssertEqual(unsupported.messageKeyName, "This site streams in a way that can't be handed off.")
         _ = unsupported.title
         _ = unsupported.message
 
-        let noVideo = WebBrowserAlertCopy.descriptor(for: .noVideo)
+        let noVideo = WebBrowserAlertCopy.descriptor(forExtractionResult: .noVideo)
         XCTAssertEqual(noVideo.titleKeyName, "No Video Found")
         XCTAssertEqual(noVideo.messageKeyName, "Start playing a video on the page, then tap Send to car again.")
         _ = noVideo.title
