@@ -8177,6 +8177,74 @@
           }
         }
       }
+    },
+    "Allowed for automatic drive detection and harsh-braking scoring.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allowed for automatic drive detection and harsh-braking scoring."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permitido para detección automática de viajes y puntuación de frenado."
+          }
+        }
+      }
+    },
+    "Off. Turn it on in Settings for automatic drive detection.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Off. Turn it on in Settings for automatic drive detection."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desactivado. Actívalo en Ajustes para la detección automática de viajes."
+          }
+        }
+      }
+    },
+    "Used for automatic drive detection and driving smoothness.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Used for automatic drive detection and driving smoothness."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Usado para detección automática de viajes y suavidad de conducción."
+          }
+        }
+      }
+    },
+    "Trips are recorded while you press Start Drive (also with the screen locked). Your trips stay on this device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trips are recorded while you press Start Drive (also with the screen locked). Your trips stay on this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Los viajes se graban mientras pulsas Iniciar viaje (también con la pantalla bloqueada). Tus viajes permanecen en este dispositivo."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

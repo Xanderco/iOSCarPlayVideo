@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 — DI-95: TripSummaryView MPH/KMH Units, Localization & Foreground Permission Refresh
+- Wired `TripSummaryView` to `AppState.useMilesPerHour` via `TripSummaryFormatter` so Distance (`mi`/`km`), Avg Speed (`mph`/`km/h`), and Top Speed (`mph`/`km/h`) respect the user's selected unit system, and switched `scoreMessage`, `statCard`, and `telemetryPill` labels to `LocalizedStringKey`.
+- Added Motion & Fitness (`CMMotionActivityManager`) status & request flow plus `UIApplication.willEnterForegroundNotification` refresh to `DriveTrackingPermissionsSheet` (alongside `DriveLocationService.refreshAuthorizationStatus()`), and added EN/ES strings in `Localizable.xcstrings`.
+- Added unit tests in `DashCastTests/DriveSettingsAndNotificationTests.swift` covering `TripSummaryFormatter` and `DriveTrackingPermissionMapper`.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
