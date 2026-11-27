@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 import CoreLocation
 @testable import DashCast
 
@@ -127,5 +128,80 @@ final class TripHistoryAndReplayTests: XCTestCase {
         let cleaned = loaded.filter { $0.id != testTrip.id }
         PersistenceController.shared.saveTrips(cleaned)
         XCTAssertEqual(PersistenceController.shared.loadTrips().count, initialCount)
+    }
+
+    func testTripHistoryMetricsFormatterDistanceScoreAndDuration() {
+        let t0 = Date(timeIntervalSince1970: 1000)
+        let trips = [
+            TripModel(
+                id: UUID(),
+                startTime: t0,
+                endTime: t0.addingTimeInterval(300),
+                distanceMeters: 5000,
+                averageSpeedKmh: 60,
+                maxSpeedKmh: 90,
+                drivingScore: 90
+            ),
+            TripModel(
+                id: UUID(),
+                startTime: t0,
+                endTime: t0.addingTimeInterval(600),
+                distanceMeters: 15000,
+                averageSpeedKmh: 75,
+                maxSpeedKmh: 100,
+                drivingScore: 80
+            )
+        ]
+
+        XCTAssertEqual(TripHistoryMetricsFormatter.averageScore(trips: []), 0)
+        XCTAssertEqual(TripHistoryMetricsFormatter.averageScore(trips: trips), 85)
+        XCTAssertEqual(TripHistoryMetricsFormatter.totalDistanceFormatted(trips: trips, useMilesPerHour: false), "20.0 km")
+        XCTAssertEqual(TripHistoryMetricsFormatter.totalDistanceFormatted(trips: trips, useMilesPerHour: true), "12.4 mi")
+        XCTAssertEqual(TripHistoryMetricsFormatter.distanceText(meters: 5000, useMilesPerHour: false), "5.0 km")
+        XCTAssertEqual(TripHistoryMetricsFormatter.distanceText(meters: 5000, useMilesPerHour: true), "3.1 mi")
+        XCTAssertEqual(TripHistoryMetricsFormatter.durationText(seconds: 95), "1m 35s")
+        XCTAssertEqual(TripHistoryMetricsFormatter.durationText(seconds: 3900), "1h 5m")
+    }
+
+    @MainActor
+    func testTripHistoryCopyHeadersAndSwiftUIKeys() {
+        XCTAssertEqual(TripHistoryCopy.allRecordedTripsHeader(count: 3), "All Recorded Trips (3)")
+        XCTAssertEqual(TripHistoryCopy.totalDrivesKey, LocalizedStringKey(TripHistoryCopy.totalDrivesString))
+        XCTAssertEqual(TripHistoryCopy.totalDistanceKey, LocalizedStringKey(TripHistoryCopy.totalDistanceString))
+        XCTAssertEqual(TripHistoryCopy.avgScoreKey, LocalizedStringKey(TripHistoryCopy.avgScoreString))
+        XCTAssertEqual(TripHistoryCopy.summaryHeaderKey, LocalizedStringKey(TripHistoryCopy.summaryHeaderString))
+        XCTAssertEqual(TripHistoryCopy.navigationTitleKey, LocalizedStringKey(TripHistoryCopy.navigationTitleString))
+        XCTAssertEqual(TripHistoryCopy.closeKey, LocalizedStringKey(TripHistoryCopy.closeString))
+        XCTAssertEqual(TripHistoryCopy.clearAllAccessibilityKey, LocalizedStringKey(TripHistoryCopy.clearAllAccessibilityString))
+        XCTAssertEqual(TripHistoryCopy.clearAlertTitleKey, LocalizedStringKey(TripHistoryCopy.clearAlertTitleString))
+        XCTAssertEqual(TripHistoryCopy.clearAllButtonKey, LocalizedStringKey(TripHistoryCopy.clearAllButtonString))
+        XCTAssertEqual(TripHistoryCopy.cancelKey, LocalizedStringKey(TripHistoryCopy.cancelString))
+        XCTAssertEqual(TripHistoryCopy.clearAlertMessageKey, LocalizedStringKey(TripHistoryCopy.clearAlertMessageString))
+        XCTAssertEqual(TripHistoryCopy.replayKey, LocalizedStringKey(TripHistoryCopy.replayString))
+        XCTAssertEqual(TripHistoryCopy.scoreBadgeKey, LocalizedStringKey(TripHistoryCopy.scoreBadgeString))
+    }
+
+    func testTripHistoryCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in TripHistoryCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
     }
 }
