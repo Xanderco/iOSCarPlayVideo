@@ -1,6 +1,88 @@
 import SwiftUI
 import AVKit
 
+/// Localized copy and step definitions for `CarCastGuideModalView`.
+public enum CarCastGuideCopy {
+    public struct MirrorStep: Equatable {
+        nonisolated public let number: String
+        nonisolated public let key: String
+
+        nonisolated public init(number: String, key: String) {
+            self.number = number
+            self.key = key
+        }
+
+        @MainActor public var localizedKey: LocalizedStringKey {
+            LocalizedStringKey(key)
+        }
+    }
+
+    nonisolated public static let headerTitleString = "Cast Video to Car Display"
+    nonisolated public static let headerSubtitleString = "Connect DashCast to your car's screen, CarPlay adapter, or in-dash browser while parked."
+    nonisolated public static let airPlayTitleString = "1. AirPlay Direct Cast"
+    nonisolated public static let airPlaySubtitleString = "Wireless video & audio to car screen"
+    nonisolated public static let airPlayBodyString = "Stream your IPTV, YouTube, or local video directly to any AirPlay-compatible car screen or wireless CarPlay adapter."
+    nonisolated public static let tapToConnectString = "Tap to connect:"
+    nonisolated public static let detectingDisplaysString = "Detecting displays..."
+    nonisolated public static let mirrorSectionTitleString = "2. Mirror Entire Screen"
+    nonisolated public static let mirrorSectionSubtitleString = "Full iPhone display on car screen"
+    nonisolated public static let mirrorControlCenterIntroString = "Apple requires system screen mirroring to be started from iOS Control Center:"
+    nonisolated public static let mirrorStep1String = "Swipe down from the top-right corner of your iPhone to open Control Center."
+    nonisolated public static let mirrorStep2String = "Tap the Screen Mirroring button (two overlapping rectangles)."
+    nonisolated public static let mirrorStep3String = "Select your car's display, CarPlay dongle, or receiver."
+    nonisolated public static let browserSectionTitleString = "3. In-Car Web Browser"
+    nonisolated public static let browserSectionSubtitleString = "Tesla, Polestar, & aftermarket screens"
+    nonisolated public static let browserSectionBodyString = "If your car has a built-in browser, connect your car to your iPhone's Personal Hotspot and open any video directly on the car's web browser."
+    nonisolated public static let safetyNoticeString = "For your safety and in compliance with driving regulations, watch video content only while parked or during EV charging stops."
+    nonisolated public static let navigationTitleString = "Car Display Setup"
+    nonisolated public static let doneString = "Done"
+
+    nonisolated public static let mirrorSteps: [MirrorStep] = [
+        MirrorStep(number: "1", key: mirrorStep1String),
+        MirrorStep(number: "2", key: mirrorStep2String),
+        MirrorStep(number: "3", key: mirrorStep3String)
+    ]
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        headerTitleString,
+        headerSubtitleString,
+        airPlayTitleString,
+        airPlaySubtitleString,
+        airPlayBodyString,
+        tapToConnectString,
+        detectingDisplaysString,
+        mirrorSectionTitleString,
+        mirrorSectionSubtitleString,
+        mirrorControlCenterIntroString,
+        mirrorStep1String,
+        mirrorStep2String,
+        mirrorStep3String,
+        browserSectionTitleString,
+        browserSectionSubtitleString,
+        browserSectionBodyString,
+        safetyNoticeString,
+        navigationTitleString,
+        doneString
+    ]
+
+    @MainActor public static var headerTitleKey: LocalizedStringKey { LocalizedStringKey(headerTitleString) }
+    @MainActor public static var headerSubtitleKey: LocalizedStringKey { LocalizedStringKey(headerSubtitleString) }
+    @MainActor public static var airPlayTitleKey: LocalizedStringKey { LocalizedStringKey(airPlayTitleString) }
+    @MainActor public static var airPlaySubtitleKey: LocalizedStringKey { LocalizedStringKey(airPlaySubtitleString) }
+    @MainActor public static var airPlayBodyKey: LocalizedStringKey { LocalizedStringKey(airPlayBodyString) }
+    @MainActor public static var tapToConnectKey: LocalizedStringKey { LocalizedStringKey(tapToConnectString) }
+    @MainActor public static var detectingDisplaysKey: LocalizedStringKey { LocalizedStringKey(detectingDisplaysString) }
+    @MainActor public static var mirrorSectionTitleKey: LocalizedStringKey { LocalizedStringKey(mirrorSectionTitleString) }
+    @MainActor public static var mirrorSectionSubtitleKey: LocalizedStringKey { LocalizedStringKey(mirrorSectionSubtitleString) }
+    @MainActor public static var mirrorControlCenterIntroKey: LocalizedStringKey { LocalizedStringKey(mirrorControlCenterIntroString) }
+    @MainActor public static var browserSectionTitleKey: LocalizedStringKey { LocalizedStringKey(browserSectionTitleString) }
+    @MainActor public static var browserSectionSubtitleKey: LocalizedStringKey { LocalizedStringKey(browserSectionSubtitleString) }
+    @MainActor public static var browserSectionBodyKey: LocalizedStringKey { LocalizedStringKey(browserSectionBodyString) }
+    @MainActor public static var safetyNoticeKey: LocalizedStringKey { LocalizedStringKey(safetyNoticeString) }
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var doneKey: LocalizedStringKey { LocalizedStringKey(doneString) }
+}
+
 public struct CarCastGuideModalView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -15,11 +97,11 @@ public struct CarCastGuideModalView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         // Header
                         VStack(alignment: .leading, spacing: 6) {
-                            Text("Cast Video to Car Display")
+                            Text(CarCastGuideCopy.headerTitleKey)
                                 .font(ThemeFonts.hudTitle(size: 24))
                                 .foregroundStyle(Color.dashTextPrimary)
 
-                            Text("Connect DashCast to your car's screen, CarPlay adapter, or in-dash browser while parked.")
+                            Text(CarCastGuideCopy.headerSubtitleKey)
                                 .font(ThemeFonts.hudCaption(size: 14))
                                 .foregroundStyle(Color.dashTextSecondary)
                         }
@@ -38,10 +120,10 @@ public struct CarCastGuideModalView: View {
                                     }
 
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("1. AirPlay Direct Cast")
+                                        Text(CarCastGuideCopy.airPlayTitleKey)
                                             .font(.system(size: 16, weight: .bold))
                                             .foregroundStyle(Color.dashTextPrimary)
-                                        Text("Wireless video & audio to car screen")
+                                        Text(CarCastGuideCopy.airPlaySubtitleKey)
                                             .font(ThemeFonts.hudCaption(size: 12))
                                             .foregroundStyle(Color.dashTextSecondary)
                                     }
@@ -49,12 +131,12 @@ public struct CarCastGuideModalView: View {
                                     Spacer()
                                 }
 
-                                Text("Stream your IPTV, YouTube, or local video directly to any AirPlay-compatible car screen or wireless CarPlay adapter.")
+                                Text(CarCastGuideCopy.airPlayBodyKey)
                                     .font(.system(size: 13))
                                     .foregroundStyle(Color.dashTextSecondary)
 
                                 HStack {
-                                    Text("Tap to connect:")
+                                    Text(CarCastGuideCopy.tapToConnectKey)
                                         .font(.system(size: 13, weight: .semibold))
                                         .foregroundStyle(Color.dashTextPrimary)
 
@@ -63,7 +145,7 @@ public struct CarCastGuideModalView: View {
 
                                     Spacer()
 
-                                    Text("Detecting displays...")
+                                    Text(CarCastGuideCopy.detectingDisplaysKey)
                                         .font(.system(size: 12))
                                         .foregroundStyle(Color.dashTextMuted)
                                 }
@@ -88,10 +170,10 @@ public struct CarCastGuideModalView: View {
                                     }
 
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("2. Mirror Entire Screen")
+                                        Text(CarCastGuideCopy.mirrorSectionTitleKey)
                                             .font(.system(size: 16, weight: .bold))
                                             .foregroundStyle(Color.dashTextPrimary)
-                                        Text("Full iPhone display on car screen")
+                                        Text(CarCastGuideCopy.mirrorSectionSubtitleKey)
                                             .font(ThemeFonts.hudCaption(size: 12))
                                             .foregroundStyle(Color.dashTextSecondary)
                                     }
@@ -99,14 +181,14 @@ public struct CarCastGuideModalView: View {
                                     Spacer()
                                 }
 
-                                Text("Apple requires system screen mirroring to be started from iOS Control Center:")
+                                Text(CarCastGuideCopy.mirrorControlCenterIntroKey)
                                     .font(.system(size: 13))
                                     .foregroundStyle(Color.dashTextSecondary)
 
                                 VStack(alignment: .leading, spacing: 10) {
-                                    stepRow(num: "1", text: "Swipe down from the top-right corner of your iPhone to open Control Center.")
-                                    stepRow(num: "2", text: "Tap the Screen Mirroring button (two overlapping rectangles).")
-                                    stepRow(num: "3", text: "Select your car's display, CarPlay dongle, or receiver.")
+                                    ForEach(CarCastGuideCopy.mirrorSteps, id: \.number) { step in
+                                        stepRow(num: step.number, text: step.localizedKey)
+                                    }
                                 }
                                 .padding(.leading, 4)
                             }
@@ -126,10 +208,10 @@ public struct CarCastGuideModalView: View {
                                     }
 
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("3. In-Car Web Browser")
+                                        Text(CarCastGuideCopy.browserSectionTitleKey)
                                             .font(.system(size: 16, weight: .bold))
                                             .foregroundStyle(Color.dashTextPrimary)
-                                        Text("Tesla, Polestar, & aftermarket screens")
+                                        Text(CarCastGuideCopy.browserSectionSubtitleKey)
                                             .font(ThemeFonts.hudCaption(size: 12))
                                             .foregroundStyle(Color.dashTextSecondary)
                                     }
@@ -137,7 +219,7 @@ public struct CarCastGuideModalView: View {
                                     Spacer()
                                 }
 
-                                Text("If your car has a built-in browser, connect your car to your iPhone's Personal Hotspot and open any video directly on the car's web browser.")
+                                Text(CarCastGuideCopy.browserSectionBodyKey)
                                     .font(.system(size: 13))
                                     .foregroundStyle(Color.dashTextSecondary)
                             }
@@ -149,7 +231,7 @@ public struct CarCastGuideModalView: View {
                                 .foregroundStyle(Color.dashOrange)
                                 .font(.system(size: 20))
 
-                            Text("For your safety and in compliance with driving regulations, watch video content only while parked or during EV charging stops.")
+                            Text(CarCastGuideCopy.safetyNoticeKey)
                                 .font(.system(size: 12))
                                 .foregroundStyle(Color.dashTextSecondary)
                         }
@@ -161,11 +243,11 @@ public struct CarCastGuideModalView: View {
                     .padding(.bottom, 20)
                 }
             }
-            .navigationTitle("Car Display Setup")
+            .navigationTitle(CarCastGuideCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") {
+                    Button(CarCastGuideCopy.doneKey) {
                         dismiss()
                     }
                     .font(.system(size: 16, weight: .semibold))
@@ -175,7 +257,7 @@ public struct CarCastGuideModalView: View {
         }
     }
 
-    private func stepRow(num: String, text: String) -> some View {
+    private func stepRow(num: String, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Text(num)
                 .font(.system(size: 12, weight: .bold))

@@ -8177,6 +8177,159 @@
           }
         }
       }
+    },
+    "2. Mirror Entire Screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2. Mirror Entire Screen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2. Duplicar toda la pantalla"
+          }
+        }
+      }
+    },
+    "Full iPhone display on car screen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full iPhone display on car screen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toda la pantalla del iPhone en el coche"
+          }
+        }
+      }
+    },
+    "Apple requires system screen mirroring to be started from iOS Control Center:": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple requires system screen mirroring to be started from iOS Control Center:"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple requiere iniciar la duplicación de pantalla desde el Centro de control de iOS:"
+          }
+        }
+      }
+    },
+    "Swipe down from the top-right corner of your iPhone to open Control Center.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swipe down from the top-right corner of your iPhone to open Control Center."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Desliza hacia abajo desde la esquina superior derecha de tu iPhone para abrir el Centro de control."
+          }
+        }
+      }
+    },
+    "Tap the Screen Mirroring button (two overlapping rectangles).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the Screen Mirroring button (two overlapping rectangles)."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca el botón Duplicar pantalla (dos rectángulos superpuestos)."
+          }
+        }
+      }
+    },
+    "Select your car's display, CarPlay dongle, or receiver.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select your car's display, CarPlay dongle, or receiver."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selecciona la pantalla de tu coche, adaptador CarPlay o receptor."
+          }
+        }
+      }
+    },
+    "If your car has a built-in browser, connect your car to your iPhone's Personal Hotspot and open any video directly on the car's web browser.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If your car has a built-in browser, connect your car to your iPhone's Personal Hotspot and open any video directly on the car's web browser."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si tu coche tiene navegador integrado, conéctalo al Punto de acceso personal de tu iPhone y abre cualquier vídeo directamente en el navegador del coche."
+          }
+        }
+      }
+    },
+    "For your safety and in compliance with driving regulations, watch video content only while parked or during EV charging stops.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For your safety and in compliance with driving regulations, watch video content only while parked or during EV charging stops."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Por tu seguridad y para cumplir con las normas de tráfico, reproduce contenido de vídeo solo cuando estés estacionado o cargando tu vehículo eléctrico."
+          }
+        }
+      }
+    },
+    "Car Display Setup": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Car Display Setup"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Configurar pantalla del coche"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
