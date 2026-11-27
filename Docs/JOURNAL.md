@@ -92,6 +92,11 @@
 
 ## Log
 
+### 2026-11-26 20:22 (Bogotá) — Localized SoundsHomeView Trigger Cards, Picker Sheet & Unit Tests [DI-140]
+- **Sounds (`DashCast/Features/Sounds/SoundsHomeView.swift`)**: Extracted `SoundPickerCategory` (enum-driven category pills and `filterSounds(_:category:searchText:)`) and `SoundsHomeCopy` (`allLocalizationKeys`, `@MainActor` `LocalizedStringKey` properties, `pickerTitleKey(forSlot:)`, and `selectedSoundText(title:bundle:)`), updating `SoundsHomeView` to use them.
+- **String catalog (`DashCast/Resources/Localizable.xcstrings`)**: Added EN/ES translations for all 20 missing `SoundsHomeCopy` keys.
+- **Tests (`DashCastTests/SoundCatalogTests.swift`)**: Added `testSoundPickerCategoryFiltering`, `testSoundsHomeCopyFormattingAndSlotTitles`, and `testSoundsHomeCopyLocalizationKeysComplete`. Verification pending `DashCast CI` on PR.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).
