@@ -1,5 +1,99 @@
 import SwiftUI
 
+/// Localized copy and title formatting helpers for `TripHistoryView`.
+public enum TripHistoryCopy {
+    nonisolated public static let emptyTitleString = "No Trips Recorded Yet"
+    nonisolated public static let emptyMessageString = "Trips you record or auto-detect with DashCast will appear here with route replay and telemetry stats."
+    nonisolated public static let totalDrivesString = "TOTAL DRIVES"
+    nonisolated public static let totalDistanceString = "TOTAL DISTANCE"
+    nonisolated public static let avgScoreString = "AVG SCORE"
+    nonisolated public static let summaryHeaderString = "Summary"
+    nonisolated public static let allRecordedTripsFormatString = "All Recorded Trips (%lld)"
+    nonisolated public static let navigationTitleString = "Trip History"
+    nonisolated public static let closeString = "Close"
+    nonisolated public static let clearAllAccessibilityString = "Clear all trips"
+    nonisolated public static let clearAlertTitleString = "Clear Trip History?"
+    nonisolated public static let clearAllButtonString = "Clear All"
+    nonisolated public static let cancelString = "Cancel"
+    nonisolated public static let clearAlertMessageString = "Are you sure you want to delete all recorded trips? This action cannot be undone."
+    nonisolated public static let replayString = "Replay"
+    nonisolated public static let scoreBadgeString = "SCORE"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        emptyTitleString,
+        emptyMessageString,
+        totalDrivesString,
+        totalDistanceString,
+        avgScoreString,
+        summaryHeaderString,
+        allRecordedTripsFormatString,
+        navigationTitleString,
+        closeString,
+        clearAllAccessibilityString,
+        clearAlertTitleString,
+        clearAllButtonString,
+        cancelString,
+        clearAlertMessageString,
+        replayString,
+        scoreBadgeString
+    ]
+
+    @MainActor public static var totalDrivesKey: LocalizedStringKey { LocalizedStringKey(totalDrivesString) }
+    @MainActor public static var totalDistanceKey: LocalizedStringKey { LocalizedStringKey(totalDistanceString) }
+    @MainActor public static var avgScoreKey: LocalizedStringKey { LocalizedStringKey(avgScoreString) }
+    @MainActor public static var summaryHeaderKey: LocalizedStringKey { LocalizedStringKey(summaryHeaderString) }
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var closeKey: LocalizedStringKey { LocalizedStringKey(closeString) }
+    @MainActor public static var clearAllAccessibilityKey: LocalizedStringKey { LocalizedStringKey(clearAllAccessibilityString) }
+    @MainActor public static var clearAlertTitleKey: LocalizedStringKey { LocalizedStringKey(clearAlertTitleString) }
+    @MainActor public static var clearAllButtonKey: LocalizedStringKey { LocalizedStringKey(clearAllButtonString) }
+    @MainActor public static var cancelKey: LocalizedStringKey { LocalizedStringKey(cancelString) }
+    @MainActor public static var clearAlertMessageKey: LocalizedStringKey { LocalizedStringKey(clearAlertMessageString) }
+    @MainActor public static var replayKey: LocalizedStringKey { LocalizedStringKey(replayString) }
+    @MainActor public static var scoreBadgeKey: LocalizedStringKey { LocalizedStringKey(scoreBadgeString) }
+
+    nonisolated public static func allRecordedTripsHeader(count: Int, bundle: Bundle = .main) -> String {
+        let format = bundle.localizedString(forKey: allRecordedTripsFormatString, value: allRecordedTripsFormatString, table: nil)
+        return String(format: format, Int64(count))
+    }
+}
+
+/// Pure aggregate stats and row formatting helpers for `TripHistoryView`.
+public enum TripHistoryMetricsFormatter {
+    nonisolated public static func totalDistanceFormatted(trips: [TripModel], useMilesPerHour: Bool) -> String {
+        let totalMeters = trips.reduce(0.0) { $0 + $1.distanceMeters }
+        return distanceText(meters: totalMeters, useMilesPerHour: useMilesPerHour)
+    }
+
+    nonisolated public static func averageScore(trips: [TripModel]) -> Int {
+        guard !trips.isEmpty else { return 0 }
+        let total = trips.reduce(0) { $0 + $1.drivingScore }
+        return total / trips.count
+    }
+
+    nonisolated public static func distanceText(meters: Double, useMilesPerHour: Bool) -> String {
+        if useMilesPerHour {
+            let miles = meters * 0.000621371
+            return String(format: "%.1f mi", miles)
+        } else {
+            let km = meters / 1000.0
+            return String(format: "%.1f km", km)
+        }
+    }
+
+    nonisolated public static func durationText(seconds: TimeInterval) -> String {
+        let totalSeconds = max(0, Int(seconds))
+        let mins = totalSeconds / 60
+        let secs = totalSeconds % 60
+        if mins > 60 {
+            let hours = mins / 60
+            let remMins = mins % 60
+            return "\(hours)h \(remMins)m"
+        }
+        return "\(mins)m \(secs)s"
+    }
+}
+
 public struct TripHistoryView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var appState: AppState
@@ -10,20 +104,11 @@ public struct TripHistoryView: View {
     public init() {}
 
     private var totalDistanceFormatted: String {
-        let totalMeters = trips.reduce(0.0) { $0 + $1.distanceMeters }
-        if appState.useMilesPerHour {
-            let miles = totalMeters * 0.000621371
-            return String(format: "%.1f mi", miles)
-        } else {
-            let km = totalMeters / 1000.0
-            return String(format: "%.1f km", km)
-        }
+        TripHistoryMetricsFormatter.totalDistanceFormatted(trips: trips, useMilesPerHour: appState.useMilesPerHour)
     }
 
     private var averageScore: Int {
-        guard !trips.isEmpty else { return 0 }
-        let total = trips.reduce(0) { $0 + $1.drivingScore }
-        return total / trips.count
+        TripHistoryMetricsFormatter.averageScore(trips: trips)
     }
 
     public var body: some View {
@@ -34,8 +119,8 @@ public struct TripHistoryView: View {
                 if trips.isEmpty {
                     EmptyStateView(
                         systemImage: "map",
-                        title: "No Trips Recorded Yet",
-                        message: "Trips you record or auto-detect with DashCast will appear here with route replay and telemetry stats."
+                        title: TripHistoryCopy.emptyTitleString,
+                        message: TripHistoryCopy.emptyMessageString
                     )
                 } else {
                     List {
@@ -44,7 +129,7 @@ public struct TripHistoryView: View {
                             VStack(spacing: 12) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("TOTAL DRIVES")
+                                        Text(TripHistoryCopy.totalDrivesKey)
                                             .font(ThemeFonts.hudCaption(size: 11))
                                             .foregroundStyle(Color.dashTextMuted)
                                         Text("\(trips.count)")
@@ -55,7 +140,7 @@ public struct TripHistoryView: View {
                                     Spacer()
 
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("TOTAL DISTANCE")
+                                        Text(TripHistoryCopy.totalDistanceKey)
                                             .font(ThemeFonts.hudCaption(size: 11))
                                             .foregroundStyle(Color.dashTextMuted)
                                         Text(totalDistanceFormatted)
@@ -66,7 +151,7 @@ public struct TripHistoryView: View {
                                     Spacer()
 
                                     VStack(alignment: .leading, spacing: 4) {
-                                        Text("AVG SCORE")
+                                        Text(TripHistoryCopy.avgScoreKey)
                                             .font(ThemeFonts.hudCaption(size: 11))
                                             .foregroundStyle(Color.dashTextMuted)
                                         Text("\(averageScore)")
@@ -78,7 +163,7 @@ public struct TripHistoryView: View {
                             }
                             .listRowBackground(Color.dashSurface)
                         } header: {
-                            Text("Summary")
+                            Text(TripHistoryCopy.summaryHeaderKey)
                                 .font(ThemeFonts.hudCaption(size: 12))
                                 .foregroundStyle(Color.dashTextMuted)
                         }
@@ -95,7 +180,7 @@ public struct TripHistoryView: View {
                             }
                             .onDelete(perform: deleteTrips)
                         } header: {
-                            Text("All Recorded Trips (\(trips.count))")
+                            Text(verbatim: TripHistoryCopy.allRecordedTripsHeader(count: trips.count))
                                 .font(ThemeFonts.hudCaption(size: 12))
                                 .foregroundStyle(Color.dashTextMuted)
                         }
@@ -103,11 +188,11 @@ public struct TripHistoryView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .navigationTitle("Trip History")
+            .navigationTitle(TripHistoryCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") {
+                    Button(TripHistoryCopy.closeKey) {
                         dismiss()
                     }
                     .font(.system(size: 16))
@@ -123,17 +208,17 @@ public struct TripHistoryView: View {
                                 .font(.system(size: 15))
                                 .foregroundStyle(Color.dashRed)
                         }
-                        .accessibilityLabel("Clear all trips")
+                        .accessibilityLabel(TripHistoryCopy.clearAllAccessibilityKey)
                     }
                 }
             }
-            .alert("Clear Trip History?", isPresented: $showingClearAlert) {
-                Button("Clear All", role: .destructive) {
+            .alert(TripHistoryCopy.clearAlertTitleKey, isPresented: $showingClearAlert) {
+                Button(TripHistoryCopy.clearAllButtonKey, role: .destructive) {
                     clearAllTrips()
                 }
-                Button("Cancel", role: .cancel) {}
+                Button(TripHistoryCopy.cancelKey, role: .cancel) {}
             } message: {
-                Text("Are you sure you want to delete all recorded trips? This action cannot be undone.")
+                Text(TripHistoryCopy.clearAlertMessageKey)
             }
             .onAppear {
                 loadTrips()
@@ -160,13 +245,13 @@ public struct TripHistoryView: View {
                     .foregroundStyle(Color.dashTextPrimary)
 
                 HStack(spacing: 6) {
-                    Text(formatDistance(trip.distanceMeters))
+                    Text(TripHistoryMetricsFormatter.distanceText(meters: trip.distanceMeters, useMilesPerHour: appState.useMilesPerHour))
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextSecondary)
                     Text("·")
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextMuted)
-                    Text(formatDuration(trip.durationSeconds))
+                    Text(TripHistoryMetricsFormatter.durationText(seconds: trip.durationSeconds))
                         .font(.system(size: 12))
                         .foregroundStyle(Color.dashTextSecondary)
                     if trip.points.count >= 2 {
@@ -176,7 +261,7 @@ public struct TripHistoryView: View {
                         HStack(spacing: 2) {
                             Image(systemName: "play.circle.fill")
                                 .font(.system(size: 10))
-                            Text("Replay")
+                            Text(TripHistoryCopy.replayKey)
                                 .font(.system(size: 11, weight: .medium))
                         }
                         .foregroundStyle(Color.dcAccent)
@@ -191,7 +276,7 @@ public struct TripHistoryView: View {
                 Text("\(trip.drivingScore)")
                     .font(ThemeFonts.hudStat(size: 17))
                     .foregroundStyle(scoreColor(for: trip.drivingScore))
-                Text("SCORE")
+                Text(TripHistoryCopy.scoreBadgeKey)
                     .font(ThemeFonts.hudCaption(size: 8))
                     .foregroundStyle(scoreColor(for: trip.drivingScore))
                     .fontWeight(.bold)
@@ -208,27 +293,6 @@ public struct TripHistoryView: View {
         if score >= 85 { return .dashGreen }
         if score >= 70 { return .dashYellow }
         return .dashRed
-    }
-
-    private func formatDistance(_ meters: Double) -> String {
-        if appState.useMilesPerHour {
-            let miles = meters * 0.000621371
-            return String(format: "%.1f mi", miles)
-        } else {
-            let km = meters / 1000.0
-            return String(format: "%.1f km", km)
-        }
-    }
-
-    private func formatDuration(_ seconds: TimeInterval) -> String {
-        let mins = Int(seconds) / 60
-        let secs = Int(seconds) % 60
-        if mins > 60 {
-            let hours = mins / 60
-            let remMins = mins % 60
-            return "\(hours)h \(remMins)m"
-        }
-        return "\(mins)m \(secs)s"
     }
 
     private func loadTrips() {
