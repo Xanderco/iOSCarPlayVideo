@@ -92,6 +92,12 @@
 
 ## Log
 
+### 2026-11-26 19:21 (Bogotá) — Localized CarPlayDashboardMockupView & SectionHeader Accessibility Copy + Unit Tests [DI-137]
+- **Widgets (`DashCast/Features/Widgets/CarPlayDashboardMockupView.swift`)**: Extracted `CarPlayDashboardMockupCopy` (`sampleMonthString`, `daysLeftString`, `allLocalizationKeys`, and `@MainActor` `LocalizedStringKey` properties) and updated the preview card labels.
+- **DesignSystem (`DashCast/Core/DesignSystem/Components/SectionHeader.swift`)**: Extracted `SectionHeaderCopy` (`allLocalizationKeys`, `defaultActionTitleKey`, `itemCountAccessibilityLabel(count:bundle:)`, `actionAccessibilityLabel(actionTitle:title:bundle:)`) and updated `SectionHeader` text and VoiceOver labels.
+- **String catalog (`DashCast/Resources/Localizable.xcstrings`)**: Added EN/ES entries for `"August"`, `"DAYS LEFT"`, and `"%@, %@"`.
+- **Tests (`DashCastTests/LocalizationTests.swift`)**: Added `testSectionHeaderCopyAccessibilityFormatting`, `testCarPlayDashboardMockupAndSectionHeaderSwiftUIKeys`, and `testCarPlayDashboardMockupAndSectionHeaderKeysComplete`. Verification pending `DashCast CI` on PR.
+
 ### 2026-11-07 02:45 (Bogotá) — Consolidation for the owner's road test (Claude, branch claude/drive-build → main)
 - Owner asked: merge what's ready, fix, abandon the rest, build nothing new; he will install on his iPhone 16 Pro for a long drive this weekend.
 - **Merged into `claude/classic-ui` (then `main`):** #39 CarPlay Video entitlement request text, #41 App Store Connect guide, #42 Privacy/Support/Terms site + Pages workflow, #53 App Store metadata polish, #36 review to-do list, #49 competitor-reference cleanup, #48 EntitlementGate (Pro unlocks real limits), #50 Jellyfin/QR entry in Media Sources, #52 trip history + route replay in Drive, #44 CarPlay-ready widgets + Photo/Doodle widget (also covers #45), #51 Spanish String Catalog, #40 classic-UI App Store screenshots pipeline, #46 Mac checklist + `verify-all.sh`, plus `AGENTS.md`/`CLAUDE.md` from #26 (updated for D10 and `main`).

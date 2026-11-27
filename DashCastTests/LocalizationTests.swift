@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import DashCast
 
 final class LocalizationTests: XCTestCase {
@@ -138,6 +139,49 @@ final class LocalizationTests: XCTestCase {
     func testTabItemLocalizations() {
         for tab in AppState.TabItem.allCases {
             XCTAssertNotNil(tab.localizedTitle)
+        }
+    }
+
+    func testSectionHeaderCopyAccessibilityFormatting() {
+        XCTAssertEqual(
+            SectionHeaderCopy.actionAccessibilityLabel(actionTitle: "See All", title: "Continue Watching"),
+            "See All, Continue Watching"
+        )
+        XCTAssertEqual(
+            SectionHeaderCopy.itemCountAccessibilityLabel(count: 42),
+            "42 items"
+        )
+    }
+
+    @MainActor
+    func testCarPlayDashboardMockupAndSectionHeaderSwiftUIKeys() {
+        XCTAssertEqual(CarPlayDashboardMockupCopy.sampleMonthKey, LocalizedStringKey(CarPlayDashboardMockupCopy.sampleMonthString))
+        XCTAssertEqual(CarPlayDashboardMockupCopy.daysLeftKey, LocalizedStringKey(CarPlayDashboardMockupCopy.daysLeftString))
+        XCTAssertEqual(SectionHeaderCopy.defaultActionTitleKey, LocalizedStringKey(SectionHeaderCopy.defaultActionTitleString))
+    }
+
+    func testCarPlayDashboardMockupAndSectionHeaderKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        let keys = CarPlayDashboardMockupCopy.allLocalizationKeys + SectionHeaderCopy.allLocalizationKeys
+        for key in keys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
         }
     }
 }
