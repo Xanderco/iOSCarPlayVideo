@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import DashCast
 
 final class LocalizationTests: XCTestCase {
@@ -138,6 +139,56 @@ final class LocalizationTests: XCTestCase {
     func testTabItemLocalizations() {
         for tab in AppState.TabItem.allCases {
             XCTAssertNotNil(tab.localizedTitle)
+        }
+    }
+
+    func testShortcutsGuideCopySteps() {
+        XCTAssertEqual(ShortcutsGuideCopy.steps.count, 4)
+        XCTAssertEqual(ShortcutsGuideCopy.steps.map(\.number), ["1", "2", "3", "4"])
+        XCTAssertEqual(
+            ShortcutsGuideCopy.steps.map(\.titleKey),
+            [
+                ShortcutsGuideCopy.step1TitleString,
+                ShortcutsGuideCopy.step2TitleString,
+                ShortcutsGuideCopy.step3TitleString,
+                ShortcutsGuideCopy.step4TitleString
+            ]
+        )
+    }
+
+    @MainActor
+    func testShortcutsGuideCopySwiftUIKeys() {
+        XCTAssertEqual(ShortcutsGuideCopy.headerTitleKey, LocalizedStringKey(ShortcutsGuideCopy.headerTitleString))
+        XCTAssertEqual(ShortcutsGuideCopy.launchButtonTitleKey, LocalizedStringKey(ShortcutsGuideCopy.launchButtonTitleString))
+        XCTAssertEqual(ShortcutsGuideCopy.navigationTitleKey, LocalizedStringKey(ShortcutsGuideCopy.navigationTitleString))
+        XCTAssertEqual(ShortcutsGuideCopy.closeButtonKey, LocalizedStringKey(ShortcutsGuideCopy.closeButtonString))
+        for step in ShortcutsGuideCopy.steps {
+            XCTAssertEqual(step.localizedTitleKey, LocalizedStringKey(step.titleKey))
+            XCTAssertEqual(step.localizedDescriptionKey, LocalizedStringKey(step.descriptionKey))
+        }
+    }
+
+    func testShortcutsGuideCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in ShortcutsGuideCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
         }
     }
 }
