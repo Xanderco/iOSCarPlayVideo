@@ -1,5 +1,48 @@
 import SwiftUI
 
+/// Localized copy and VoiceOver formatting helpers for `SourceTile`.
+public enum SourceTileCopy {
+    nonisolated public static let addSourceString = "Add Source"
+    nonisolated public static let addHintString = "Adds a playlist, server or files"
+    nonisolated public static let openHintString = "Opens source"
+    nonisolated public static let loadingString = "Loading"
+    nonisolated public static let errorFormatString = "Error: %@"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        addSourceString,
+        addHintString,
+        openHintString,
+        loadingString,
+        errorFormatString
+    ]
+
+    @MainActor public static var addTitleKey: LocalizedStringKey {
+        LocalizedStringKey(addSourceString)
+    }
+
+    @MainActor public static func accessibilityHintKey(style: SourceTile.Style) -> LocalizedStringKey {
+        LocalizedStringKey(style == .add ? addHintString : openHintString)
+    }
+
+    nonisolated public static func accessibilityValue(
+        status: SourceTile.Status,
+        subtitle: String?,
+        badge: String?,
+        bundle: Bundle = .main
+    ) -> String {
+        switch status {
+        case .loading:
+            let loadingText = bundle.localizedString(forKey: loadingString, value: loadingString, table: nil)
+            return [subtitle, loadingText].compactMap { $0 }.joined(separator: ", ")
+        case .error(let message):
+            let format = bundle.localizedString(forKey: errorFormatString, value: errorFormatString, table: nil)
+            return String(format: format, message)
+        case .ready:
+            return [subtitle, badge].compactMap { $0 }.joined(separator: ", ")
+        }
+    }
+}
+
 /// Big rounded tile representing a media source (M3U playlist, media server,
 /// local files, web) on Home and in Library. Also used for "Add source".
 public struct SourceTile: View {
@@ -54,7 +97,7 @@ public struct SourceTile: View {
     }
 
     /// Dashed "add a source" tile.
-    public static func add(title: String = "Add Source", action: @escaping () -> Void) -> SourceTile {
+    public static func add(title: String = SourceTileCopy.addSourceString, action: @escaping () -> Void) -> SourceTile {
         SourceTile(title: title, subtitle: nil, systemImage: "plus", tint: .dcAccent,
                    status: .ready, badge: nil, style: .add, action: action)
     }
@@ -67,10 +110,17 @@ public struct SourceTile: View {
         }
         .buttonStyle(SourceTilePressStyle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(title))
-        .accessibilityValue(Text(accessibilityValue))
-        .accessibilityHint(style == .add ? Text("Adds a playlist, server or files") : Text("Opens source"))
+        .accessibilityLabel(accessibilityTitleText)
+        .accessibilityValue(Text(verbatim: accessibilityValue))
+        .accessibilityHint(Text(SourceTileCopy.accessibilityHintKey(style: style)))
         .accessibilityAddTraits(.isButton)
+    }
+
+    private var accessibilityTitleText: Text {
+        if style == .add && title == SourceTileCopy.addSourceString {
+            return Text(SourceTileCopy.addTitleKey)
+        }
+        return Text(title)
     }
 
     private var shape: RoundedRectangle {
@@ -87,10 +137,16 @@ public struct SourceTile: View {
                     .foregroundStyle(Color.dcAccent)
                     .frame(width: iconBox, height: iconBox)
                     .background(Color.dcAccentSoft, in: Circle())
-                Text(LocalizedStringKey(title))
-                    .font(DSTypography.headline)
-                    .foregroundStyle(Color.dcTextPrimary)
-                    .multilineTextAlignment(.center)
+                Group {
+                    if title == SourceTileCopy.addSourceString {
+                        Text(SourceTileCopy.addTitleKey)
+                    } else {
+                        Text(LocalizedStringKey(title))
+                    }
+                }
+                .font(DSTypography.headline)
+                .foregroundStyle(Color.dcTextPrimary)
+                .multilineTextAlignment(.center)
             }
             .frame(maxWidth: .infinity, minHeight: DSLayout.sourceTileMinWidth)
             .padding(DSSpacing.lg)
@@ -161,11 +217,7 @@ public struct SourceTile: View {
     }
 
     private var accessibilityValue: String {
-        switch status {
-        case .loading: return [subtitle, "Loading"].compactMap { $0 }.joined(separator: ", ")
-        case .error(let message): return "Error: \(message)"
-        case .ready: return [subtitle, badge].compactMap { $0 }.joined(separator: ", ")
-        }
+        SourceTileCopy.accessibilityValue(status: status, subtitle: subtitle, badge: badge)
     }
 }
 
