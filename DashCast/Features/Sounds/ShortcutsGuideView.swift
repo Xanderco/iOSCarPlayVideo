@@ -1,5 +1,71 @@
 import SwiftUI
 
+/// Localized copy and step definitions for `ShortcutsGuideView`.
+public enum ShortcutsGuideCopy {
+    public struct Step: Equatable {
+        nonisolated public let number: String
+        nonisolated public let titleKey: String
+        nonisolated public let descriptionKey: String
+
+        nonisolated public init(number: String, titleKey: String, descriptionKey: String) {
+            self.number = number
+            self.titleKey = titleKey
+            self.descriptionKey = descriptionKey
+        }
+
+        @MainActor public var localizedTitleKey: LocalizedStringKey {
+            LocalizedStringKey(titleKey)
+        }
+
+        @MainActor public var localizedDescriptionKey: LocalizedStringKey {
+            LocalizedStringKey(descriptionKey)
+        }
+    }
+
+    nonisolated public static let headerTitleString = "Configure Siri Shortcuts Automation"
+    nonisolated public static let headerSubtitleString = "Follow these 4 simple steps in Apple's Shortcuts app to trigger your car personality sounds automatically whenever you get in or out of your car."
+    nonisolated public static let step1TitleString = "Open Apple Shortcuts"
+    nonisolated public static let step1DescriptionString = "Open the pre-installed 'Shortcuts' app on your iPhone and tap the 'Automation' tab at the bottom center."
+    nonisolated public static let step2TitleString = "Create CarPlay Automation"
+    nonisolated public static let step2DescriptionString = "Tap '+' (New Automation) and select 'CarPlay' (or 'Bluetooth'). Choose 'When CarPlay Connects' and select 'Run Immediately' (disable 'Ask Before Running')."
+    nonisolated public static let step3TitleString = "Add DashCast Action"
+    nonisolated public static let step3DescriptionString = "Tap 'New Blank Automation', search for 'DashCast' or 'Open App', and add the 'Play Connection Sound' intent."
+    nonisolated public static let step4TitleString = "Done! Enjoy the Experience"
+    nonisolated public static let step4DescriptionString = "Whenever your iPhone plugs into or connects wirelessly to CarPlay, your chosen sound will immediately play through your car's stereo system!"
+    nonisolated public static let launchButtonTitleString = "Launch Apple Shortcuts"
+    nonisolated public static let navigationTitleString = "Automations Guide"
+    nonisolated public static let closeButtonString = "Close"
+
+    nonisolated public static let steps: [Step] = [
+        Step(number: "1", titleKey: step1TitleString, descriptionKey: step1DescriptionString),
+        Step(number: "2", titleKey: step2TitleString, descriptionKey: step2DescriptionString),
+        Step(number: "3", titleKey: step3TitleString, descriptionKey: step3DescriptionString),
+        Step(number: "4", titleKey: step4TitleString, descriptionKey: step4DescriptionString)
+    ]
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        headerTitleString,
+        headerSubtitleString,
+        step1TitleString,
+        step1DescriptionString,
+        step2TitleString,
+        step2DescriptionString,
+        step3TitleString,
+        step3DescriptionString,
+        step4TitleString,
+        step4DescriptionString,
+        launchButtonTitleString,
+        navigationTitleString,
+        closeButtonString
+    ]
+
+    @MainActor public static var headerTitleKey: LocalizedStringKey { LocalizedStringKey(headerTitleString) }
+    @MainActor public static var headerSubtitleKey: LocalizedStringKey { LocalizedStringKey(headerSubtitleString) }
+    @MainActor public static var launchButtonTitleKey: LocalizedStringKey { LocalizedStringKey(launchButtonTitleString) }
+    @MainActor public static var navigationTitleKey: LocalizedStringKey { LocalizedStringKey(navigationTitleString) }
+    @MainActor public static var closeButtonKey: LocalizedStringKey { LocalizedStringKey(closeButtonString) }
+}
+
 public struct ShortcutsGuideView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -12,39 +78,23 @@ public struct ShortcutsGuideView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
-                        Text("Configure Siri Shortcuts Automation")
+                        Text(ShortcutsGuideCopy.headerTitleKey)
                             .font(ThemeFonts.hudTitle(size: 22))
                             .foregroundStyle(Color.dashTextPrimary)
 
-                        Text("Follow these 4 simple steps in Apple's Shortcuts app to trigger your car personality sounds automatically whenever you get in or out of your car.")
+                        Text(ShortcutsGuideCopy.headerSubtitleKey)
                             .font(ThemeFonts.hudCaption(size: 14))
                             .foregroundStyle(Color.dashTextSecondary)
 
-                        stepCard(
-                            stepNumber: "1",
-                            title: "Open Apple Shortcuts",
-                            description: "Open the pre-installed 'Shortcuts' app on your iPhone and tap the 'Automation' tab at the bottom center."
-                        )
+                        ForEach(ShortcutsGuideCopy.steps, id: \.number) { step in
+                            stepCard(
+                                stepNumber: step.number,
+                                title: step.localizedTitleKey,
+                                description: step.localizedDescriptionKey
+                            )
+                        }
 
-                        stepCard(
-                            stepNumber: "2",
-                            title: "Create CarPlay Automation",
-                            description: "Tap '+' (New Automation) and select 'CarPlay' (or 'Bluetooth'). Choose 'When CarPlay Connects' and select 'Run Immediately' (disable 'Ask Before Running')."
-                        )
-
-                        stepCard(
-                            stepNumber: "3",
-                            title: "Add DashCast Action",
-                            description: "Tap 'New Blank Automation', search for 'DashCast' or 'Open App', and add the 'Play Connection Sound' intent."
-                        )
-
-                        stepCard(
-                            stepNumber: "4",
-                            title: "Done! Enjoy the Experience",
-                            description: "Whenever your iPhone plugs into or connects wirelessly to CarPlay, your chosen sound will immediately play through your car's stereo system!"
-                        )
-
-                        GlowButton(title: "Launch Apple Shortcuts", iconName: "arrow.up.forward.app.fill", gradient: .dashAccentGradient) {
+                        GlowButton(title: ShortcutsGuideCopy.launchButtonTitleKey, iconName: "arrow.up.forward.app.fill", gradient: .dashAccentGradient) {
                             if let url = URL(string: "shortcuts://") {
                                 UIApplication.shared.open(url)
                             }
@@ -54,11 +104,11 @@ public struct ShortcutsGuideView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Automations Guide")
+            .navigationTitle(ShortcutsGuideCopy.navigationTitleKey)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") {
+                    Button(ShortcutsGuideCopy.closeButtonKey) {
                         dismiss()
                     }
                     .foregroundStyle(Color.dashTextSecondary)
@@ -67,7 +117,7 @@ public struct ShortcutsGuideView: View {
         }
     }
 
-    private func stepCard(stepNumber: String, title: String, description: String) -> some View {
+    private func stepCard(stepNumber: String, title: LocalizedStringKey, description: LocalizedStringKey) -> some View {
         AutomotiveCard {
             HStack(alignment: .top, spacing: 14) {
                 ZStack {
