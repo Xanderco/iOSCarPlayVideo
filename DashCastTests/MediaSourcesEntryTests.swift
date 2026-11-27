@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import DashCast
 
 final class MediaSourcesEntryTests: XCTestCase {
@@ -132,5 +133,61 @@ final class MediaSourcesEntryTests: XCTestCase {
 
         store.remove(account)
         XCTAssertTrue(store.accounts.isEmpty)
+    }
+
+    // MARK: - PlaylistQRImportCopy Localization Tests
+
+    func testPlaylistQRImportCopyFormatting() {
+        XCTAssertEqual(
+            PlaylistQRImportCopy.importingMessage(hostOrURL: "tv.example.org"),
+            "Importing tv.example.org…"
+        )
+        XCTAssertEqual(
+            PlaylistQRImportCopy.importedMessage(title: "Road Trip TV", channels: 42),
+            "Added \"Road Trip TV\" (42 channels)"
+        )
+        XCTAssertEqual(
+            PlaylistQRImportCopy.invalidPayloadMessage(),
+            "That QR code doesn't contain a playlist link."
+        )
+    }
+
+    @MainActor
+    func testPlaylistQRImportCopySwiftUIKeys() {
+        XCTAssertEqual(PlaylistQRImportCopy.pasteLinkPlaceholderKey, LocalizedStringKey(PlaylistQRImportCopy.pasteLinkPlaceholderString))
+        XCTAssertEqual(PlaylistQRImportCopy.importButtonKey, LocalizedStringKey(PlaylistQRImportCopy.importButtonString))
+        XCTAssertEqual(PlaylistQRImportCopy.navigationTitleKey, LocalizedStringKey(PlaylistQRImportCopy.navigationTitleString))
+        XCTAssertEqual(PlaylistQRImportCopy.closeKey, LocalizedStringKey(PlaylistQRImportCopy.closeString))
+        XCTAssertEqual(PlaylistQRImportCopy.noCameraKey, LocalizedStringKey(PlaylistQRImportCopy.noCameraString))
+        XCTAssertEqual(PlaylistQRImportCopy.cameraDeniedKey, LocalizedStringKey(PlaylistQRImportCopy.cameraDeniedString))
+        XCTAssertEqual(PlaylistQRImportCopy.openSettingsKey, LocalizedStringKey(PlaylistQRImportCopy.openSettingsString))
+        XCTAssertEqual(PlaylistQRImportCopy.waitingForCameraKey, LocalizedStringKey(PlaylistQRImportCopy.waitingForCameraString))
+        XCTAssertEqual(PlaylistQRImportCopy.scanInstructionKey, LocalizedStringKey(PlaylistQRImportCopy.scanInstructionString))
+        XCTAssertEqual(PlaylistQRImportCopy.doneKey, LocalizedStringKey(PlaylistQRImportCopy.doneString))
+        XCTAssertEqual(PlaylistQRImportCopy.scanAgainKey, LocalizedStringKey(PlaylistQRImportCopy.scanAgainString))
+    }
+
+    func testPlaylistQRImportCopyLocalizationKeysComplete() throws {
+        let projectDir = URL(fileURLWithPath: #file)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+        let catalogURL = projectDir
+            .appendingPathComponent("DashCast")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Localizable.xcstrings")
+
+        let data = try Data(contentsOf: catalogURL)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let strings = try XCTUnwrap(json["strings"] as? [String: [String: Any]])
+
+        for key in PlaylistQRImportCopy.allLocalizationKeys {
+            let entry = try XCTUnwrap(strings[key], "Missing Localizable.xcstrings entry for: \(key)")
+            let localizations = try XCTUnwrap(entry["localizations"] as? [String: [String: Any]], "Missing localizations for: \(key)")
+            for lang in ["en", "es"] {
+                let unit = try XCTUnwrap(localizations[lang]?["stringUnit"] as? [String: Any], "Missing \(lang) stringUnit for: \(key)")
+                let value = try XCTUnwrap(unit["value"] as? String)
+                XCTAssertFalse(value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, "Empty \(lang) translation for: \(key)")
+            }
+        }
     }
 }
