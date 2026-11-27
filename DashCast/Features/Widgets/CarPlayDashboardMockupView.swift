@@ -1,5 +1,24 @@
 import SwiftUI
 
+/// Localized copy constants for `CarPlayDashboardMockupView`.
+public enum CarPlayDashboardMockupCopy {
+    nonisolated public static let sampleMonthString = "August"
+    nonisolated public static let daysLeftString = "DAYS LEFT"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        sampleMonthString,
+        daysLeftString
+    ]
+
+    @MainActor public static var sampleMonthKey: LocalizedStringKey {
+        LocalizedStringKey(sampleMonthString)
+    }
+
+    @MainActor public static var daysLeftKey: LocalizedStringKey {
+        LocalizedStringKey(daysLeftString)
+    }
+}
+
 public struct CarPlayDashboardMockupView: View {
     public let config: WidgetConfigModel
 
@@ -105,7 +124,7 @@ public struct CarPlayDashboardMockupView: View {
             VStack(spacing: 4) {
                 HStack {
                     VStack(alignment: .leading, spacing: 1) {
-                        Text("August")
+                        Text(CarPlayDashboardMockupCopy.sampleMonthKey)
                             .font(.system(size: 10, weight: .semibold))
                             .foregroundStyle(Color.dashTextSecondary)
                         Text("03")
@@ -183,7 +202,7 @@ public struct CarPlayDashboardMockupView: View {
                     .font(.system(size: 44, weight: .black, design: .rounded))
                     .foregroundStyle(.white)
 
-                Text("DAYS LEFT")
+                Text(CarPlayDashboardMockupCopy.daysLeftKey)
                     .font(.system(size: 11, weight: .bold))
                     .foregroundStyle(.white.opacity(0.9))
                     .tracking(1.5)

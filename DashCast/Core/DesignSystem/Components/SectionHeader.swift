@@ -1,5 +1,42 @@
 import SwiftUI
 
+/// Localized copy and VoiceOver accessibility formatting helpers for `SectionHeader`.
+public enum SectionHeaderCopy {
+    nonisolated public static let defaultActionTitleString = "See All"
+    nonisolated public static let itemCountFormatString = "%lld items"
+    nonisolated public static let actionAccessibilityFormatString = "%@, %@"
+
+    nonisolated public static let allLocalizationKeys: [String] = [
+        defaultActionTitleString,
+        itemCountFormatString,
+        actionAccessibilityFormatString
+    ]
+
+    @MainActor public static var defaultActionTitleKey: LocalizedStringKey {
+        LocalizedStringKey(defaultActionTitleString)
+    }
+
+    nonisolated public static func itemCountAccessibilityLabel(count: Int, bundle: Bundle = .main) -> String {
+        let format = bundle.localizedString(forKey: itemCountFormatString, value: itemCountFormatString, table: nil)
+        return String(format: format, Int64(count))
+    }
+
+    nonisolated public static func actionAccessibilityLabel(
+        actionTitle: String,
+        title: String,
+        bundle: Bundle = .main
+    ) -> String {
+        let localizedAction = bundle.localizedString(forKey: actionTitle, value: actionTitle, table: nil)
+        let localizedTitle = bundle.localizedString(forKey: title, value: title, table: nil)
+        let format = bundle.localizedString(
+            forKey: actionAccessibilityFormatString,
+            value: actionAccessibilityFormatString,
+            table: nil
+        )
+        return String(format: format, localizedAction, localizedTitle)
+    }
+}
+
 /// Header for a Home shelf or list section: title, optional count/subtitle,
 /// optional trailing "See All" action.
 public struct SectionHeader: View {
@@ -13,7 +50,7 @@ public struct SectionHeader: View {
         _ title: String,
         subtitle: String? = nil,
         count: Int? = nil,
-        actionTitle: String = "See All",
+        actionTitle: String = SectionHeaderCopy.defaultActionTitleString,
         action: (() -> Void)? = nil
     ) {
         self.title = title
@@ -35,7 +72,7 @@ public struct SectionHeader: View {
                         Text("\(count)")
                             .font(DSTypography.numeric)
                             .foregroundStyle(Color.dcTextTertiary)
-                            .accessibilityLabel(Text("\(count) items"))
+                            .accessibilityLabel(Text(verbatim: SectionHeaderCopy.itemCountAccessibilityLabel(count: count)))
                     }
                 }
                 if let subtitle {
@@ -59,7 +96,9 @@ public struct SectionHeader: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("\(actionTitle), \(title)"))
+                .accessibilityLabel(
+                    Text(verbatim: SectionHeaderCopy.actionAccessibilityLabel(actionTitle: actionTitle, title: title))
+                )
             }
         }
         .padding(.horizontal, DSSpacing.screenGutter)
