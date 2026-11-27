@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import DashCast
 
 final class LocalizationTests: XCTestCase {
